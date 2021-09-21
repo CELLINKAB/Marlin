@@ -66,7 +66,7 @@
  * Proceed at your own risk.
  *                                                            _CN7_
  *                                              (X_STEP) PC6 | · · | PB8 (X_EN)
- *                                              (X_DIR) PB15 | · · | PB9 (X_CS)
+ *                                              (X_DIR) PB15 | · · | PB9 (X_CS/UART)
  *                                             (LCD_D4) PB13 | · · | AVDD
  *                 _CN8_                                PB12 | · · | GND
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
@@ -85,12 +85,12 @@
  *            PC3 | · · | PD5                            PC2 | · · | PE13
  *            PF3 | · · | PD4                            PF4 | · · | PF15
  *            PF5 | · · | PD3                   (E_STEP) PB6 | · · | PG14 (E_EN)
- *           PF10 | · · | GND                    (E_DIR) PB2 | · · | PG9  (E_CS)
+ *           PF10 | · · | GND                    (E_DIR) PB2 | · · | PG9  (E_CS/UART)
  *             NC | · · | PE2                            GND | · · | PE8
  *            PA7 | · · | PE4                           PD13 | · · | PE7
  *            PF2 | · · | PE5                           PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
- *    (Y_DIR) PF0 | · · | PE3 (Y_CS)             (Z_DIR) PE2 | · · | PE12 (Z_CS)
+ *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)             (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8                            GND | · · | PE14
  *    (Z_MAX) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
  *    (Z_MIN) PD1 | · · | PF9 (X_MAX)                    PB0 | · · | PB10 (FAN)
