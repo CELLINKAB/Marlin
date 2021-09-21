@@ -73,8 +73,8 @@
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10              (SERVO1_PIN) PB5 | · · | PA7  (MOSI)
  *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14 (SD_DETECT)
- *            +5V | · · | PC12                    (SDSS) PA4 | · · | PD15 (LCD_ENABLE)
- *            GND | · · | PD2               (SERVO0_PIN) PB4 | · · | PF12 (LCD_RS)
+ *            +5V | · · | PC12                    (SDSS) PA4 | · · | PD15 (Y2_EN)
+ *            GND | · · | PD2               (SERVO0_PIN) PB4 | · · | PF12 (Y2_CS/UART)
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
@@ -87,23 +87,23 @@
  *            PF5 | · · | PD3                   (E_STEP) PB6 | · · | PG14 (E_EN)
  *           PF10 | · · | GND                    (E_DIR) PB2 | · · | PG9  (E_CS/UART)
  *             NC | · · | PE2                            GND | · · | PE8
- *            PA7 | · · | PE4 (Y2_EN)                   PD13 | · · | PE7
- *            PF2 | · · | PE5 (Y2_CS/UART)              PD12 | · · | GND
+ *            PA7 | · · | PE4                           PD13 | · · | PE7
+ *            PF2 | · · | PE5                           PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8                            GND | · · | PE14
- *    (Z_MAX) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
- *    (Z_MIN) PD1 | · · | PF9 (X_MAX)                    PB0 | · · | PB10 (FAN)
- *    (Y_MAX) PG0 | · · | PG1 (Y_MIN)                    PE0 | · · | PB11 (FAN1)
+ *    (X_MAX) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
+ *    (Y_MAX) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
+ *    (Z_MAX) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
 #define X_MIN_PIN PF7
-#define X_MAX_PIN PF9
-#define Y_MIN_PIN PG1
-#define Y_MAX_PIN PG0
-#define Z_MIN_PIN PD1
-#define Z_MAX_PIN PD0
+#define X_MAX_PIN PD0
+#define Y_MIN_PIN PF9
+#define Y_MAX_PIN PD1
+#define Z_MIN_PIN PG1
+#define Z_MAX_PIN PG0
 
 //
 // Steppers
@@ -120,8 +120,8 @@
 
 #define Y2_STEP_PIN PF1
 #define Y2_DIR_PIN PF0
-#define Y2_ENABLE_PIN PE4
-#define Y2_CS_PIN PE5
+#define Y2_ENABLE_PIN PD15
+#define Y2_CS_PIN PF12
 
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
@@ -140,8 +140,8 @@
 #define Y_SERIAL_TX_PIN PE3
 #define Y_SERIAL_RX_PIN PE3
 
-#define Y2_SERIAL_TX_PIN PE5
-#define Y2_SERIAL_RX_PIN PE5
+#define Y2_SERIAL_TX_PIN PF12
+#define Y2_SERIAL_RX_PIN PF12
 
 #define Z_SERIAL_TX_PIN PE12
 #define Z_SERIAL_RX_PIN PE12
