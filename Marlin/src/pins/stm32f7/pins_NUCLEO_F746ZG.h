@@ -67,25 +67,25 @@
  *                                                            _CN7_
  *                                              (X_STEP) PC6 | · · | PB8 (X_EN)
  *                                              (X_DIR) PB15 | · · | PB9 (X_CS/UART)
- *                                             (LCD_D4) PB13 | · · | AVDD
+ *                                                      PB13 | · · | AVDD
  *                 _CN8_                                PB12 | · · | GND
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
- *          RESET | · · | PC10              (SERVO1_PIN) PB5 | · · | PA7  (MOSI)
- *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14 (SD_DETECT)
- *            +5V | · · | PC12                    (SDSS) PA4 | · · | PD15 (Y2_EN)
- *            GND | · · | PD2               (SERVO0_PIN) PB4 | · · | PF12 (Y2_CS/UART)
+ *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
+ *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14
+ *            +5V | · · | PC12                           PA4 | · · | PD15
+ *            GND | · · | PD2                            PB4 | · · | PF12 
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
  *                                                      AVDD | · · | PF13 (BTN_EN1)
  *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
- * (TEMP_BED) PC0 | · · | PD6                            PB1 | · · | PF14
- *            PC3 | · · | PD5                            PC2 | · · | PE13
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14
+ *            PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
  *            PF3 | · · | PD4                            PF4 | · · | PF15
- *            PF5 | · · | PD3                   (E_STEP) PB6 | · · | PG14 (E_EN)
- *           PF10 | · · | GND                    (E_DIR) PB2 | · · | PG9  (E_CS/UART)
+ *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14 (Y2_EN)
+ *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9  (Y2_CS/UART)
  *             NC | · · | PE2                            GND | · · | PE8
  *            PA7 | · · | PE4                           PD13 | · · | PE7
  *            PF2 | · · | PE5                           PD12 | · · | GND
@@ -94,7 +94,7 @@
  *            GND | · · | PF8                            GND | · · | PE14
  *    (X_MAX) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
  *    (Y_MAX) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
- *    (Z_MAX) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
+ *  (Y2_STOP) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
@@ -108,6 +108,7 @@
 #else
     #define X_STOP_PIN PF7
     #define Y_STOP_PIN PF9
+    #define Y2_STOP_PIN PG0
     #define Z_STOP_PIN PG1
 #endif
 
@@ -125,8 +126,8 @@
 #define Y_ENABLE_PIN PE6
 #define Y_CS_PIN PE3
 
-#define Y2_STEP_PIN PF1
-#define Y2_DIR_PIN PF0
+#define Y2_STEP_PIN PB6
+#define Y2_DIR_PIN PB2
 #define Y2_ENABLE_PIN PG14
 #define Y2_CS_PIN PG9
 
@@ -177,19 +178,6 @@
 //#ifndef E0_AUTO_FAN_PIN
 //#define E0_AUTO_FAN_PIN FAN1_PIN
 //#endif
-
-//
-// Servos
-//
-//#define SERVO0_PIN PB4 // PWM Capable, TIM3_CH1
-//#define SERVO1_PIN PB5 // PWM Capable, TIM3_CH2
-
-// SPI for external SD Card (Not entirely sure this will work)
-//#define SD_SCK_PIN PA5
-//#define SD_MISO_PIN PA6
-//#define SD_MOSI_PIN PA7
-//#define SD_SS_PIN PA4
-//#define SDSS PA4
 
 #define LED_PIN LED_BLUE
 
