@@ -98,12 +98,19 @@
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
-#define X_MIN_PIN PF7
-#define X_MAX_PIN PD0
-#define Y_MIN_PIN PF9
-#define Y_MAX_PIN PD1
-#define Z_MIN_PIN PG1
-#define Z_MAX_PIN PG0
+#if DISABLED(SENSORLESS_HOMING)
+    #define X_MIN_PIN PF7
+    #define X_MAX_PIN PD0
+    #define Y_MIN_PIN PF9
+    #define Y_MAX_PIN PD1
+    #define Z_MIN_PIN PG1
+    #define Z_MAX_PIN PG0
+#else
+    #define X_STOP_PIN PF7
+    #define Y_STOP_PIN PF9
+    #define Z_STOP_PIN PG1
+#endif
+
 
 //
 // Steppers
@@ -120,69 +127,69 @@
 
 #define Y2_STEP_PIN PF1
 #define Y2_DIR_PIN PF0
-#define Y2_ENABLE_PIN PD15
-#define Y2_CS_PIN PF12
+#define Y2_ENABLE_PIN PG14
+#define Y2_CS_PIN PG9
 
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
 #define Z_CS_PIN PE12
 
-#define E0_STEP_PIN PB6
-#define E0_DIR_PIN PB2
-#define E0_ENABLE_PIN PG14
-#define E0_CS_PIN PG9
+//#define E0_STEP_PIN PB6
+//#define E0_DIR_PIN PB2
+//#define E0_ENABLE_PIN PG14
+//#define E0_CS_PIN PG9
 
 #if HAS_TMC_UART
-#define X_SERIAL_TX_PIN PB9
-#define X_SERIAL_RX_PIN PB9
+#define X_SERIAL_TX_PIN PD5
+#define X_SERIAL_RX_PIN PD6
 
-#define Y_SERIAL_TX_PIN PE3
-#define Y_SERIAL_RX_PIN PE3
+#define Y_SERIAL_TX_PIN PD5
+#define Y_SERIAL_RX_PIN PD6
 
-#define Y2_SERIAL_TX_PIN PF12
-#define Y2_SERIAL_RX_PIN PF12
+#define Y2_SERIAL_TX_PIN PD5
+#define Y2_SERIAL_RX_PIN PD6
 
-#define Z_SERIAL_TX_PIN PE12
-#define Z_SERIAL_RX_PIN PE12
+#define Z_SERIAL_TX_PIN PD5
+#define Z_SERIAL_RX_PIN PD6
 
-#define E_SERIAL_TX_PIN PG9
-#define E_SERIAL_RX_PIN PG9
+//#define E_SERIAL_TX_PIN PG9
+//#define E_SERIAL_RX_PIN PG9
 #endif
 
 //
 // Temperature Sensors
 //
 #define TEMP_0_PIN PA3
-#define TEMP_BED_PIN PC0
+//#define TEMP_BED_PIN PC0
 
 //
 // Heaters / Fans
 //
-#define HEATER_0_PIN PA15  // PWM Capable, TIM2_CH1
-#define HEATER_BED_PIN PB3 // PWM Capable, TIM2_CH2
+//#define HEATER_0_PIN PA15  // PWM Capable, TIM2_CH1
+//#define HEATER_BED_PIN PB3 // PWM Capable, TIM2_CH2
 
-#ifndef FAN_PIN
-#define FAN_PIN PB10 // PWM Capable, TIM2_CH3
-#endif
-#define FAN1_PIN PB11 // PWM Capable, TIM2_CH4
-
-#ifndef E0_AUTO_FAN_PIN
-#define E0_AUTO_FAN_PIN FAN1_PIN
-#endif
+//#ifndef FAN_PIN
+//#define FAN_PIN PB10 // PWM Capable, TIM2_CH3
+//#endif
+//#define FAN1_PIN PB11 // PWM Capable, TIM2_CH4
+//
+//#ifndef E0_AUTO_FAN_PIN
+//#define E0_AUTO_FAN_PIN FAN1_PIN
+//#endif
 
 //
 // Servos
 //
-#define SERVO0_PIN PB4 // PWM Capable, TIM3_CH1
-#define SERVO1_PIN PB5 // PWM Capable, TIM3_CH2
+//#define SERVO0_PIN PB4 // PWM Capable, TIM3_CH1
+//#define SERVO1_PIN PB5 // PWM Capable, TIM3_CH2
 
 // SPI for external SD Card (Not entirely sure this will work)
-#define SD_SCK_PIN PA5
-#define SD_MISO_PIN PA6
-#define SD_MOSI_PIN PA7
-#define SD_SS_PIN PA4
-#define SDSS PA4
+//#define SD_SCK_PIN PA5
+//#define SD_MISO_PIN PA6
+//#define SD_MOSI_PIN PA7
+//#define SD_SS_PIN PA4
+//#define SDSS PA4
 
 #define LED_PIN LED_BLUE
 
