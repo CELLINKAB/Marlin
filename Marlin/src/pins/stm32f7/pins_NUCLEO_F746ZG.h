@@ -134,12 +134,7 @@
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
-#define Z_CS_PIN PE12
-
-//#define E0_STEP_PIN PB6
-//#define E0_DIR_PIN PB2
-//#define E0_ENABLE_PIN PG14
-//#define E0_CS_PIN PG9
+#define Z_CS_PIN PE12]
 
 #if HAS_TMC_UART
 #define X_SERIAL_TX_PIN PD5
@@ -154,8 +149,6 @@
 #define Z_SERIAL_TX_PIN PD5
 #define Z_SERIAL_RX_PIN PD6
 
-//#define E_SERIAL_TX_PIN PG9
-//#define E_SERIAL_RX_PIN PG9
 #endif
 
 //
@@ -164,37 +157,8 @@
 #define TEMP_0_PIN PA3
 //#define TEMP_BED_PIN PC0
 
-//
-// Heaters / Fans
-//
-//#define HEATER_0_PIN PA15  // PWM Capable, TIM2_CH1
-//#define HEATER_BED_PIN PB3 // PWM Capable, TIM2_CH2
 
-//#ifndef FAN_PIN
-//#define FAN_PIN PB10 // PWM Capable, TIM2_CH3
-//#endif
-//#define FAN1_PIN PB11 // PWM Capable, TIM2_CH4
-//
-//#ifndef E0_AUTO_FAN_PIN
-//#define E0_AUTO_FAN_PIN FAN1_PIN
-//#endif
 
 #define LED_PIN LED_BLUE
 
-//
-// LCD / Controller
-//
-#if IS_RRD_FG_SC
-#define BEEPER_PIN PC7 // LCD_BEEPER
-#define BTN_ENC PE11   // BTN_ENC
-#define SD_DETECT_PIN PD14
-#define LCD_PINS_RS PF12     // LCD_RS
-#define LCD_PINS_ENABLE PD15 // LCD_EN
-#define LCD_PINS_D4 PB13     // LCD_D4
-#define BTN_EN1 PF13         // BTN_EN1
-#define BTN_EN2 PE9          // BTN_EN2
 
-#define BOARD_ST7920_DELAY_1 DELAY_NS(125)
-#define BOARD_ST7920_DELAY_2 DELAY_NS(63)
-#define BOARD_ST7920_DELAY_3 DELAY_NS(780)
-#endif
