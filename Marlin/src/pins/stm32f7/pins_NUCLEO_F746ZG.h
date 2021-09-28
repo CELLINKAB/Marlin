@@ -134,20 +134,28 @@
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
-#define Z_CS_PIN PE12]
+#define Z_CS_PIN PE12
 
 #if HAS_TMC_UART
-#define X_SERIAL_TX_PIN PD5
-#define X_SERIAL_RX_PIN PD6
 
-#define Y_SERIAL_TX_PIN PD5
-#define Y_SERIAL_RX_PIN PD6
+#define X_HARDWARE_SERIAL MSerial2
+#define Y_HARDWARE_SERIAL MSerial2
+#define Y2_HARDWARE_SERIAL MSerial2
+#define Z_HARDWARE_SERIAL MSerial2
 
-#define Y2_SERIAL_TX_PIN PD5
-#define Y2_SERIAL_RX_PIN PD6
+// #define X_SERIAL_TX_PIN PC10
+// #define X_SERIAL_RX_PIN PC11
 
-#define Z_SERIAL_TX_PIN PD5
-#define Z_SERIAL_RX_PIN PD6
+// #define Y_SERIAL_TX_PIN PC10
+// #define Y_SERIAL_RX_PIN PC11
+
+// #define Y2_SERIAL_TX_PIN PC10
+// #define Y2_SERIAL_RX_PIN PC11
+
+// #define Z_SERIAL_TX_PIN PC10
+// #define Z_SERIAL_RX_PIN PC11
+
+#define TMC_BAUD_RATE 19200
 
 #endif
 
