@@ -47,7 +47,11 @@
   DECLARE_SERIAL_PORT(1)
 #endif
 #if USING_HW_SERIAL2
-  DECLARE_SERIAL_PORT(2)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial2(PD6, PD5);
+  #else 
+    DECLARE_SERIAL_PORT(2)
+  #endif
 #endif
 #if USING_HW_SERIAL3
   DECLARE_SERIAL_PORT(3)

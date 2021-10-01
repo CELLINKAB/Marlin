@@ -47,7 +47,7 @@ protected:
 
 typedef Serial1Class<MarlinSerial> MSerialT;
 extern MSerialT MSerial1;
-extern MSerialT MSerial2;
+extern HardwareSerial MSerial2;
 extern MSerialT MSerial3;
 extern MSerialT MSerial4;
 extern MSerialT MSerial5;
