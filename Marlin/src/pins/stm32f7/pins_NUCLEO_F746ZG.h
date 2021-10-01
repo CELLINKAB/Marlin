@@ -112,7 +112,6 @@
     #define Z_STOP_PIN PG1
 #endif
 
-
 //
 // Steppers
 //
@@ -138,26 +137,34 @@
 
 #if HAS_TMC_UART
 
-#define X_HARDWARE_SERIAL MSerial2
-#define Y_HARDWARE_SERIAL MSerial2
-#define Y2_HARDWARE_SERIAL MSerial2
-#define Z_HARDWARE_SERIAL MSerial2
+    #define I_DONT_TRUST_MSERIAL
+
+    #define X_HARDWARE_SERIAL  MSerial2
+    #define Y_HARDWARE_SERIAL  MSerial2
+    #define Y2_HARDWARE_SERIAL MSerial2
+    #define Z_HARDWARE_SERIAL  MSerial2
+
+
+    #define X_SLAVE_ADDRESS  0
+    #define Y_SLAVE_ADDRESS  2
+    #define Y2_SLAVE_ADDRESS 1
+    #define Z_SLAVE_ADDRESS  3
 
 // #define X_SERIAL_TX_PIN PC10
-// #define X_SERIAL_RX_PIN PC11
+// #define X_SERIAL_RX_PIN PC10
 
 // #define Y_SERIAL_TX_PIN PC10
-// #define Y_SERIAL_RX_PIN PC11
+// #define Y_SERIAL_RX_PIN PC10
 
 // #define Y2_SERIAL_TX_PIN PC10
-// #define Y2_SERIAL_RX_PIN PC11
+// #define Y2_SERIAL_RX_PIN PC10
 
 // #define Z_SERIAL_TX_PIN PC10
-// #define Z_SERIAL_RX_PIN PC11
+// #define Z_SERIAL_RX_PIN PC10
 
-#define TMC_BAUD_RATE 19200
+//#define TMC_BAUD_RATE 9600
 
-#endif
+#endif // HAS_TMC_UART
 
 //
 // Temperature Sensors
