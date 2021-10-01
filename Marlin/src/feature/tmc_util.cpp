@@ -966,7 +966,7 @@
     TMC_REPORT("uStep count",        TMC_MSCNT);
     DRV_REPORT("DRVSTATUS",          TMC_DRV_CODES);
     #if HAS_TMCX1X0 || HAS_TMC220x
-      DRV_REPORT("sg_result",        TMC_SG_RESULT);
+      DRV_REPORT("sg_result\t",        TMC_SG_RESULT);
     #endif
     #if HAS_TMCX1X0
       DRV_REPORT("stallguard",       TMC_STALLGUARD);
