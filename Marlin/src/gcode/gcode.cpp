@@ -448,6 +448,16 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 425: G425(); break;                                  // G425: Perform calibration with calibration cube
       #endif
 
+      #if ENABLED(LID_GRIPPER_STATION)                            // TODO: make sure these Gcode names are viable
+        case 500: G500(); break;                                  // G500: calibrate lid-gripper step range
+        case 501: G501(); break;                                  // G501: Remove lid from inserted vessel
+        case 502: G502(); break;                                  // G502: Replace lid from inserted vessel
+      #endif
+
+      #if ENABLED(OPTICAL_AUTOCAL)
+        case 510: G510(); break;                                  // Perform autocalibration routine
+      #endif
+
       #if ENABLED(DEBUG_GCODE_PARSER)
         case 800: parser.debug(); break;                          // G800: GCode Parser Test for G
       #endif

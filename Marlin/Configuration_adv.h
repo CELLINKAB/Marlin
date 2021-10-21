@@ -1069,12 +1069,12 @@
 // Backlash Compensation
 // Adds extra movement to axes on direction-changes to account for backlash.
 //
-//#define BACKLASH_COMPENSATION
+#define BACKLASH_COMPENSATION
 #if ENABLED(BACKLASH_COMPENSATION)
   // Define values for backlash distance and correction.
   // If BACKLASH_GCODE is enabled these values are the defaults.
-  #define BACKLASH_DISTANCE_MM { 0, 0, 0 } // (mm) One value for each linear axis
-  #define BACKLASH_CORRECTION    0.0       // 0.0 = no correction; 1.0 = full correction
+  #define BACKLASH_DISTANCE_MM { 0.06, 0, 0 } // (mm) One value for each linear axis
+  #define BACKLASH_CORRECTION    1.0       // 0.0 = no correction; 1.0 = full correction
 
   // Add steps for motor direction changes on CORE kinematics
   //#define CORE_BACKLASH
@@ -1084,11 +1084,11 @@
   //#define BACKLASH_SMOOTHING_MM 3 // (mm)
 
   // Add runtime configuration and tuning of backlash values (M425)
-  //#define BACKLASH_GCODE
+  #define BACKLASH_GCODE
 
   #if ENABLED(BACKLASH_GCODE)
     // Measure the Z backlash when probing (G29) and set with "M425 Z"
-    #define MEASURE_BACKLASH_WHEN_PROBING
+    //#define MEASURE_BACKLASH_WHEN_PROBING
 
     #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
       // When measuring, the probe will move up to BACKLASH_MEASUREMENT_LIMIT
@@ -1114,7 +1114,7 @@
  * Note: HOTEND_OFFSET and CALIBRATION_OBJECT_CENTER must be set to within
  *       ±5mm of true values for G425 to succeed.
  */
-//#define CALIBRATION_GCODE
+#define CALIBRATION_GCODE
 #if ENABLED(CALIBRATION_GCODE)
 
   //#define CALIBRATION_SCRIPT_PRE  "M117 Starting Auto-Calibration\nT0\nG28\nG12\nM117 Calibrating..."
@@ -2263,13 +2263,13 @@
 // For debug-echo: 128 bytes for the optimal speed.
 // Other output doesn't need to be that speedy.
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256]
-#define TX_BUFFER_SIZE 0
+#define TX_BUFFER_SIZE 256
 
 // Host Receive Buffer Size
 // Without XON/XOFF flow control (see SERIAL_XON_XOFF below) 32 bytes should be enough.
 // To use flow control, set this buffer size to at least 1024 bytes.
 // :[0, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048]
-//#define RX_BUFFER_SIZE 1024
+#define RX_BUFFER_SIZE 1024
 
 #if RX_BUFFER_SIZE >= 1024
   // Enable to have the controller send XON/XOFF control characters to
@@ -2337,7 +2337,7 @@
 #define SERIAL_OVERRUN_PROTECTION
 
 // For serial echo, the number of digits after the decimal point
-//#define SERIAL_FLOAT_PRECISION 4
+#define SERIAL_FLOAT_PRECISION 4
 
 /**
  * Set the number of proportional font spaces required to fill up a typical character space.
@@ -3070,11 +3070,11 @@
 
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
-    #define X_STALL_SENSITIVITY  45
+    #define X_STALL_SENSITIVITY  50
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  32
+    #define Y_STALL_SENSITIVITY  50
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
-    #define Z_STALL_SENSITIVITY  51
+    #define Z_STALL_SENSITIVITY  55
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
@@ -4308,6 +4308,121 @@
   //#define SERVICE_INTERVAL_3    1 // print hours
 #endif
 
+// @section bioprinting features
+
+// enables support for modular printheads
+// addressed and controlled via UART/RS285
+// and using an interrupt trigger pin
+//#define MODULAR_PRINTHEADS
+#if ENABLED(MODULAR_PRINTHEADS)
+
+  #define NUMBER_MODULAR_PRINHEADS 3
+
+
+
+#endif // MODULAR_PRINTHEADS
+
+// enbables support for pneumatic/pressure systems
+//#define PNEUMATIC_SYSTEM
+#if ENABLED(PNEUMATIC_SYSTEM)
+
+  //The maximum pressure we can use for extrusion in kPa
+  #define MAXIMUM_EXTRUDE_PRESSURE 		700 
+  //in Kpa. This is the minimum pressure required to be maintained in the tank.
+  #define TANK_REQUIRED_PRESSURE_DEFAULT 	260 
+  //Dictates how much more the tank needs to be filled
+  #define TANK_FULL_PRESSURE_DEFAULT		310	
+  // polarity pneumatic pins
+  #define AIR_RELEASE_PUMP_OPEN	false
+  #define AIR_RELEASE_TANK_OPEN false
+  #define AIR_SOURCE_EXTERNAL   true
+
+  #define AIRTANK_FULL_PRESSURE	(REQUIRED_TANK_PRESSURE*TANK_PRESSURE_BUFFER_FACTOR)
+
+  #define PRESSURE_PWM_BITS 12
+  #define PRESSURE_PWM_TOP ((1<<PRESSURE_PWM_BITS)-1)
+  //PWM-frewuency: 16000000/((2^12)*2) = 1953Hz
+  //Pressure-resolution= FULLSCALE/(2^12)
+
+  //The max voltage the control signal can have
+  #define PRESSURE_MAX_CTRL_VOLTAGE	5000
+  //The smallest control voltage that should be used (it's technically possible ot use smaller, but not meaningful)
+  #define PRESSURE_MIN_CTRL_VOLTAGE	10
+  //The maximum feedback voltage from the regulator output sensor. This will correspond to PRESSURE_FULL_SCALE
+  #define PRESSURE_FEEDBACK_MAX_VOLT	5000
+  //The minimum feedback voltage from the regulator output sensor. This corresponds to 0 pressure
+  #define PRESSURE_FEEDBACK_MIN_VOLT	1000
+
+  //The cycle time for the pump control task (ms)
+  #define PUMP_TASK_TIME	95
+  //Startup time for the pump (it cannot start under pressure). (ms)
+  #define PUMP_STARTUP_HOLDOFF	150
+
+  //Maximum pressure sensor pressure (for MPX5700AP). Unit is kPa
+  #define PRESSURE_SENSOR_MAX_PRESSURE 700
+  //The pressure sensor has some kind of offset when reading atmosphere pressure. This is in ADC ticks. Empirically measured.
+  #define PRESSURE_SENSOR_OFFSET 168
+
+  //The maximum number of regulators we can have
+  #define NOF_MAX_REGULATORS 2
+  
+  //Defines which printheads are supplied by which regulator
+
+  #define REGULATOR_1_PHS	{1,3,5} 
+  #if NOF_MAX_REGULATORS > 1
+    #define REGULATOR_2_PHS	{2,4,6}
+  #endif
+
+#endif // PNEUMATIC_SYSTEM
+
+// Enables the untrasonic auto calibration system.
+//#define ULTRASONIC_AUTOCALIBRATION
+
+
+// Enable door sensor feature
+//#define DOOR_OPEN_SENSOR
+#if ENABLED(DOOR_OPEN_SENSOR)
+  // override pin for door sensor, or definition place if no
+  // door sensor pin is defined for your board (interrupt capable input)
+  #define DOOR_OPEN_PIN_OVERIDE 0
+#endif
+
+// Enable power door opening feature
+//#define POWER_DOOR_OPENER
+
+// options for lid gripping station
+#define LID_GRIPPER_STATION
+#if ENABLED(LID_GRIPPER_STATION)
+
+  // Position to move printbed before the lid gripper
+  // attempts to grip a lid {x,y,z}
+  #define LID_GRIPPER_COORDS {400,51,50}
+
+  // define stall sensitivity to use sensorless lid detection and
+  // gripping ability, and to adjust the force needed to stop the
+  // lid gripper. (0-255)
+  #define LID_GRIPPER_STALL_SENSITIVITY 50
+  
+  // RMS current for driver to supply to motor (mA)
+  #define LID_GRIPPER_CURRENT 400
+
+  #define LID_GRIPPER_STEPS_PER_MM 140
+
+  // if using stallguard lid detection and gripping, this value is
+  // the maximum number of mm the gripper should close before we
+  // know for sure there is no lid present.
+  #define LID_GRIPPER_DETECTION_THRESHOLD 50000
+#endif
+
+// enable optical autocalibration routines
+#define OPTICAL_AUTOCAL
+#if ENABLED(OPTICAL_AUTOCAL)
+  #define AUTOCAL_START_POSITION {242.0, 150.0, 19.0}
+  #define AUTOCAL_DEFAULT_FEEDRATE 1.0
+  #define AUTOCAL_DEFAULT_CYCLES 100
+  #define AUTOCAL_DEFAULT_Z_INCREMENT 0.025
+#endif
+
 // @section develop
 
 //
@@ -4318,15 +4433,15 @@
 //
 // M42 - Set pin states
 //
-//#define DIRECT_PIN_CONTROL
+#define DIRECT_PIN_CONTROL
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
 //
-//#define PINS_DEBUGGING
+// #define PINS_DEBUGGING
 
 // Enable Marlin dev mode which adds some special commands
-//#define MARLIN_DEV_MODE
+#define MARLIN_DEV_MODE
 
 #if ENABLED(MARLIN_DEV_MODE)
   /**

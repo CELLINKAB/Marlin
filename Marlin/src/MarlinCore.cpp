@@ -162,6 +162,10 @@
   bool G38_did_trigger; // = false
 #endif
 
+#if ENABLED(LID_GRIPPER_STATION)
+  #include "feature/lidgripper.h"
+#endif
+
 #if ENABLED(DELTA)
   #include "module/delta.h"
 #elif ENABLED(POLARGRAPH)
@@ -1616,6 +1620,11 @@ void setup() {
 
   #if ENABLED(EASYTHREED_UI)
     SETUP_RUN(easythreed_ui.init());
+  #endif
+
+  #if ENABLED(LID_GRIPPER_STATION)
+    LGSerial.begin(115200);
+    SETUP_RUN(lid_gripper.init_pins());
   #endif
 
   marlin_state = MF_RUNNING;

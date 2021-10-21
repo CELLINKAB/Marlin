@@ -71,6 +71,11 @@
  * G90  - Use Absolute Coordinates
  * G91  - Use Relative Coordinates
  * G92  - Set current position to coordinates given
+ * G500 - calibrate lid gripper range
+ * G501 - Remove lid from inserted vessel
+ * G502 - Replace lid from inserted vessel
+ * G510 - perform optical autocalibration routine
+ 
  *
  * "M" Codes
  *
@@ -589,6 +594,16 @@ private:
 
   #if ENABLED(CALIBRATION_GCODE)
     static void G425();
+  #endif
+
+  #if ENABLED(LID_GRIPPER_STATION)
+    static void G500();
+    static void G501();
+    static void G502();
+  #endif
+
+  #if ENABLED(OPTICAL_AUTOCAL)
+    static void G510();
   #endif
 
   #if HAS_RESUME_CONTINUE

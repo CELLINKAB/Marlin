@@ -52,7 +52,7 @@
  * TIM9 - TIMER_SERIAL (platformio.ini)
  * TIM10 - For some reason trips Watchdog when used for SW Serial
  * TIM11 -
- * TIM12 -
+ * TIM12 - lid gripper (temporary)
  * TIM13 -
  * TIM14 - TEMP_TIMER (Marlin)
  *
@@ -73,8 +73,8 @@
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
  *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14
- *            +5V | · · | PC12                           PA4 | · · | PD15
- *            GND | · · | PD2                            PB4 | · · | PF12 
+ *            +5V | · · | PC12 TX                        PA4 | · · | PD15
+ *            GND | · · | PD2  RX                        PB4 | · · | PF12 
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
@@ -86,13 +86,13 @@
  *            PF3 | · · | PD4                            PF4 | · · | PF15
  *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14 (Y2_EN)
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9  (Y2_CS/UART)
- *             NC | · · | PE2                            GND | · · | PE8
- *            PA7 | · · | PE4                           PD13 | · · | PE7
- *            PF2 | · · | PE5                           PD12 | · · | GND
+ *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8
+ *  (LG_STEP) PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7
+ *   (LG_DIR) PF2 | · · | PE5 (LG_STOP)                 PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8                            GND | · · | PE14
- *    (X_MAX) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
+ *      (OAC) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
  *    (Y_MAX) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
@@ -165,6 +165,25 @@
 //#define TMC_BAUD_RATE 9600
 
 #endif // HAS_TMC_UART
+
+#if ENABLED(LID_GRIPPER_STATION)
+    #define LG_STEP_PIN         PA7
+    #define LG_DIR_PIN          PF2
+    #define LG_EN_PIN           PE4
+    // #define LG_CS_PIN           PE2
+    // #define LG_SCK_PIN          PA5
+    // #define LG_MISO_PIN         PA6
+    // #define LG_MOSI_PIN         PA7
+    #define LG_RX_PIN         PD2
+    #define LG_TX_PIN         PC12
+    //#define LG_HARDWARE_SERIAL MSerial4
+    #define LG_SLAVE_ADDRESS    0
+    #define LG_STOP_PIN         PE5
+
+    //#define USING_HW_SERIAL4 1
+#endif
+
+#define OPTICAL_AUTOCAL_PIN PD0
 
 //
 // Temperature Sensors

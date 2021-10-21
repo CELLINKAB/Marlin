@@ -120,6 +120,8 @@
     #if HAS_EXTRUDERS
       const float e_normalized_dist = (end.e - start.e) / on_axis_distance;
       const bool inf_normalized_flag = isinf(e_normalized_dist);
+    #else
+      const bool inf_normalized_flag = false;
     #endif
 
     xy_int8_t icell = istart;
