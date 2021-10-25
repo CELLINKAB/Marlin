@@ -3019,7 +3019,7 @@
    * STEALTHCHOP_(XY|Z|E) must be enabled to use HYBRID_THRESHOLD.
    * M913 X/Y/Z/E to live tune the setting
    */
-  //#define HYBRID_THRESHOLD
+  #define HYBRID_THRESHOLD
 
   #define X_HYBRID_THRESHOLD     200  // [mm/s]
   #define X2_HYBRID_THRESHOLD    200
@@ -4417,7 +4417,7 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {242.0, 150.0, 19.0}
+  #define AUTOCAL_START_POSITION {240.0, 153.0, 19.0}
   #define AUTOCAL_DEFAULT_FEEDRATE 1.0
   #define AUTOCAL_DEFAULT_CYCLES 100
   #define AUTOCAL_DEFAULT_Z_INCREMENT 0.025

@@ -41,7 +41,7 @@ struct OpticalAutocal
                             " Z:", position_at_interrupt.z
                             );
         };
-        attachInterrupt(SENSOR, isr, CHANGE);
+        attachInterrupt(SENSOR, isr, RISING);
 
         float z = START_POSITION.z;
         cycles = (!cycles) | cycles;  // guarantees non-zero
