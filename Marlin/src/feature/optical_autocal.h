@@ -12,7 +12,7 @@ struct OpticalAutocal
 
     OpticalAutocal()
     {
-        SET_INPUT(SENSOR);
+        SET_INPUT_PULLDOWN(SENSOR);
     }
 
     void full_autocal_routine(uint8_t cycles, float z_increment, float feedrate) const
