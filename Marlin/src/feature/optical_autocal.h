@@ -33,13 +33,11 @@ struct OpticalAutocal
         bool triggered = false;
         auto isr = [&]{
             const auto position_at_interrupt = planner.get_axis_positions_mm().copy();
-            const bool sensor_state = READ(SENSOR);
             triggered = true;
-            SERIAL_ECHOLNPAIR("State:", sensor_state, 
-                            " X:", position_at_interrupt.x, 
-                            " Y:", position_at_interrupt.y, 
-                            " Z:", position_at_interrupt.z
-                            );
+            SERIAL_ECHOLNPAIR(" X:", position_at_interrupt.x, 
+                              " Y:", position_at_interrupt.y, 
+                              " Z:", position_at_interrupt.z
+                              );
         };
         attachInterrupt(SENSOR, isr, RISING);
 
