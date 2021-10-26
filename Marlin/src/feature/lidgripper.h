@@ -146,28 +146,17 @@ struct LidGripper
  private:
     TMCMarlin<TMC2209Stepper, 'L', '0', AxisEnum::NO_AXIS_ENUM> driver;
     uint32_t calibrated_step_range = 0;
-    xyz_pos_t pre_grip_location;
 
     void move_from_gripper()
     {
         SET_SOFT_ENDSTOP_LOOSE(true);
-        do_blocking_move_to_z((gripper_location.z - 20));
+        do_blocking_move_to_z(10.0);
         SET_SOFT_ENDSTOP_LOOSE(false);
-        do_blocking_move_to(pre_grip_location);
         planner.synchronize();
     }
 
     void move_to_gripper()
     {
-        planner.synchronize();   // Wait for planner moves to finish!
-        pre_grip_location = planner.get_axis_positions_mm().copy();
-
-        if (pre_grip_location == gripper_location) 
-        {
-            pre_grip_location.set(0.0, 0.0, 0.0);
-            return; // already there, nothing to do.
-        }
-
         home_if_needed(true);
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to(gripper_location.x, gripper_location.y, (gripper_location.z - 20));
