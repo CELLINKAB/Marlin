@@ -18,11 +18,10 @@ struct OpticalAutocal
     void full_autocal_routine(uint8_t cycles, float z_increment, float feedrate) const
     {
         home_if_needed();
-        planner.synchronize();
         do_blocking_move_to(START_POSITION);
+        planner.synchronize();
         full_sensor_sweep(z_increment, feedrate, cycles);
         do_blocking_move_to(START_POSITION);
-        planner.synchronize();
     }
 
  private:
@@ -33,25 +32,23 @@ struct OpticalAutocal
         bool triggered = false;
         auto isr = [&]{
             const auto position_at_interrupt = planner.get_axis_positions_mm().copy();
-            triggered = true;
-            SERIAL_ECHOLNPAIR(" X:", position_at_interrupt.x, 
+            if (triggered) SERIAL_ECHOLNPAIR(" X:", position_at_interrupt.x, 
                               " Y:", position_at_interrupt.y, 
                               " Z:", position_at_interrupt.z
                               );
+            triggered = true;
         };
         attachInterrupt(SENSOR, isr, RISING);
 
         float z = START_POSITION.z;
         cycles = (!cycles) | cycles;  // guarantees non-zero
-        while (--cycles)
+        while (cycles -= triggered)
         {
             const float pass_feedrate = feedrate * static_cast<float>(triggered);
             single_sensor_pass(z, pass_feedrate);
 
-            // if this is the first cycle that triggered, redo it at desired rate
             const bool first_trigger = (triggered && pass_feedrate == 0.0);
-            cycles += first_trigger;
-            z += z_increment * static_cast<float>(!first_trigger);
+            z = first_trigger ? z - z_increment : z + z_increment;
         }
         detachInterrupt(SENSOR);
     }
