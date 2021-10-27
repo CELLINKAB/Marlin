@@ -161,7 +161,8 @@ struct LidGripper
     {
         home_if_needed(true);
         SET_SOFT_ENDSTOP_LOOSE(true);
-        do_blocking_move_to(gripper_location.x, gripper_location.y, 10.0);
+        do_blocking_move_to_z(10);
+        do_blocking_move_to_xy(gripper_location.x, gripper_location.y);
         do_blocking_move_to_z(gripper_location.z);
         SET_SOFT_ENDSTOP_LOOSE(false);
 
