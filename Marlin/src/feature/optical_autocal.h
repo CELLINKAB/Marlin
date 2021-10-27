@@ -3,12 +3,10 @@
 #include "../module/planner.h"
 
 static constexpr xyz_pos_t START_POSITION = AUTOCAL_START_POSITION;
-static constexpr float UNTRIGGERED_FEEDRATE = ((xyz_pos_t)DEFAULT_MAX_FEEDRATE).y;
-
+static constexpr uint8_t MAX_AUTOCAL_CYCLES = 200;
 template <const pin_t SENSOR>
 struct OpticalAutocal
 {
-    static constexpr uint8_t MAX_AUTOCAL_CYCLES = 200;
 
     OpticalAutocal()
     {
