@@ -110,6 +110,8 @@ struct LidGripper
         move_gripper_until_stall();
 
         disable();
+
+        move_from_gripper();
         return 0;
     }
 
@@ -159,7 +161,7 @@ struct LidGripper
     {
         home_if_needed(true);
         SET_SOFT_ENDSTOP_LOOSE(true);
-        do_blocking_move_to(gripper_location.x, gripper_location.y, (gripper_location.z - 20));
+        do_blocking_move_to(gripper_location.x, gripper_location.y, 10.0);
         do_blocking_move_to_z(gripper_location.z);
         SET_SOFT_ENDSTOP_LOOSE(false);
 
