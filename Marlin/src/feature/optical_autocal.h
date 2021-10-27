@@ -52,20 +52,21 @@ struct OpticalAutocal
         report = true;
         while (--cycles)
         {
-            single_sensor_pass(z, pass_feedrate);
+            single_sensor_pass(z, feedrate);
             z += z_increment;
         }
         detachInterrupt(SENSOR);
     }
 
-    inline void scan_for_tip(float & z, const float inc, bool & condition)
+    inline void scan_for_tip(float & z, const float inc, bool & condition) const
     {
         while (!condition)
         {
             single_sensor_pass(z, 0);
-            z += inc
+            z += inc;
         }
-        do_blocking_move_to_z(z = z - inc);
+        z = z - inc - inc;
+        do_blocking_move_to_z(z);
         condition = false;
     }
 
