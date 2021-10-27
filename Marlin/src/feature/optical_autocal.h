@@ -30,27 +30,43 @@ struct OpticalAutocal
     void full_sensor_sweep(const float z_increment, const float feedrate, uint8_t cycles) const
     {
         bool triggered = false;
+        bool report = false;
         auto isr = [&]{
             const auto position_at_interrupt = planner.get_axis_positions_mm().copy();
-            if (triggered) SERIAL_ECHOLNPAIR(" X:", position_at_interrupt.x, 
+            triggered = true;
+            if (report) SERIAL_ECHOLNPAIR(" X:", position_at_interrupt.x, 
                               " Y:", position_at_interrupt.y, 
                               " Z:", position_at_interrupt.z
                               );
-            triggered = true;
         };
         attachInterrupt(SENSOR, isr, RISING);
 
         float z = START_POSITION.z;
         cycles = (!cycles) | cycles;  // guarantees non-zero
-        while (cycles -= triggered)
-        {
-            const float pass_feedrate = feedrate * static_cast<float>(triggered);
-            single_sensor_pass(z, pass_feedrate);
 
-            const bool first_trigger = (triggered && pass_feedrate == 0.0);
-            z = first_trigger ? z - z_increment : z + z_increment;
+        // go in large chunks to find rough needle bottom
+        for (float inc = 4; inc >= z_increment; inc /= 8)
+            scan_for_tip(z, inc, triggered);
+
+        // enable the isr to report and begin measurement sweeps
+        report = true;
+        while (--cycles)
+        {
+            single_sensor_pass(z, pass_feedrate);
+            z += z_increment;
         }
         detachInterrupt(SENSOR);
+    }
+
+    inline void scan_for_tip(float & z, const float inc, bool & condition)
+    {
+        while (!condition)
+        {
+            single_sensor_pass(z, 0);
+            z += inc
+        }
+        do_blocking_move_to_z(z = z - inc);
+        condition = false;
     }
 
     inline void single_sensor_pass(const float z, const float feedrate) const
