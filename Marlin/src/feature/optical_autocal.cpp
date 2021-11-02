@@ -6,7 +6,7 @@
   #include "../gcode/gcode.h"
   #include "optical_autocal.h"
 
-  OpticalAutocal<OPTICAL_AUTOCAL_PIN> optical_autocal;
+  OpticalAutocal<OPTICAL_SENSOR_1_PIN, OPTICAL_SENSOR_2_PIN> optical_autocal;
 
   void GcodeSuite::G510()
   {

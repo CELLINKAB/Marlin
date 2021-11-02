@@ -92,8 +92,8 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8                            GND | · · | PE14
- *      (OAC) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
- *    (Y_MAX) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
+ * (optical1) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
+ * (optical2) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
@@ -183,7 +183,8 @@
     //#define USING_HW_SERIAL4 1
 #endif
 
-#define OPTICAL_AUTOCAL_PIN PD0
+#define OPTICAL_SENSOR_1_PIN PD0
+#define OPTICAL_SENSOR_2_PIN PD1
 
 //
 // Temperature Sensors
