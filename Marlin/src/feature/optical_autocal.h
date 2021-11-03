@@ -21,16 +21,24 @@ struct OpticalAutocal
         planner.synchronize();
 
         const bool success = full_sensor_sweep(z_increment, feedrate, cycles);
-        if (!success) SERIAL_ERROR_MSG("autocalibration sanity check failed!\n Current postition: ", 
+        if (!success) {
+            SERIAL_ERROR_MSG("autocalibration sanity check failed!\n Current postition: ", 
                                        planner.get_axis_positions_mm(), 
                                        "sensor 1: ", READ(SENSOR_1), 
                                        "sensor 2: ", READ(SENSOR_2)
-                                       );
+                                       )
+        } else {
+            if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("Nozzle offset: ", tool_offset);
+        }
     }
 
  private:
     static constexpr float SHORT_Y_RANGE = 6.0;
     static constexpr float FULL_Y_RANGE = 30.0;
+    static constexpr float COARSE_Z_INCREMENT = 4.0;
+    static constexpr float MEDIUM_Z_INCREMENT = 1.0;
+    static constexpr float FINE_Z_INCREMENT = 0.125;
+    static constexpr float PRECISE_Z_INCREMENT = 0.025;
 
     xyz_pos_t tool_offset{0};
 
@@ -44,10 +52,11 @@ struct OpticalAutocal
     const bool full_sensor_sweep(const float z_increment, const float feedrate, uint8_t cycles)
     {
         const float z_offset = find_z_offset();
-
-        do_blocking_move_to_z(z_offset + 0.025);  // ensure nozzle is visible to both sensors
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("Z offset: ", z_offset);
+        do_blocking_move_to_z(z_offset + FINE_Z_INCREMENT);  // ensure nozzle is visible to both sensors
 
         const xy_pos_t xy_offset = find_xy_offset(feedrate);
+        if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("XY offset: ", xy_offset);
 
         do_blocking_move_to_xy_z(xy_offset, z_offset);
 
@@ -63,12 +72,13 @@ struct OpticalAutocal
      *        then use that value to calculate the precise offset for both X and Y using sensor geometry
      * 
      * @param feedrate mm/s
-     * @return const float y distance between sensors
+     * @return const xy_pos_t XY coordinate of the intersection of both optical sensors
      */
     const xy_pos_t find_xy_offset(const float feedrate) const
     {
         float sensor_1_trigger_y_pos{0};
         float sensor_2_trigger_y_pos{0};
+
         // enable sensors
         auto isr1 = [&]{
             sensor_1_trigger_y_pos = planner.get_axis_positions_mm().copy().y;
@@ -103,7 +113,7 @@ struct OpticalAutocal
         return {x, y};
     }
 
-    const float scan_for_tip(float z, const float inc, bool & condition) const
+    float scan_for_tip(float z, const float inc, bool & condition) const
     {
         while (!condition)
         {
@@ -112,10 +122,8 @@ struct OpticalAutocal
             do_blocking_move_to_y(START_POSITION.y);
             z += inc;
         }
-        z = z - inc - inc;  // go to the last position before interrupt
-        do_blocking_move_to_z(z);
         condition = false;
-        return z;
+        return (z - inc) - inc; // report position before interrupt triggered
     }
 
     const float find_z_offset() const
@@ -127,12 +135,10 @@ struct OpticalAutocal
             triggered = true;
         }, RISING);
 
-        float z_precision = 4.0;
-        do
-        {
-            z = scan_for_tip(z, z_precision, triggered);
-            z_precision /= 4;
-        } while (z_precision > 0.025);
+        z = scan_for_tip(z, COARSE_Z_INCREMENT, triggered);
+        z = scan_for_tip(z, MEDIUM_Z_INCREMENT, triggered);
+        z = scan_for_tip(z, FINE_Z_INCREMENT, triggered);
+        z = scan_for_tip(z, PRECISE_Z_INCREMENT, triggered);
 
         detachInterrupt(SENSOR_1);
         return z;
