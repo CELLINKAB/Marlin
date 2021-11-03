@@ -80,15 +80,15 @@ struct OpticalAutocal
      */
     const xy_pos_t find_xy_offset(const float feedrate) const
     {
-        float sensor_1_trigger_y_pos{0};
-        float sensor_2_trigger_y_pos{0};
+        float sensor_1_trigger_y_pos{0.0f};
+        float sensor_2_trigger_y_pos{0.0f};
 
         // y1 - cross sensor 1 forwards; y2 - cross sensor 2 forwards
         // y3 - cross sensor 2 backwards; y4 - cross sensor 1 backwards
-        std::array<float, NUM_CYCLES> y1{0};
-        std::array<float, NUM_CYCLES> y2{0};
-        std::array<float, NUM_CYCLES> y3{0};
-        std::array<float, NUM_CYCLES> y4{0};
+        std::array<float, NUM_CYCLES> y1{0.0f};
+        std::array<float, NUM_CYCLES> y2{0.0f};
+        std::array<float, NUM_CYCLES> y3{0.0f};
+        std::array<float, NUM_CYCLES> y4{0.0f};
 
 
         // enable sensors
