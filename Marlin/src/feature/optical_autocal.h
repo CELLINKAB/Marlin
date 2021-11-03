@@ -2,8 +2,12 @@
 #include "../MarlinCore.h"
 #include "../module/planner.h"
 
+#include <array>
+#include <numeric>
+
 static constexpr xyz_pos_t START_POSITION = AUTOCAL_START_POSITION;
 static constexpr uint8_t MAX_AUTOCAL_CYCLES = 200;
+static constexpr uint8_t NUM_CYCLES = 2;
 template <const pin_t SENSOR_1, const pin_t SENSOR_2>
 struct OpticalAutocal
 {
@@ -26,19 +30,19 @@ struct OpticalAutocal
                                        planner.get_axis_positions_mm(), 
                                        "sensor 1: ", READ(SENSOR_1), 
                                        "sensor 2: ", READ(SENSOR_2)
-                                       )
+                                       );
         } else {
             if (DEBUGGING(LEVELING)) SERIAL_ECHOLNPAIR("Nozzle offset: ", tool_offset);
         }
     }
 
  private:
-    static constexpr float SHORT_Y_RANGE = 6.0;
-    static constexpr float FULL_Y_RANGE = 30.0;
-    static constexpr float COARSE_Z_INCREMENT = 4.0;
-    static constexpr float MEDIUM_Z_INCREMENT = 1.0;
-    static constexpr float FINE_Z_INCREMENT = 0.125;
-    static constexpr float PRECISE_Z_INCREMENT = 0.025;
+    static constexpr float SHORT_Y_RANGE = 6.0f;
+    static constexpr float FULL_Y_RANGE = 30.0f;
+    static constexpr float COARSE_Z_INCREMENT = 4.0f;
+    static constexpr float MEDIUM_Z_INCREMENT = 1.0f;
+    static constexpr float FINE_Z_INCREMENT = 0.125f;
+    static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
     xyz_pos_t tool_offset{0};
 
@@ -79,6 +83,14 @@ struct OpticalAutocal
         float sensor_1_trigger_y_pos{0};
         float sensor_2_trigger_y_pos{0};
 
+        // y1 - cross sensor 1 forwards; y2 - cross sensor 2 forwards
+        // y3 - cross sensor 2 backwards; y4 - cross sensor 1 backwards
+        std::array<float, NUM_CYCLES> y1{0};
+        std::array<float, NUM_CYCLES> y2{0};
+        std::array<float, NUM_CYCLES> y3{0};
+        std::array<float, NUM_CYCLES> y4{0};
+
+
         // enable sensors
         auto isr1 = [&]{
             sensor_1_trigger_y_pos = planner.get_axis_positions_mm().copy().y;
@@ -89,17 +101,19 @@ struct OpticalAutocal
         };
         attachInterrupt(SENSOR_2, isr2, RISING);
 
-        do_blocking_move_to_y(START_POSITION.y + FULL_Y_RANGE, feedrate);
-        const float y1 = sensor_1_trigger_y_pos;
-        const float y2 = sensor_2_trigger_y_pos;
-        do_blocking_move_to_y(START_POSITION.y, feedrate);            
-        const float y3 = sensor_2_trigger_y_pos;
-        const float y4 = sensor_1_trigger_y_pos;
-        detachInterrupt(SENSOR_1);
-        detachInterrupt(SENSOR_2);
-
-        const float nozzle_y1 = (y1 + y4) / 2;
-        const float nozzle_y2 = (y2 + y3) / 2;
+        for (uint8_t i = 0; i < NUM_CYCLES; ++i)
+        {
+            do_blocking_move_to_y(START_POSITION.y + FULL_Y_RANGE, feedrate);
+            y1[i] = sensor_1_trigger_y_pos;
+            y2[i] = sensor_2_trigger_y_pos;
+            do_blocking_move_to_y(START_POSITION.y, feedrate);            
+            y3[i] = sensor_2_trigger_y_pos;
+            y4[i] = sensor_1_trigger_y_pos;
+            detachInterrupt(SENSOR_1);
+            detachInterrupt(SENSOR_2);
+        }
+        const float nozzle_y1 = cycles_avg(y1, y4);
+        const float nozzle_y2 = cycles_avg(y2, y3);
 
         const float dy = ABS(nozzle_y1 - nozzle_y2);
 
@@ -111,6 +125,15 @@ struct OpticalAutocal
         const float y = nozzle_y1 + xy_offset;
 
         return {x, y};
+    }
+
+
+    const float cycles_avg(const std::array<float, NUM_CYCLES> s1, const std::array<float, NUM_CYCLES> s2) const
+    {
+        const float sum_s1 = std::accumulate(s1.begin(), s1.end(), 0.0f);
+        const float sum_s2 = std::accumulate(s2.begin(), s2.end(), 0.0f);
+        const float avg = (sum_s1 + sum_s2) / (s1.size() + s2.size());
+        return avg;
     }
 
     float scan_for_tip(float z, const float inc, bool & condition) const
