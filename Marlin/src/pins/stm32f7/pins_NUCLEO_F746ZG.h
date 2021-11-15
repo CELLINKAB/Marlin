@@ -83,12 +83,12 @@
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14
  *            PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
- *            PF3 | · · | PD4                            PF4 | · · | PF15
- *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14 (Y2_EN)
- *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9  (Y2_CS/UART)
- *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8
- *  (LG_STEP) PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7
- *   (LG_DIR) PF2 | · · | PE5 (LG_STOP)                 PD12 | · · | GND
+ *            PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15
+ *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  TX
+ *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   RX
+ *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8   TX
+ *            PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7   RX
+ *   (LG_DIR) PF2 | · · | PE5 (LG_STOP)         LG_STEP PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8                            GND | · · | PE14
@@ -127,8 +127,8 @@
 
 #define Y2_STEP_PIN PB6
 #define Y2_DIR_PIN PB2
-#define Y2_ENABLE_PIN PG14
-#define Y2_CS_PIN PG9
+#define Y2_ENABLE_PIN PF4
+#define Y2_CS_PIN PC2
 
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
@@ -137,12 +137,10 @@
 
 #if HAS_TMC_UART
 
-    #define I_DONT_TRUST_MSERIAL
-
-    #define X_HARDWARE_SERIAL  MSerial2
-    #define Y_HARDWARE_SERIAL  MSerial2
-    #define Y2_HARDWARE_SERIAL MSerial2
-    #define Z_HARDWARE_SERIAL  MSerial2
+    #define X_HARDWARE_SERIAL  MSerial6
+    #define Y_HARDWARE_SERIAL  MSerial6
+    #define Y2_HARDWARE_SERIAL MSerial6
+    #define Z_HARDWARE_SERIAL  MSerial6
 
 
     #define X_SLAVE_ADDRESS  0
@@ -167,16 +165,15 @@
 #endif // HAS_TMC_UART
 
 #if ENABLED(LID_GRIPPER_STATION)
-    #define LG_STEP_PIN         PA7
-    #define LG_DIR_PIN          PF2
+    // #define LG_STEP_PIN         PD12
+    // #define LG_DIR_PIN          PF2
+    #define LG_INDEX_PIN        PF2
     #define LG_EN_PIN           PE4
-    // #define LG_CS_PIN           PE2
-    // #define LG_SCK_PIN          PA5
-    // #define LG_MISO_PIN         PA6
-    // #define LG_MOSI_PIN         PA7
-    #define LG_RX_PIN         PD2
-    #define LG_TX_PIN         PC12
-    //#define LG_HARDWARE_SERIAL MSerial4
+
+    #define LG_HARDWARE_SERIAL MSerial2
+    #ifndef USING_HW_SERIAL2
+        #define USING_HW_SERIAL2 1
+    #endif
     #define LG_SLAVE_ADDRESS    0
     #define LG_STOP_PIN         PE5
 

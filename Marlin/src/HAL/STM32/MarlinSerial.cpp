@@ -78,10 +78,18 @@
   DECLARE_SERIAL_PORT(5)
 #endif
 #if USING_HW_SERIAL6
-  DECLARE_SERIAL_PORT(6)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial6(PG9, PG14);
+  #else 
+    DECLARE_SERIAL_PORT(6)
+  #endif
 #endif
 #if USING_HW_SERIAL7
-  DECLARE_SERIAL_PORT(7)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial7(PE7, PE8)
+  #else
+    DECLARE_SERIAL_PORT(7)
+  #endif
 #endif
 #if USING_HW_SERIAL8
   DECLARE_SERIAL_PORT(8)

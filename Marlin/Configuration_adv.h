@@ -686,7 +686,7 @@
 
 // If you want endstops to stay on (by default) even when not homing
 // enable this option. Override at any time with M120, M121.
-#define ENDSTOPS_ALWAYS_ON_DEFAULT
+//#define ENDSTOPS_ALWAYS_ON_DEFAULT
 
 // @section extras
 
@@ -3070,9 +3070,10 @@
 
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
-    #define X_STALL_SENSITIVITY  50
+    #define X_STALL_SENSITIVITY  60
+
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  50
+    #define Y_STALL_SENSITIVITY  64
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
     #define Z_STALL_SENSITIVITY  55
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
@@ -4401,12 +4402,12 @@
   // define stall sensitivity to use sensorless lid detection and
   // gripping ability, and to adjust the force needed to stop the
   // lid gripper. (0-255)
-  #define LID_GRIPPER_STALL_SENSITIVITY 50
+  #define LID_GRIPPER_STALL_SENSITIVITY 25
   
   // RMS current for driver to supply to motor (mA)
   #define LID_GRIPPER_CURRENT 400
 
-  #define LID_GRIPPER_STEPS_PER_MM 140
+  #define LID_GRIPPER_VELOCITY 15000
 
   // if using stallguard lid detection and gripping, this value is
   // the maximum number of mm the gripper should close before we

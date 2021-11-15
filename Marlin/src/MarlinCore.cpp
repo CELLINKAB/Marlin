@@ -1623,7 +1623,6 @@ void setup() {
   #endif
 
   #if ENABLED(LID_GRIPPER_STATION)
-    LGSerial.begin(115200);
     SETUP_RUN(lid_gripper.init_pins());
   #endif
 
