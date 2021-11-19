@@ -101,28 +101,28 @@ private:
         volatile bool read_sensor_1 = false;
         volatile bool read_sensor_2 = false;
 
-        const unsigned int delay_2mm = static_cast<int>(2000.0f / feedrate);
+        const unsigned int delay_5mm = static_cast<int>(5000.0f / feedrate);
 
         // enable sensors
-        auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_2mm]
+        auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_5mm]
         {
             const float y = planner.get_axis_positions_mm().y;
             if (!read_sensor_1)
                 return;
             sensor_1_trigger_y_pos = y;
             read_sensor_1 = false;
-            delay(delay_2mm);
+            delay(delay_5mm);
             read_sensor_2 = true;
             if DEBUGGING(LEVELING) SERIAL_ECHOLNPAIR("sensor 1 triggered Y", y);
         };
-        auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_2mm]
+        auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm]
         {
             const float y = planner.get_axis_positions_mm().y;
             if (!read_sensor_2)
                 return;
             sensor_2_trigger_y_pos = y;
             read_sensor_2 = false;
-            delay(delay_2mm);
+            delay(delay_5mm);
             read_sensor_1 = true;
             if DEBUGGING(LEVELING) SERIAL_ECHOLNPAIR("sensor 2 triggered Y", y);
         };
