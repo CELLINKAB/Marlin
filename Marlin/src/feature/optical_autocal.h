@@ -75,14 +75,14 @@ private:
 
         do_blocking_move_to_xy_z(xy_offset, z_offset + MEDIUM_Z_INCREMENT);
 
-        const bool parameter_check = (READ(SENSOR_1) && !READ(SENSOR_2));
+        const bool parameter_check = (READ(SENSOR_1) && READ(SENSOR_2));
 
         if (parameter_check)
             tool_offset.set(xy_offset, z_offset);
         else
             SERIAL_ERROR_MSG("Autocalibration succeeded but sanity check failed!"
                              "\nsensor 1: ", READ(SENSOR_1),
-                             "\nsensor 2: ", !READ(SENSOR_2));
+                             "\nsensor 2: ", READ(SENSOR_2));
 
         return true;
     }
@@ -128,7 +128,7 @@ private:
         };
 
         attachInterrupt(SENSOR_1, isr1, RISING);
-        attachInterrupt(SENSOR_2, isr2, FALLING);
+        attachInterrupt(SENSOR_2, isr2, RISING);
 
         // y1 - cross sensor 1 forwards; y2 - cross sensor 2 forwards
         // y3 - cross sensor 2 backwards; y4 - cross sensor 1 backwards
