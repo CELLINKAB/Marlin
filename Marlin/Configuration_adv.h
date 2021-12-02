@@ -3084,6 +3084,13 @@
     //#define K_STALL_SENSITIVITY  8
     //#define SPI_ENDSTOPS              // TMC2130 only
     #define IMPROVE_HOMING_RELIABILITY
+
+    // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
+    #define SENSORLESS_HOME_SANITY_CHECKING
+    #if ENABLED(SENSORLESS_HOME_SANITY_CHECKING)
+      #define HOME_SANITY_CHECKING_STARTUP_COMPENSATION 200
+      #define HOME_SANITY_CHECKING_ERROR_MARGIN 50
+    #endif
   #endif
 
   /**
