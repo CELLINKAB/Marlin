@@ -1123,19 +1123,19 @@
   #define CALIBRATION_MEASUREMENT_RESOLUTION     0.01 // mm
 
   #define CALIBRATION_FEEDRATE_SLOW             60    // mm/min
-  #define CALIBRATION_FEEDRATE_FAST           1200    // mm/min
-  #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/min
+  #define CALIBRATION_FEEDRATE_FAST            900    // mm/min
+  #define CALIBRATION_FEEDRATE_TRAVEL         2400    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
   #define CALIBRATION_NOZZLE_TIP_HEIGHT          1.0  // mm
-  #define CALIBRATION_NOZZLE_OUTER_DIAMETER      2.0  // mm
+  #define CALIBRATION_NOZZLE_OUTER_DIAMETER      10.0  // mm
 
   // Uncomment to enable reporting (required for "G425 V", but consumes PROGMEM).
   #define CALIBRATION_REPORTING
 
   // The true location and dimension the cube/bolt/washer on the bed.
-  #define CALIBRATION_OBJECT_CENTER     { 264.0, -22.0,  -2.0 } // mm
-  #define CALIBRATION_OBJECT_DIMENSIONS {  10.0,  10.0,  10.0 } // mm
+  #define CALIBRATION_OBJECT_CENTER     { 180.0, 80.0, 0.0 } // mm
+  #define CALIBRATION_OBJECT_DIMENSIONS {  50.0,  50.0,  2.0 } // mm
 
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
@@ -1153,7 +1153,7 @@
 
   // Probing at the exact top center only works if the center is flat. If
   // probing on a screwhead or hollow washer, probe near the edges.
-  //#define CALIBRATION_MEASURE_AT_TOP_EDGES
+  #define CALIBRATION_MEASURE_AT_TOP_EDGES
 
   // Define the pin to read during calibration
   #ifndef CALIBRATION_PIN
@@ -3073,7 +3073,7 @@
     #define X_STALL_SENSITIVITY  66
 
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  58
+    #define Y_STALL_SENSITIVITY  60
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
     #define Z_STALL_SENSITIVITY  56
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
