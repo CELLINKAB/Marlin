@@ -28,9 +28,7 @@ struct OpticalAutocal
     bool full_autocal_routine(float feedrate)
     {
         home_if_needed();
-        do_blocking_move_to_z(START_POSITION.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
-        do_blocking_move_to_xy(START_POSITION);
-        do_blocking_move_to_z(START_POSITION.z);
+        do_blocking_move_to(START_POSITION);
         planner.synchronize();
 
         const bool success = full_sensor_sweep(feedrate);
@@ -70,7 +68,7 @@ private:
         else if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
             SERIAL_ECHOLNPAIR("Z offset: ", z_offset);
 
-        do_blocking_move_to_z(z_offset + MEDIUM_Z_INCREMENT); // ensure nozzle is visible to both sensors
+        do_blocking_move_to_z(z_offset - MEDIUM_Z_INCREMENT); // ensure nozzle is visible to both sensors
 
         const xy_pos_t xy_offset = find_xy_offset(feedrate);
         if (xy_offset == XY_OFFSET_ERR)
@@ -78,7 +76,7 @@ private:
         if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
             SERIAL_ECHOLNPAIR("XY offset: ", xy_offset);
 
-        do_blocking_move_to_xy_z(xy_offset, z_offset + MEDIUM_Z_INCREMENT);
+        do_blocking_move_to_xy_z(xy_offset, z_offset - MEDIUM_Z_INCREMENT);
 
         const bool sensor_1_check = READ(SENSOR_1);
         const bool sensor_2_check = READ(SENSOR_2);
@@ -92,7 +90,7 @@ private:
                 print_pos(tool_offset, "Calibrated tool offset:");
             do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
             do_blocking_move_to_xy(tool_offset);
-            do_blocking_move_to(tool_offset);
+            do_blocking_move_to_z(tool_offset.z);
             //planner.set_position_mm({0.0,0.0,0.0});
             
         }
@@ -221,21 +219,21 @@ private:
 
     float scan_for_tip(float z, const float inc, bool &condition, const float feedrate) const
     {
-        while (!condition && z < soft_endstop.max.z)
+        while (!condition && z > soft_endstop.min.z)
         {
             do_blocking_move_to_z(z, feedrate);
             do_blocking_move_to_y(START_POSITION.y + SHORT_Y_RANGE, feedrate);
             do_blocking_move_to_y(START_POSITION.y, feedrate);
-            z += inc;
+            z -= inc;
         }
 
-        if (DEBUGGING(ERRORS) && z >= soft_endstop.max.z)
+        if (DEBUGGING(ERRORS) && z <= soft_endstop.min.z)
             SERIAL_ERROR_MSG("No nozzle found during Z sweep!");
         else if DEBUGGING (LEVELING)
             SERIAL_ECHOLNPAIR("Z sweep increment=", inc, "; found nozzle at z=", z);
 
         condition = false;
-        return (z - inc) - inc; // report position before interrupt triggered
+        return (z + inc) + inc; // report position before interrupt triggered
     }
 
     const float find_z_offset(const float feedrate) const
@@ -252,11 +250,11 @@ private:
         z = scan_for_tip(z, MEDIUM_Z_INCREMENT, triggered, feedrate);
         z = scan_for_tip(z, FINE_Z_INCREMENT, triggered, feedrate);
         z = scan_for_tip(z, PRECISE_Z_INCREMENT, triggered, feedrate);
-        z += PRECISE_Z_INCREMENT;
+        z -= PRECISE_Z_INCREMENT;
 
         detachInterrupt(SENSOR_1);
 
-        if (z >= (soft_endstop.max.z - PRECISE_Z_INCREMENT))
+        if (z <= (soft_endstop.min.z + PRECISE_Z_INCREMENT))
             z = Z_OFFSET_ERR;
         
         return z;

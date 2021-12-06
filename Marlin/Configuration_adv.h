@@ -4404,7 +4404,7 @@
 
   // Position to move printbed before the lid gripper
   // attempts to grip a lid {x,y,z}
-  #define LID_GRIPPER_COORDS {400,51,50}
+  #define LID_GRIPPER_COORDS {400,51,-10}
 
   // define stall sensitivity to use sensorless lid detection and
   // gripping ability, and to adjust the force needed to stop the
@@ -4425,10 +4425,10 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {240.0, 153.0, 19.0}
+  #define AUTOCAL_START_POSITION {240.0, 153.0, 25.0}
   #define AUTOCAL_DEFAULT_FEEDRATE 60.0
-  #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.3, -86.11, 9.0}
-  #define POST_AUTOCAL_SAFE_Z_HEIGHT -20.0
+  #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.3, -86.11, -9.0}
+  #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
 #endif
 
 #define OPTICAL_SURFACE_PROBE
