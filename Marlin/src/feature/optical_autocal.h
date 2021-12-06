@@ -1,20 +1,23 @@
 
 #include "../MarlinCore.h"
 #include "../module/planner.h"
+#include "../module/motion.h"
+#include "../gcode/gcode.h"
 
 #include <array>
 #include <numeric>
 
-static constexpr xyz_pos_t START_POSITION = AUTOCAL_START_POSITION;
-static constexpr uint8_t MAX_AUTOCAL_CYCLES = 200;
-static constexpr uint8_t NUM_CYCLES = 2;
-static constexpr xy_pos_t XY_OFFSET_ERR{-1.0f, -1.0f};
-static constexpr float Z_OFFSET_ERR{-1.0f};
-using YSweepArray = std::array<float, NUM_CYCLES>;
 
-template <const pin_t SENSOR_1, const pin_t SENSOR_2>
 struct OpticalAutocal
 {
+    inline static constexpr xyz_pos_t START_POSITION{AUTOCAL_START_POSITION};
+    inline static constexpr xyz_pos_t END_POSITION_PRINTBED_DELTA{AUTOCAL_PRINTBED_CENTER_DELTA};
+    static constexpr uint8_t NUM_CYCLES = 2;
+    inline static constexpr xy_pos_t XY_OFFSET_ERR{-1.0f, -1.0f};
+    static constexpr float Z_OFFSET_ERR{-1.0f};
+    static constexpr pin_t SENSOR_1{OPTICAL_SENSOR_1_PIN};
+    static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
+    using YSweepArray = std::array<float, NUM_CYCLES>;
 
     OpticalAutocal()
     {
@@ -22,15 +25,15 @@ struct OpticalAutocal
         SET_INPUT(SENSOR_2);
     }
 
-    void full_autocal_routine(uint8_t cycles, float z_increment, float feedrate)
+    bool full_autocal_routine(float feedrate)
     {
         home_if_needed();
-        do_blocking_move_to_x(START_POSITION.x);
-        do_blocking_move_to_y(START_POSITION.y);
+        do_blocking_move_to_z(START_POSITION.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
+        do_blocking_move_to_xy(START_POSITION);
         do_blocking_move_to_z(START_POSITION.z);
         planner.synchronize();
 
-        const bool success = full_sensor_sweep(z_increment, feedrate, cycles);
+        const bool success = full_sensor_sweep(feedrate);
         if (!success)
         {
             do_blocking_move_to(START_POSITION);
@@ -38,6 +41,8 @@ struct OpticalAutocal
         }
         else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
             SERIAL_ECHOLNPAIR("Nozzle offset: ", tool_offset);
+
+        return success;
     }
 
 private:
@@ -57,7 +62,7 @@ private:
      * @param feedrate mm/s
      * @param cycles 
      */
-    const bool full_sensor_sweep(const float z_increment, const float feedrate, uint8_t cycles)
+    const bool full_sensor_sweep(const float feedrate)
     {
         const float z_offset = find_z_offset(feedrate);
         if (z_offset == Z_OFFSET_ERR)
@@ -75,14 +80,26 @@ private:
 
         do_blocking_move_to_xy_z(xy_offset, z_offset + MEDIUM_Z_INCREMENT);
 
-        const bool parameter_check = (READ(SENSOR_1) && READ(SENSOR_2));
+        const bool sensor_1_check = READ(SENSOR_1);
+        const bool sensor_2_check = READ(SENSOR_2);
 
-        if (parameter_check)
-            tool_offset.set(xy_offset, z_offset);
+        if (sensor_1_check && sensor_2_check) {
+            tool_offset.set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
+                            xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
+                            z_offset + END_POSITION_PRINTBED_DELTA.z
+                            );
+            if (DEBUGGING(INFO) || DEBUGGING(LEVELING)) 
+                print_pos(tool_offset, "Calibrated tool offset:");
+            do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
+            do_blocking_move_to_xy(tool_offset);
+            do_blocking_move_to(tool_offset);
+            //planner.set_position_mm({0.0,0.0,0.0});
+            
+        }
         else
             SERIAL_ERROR_MSG("Autocalibration succeeded but sanity check failed!"
-                             "\nsensor 1: ", READ(SENSOR_1),
-                             "\nsensor 2: ", READ(SENSOR_2));
+                             "\nsensor 1: ", sensor_1_check,
+                             "\nsensor 2: ", sensor_2_check);
 
         return true;
     }
@@ -101,7 +118,7 @@ private:
         volatile bool read_sensor_1 = false;
         volatile bool read_sensor_2 = false;
 
-        const unsigned int delay_5mm = static_cast<int>(5000.0f / feedrate);
+        const unsigned int delay_5mm = static_cast<int>(5000.0f / feedrate ?: feedrate_mm_s);
 
         // enable sensors
         auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_5mm]
@@ -247,5 +264,5 @@ private:
 };
 
 #if ENABLED(OPTICAL_AUTOCAL)
-extern OpticalAutocal<OPTICAL_SENSOR_1_PIN, OPTICAL_SENSOR_2_PIN> optical_autocal;
+extern OpticalAutocal optical_autocal;
 #endif
