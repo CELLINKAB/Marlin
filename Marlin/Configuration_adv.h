@@ -4431,6 +4431,11 @@
   #define POST_AUTOCAL_SAFE_Z_HEIGHT -20.0
 #endif
 
+#define OPTICAL_SURFACE_PROBE
+#if ENABLED(OPTICAL_SURFACE_PROBE)
+  #define ____HELLO____ :)
+#endif
+
 // @section develop
 
 //

@@ -321,7 +321,7 @@
  * M995 - Touch screen calibration for TFT display
  * M997 - Perform in-application firmware update
  * M999 - Restart after being stopped by error
- *
+ * M1100 - Read optical surface probe
  * D... - Custom Development G-code. Add hooks to 'gcode_D.cpp' for developers to test features. (Requires MARLIN_DEV_MODE)
  *        D576 - Set buffer monitoring options. (Requires BUFFER_MONITORING)
  *
@@ -1238,6 +1238,10 @@ private:
   #if ENABLED(CONTROLLER_FAN_EDITABLE)
     static void M710();
     static void M710_report(const bool forReplay=true);
+  #endif
+
+  #if ENABLED(OPTICAL_SURFACE_PROBE)
+    static void M1100();
   #endif
 
   static void T(const int8_t tool_index);

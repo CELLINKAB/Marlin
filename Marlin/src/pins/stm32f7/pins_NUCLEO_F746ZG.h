@@ -81,13 +81,13 @@
  *                                                      AVDD | · · | PF13 (BTN_EN1)
  *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
- * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14
- *            PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
- *            PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15
- *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  TX
- *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   RX
- *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8   TX
- *            PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7   RX
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
+ *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
+ *            PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
+ *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX
+ *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX
+ *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8   PROBE_TX
+ *            PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7   PROBE_RX
  *   (LG_DIR) PF2 | · · | PE5 (LG_STOP)         LG_STEP PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
@@ -180,9 +180,22 @@
     //#define USING_HW_SERIAL4 1
 #endif
 
-#define OPTICAL_SENSOR_1_PIN PD0
-#define OPTICAL_SENSOR_2_PIN PD1
+#if ENABLED(OPTICAL_SURFACE_PROBE)
+    #define OPT_SURF_IN_PIN PC3 // white
+    #define OPT_SURF_ERR_PIN PF15 // brown
+    #define OPT_SURF_MFI_PIN PE13// violet
+    #define OPT_SURF_LED_ON_PIN PF14 // black
 
+    #define OPT_SURF_HW_SERIAL MSerial7
+    #ifndef USING_HW_SERIAL7
+      #define USING_HW_SERIAL7 1
+    #endif
+#endif
+
+#if ENABLED(OPTICAL_AUTOCAL)
+  #define OPTICAL_SENSOR_1_PIN PD0
+  #define OPTICAL_SENSOR_2_PIN PD1
+#endif
 //
 // Temperature Sensors
 //

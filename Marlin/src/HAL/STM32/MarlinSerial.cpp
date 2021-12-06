@@ -86,7 +86,7 @@
 #endif
 #if USING_HW_SERIAL7
   #ifdef I_DONT_TRUST_MSERIAL
-    HardwareSerial MSerial7(PE7, PE8)
+    HardwareSerial MSerial7(PE7, PE8);
   #else
     DECLARE_SERIAL_PORT(7)
   #endif
