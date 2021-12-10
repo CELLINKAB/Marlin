@@ -1007,7 +1007,7 @@
 
 // @section motion
 
-#define AXIS_RELATIVE_MODES { false, false, false}
+#define AXIS_RELATIVE_MODES { false, false, false, false}
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -2801,7 +2801,7 @@
 
   #if AXIS_IS_TMC(E0)
     #define E0_CURRENT      800
-    #define E0_MICROSTEPS    16
+    #define E0_MICROSTEPS    32
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
     //#define E0_INTERPOLATE true
@@ -4399,7 +4399,7 @@
 //#define POWER_DOOR_OPENER
 
 // options for lid gripping station
-#define LID_GRIPPER_STATION
+//#define LID_GRIPPER_STATION
 #if ENABLED(LID_GRIPPER_STATION)
 
   // Position to move printbed before the lid gripper

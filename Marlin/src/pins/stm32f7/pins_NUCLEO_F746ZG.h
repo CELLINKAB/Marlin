@@ -86,9 +86,9 @@
  *            PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
  *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX
- *             NC | · · | PE2 (LG_CS)                    GND | · · | PE8   PROBE_TX
- *            PA7 | · · | PE4 (LG_EN)                   PD13 | · · | PE7   PROBE_RX
- *   (LG_DIR) PF2 | · · | PE5 (LG_STOP)         LG_STEP PD12 | · · | GND
+ *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
+ *   (E_STEP) PA7 | · · | PE4 (E_EN)                    PD13 | · · | PE7   PROBE_RX
+ *    (E_DIR) PF2 | · · | PE5 (E_STOP)                  PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
@@ -135,6 +135,10 @@
 #define Z_ENABLE_PIN PE10
 #define Z_CS_PIN PE12
 
+#define E0_STEP_PIN PE5
+#define E0_DIR_PIN PF2
+#define E0_ENABLE_PIN PE4
+
 #if HAS_TMC_UART
 
     #define X_HARDWARE_SERIAL  MSerial6
@@ -142,25 +146,13 @@
     #define Y2_HARDWARE_SERIAL MSerial6
     #define Z_HARDWARE_SERIAL  MSerial6
 
-
     #define X_SLAVE_ADDRESS  0
     #define Y_SLAVE_ADDRESS  2
     #define Y2_SLAVE_ADDRESS 1
     #define Z_SLAVE_ADDRESS  3
 
-// #define X_SERIAL_TX_PIN PC10
-// #define X_SERIAL_RX_PIN PC10
-
-// #define Y_SERIAL_TX_PIN PC10
-// #define Y_SERIAL_RX_PIN PC10
-
-// #define Y2_SERIAL_TX_PIN PC10
-// #define Y2_SERIAL_RX_PIN PC10
-
-// #define Z_SERIAL_TX_PIN PC10
-// #define Z_SERIAL_RX_PIN PC10
-
-//#define TMC_BAUD_RATE 9600
+    #define E0_HARDWARE_SERIAL MSerial2
+    #define E0_SLAVE_ADDRESS 0
 
 #endif // HAS_TMC_UART
 
@@ -201,6 +193,8 @@
 //
 #define TEMP_0_PIN PA3
 //#define TEMP_BED_PIN PC0
+
+#define HEATER_0_PIN PA15
 
 #define CALIBRATION_PIN PF8
 #define CALIBRATION_PIN_PULLUP
