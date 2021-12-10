@@ -4,6 +4,10 @@
 
 #include "../module/planner.h"
 
+#if ENABLED(GLOBAL_INTERVAL_REPORTER)
+  #include "interval_reporter.h"
+#endif
+
 #include <string_view>
 // using namespace std::string_view_literals;
 
@@ -19,34 +23,26 @@ struct OpticalSurfaceProbe
 
     void init();
 
-    const auto get_distance() const
+    const uint32_t get_distance() const
     {
         return analogRead(OPT_SURF_IN_PIN);
     }
 
-    /**
-     * @brief reports analog sensor reading at a set interval 
-     *        using a hardware timer based interrupt
-     * 
-     * @param ms milliseconds between reports
-     */
-    void interval_report(const int ms)
-    {
-        // requires static lifetime for interrupts to trigger,
-        // and to ensure we can stop the timer later.
-        static HardwareTimer timer{TIM12};
-        timer.pause();
-        if (ms <= 0)
-            return;
-
-        timer.setOverflow(ms * 1000, TimerFormat_t::MICROSEC_FORMAT);
-        timer.attachInterrupt([this]
-                              {
-                                  const auto position = planner.get_axis_positions_mm();
-                                  SERIAL_ECHOLNPAIR("prb:", get_distance(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
-                              });
-        timer.resume();
-    }
+    #if ENABLED(GLOBAL_INTERVAL_REPORTER)
+        /**
+         * @brief reports analog sensor reading at a set interval 
+         *        using a hardware timer based interrupt
+         * 
+         * @param ms milliseconds between reports
+         */
+        void interval_report(bool start)
+        {
+            if (start)
+                reporter.start();
+            else
+                reporter.stop();
+        }
+    #endif
 
     /**
      * @brief TODO: unimplemented, intended to alter sensor angle
@@ -62,6 +58,14 @@ struct OpticalSurfaceProbe
 
 private:
     constexpr static size_t READ_BUFFER_SIZE{255};
+
+    #if ENABLED(GLOBAL_INTERVAL_REPORTER)
+        IntervalReporter reporter{[this]
+                                {
+                                    const auto position = planner.get_axis_positions_mm();
+                                    SERIAL_ECHOLNPAIR("prb:", get_distance(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
+                                }};
+    #endif
 
     /**
      * @brief Private inner struct for holding serial communication

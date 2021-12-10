@@ -12,8 +12,13 @@
     const auto val = probe.get_distance();
     SERIAL_ECHOLNPAIR("Probe raw reading: ", val);
 
-    const auto ms = parser.intval('P', 0);
-    probe.interval_report(ms);
+    #if ENABLED(GLOBAL_INTERVAL_REPORTER)
+      const auto ms = parser.intval('P', 0);
+      if (ms > 0) IntervalReporter::set_interval_ms(ms);
+
+      const auto start = parser.boolval('S');
+      probe.interval_report(start);
+    #endif
   }
 
 #endif // OPTICAL_SURFACE_PROBE
