@@ -11,6 +11,12 @@ struct IntervalReporter
 
     ~IntervalReporter();
 
+    // it does not make sense to copy or move a reporter
+    IntervalReporter(const IntervalReporter&) = delete;
+    IntervalReporter(IntervalReporter&&) = delete;
+    IntervalReporter& operator=(const IntervalReporter) = delete;
+    IntervalReporter& operator=(IntervalReporter&&) = delete;
+
     inline void start() { if (channel) channel->enabled = true; }
 
     inline void stop() { if (channel) channel->enabled = false; }
