@@ -44,7 +44,7 @@ struct OpticalAutocal
     }
 
 private:
-    static constexpr float SHORT_Y_RANGE = 6.0f;
+    static constexpr float SHORT_Y_RANGE = 10.0f;
     static constexpr float FULL_Y_RANGE = 25.0f;
     static constexpr float COARSE_Z_INCREMENT = 4.0f;
     static constexpr float MEDIUM_Z_INCREMENT = 1.0f;
@@ -90,7 +90,6 @@ private:
                 print_pos(tool_offset, "Calibrated tool offset:");
             do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
             do_blocking_move_to_xy(tool_offset);
-            do_blocking_move_to_z(tool_offset.z);
             //planner.set_position_mm({0.0,0.0,0.0});
             
         }

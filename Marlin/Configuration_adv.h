@@ -1007,7 +1007,7 @@
 
 // @section motion
 
-#define AXIS_RELATIVE_MODES { false, false, false, false}
+#define AXIS_RELATIVE_MODES { false, false, false, true}
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -3783,7 +3783,7 @@
    * M200 D0 to disable, M200 Dn to set a new diameter (and enable volumetric).
    * M200 S0/S1 to disable/enable volumetric extrusion.
    */
-  //#define VOLUMETRIC_DEFAULT_ON
+  #define VOLUMETRIC_DEFAULT_ON
 
   //#define VOLUMETRIC_EXTRUDER_LIMIT
   #if ENABLED(VOLUMETRIC_EXTRUDER_LIMIT)
@@ -4425,7 +4425,7 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {240.0, 153.0, 25.0}
+  #define AUTOCAL_START_POSITION {240.0, 176.0, 25.0}
   #define AUTOCAL_DEFAULT_FEEDRATE 60.0
   #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.3, -86.11, -9.0}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
