@@ -336,7 +336,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 // HAS_FAN does not include CONTROLLER_FAN
 #if HAS_FAN
 
-  uint8_t Temperature::fan_speed[FAN_COUNT]; // = { 0 }
+  uint8_t Temperature::fan_speed[FAN_COUNT]; //{}
 
   #if ENABLED(EXTRA_FAN_SPEED)
 
@@ -367,7 +367,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 
   #if EITHER(PROBING_FANS_OFF, ADVANCED_PAUSE_FANS_PAUSE)
     bool Temperature::fans_paused; // = false;
-    uint8_t Temperature::saved_fan_speed[FAN_COUNT]; // = { 0 }
+    uint8_t Temperature::saved_fan_speed[FAN_COUNT]; //{}
   #endif
 
   #if ENABLED(ADAPTIVE_FAN_SLOWING)
@@ -428,14 +428,14 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 #endif // HAS_FAN
 
 #if WATCH_HOTENDS
-  hotend_watch_t Temperature::watch_hotend[HOTENDS]; // = { { 0 } }
+  hotend_watch_t Temperature::watch_hotend[HOTENDS]; // = {{} }
 #endif
 #if HEATER_IDLE_HANDLER
-  Temperature::heater_idle_t Temperature::heater_idle[NR_HEATER_IDLE]; // = { { 0 } }
+  Temperature::heater_idle_t Temperature::heater_idle[NR_HEATER_IDLE]; // = {{} }
 #endif
 
 #if HAS_HEATED_BED
-  bed_info_t Temperature::temp_bed; // = { 0 }
+  bed_info_t Temperature::temp_bed; //{}
   // Init min and max temp with extreme values to prevent false errors during startup
   raw_adc_t Temperature::mintemp_raw_BED = TEMP_SENSOR_BED_RAW_LO_TEMP,
             Temperature::maxtemp_raw_BED = TEMP_SENSOR_BED_RAW_HI_TEMP;
@@ -444,7 +444,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 #endif
 
 #if HAS_TEMP_CHAMBER
-  chamber_info_t Temperature::temp_chamber; // = { 0 }
+  chamber_info_t Temperature::temp_chamber; //{}
   #if HAS_HEATED_CHAMBER
     millis_t next_cool_check_ms_2 = 0;
     celsius_float_t old_temp = 9999;
@@ -456,7 +456,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 #endif
 
 #if HAS_TEMP_COOLER
-  cooler_info_t Temperature::temp_cooler; // = { 0 }
+  cooler_info_t Temperature::temp_cooler; //{}
   #if HAS_COOLER
     bool flag_cooler_state;
     //bool flag_cooler_excess = false;
@@ -464,14 +464,14 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
     raw_adc_t Temperature::mintemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_LO_TEMP,
               Temperature::maxtemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_HI_TEMP;
     #if WATCH_COOLER
-      cooler_watch_t Temperature::watch_cooler{0};
+      cooler_watch_t Temperature::watch_cooler{};
     #endif
     millis_t Temperature::next_cooler_check_ms, Temperature::cooler_fan_flush_ms;
   #endif
 #endif
 
 #if HAS_TEMP_PROBE
-  probe_info_t Temperature::temp_probe; // = { 0 }
+  probe_info_t Temperature::temp_probe; //{}
 #endif
 
 #if HAS_TEMP_BOARD
@@ -531,11 +531,11 @@ volatile bool Temperature::raw_temps_ready = false;
 #endif
 
 #if MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED > 1
-  uint8_t Temperature::consecutive_low_temperature_error[HOTENDS] = { 0 };
+  uint8_t Temperature::consecutive_low_temperature_error[HOTENDS]{};
 #endif
 
 #if MILLISECONDS_PREHEAT_TIME > 0
-  millis_t Temperature::preheat_end_time[HOTENDS] = { 0 };
+  millis_t Temperature::preheat_end_time[HOTENDS]{};
 #endif
 
 #if HAS_FAN_LOGIC
@@ -1090,9 +1090,9 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
     #if ENABLED(PIDTEMP)
       #if DISABLED(PID_OPENLOOP)
         static hotend_pid_t work_pid[HOTENDS];
-        static float temp_iState[HOTENDS] = { 0 },
-                     temp_dState[HOTENDS] = { 0 };
-        static bool pid_reset[HOTENDS] = { false };
+        static float temp_iState[HOTENDS]{},
+                     temp_dState[HOTENDS]{};
+        static bool pid_reset[HOTENDS]{};
         const float pid_error = temp_hotend[ee].target - temp_hotend[ee].celsius;
 
         float pid_output;
@@ -1195,7 +1195,7 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
 
     #if DISABLED(PID_OPENLOOP)
 
-      static PID_t work_pid{0};
+      static PID_t work_pid{};
       static float temp_iState = 0, temp_dState = 0;
       static bool pid_reset = true;
       float pid_output = 0;
@@ -1258,7 +1258,7 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
 
     #if DISABLED(PID_OPENLOOP)
 
-      static PID_t work_pid{0};
+      static PID_t work_pid{};
       static float temp_iState = 0, temp_dState = 0;
       static bool pid_reset = true;
       float pid_output = 0;
@@ -2756,7 +2756,7 @@ void Temperature::disable_all_heaters() {
 
     #if HAS_MULTI_MAX_TC
       // Needed to return the correct temp when this is called between readings
-      static raw_adc_t max_tc_temp_previous[MAX_TC_COUNT] = { 0 };
+      static raw_adc_t max_tc_temp_previous[MAX_TC_COUNT] = {};
       #define THERMO_TEMP(I) max_tc_temp_previous[I]
       #define THERMO_SEL(A,B) (hindex ? (B) : (A))
       #define MAXTC_CS_WRITE(V) do{ switch (hindex) { case 1: WRITE(TEMP_1_CS_PIN, V); break; default: WRITE(TEMP_0_CS_PIN, V); } }while(0)
@@ -2779,8 +2779,8 @@ void Temperature::disable_all_heaters() {
       TEMP_SENSOR_1_MAX_TC_TMAX
     );
 
-    static uint8_t max_tc_errors[MAX_TC_COUNT] = { 0 };
-    static millis_t next_max_tc_ms[MAX_TC_COUNT] = { 0 };
+    static uint8_t max_tc_errors[MAX_TC_COUNT]{};
+    static millis_t next_max_tc_ms[MAX_TC_COUNT]{};
 
     // Return last-read value between readings
     millis_t ms = millis();
@@ -3351,7 +3351,8 @@ void Temperature::isr() {
       else {
         adc_sensor_state = StartSampling;                 // Fall-through to start sampling
         next_sensor_state = (ADCSensorState)(int(StartSampling) + 1);
-      }
+        [[fallthrough]];
+      } 
     }
 
     case StartSampling:                                   // Start of sampling loops. Do updates/checks.

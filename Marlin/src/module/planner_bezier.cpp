@@ -109,8 +109,7 @@ void cubic_b_spline(
   const xyze_pos_t &position,       // current position
   const xyze_pos_t &target,         // target position
   const xy_pos_t (&offsets)[2],     // a pair of offsets
-  const_feedRate_t scaled_fr_mm_s,  // mm/s scaled by feedrate %
-  const uint8_t extruder
+  const_feedRate_t scaled_fr_mm_s  // mm/s scaled by feedrate %
 ) {
   // Absolute first and second control points are recovered.
   const xy_pos_t first = position + offsets[0], second = target + offsets[1];

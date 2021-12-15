@@ -28,7 +28,7 @@
 #include "../../queue.h"
 #include "../../parser.h"
 
-char gcode_macros[GCODE_MACROS_SLOTS][GCODE_MACROS_SLOT_SIZE + 1] = {{ 0 }};
+char gcode_macros[GCODE_MACROS_SLOTS][GCODE_MACROS_SLOT_SIZE + 1] = {{}};
 
 /**
  * M810_819: Set/execute a G-code macro.

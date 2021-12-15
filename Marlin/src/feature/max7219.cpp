@@ -64,7 +64,7 @@
 
 Max7219 max7219;
 
-uint8_t Max7219::led_line[MAX7219_LINES]; // = { 0 };
+uint8_t Max7219::led_line[MAX7219_LINES]; //{};
 uint8_t Max7219::suspended; // = 0;
 
 #define LINE_REG(Q)     (max7219_reg_digit0 + ((Q) & 0x7))

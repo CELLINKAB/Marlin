@@ -50,7 +50,7 @@ static lv_obj_t *scr;
 static lv_obj_t *buttonValue = nullptr;
 static lv_obj_t *labelValue  = nullptr;
 
-static char key_value[11] = { 0 };
+static char key_value[11]{};
 static uint8_t cnt = 0;
 static bool point_flag = true;
 

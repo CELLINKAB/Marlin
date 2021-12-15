@@ -132,7 +132,7 @@ void lv_draw_wifi_list() {
 }
 
 void disp_wifi_list() {
-  int8_t tmpStr[WIFI_NAME_BUFFER_SIZE] = { 0 };
+  int8_t tmpStr[WIFI_NAME_BUFFER_SIZE]{};
   uint8_t i, j;
 
   sprintf((char *)tmpStr, list_menu.file_pages, wifi_list.currentWifipage, wifi_list.getPage);

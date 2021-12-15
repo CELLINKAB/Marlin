@@ -759,7 +759,7 @@ void MarlinUI::init() {
     float ManualMove::menu_scale = 1;
     #if IS_KINEMATIC
       float ManualMove::offset = 0;
-      xyze_pos_t ManualMove::all_axes_destination = { 0 };
+      xyze_pos_t ManualMove::all_axes_destination{};
       bool ManualMove::processing = false;
     #endif
     #if MULTI_E_MANUAL

@@ -24,7 +24,7 @@ void LidGripper::init_pins()
 {
     LG_HARDWARE_SERIAL.begin(115200);
 
-    TMC2208_n::GCONF_t gconf{0};
+    TMC2208_n::GCONF_t gconf{};
     gconf.pdn_disable = true;      // Use UART
     gconf.mstep_reg_select = true; // Select microsteps with UART
     gconf.i_scale_analog = false;  // will be set digitally
@@ -33,7 +33,7 @@ void LidGripper::init_pins()
     driver.GCONF(gconf.sr);
     driver.stored.stealthChop_enabled = true;
 
-    TMC2208_n::CHOPCONF_t chopconf{0};
+    TMC2208_n::CHOPCONF_t chopconf{};
     chopconf.tbl = 0b01; // blank_time = 24
     chopconf.toff = 4;
     chopconf.intpol = true;

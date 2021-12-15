@@ -544,7 +544,7 @@ void DGUSScreenHandler::HandleStepPerMMExtruderChanged(DGUS_VP_Variable &var, vo
   void DGUSScreenHandler::HandlePIDAutotune(DGUS_VP_Variable &var, void *val_ptr) {
     DEBUG_ECHOLNPGM("HandlePIDAutotune");
 
-    char buf[32] = {0};
+    char buf[32]{};
 
     switch (var.VP) {
       default: break;

@@ -432,7 +432,7 @@ void tft_style_init() {
 
 #define MAX_TITLE_LEN 28
 
-char public_buf_m[100] = {0};
+char public_buf_m[100]{};
 char public_buf_l[30];
 
 void titleText_cat(char *str, int strSize, char *addPart) {

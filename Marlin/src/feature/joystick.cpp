@@ -40,7 +40,7 @@ Joystick joystick;
 #endif
 
 #if HAS_JOY_ADC_X
-  temp_info_t Joystick::x; // = { 0 }
+  temp_info_t Joystick::x; //{}
   #if ENABLED(INVERT_JOY_X)
     #define JOY_X(N) (16383 - (N))
   #else
@@ -48,7 +48,7 @@ Joystick joystick;
   #endif
 #endif
 #if HAS_JOY_ADC_Y
-  temp_info_t Joystick::y; // = { 0 }
+  temp_info_t Joystick::y; //{}
   #if ENABLED(INVERT_JOY_Y)
     #define JOY_Y(N) (16383 - (N))
   #else
@@ -56,7 +56,7 @@ Joystick joystick;
   #endif
 #endif
 #if HAS_JOY_ADC_Z
-  temp_info_t Joystick::z; // = { 0 }
+  temp_info_t Joystick::z; //{}
   #if ENABLED(INVERT_JOY_Z)
     #define JOY_Z(N) (16383 - (N))
   #else
@@ -148,7 +148,7 @@ Joystick joystick;
     // Normalized jog values are 0 for no movement and -1 or +1 for as max feedrate (nonlinear relationship)
     // Jog are initialized to zero and handling input can update values but doesn't have to
     // You could use a two-axis joystick and a one-axis keypad and they might work together
-    xyz_float_t norm_jog{0};
+    xyz_float_t norm_jog{};
 
     // Use ADC values and defined limits. The active zone is normalized: -1..0 (dead) 0..1
     #if HAS_JOY_ADC_X || HAS_JOY_ADC_Y || HAS_JOY_ADC_Z
@@ -161,7 +161,7 @@ Joystick joystick;
     TERN_(EXTENSIBLE_UI, ExtUI::_joystick_update(norm_jog));
 
     // norm_jog values of [-1 .. 1] maps linearly to [-feedrate .. feedrate]
-    xyz_float_t move_dist{0};
+    xyz_float_t move_dist{};
     float hypot2 = 0;
     LOOP_LINEAR_AXES(i) if (norm_jog[i]) {
       move_dist[i] = seg_time * norm_jog[i] * TERN(EXTENSIBLE_UI, manual_feedrate_mm_s, planner.settings.max_feedrate_mm_s)[i];

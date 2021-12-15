@@ -51,7 +51,7 @@ private:
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
-    xyz_pos_t tool_offset{0};
+    xyz_pos_t tool_offset{};
 
     /**
      * @brief Perform a multi-step sweep of optical sensors to find precise tool offset
@@ -60,7 +60,7 @@ private:
      * @param feedrate mm/s
      * @param cycles 
      */
-    const bool full_sensor_sweep(const float feedrate)
+    bool full_sensor_sweep(const float feedrate)
     {
         const float z_offset = find_z_offset(feedrate);
         if (z_offset == Z_OFFSET_ERR)
@@ -108,7 +108,7 @@ private:
      * @param feedrate mm/s
      * @return const xy_pos_t XY coordinate of the intersection of both optical sensors
      */
-    const xy_pos_t find_xy_offset(const float feedrate) const
+    xy_pos_t find_xy_offset(const float feedrate) const
     {
         volatile float sensor_1_trigger_y_pos{0.0f};
         volatile float sensor_2_trigger_y_pos{0.0f};
@@ -179,7 +179,7 @@ private:
         detachInterrupt(SENSOR_1);
         detachInterrupt(SENSOR_2);
 
-        auto check_non_zero = [](const auto containter) -> const bool
+        auto check_non_zero = [](const auto containter) -> bool
         {
             return std::any_of(containter.cbegin(), containter.cend(), [](const float v)
                                { return v == 0.0f; });
@@ -193,7 +193,7 @@ private:
             return XY_OFFSET_ERR;
         }
 
-        auto cycles_avg = [](const auto s1, const auto s2) -> const float
+        auto cycles_avg = [](const auto s1, const auto s2) -> float
         {
             const float sum_s1 = std::accumulate(s1.cbegin(), s1.cend(), 0.0f);
             const float sum_s2 = std::accumulate(s2.cbegin(), s2.cend(), 0.0f);
@@ -235,7 +235,7 @@ private:
         return (z + inc) + inc; // report position before interrupt triggered
     }
 
-    const float find_z_offset(const float feedrate) const
+    float find_z_offset(const float feedrate) const
     {
         float z = START_POSITION.z;
         bool triggered = false;

@@ -128,7 +128,7 @@ static const FLASH_SECTOR_T* getFlashStorage(int page) {
   return (const FLASH_SECTOR_T*)&flashStorage[page*PageSize];
 }
 
-static uint8_t buffer[256] = {0},   // The RAM buffer to accumulate writes
+static uint8_t buffer[256] = {},   // The RAM buffer to accumulate writes
                curPage = 0,         // Current FLASH page inside the group
                curGroup = 0xFF;     // Current FLASH group
 

@@ -467,12 +467,12 @@ void cutFileName(char *path, int len, int bytePerLine, char *outStr) {
   #if _LFN_UNICODE
     TCHAR *tmpFile;
     TCHAR *strIndex1 = 0, *strIndex2 = 0, *beginIndex;
-    TCHAR secSeg[10]   = {0};
+    TCHAR secSeg[10]  {};
     TCHAR gFileTail[4] = {'~', '.', 'g', '\0'};
   #else
     char *tmpFile;
     char *strIndex1 = 0, *strIndex2 = 0, *beginIndex;
-    char secSeg[10] = {0};
+    char secSeg[10]{};
   #endif
 
   if (path == 0 || len <= 3 || outStr == 0) return;

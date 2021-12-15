@@ -469,7 +469,7 @@ void lv_draw_dialog(uint8_t type) {
 }
 
 void filament_sprayer_temp() {
-  char buf[20] = {0};
+  char buf[20]{};
   sprintf(buf, preheat_menu.value_state, thermalManager.wholeDegHotend(uiCfg.extruderIndex), thermalManager.degTargetHotend(uiCfg.extruderIndex));
 
   strcpy(public_buf_l, uiCfg.extruderIndex < 1 ? extrude_menu.ext1 : extrude_menu.ext2);

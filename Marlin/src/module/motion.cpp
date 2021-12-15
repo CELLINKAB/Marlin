@@ -92,7 +92,7 @@ xyze_pos_t current_position = LOGICAL_AXIS_ARRAY(0, X_HOME_POS, Y_HOME_POS, Z_IN
  *   and expected by functions like 'prepare_line_to_destination'.
  *   G-codes can set destination using 'get_destination_from_command'
  */
-xyze_pos_t destination; // {0}
+xyze_pos_t destination; // {}
 
 // G60/G61 Position Save and Return
 #if SAVED_POSITIONS
@@ -160,16 +160,16 @@ xyz_pos_t cartes;
  */
 #if HAS_POSITION_SHIFT
   // The distance that XYZ has been offset by G92. Reset by G28.
-  xyz_pos_t position_shift{0};
+  xyz_pos_t position_shift{};
 #endif
 #if HAS_HOME_OFFSET
   // This offset is added to the configured home position.
   // Set by M206, M428, or menu item. Saved to EEPROM.
-  xyz_pos_t home_offset{0};
+  xyz_pos_t home_offset{};
 #endif
 #if HAS_HOME_OFFSET && HAS_POSITION_SHIFT
   // The above two are combined to save on computes
-  xyz_pos_t workspace_offset{0};
+  xyz_pos_t workspace_offset{};
 #endif
 
 #if HAS_ABL_NOT_UBL
@@ -786,7 +786,7 @@ void restore_feedrate_and_scaling() {
         const xy_pos_t offs = hotend_offset[active_extruder];
       #else
         // SCARA needs to consider the angle of the arm through the entire move, so for now use no tool offset.
-        constexpr xy_pos_t offs{0};
+        constexpr xy_pos_t offs{};
       #endif
 
       if (TERN1(IS_SCARA, axis_was_homed(X_AXIS) && axis_was_homed(Y_AXIS))) {
@@ -1346,7 +1346,7 @@ void prepare_line_to_destination() {
      * Set sensorless homing if the axis has it, accounting for Core Kinematics.
      */
     sensorless_t start_sensorless_homing_per_axis(const AxisEnum axis) {
-      sensorless_t stealth_states { false };
+      sensorless_t stealth_states{};
 
       switch (axis) {
         default: break;
@@ -1500,7 +1500,7 @@ void prepare_line_to_destination() {
   /**
    * Home an individual linear axis
    */
-  void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0, const bool final_approach=true) {
+  void do_homing_move(const AxisEnum axis, const float distance, const feedRate_t fr_mm_s=0.0, [[maybe_unused]] const bool final_approach=true) {
     DEBUG_SECTION(log_move, "do_homing_move", DEBUGGING(LEVELING));
 
     const feedRate_t home_fr_mm_s = fr_mm_s ?: homing_feedrate(axis);
@@ -1578,7 +1578,7 @@ void prepare_line_to_destination() {
       planner.set_machine_position_mm(target);  // Update the machine position
 
       #if HAS_DIST_MM_ARG
-        const xyze_float_t cart_dist_mm{0};
+        const xyze_float_t cart_dist_mm{};
       #endif
 
       // Set delta/cartesian axes directly

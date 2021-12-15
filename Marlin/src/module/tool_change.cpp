@@ -1130,7 +1130,7 @@ void tool_change(const uint8_t new_tool, bool no_move/*=false*/) {
         xyz_pos_t diff = hotend_offset[new_tool] - hotend_offset[old_tool];
         TERN_(DUAL_X_CARRIAGE, diff.x = 0);
       #else
-        constexpr xyz_pos_t diff{0};
+        constexpr xyz_pos_t diff{};
       #endif
 
       #if ENABLED(DUAL_X_CARRIAGE)

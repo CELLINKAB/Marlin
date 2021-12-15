@@ -69,7 +69,7 @@ int cfg_cloud_flag = 0;
 
 extern PRINT_TIME print_time;
 
-char wifi_firm_ver[20] = { 0 };
+char wifi_firm_ver[20]{};
 WIFI_GCODE_BUFFER espGcodeFifo;
 extern uint8_t pause_resum;
 
@@ -98,7 +98,7 @@ extern uint32_t wifi_loop_cycle;
 volatile TRANSFER_STATE esp_state;
 
 uint8_t left_to_send = 0;
-uint8_t left_to_save[96] = { 0 };
+uint8_t left_to_save[96]{};
 
 volatile WIFI_DMA_RCV_FIFO wifiDmaRcvFifo;
 
@@ -784,7 +784,7 @@ int write_to_file(char *buf, int len) {
 
 #define ESP_TYPE_WIFI_LIST      (uint8_t)0x4
 
-uint8_t esp_msg_buf[UART_RX_BUFFER_SIZE] = { 0 };
+uint8_t esp_msg_buf[UART_RX_BUFFER_SIZE]{};
 uint16_t esp_msg_index = 0;
 
 typedef struct {
@@ -838,7 +838,7 @@ uint8_t Explore_Disk(char *path , uint8_t recu_level) {
 }
 
 static void wifi_gcode_exec(uint8_t *cmd_line) {
-  int8_t tempBuf[100] = { 0 };
+  int8_t tempBuf[100]{};
   uint8_t *tmpStr = 0;
   int cmd_value;
   volatile int print_rate;
@@ -1416,7 +1416,7 @@ static void wifi_list_msg_handle(uint8_t * msg, uint16_t msgLen) {
 }
 
 static void gcode_msg_handle(uint8_t * msg, uint16_t msgLen) {
-  uint8_t gcodeBuf[100] = { 0 };
+  uint8_t gcodeBuf[100]{};
   char *index_s, *index_e;
 
   if (msgLen <= 0) return;
@@ -1786,7 +1786,7 @@ void stopEspTransfer() {
 
 void wifi_rcv_handle() {
   int32_t len = 0;
-  uint8_t ucStr[(UART_RX_BUFFER_SIZE) + 1] = {0};
+  uint8_t ucStr[(UART_RX_BUFFER_SIZE) + 1]{};
   int8_t getDataF = 0;
   if (wifi_link_state == WIFI_TRANS_FILE) {
     #if 0

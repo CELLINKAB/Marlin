@@ -44,7 +44,7 @@
 #endif
 size_t PersistentStore::capacity() { return MARLIN_EEPROM_SIZE; }
 
-static uint8_t ram_eeprom[MARLIN_EEPROM_SIZE] __attribute__((aligned(4))) = {0};
+static uint8_t ram_eeprom[MARLIN_EEPROM_SIZE] __attribute__((aligned(4))){};
 static bool eeprom_dirty = false;
 
 bool PersistentStore::access_start() {

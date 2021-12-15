@@ -987,7 +987,7 @@ void set_message_with_feedback(FSTR_P const fstr) {
 
     do_blocking_move_to_xy_z(pos, Z_CLEARANCE_BETWEEN_PROBES);  // Move to the given XY with probe clearance
 
-    MeshFlags done_flags{0};
+    MeshFlags done_flags{};
     const xy_int8_t &lpos = location.pos;
 
     #if IS_TFTGLCD_PANEL
@@ -1675,7 +1675,7 @@ void unified_bed_leveling::smart_fill_mesh() {
     // the point being extrapolated.  Then extrapolate the mesh point from WLSF.
 
     static_assert((GRID_MAX_POINTS_Y) <= 16, "GRID_MAX_POINTS_Y too big");
-    uint16_t bitmap[GRID_MAX_POINTS_X] = { 0 };
+    uint16_t bitmap[GRID_MAX_POINTS_X]{};
     struct linear_fit_data lsf_results;
 
     SERIAL_ECHOPGM("Extrapolating mesh...");

@@ -42,7 +42,7 @@ mixer_comp_t  Mixer::color[NR_MIXING_VIRTUAL_TOOLS][MIXING_STEPPERS];
 // Used in Stepper
 int_fast8_t   Mixer::runner = 0;
 mixer_comp_t  Mixer::s_color[MIXING_STEPPERS];
-mixer_accu_t  Mixer::accu[MIXING_STEPPERS] = { 0 };
+mixer_accu_t  Mixer::accu[MIXING_STEPPERS]{};
 
 #if EITHER(HAS_DUAL_MIXING, GRADIENT_MIX)
   mixer_perc_t Mixer::mix[MIXING_STEPPERS];
@@ -170,10 +170,10 @@ void Mixer::refresh_collector(const float proportion/*=1.0*/, const uint8_t t/*=
 
   gradient_t Mixer::gradient = {
     false,                      // enabled
-    {0},                        // color (array)
+    {},                        // color (array)
     0, 0,                       // start_z, end_z
     0, 1,                       // start_vtool, end_vtool
-    {0}, {0}                    // start_mix[], end_mix[]
+    {}, {}                    // start_mix[], end_mix[]
     OPTARG(GRADIENT_VTOOL, -1)  // vtool_index
   };
 

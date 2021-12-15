@@ -23,7 +23,7 @@ struct OpticalSurfaceProbe
 
     void init();
 
-    const uint32_t get_distance() const
+    uint32_t get_distance() const
     {
         return analogRead(OPT_SURF_IN_PIN);
     }
@@ -86,7 +86,7 @@ private:
         };
         void login(const User, const str);
         void set_password(const str);
-        const User get_user() const;
+        User get_user() const;
         void set_default_user(const User);
 
         enum class Trigger
@@ -125,7 +125,7 @@ private:
 
         void read_response()
         {
-            char read_buf[READ_BUFFER_SIZE] = {0}; // zero initialized buffer
+            char read_buf[READ_BUFFER_SIZE] = {}; // zero initialized buffer
             serial.readBytesUntil('>', read_buf, READ_BUFFER_SIZE);
             str parse_string{read_buf, READ_BUFFER_SIZE};
         }

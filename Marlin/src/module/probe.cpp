@@ -518,7 +518,7 @@ bool Probe::probe_down_to_z(const_float_t z, const_feedRate_t fr_mm_s) {
 
   // Disable stealthChop if used. Enable diag1 pin on driver.
   #if ENABLED(SENSORLESS_PROBING)
-    sensorless_t stealth_states { false };
+    sensorless_t stealth_states {};
     #if HAS_DELTA_SENSORLESS_PROBING
       if (test_sensitivity.x) stealth_states.x = tmc_enable_stallguard(stepperX);  // Delta watches all DIAG pins for a stall
       if (test_sensitivity.y) stealth_states.y = tmc_enable_stallguard(stepperY);
@@ -853,7 +853,7 @@ float Probe::probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRai
 
 #if USE_SENSORLESS
 
-  sensorless_t stealth_states { false };
+  sensorless_t stealth_states{};
 
   /**
    * Disable stealthChop if used. Enable diag1 pin on driver.

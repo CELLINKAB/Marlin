@@ -207,7 +207,7 @@ static bool probe_calibration_points(float z_pt[NPP + 1], const int8_t probe_poi
   if (!_0p_calibration) {
 
     if (!_7p_no_intermediates && !_7p_4_intermediates && !_7p_11_intermediates) { // probe the center
-      const xy_pos_t center{0};
+      const xy_pos_t center{};
       z_pt[CEN] += calibration_probe(center, stow_after_each, probe_at_offset);
       if (isnan(z_pt[CEN])) return false;
     }
@@ -269,7 +269,7 @@ static bool probe_calibration_points(float z_pt[NPP + 1], const int8_t probe_poi
  *  - definition of the matrix scaling parameters
  */
 static void reverse_kinematics_probe_points(float z_pt[NPP + 1], abc_float_t mm_at_pt_axis[NPP + 1], const float dcr) {
-  xyz_pos_t pos{0};
+  xyz_pos_t pos{};
 
   LOOP_CAL_ALL(rad) {
     const float a = RADIANS(210 + (360 / NPP) *  (rad - 1)),

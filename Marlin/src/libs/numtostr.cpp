@@ -25,7 +25,7 @@
 #include "../inc/MarlinConfigPre.h"
 #include "../core/utility.h"
 
-char conv[8] = { 0 };
+char conv[8]{};
 
 #define DIGIT(n) ('0' + (n))
 #define DIGIMOD(n, f) DIGIT((n)/(f) % 10)

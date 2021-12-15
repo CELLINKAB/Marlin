@@ -60,8 +60,8 @@ GCodeQueue queue;
 // Frequently used G-code strings
 PGMSTR(G28_STR, "G28");
 
-GCodeQueue::SerialState GCodeQueue::serial_state[NUM_SERIAL] = { 0 };
-GCodeQueue::RingBuffer GCodeQueue::ring_buffer = { 0 };
+GCodeQueue::SerialState GCodeQueue::serial_state[NUM_SERIAL]{};
+GCodeQueue::RingBuffer GCodeQueue::ring_buffer{};
 
 #if NO_TIMEOUTS > 0
   static millis_t last_command_time = 0;
@@ -97,7 +97,7 @@ PGM_P GCodeQueue::injected_commands_P; // = nullptr
 /**
  * Injected SRAM Commands
  */
-char GCodeQueue::injected_commands[64]; // = { 0 }
+char GCodeQueue::injected_commands[64]; //{}
 
 void GCodeQueue::RingBuffer::commit_command(bool skip_ok
   OPTARG(HAS_MULTI_SERIAL, serial_index_t serial_ind/*=-1*/)

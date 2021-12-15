@@ -131,8 +131,8 @@ class I2CPositionEncoder {
 
     #if ENABLED(I2CPE_ERR_ROLLING_AVERAGE)
       uint8_t errIdx = 0, errPrstIdx = 0;
-      int err[I2CPE_ERR_ARRAY_SIZE] = { 0 },
-          errPrst[I2CPE_ERR_PRST_ARRAY_SIZE] = { 0 };
+      int err[I2CPE_ERR_ARRAY_SIZE]{},
+          errPrst[I2CPE_ERR_PRST_ARRAY_SIZE]{};
     #endif
 
   public:

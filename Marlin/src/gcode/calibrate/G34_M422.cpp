@@ -184,7 +184,7 @@ void GcodeSuite::G34() {
       #else
         float last_z_align_level_indicator = 10000.0f;
       #endif
-      float z_measured[NUM_Z_STEPPER_DRIVERS] = { 0 },
+      float z_measured[NUM_Z_STEPPER_DRIVERS]{},
             z_maxdiff = 0.0f,
             amplification = z_auto_align_amplification;
 

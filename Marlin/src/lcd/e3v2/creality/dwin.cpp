@@ -135,7 +135,7 @@ constexpr uint16_t MROWS = TROWS - 1,   // Last Row Index
 
 // Value Init
 HMI_value_t HMI_ValueStruct;
-HMI_flag_t HMI_flag{0};
+HMI_flag_t HMI_flag{};
 
 millis_t dwin_heat_time = 0;
 
@@ -161,14 +161,14 @@ typedef struct {
   bool inc(uint8_t v) { if (now < (v - 1)) now++; else now = (v - 1); return changed(); }
 } select_t;
 
-select_t select_page{0}, select_file{0}, select_print{0}, select_prepare{0}
-       , select_control{0}, select_axis{0}, select_temp{0}, select_motion{0}, select_tune{0}
-       , select_advset{0}, select_speed{0}, select_acc{0}, select_jerk{0}, select_step{0}, select_item{0};
+select_t select_page{}, select_file{}, select_print{}, select_prepare{}
+       , select_control{}, select_axis{}, select_temp{}, select_motion{}, select_tune{}
+       , select_advset{}, select_speed{}, select_acc{}, select_jerk{}, select_step{}, select_item{};
 
 #if HAS_PREHEAT
-  select_t select_PLA{0};
+  select_t select_PLA{};
   #if PREHEAT_COUNT > 1
-    select_t select_ABS{0};
+    select_t select_ABS{};
   #endif
 #endif
 

@@ -173,7 +173,7 @@ static inline void waitSpiTxEnd(LPC_SSP_TypeDef *spi_d) {
 
 // Retain the pin init state of the SPI, to avoid init more than once,
 // even if more instances of SPIClass exist
-static bool spiInitialised[BOARD_NR_SPI] = { false };
+static bool spiInitialised[BOARD_NR_SPI]{};
 
 SPIClass::SPIClass(uint8_t device) {
   // Init things specific to each SPI device

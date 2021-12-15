@@ -226,7 +226,7 @@ UnwResult UnwStartArm(UnwState * const state) {
         else {
           shiftDist = (operand2 & 0x0F80) >> 7;
           op2origin = REG_VAL_FROM_CONST;
-          if (shiftDist) UnwPrintd3("%s #%d", shiftMnu[shiftType], shiftDist);
+          if (shiftDist) {UnwPrintd3("%s #%d", shiftMnu[shiftType], shiftDist);}
           UnwPrintd3("\t; r%d %s", rm, M_Origin2Str(state->regData[rm].o));
         }
 

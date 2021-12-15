@@ -157,7 +157,7 @@ float Planner::mm_per_step[DISTINCT_AXES];      // (mm) Millimeters per step
 
 #if ENABLED(DIRECT_STEPPING)
   uint32_t Planner::last_page_step_rate = 0;
-  xyze_bool_t Planner::last_page_dir{0};
+  xyze_bool_t Planner::last_page_dir{};
 #endif
 
 #if HAS_EXTRUDERS
@@ -201,7 +201,7 @@ skew_factor_t Planner::skew_factor; // Initialized by settings.load()
 
 // private:
 
-xyze_long_t Planner::position{0};
+xyze_long_t Planner::position{};
 
 uint32_t Planner::acceleration_long_cutoff;
 
@@ -209,7 +209,7 @@ xyze_float_t Planner::previous_speed;
 float Planner::previous_nominal_speed_sqr;
 
 #if ENABLED(DISABLE_INACTIVE_EXTRUDER)
-  last_move_t Planner::g_uc_extruder_last_move[E_STEPPERS] = { 0 };
+  last_move_t Planner::g_uc_extruder_last_move[E_STEPPERS]{};
 #endif
 
 #ifdef XY_FREQUENCY_LIMIT
@@ -1278,7 +1278,7 @@ void Planner::recalculate() {
   #if FAN_KICKSTART_TIME
 
     void Planner::kickstart_fan(uint8_t (&fan_speed)[FAN_COUNT], const millis_t &ms, const uint8_t f) {
-      static millis_t fan_kick_end[FAN_COUNT] = { 0 };
+      static millis_t fan_kick_end[FAN_COUNT]{};
       if (fan_speed[f]) {
         if (fan_kick_end[f] == 0) {
           fan_kick_end[f] = ms + FAN_KICKSTART_TIME;
@@ -1301,7 +1301,7 @@ void Planner::recalculate() {
 void Planner::check_axes_activity() {
 
   #if ANY(DISABLE_X, DISABLE_Y, DISABLE_Z, DISABLE_I, DISABLE_J, DISABLE_K, DISABLE_E)
-    xyze_bool_t axis_active = { false };
+    xyze_bool_t axis_active = {};
   #endif
 
   #if HAS_FAN && DISABLED(LASER_SYNCHRONOUS_M106_M107)
@@ -1689,7 +1689,7 @@ void Planner::quick_stop() {
     // Don't empty buffers or queues
     const bool did_suspend = stepper.suspend();
     if (did_suspend)
-      TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(M_HOLD));
+      {TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(M_HOLD));}
   }
 
   // Resume if suspended
@@ -3188,7 +3188,7 @@ void Planner::refresh_positioning() {
 }
 
 // Apply limits to a variable and give a warning if the value was out of range
-inline void limit_and_warn(float &val, const uint8_t axis, PGM_P const setting_name, const xyze_float_t &max_limit) {
+inline void limit_and_warn(float &val, const AxisEnum axis, PGM_P const setting_name, const xyze_float_t &max_limit) {
   const uint8_t lim_axis = TERN_(HAS_EXTRUDERS, axis > E_AXIS ? E_AXIS :) axis;
   const float before = val;
   LIMIT(val, 0.1, max_limit[lim_axis]);
@@ -3207,7 +3207,7 @@ inline void limit_and_warn(float &val, const uint8_t axis, PGM_P const setting_n
  *
  * This hard limit is applied as a block is being added to the planner queue.
  */
-void Planner::set_max_acceleration(const uint8_t axis, float inMaxAccelMMS2) {
+void Planner::set_max_acceleration(const AxisEnum axis, float inMaxAccelMMS2) {
   #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
     #ifdef MAX_ACCEL_EDIT_VALUES
       constexpr xyze_float_t max_accel_edit = MAX_ACCEL_EDIT_VALUES;
@@ -3230,7 +3230,7 @@ void Planner::set_max_acceleration(const uint8_t axis, float inMaxAccelMMS2) {
  *
  * This hard limit is applied as a block is being added to the planner queue.
  */
-void Planner::set_max_feedrate(const uint8_t axis, float inMaxFeedrateMMS) {
+void Planner::set_max_feedrate(const AxisEnum axis, float inMaxFeedrateMMS) {
   #if ENABLED(LIMITED_MAX_FR_EDITING)
     #ifdef MAX_FEEDRATE_EDIT_VALUES
       constexpr xyze_float_t max_fr_edit = MAX_FEEDRATE_EDIT_VALUES;

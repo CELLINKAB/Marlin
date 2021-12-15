@@ -347,7 +347,7 @@ EspUploadResult readPacket(uint8_t op, uint32_t *valp, size_t *bodyLen, uint32_t
 
 // Send a block of data performing SLIP encoding of the content.
 void _writePacket(const uint8_t *data, size_t len) {
-  unsigned char outBuf[2048] = {0};
+  unsigned char outBuf[2048]{};
   unsigned int outIndex = 0;
   while (len != 0) {
     if (*data == 0xC0) {

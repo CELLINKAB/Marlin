@@ -181,7 +181,7 @@ void disp_ext_speed() {
 }
 
 void disp_hotend_temp() {
-  char buf[20] = {0};
+  char buf[20]{};
   sprintf(buf, extrude_menu.temp_value, thermalManager.wholeDegHotend(uiCfg.extruderIndex), thermalManager.degTargetHotend(uiCfg.extruderIndex));
   strcpy(public_buf_l, extrude_menu.temper_text);
   strcat(public_buf_l, buf);
@@ -190,7 +190,7 @@ void disp_hotend_temp() {
 }
 
 void disp_extru_amount() {
-  char buf1[10] = {0};
+  char buf1[10]{};
 
   public_buf_l[0] = '\0';
 

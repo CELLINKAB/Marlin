@@ -51,7 +51,7 @@
 
 // Initialized by settings.load()
 float delta_height;
-abc_float_t delta_endstop_adj{0};
+abc_float_t delta_endstop_adj{};
 float delta_radius,
       delta_diagonal_rod,
       segments_per_second;
@@ -129,7 +129,7 @@ void inverse_kinematics(const xyz_pos_t &raw) {
  * effector has the full range of XY motion.
  */
 float delta_safe_distance_from_top() {
-  xyz_pos_t cartesian{0};
+  xyz_pos_t cartesian{};
   inverse_kinematics(cartesian);
   const float centered_extent = delta.a;
   cartesian.y = DELTA_PRINTABLE_RADIUS;

@@ -773,7 +773,7 @@ void MarlinSettings::postprocess() {
         EEPROM_WRITE(scara_home_offset);
       #else
         #if !HAS_HOME_OFFSET
-          const xyz_pos_t home_offset{0};
+          const xyz_pos_t home_offset{};
         #endif
         EEPROM_WRITE(home_offset);
       #endif
@@ -853,7 +853,7 @@ void MarlinSettings::postprocess() {
       #if HAS_BED_PROBE
         const xyz_pos_t &zpo = probe.offset;
       #else
-        constexpr xyz_pos_t zpo{0};
+        constexpr xyz_pos_t zpo{};
       #endif
       EEPROM_WRITE(zpo);
     }
@@ -1213,7 +1213,7 @@ void MarlinSettings::postprocess() {
     {
       _FIELD_TEST(tmc_stepper_current);
 
-      tmc_stepper_current_t tmc_stepper_current{0};
+      tmc_stepper_current_t tmc_stepper_current{};
 
       #if HAS_TRINAMIC_CONFIG
         #if AXIS_IS_TMC(X)
@@ -1284,7 +1284,7 @@ void MarlinSettings::postprocess() {
       _FIELD_TEST(tmc_hybrid_threshold);
 
       #if ENABLED(HYBRID_THRESHOLD)
-        tmc_hybrid_threshold_t tmc_hybrid_threshold{0};
+        tmc_hybrid_threshold_t tmc_hybrid_threshold{};
         TERN_(X_HAS_STEALTHCHOP,  tmc_hybrid_threshold.X =  stepperX.get_pwm_thrs());
         TERN_(Y_HAS_STEALTHCHOP,  tmc_hybrid_threshold.Y =  stepperY.get_pwm_thrs());
         TERN_(Z_HAS_STEALTHCHOP,  tmc_hybrid_threshold.Z =  stepperZ.get_pwm_thrs());
@@ -1320,7 +1320,7 @@ void MarlinSettings::postprocess() {
     // TMC StallGuard threshold
     //
     {
-      tmc_sgt_t tmc_sgt{0};
+      tmc_sgt_t tmc_sgt{};
       #if USE_SENSORLESS
         LINEAR_AXIS_CODE(
           TERN_(X_SENSORLESS, tmc_sgt.X = stepperX.homing_threshold()),
@@ -1345,7 +1345,7 @@ void MarlinSettings::postprocess() {
     {
       _FIELD_TEST(tmc_stealth_enabled);
 
-      tmc_stealth_enabled_t tmc_stealth_enabled = { false };
+      tmc_stealth_enabled_t tmc_stealth_enabled{};
       TERN_(X_HAS_STEALTHCHOP,  tmc_stealth_enabled.X  = stepperX.get_stored_stealthChop());
       TERN_(Y_HAS_STEALTHCHOP,  tmc_stealth_enabled.Y  = stepperY.get_stored_stealthChop());
       TERN_(Z_HAS_STEALTHCHOP,  tmc_stealth_enabled.Z  = stepperZ.get_stored_stealthChop());
@@ -1391,7 +1391,7 @@ void MarlinSettings::postprocess() {
       #if HAS_MOTOR_CURRENT_SPI || HAS_MOTOR_CURRENT_PWM
         EEPROM_WRITE(stepper.motor_current_setting);
       #else
-        const uint32_t no_current[MOTOR_CURRENT_COUNT] = { 0 };
+        const uint32_t no_current[MOTOR_CURRENT_COUNT]{};
         EEPROM_WRITE(no_current);
       #endif
     }
@@ -1403,7 +1403,7 @@ void MarlinSettings::postprocess() {
     _FIELD_TEST(coordinate_system);
 
     #if DISABLED(CNC_COORDINATE_SYSTEMS)
-      const xyz_pos_t coordinate_system[MAX_COORDINATE_SYSTEMS] = { { 0 } };
+      const xyz_pos_t coordinate_system[MAX_COORDINATE_SYSTEMS] = {{} };
     #endif
     EEPROM_WRITE(TERN(CNC_COORDINATE_SYSTEMS, gcode.coordinate_system, coordinate_system));
 
@@ -1444,7 +1444,7 @@ void MarlinSettings::postprocess() {
         LOOP_LINEAR_AXES(axis) backlash_distance_mm[axis] = backlash.get_distance_mm((AxisEnum)axis);
         const uint8_t backlash_correction = backlash.get_correction_uint8();
       #else
-        const xyz_float_t backlash_distance_mm{0};
+        const xyz_float_t backlash_distance_mm{};
         const uint8_t backlash_correction = 0;
       #endif
       #if ENABLED(BACKLASH_GCODE) && defined(BACKLASH_SMOOTHING_MM)
@@ -1463,7 +1463,7 @@ void MarlinSettings::postprocess() {
     //
     #if ENABLED(EXTENSIBLE_UI)
     {
-      char extui_data[ExtUI::eeprom_data_size] = { 0 };
+      char extui_data[ExtUI::eeprom_data_size]{};
       ExtUI::onStoreSettings(extui_data);
       _FIELD_TEST(extui_data);
       EEPROM_WRITE(extui_data);
@@ -2410,7 +2410,7 @@ void MarlinSettings::postprocess() {
       //
       #if ENABLED(EXTENSIBLE_UI)
       { // This is a significant hardware change; don't reserve EEPROM space when not present
-        const char extui_data[ExtUI::eeprom_data_size] = { 0 };
+        const char extui_data[ExtUI::eeprom_data_size]{};
         _FIELD_TEST(extui_data);
         EEPROM_READ(extui_data);
         if (!validating) ExtUI::onLoadSettings(extui_data);

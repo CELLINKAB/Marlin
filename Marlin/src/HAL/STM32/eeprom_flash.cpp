@@ -86,7 +86,7 @@
   #define EMPTY_UINT32            ((uint32_t)-1)
   #define EMPTY_UINT8             ((uint8_t)-1)
 
-  static uint8_t ram_eeprom[MARLIN_EEPROM_SIZE] __attribute__((aligned(4))) = {0};
+  static uint8_t ram_eeprom[MARLIN_EEPROM_SIZE] __attribute__((aligned(4))){};
   static int current_slot = -1;
 
   static_assert(0 == MARLIN_EEPROM_SIZE % 4, "MARLIN_EEPROM_SIZE must be a multiple of 4"); // Ensure copying as uint32_t is safe

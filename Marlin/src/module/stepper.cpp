@@ -195,9 +195,9 @@ uint8_t Stepper::steps_per_isr;
 
 IF_DISABLED(ADAPTIVE_STEP_SMOOTHING, constexpr) uint8_t Stepper::oversampling_factor;
 
-xyze_long_t Stepper::delta_error{0};
+xyze_long_t Stepper::delta_error{};
 
-xyze_ulong_t Stepper::advance_dividend{0};
+xyze_ulong_t Stepper::advance_dividend{};
 uint32_t Stepper::advance_divisor = 0,
          Stepper::step_events_completed = 0, // The number of step events executed in the current block
          Stepper::accelerate_until,          // The count at which to stop accelerating
@@ -250,8 +250,8 @@ int32_t Stepper::ticks_nominal = -1;
 #endif
 
 xyz_long_t Stepper::endstops_trigsteps;
-xyze_long_t Stepper::count_position{0};
-xyze_int8_t Stepper::count_direction{0};
+xyze_long_t Stepper::count_position{};
+xyze_int8_t Stepper::count_direction{};
 
 #if ENABLED(LASER_POWER_INLINE_TRAPEZOID)
   Stepper::stepper_laser_t Stepper::laser_trap = {
@@ -1657,7 +1657,7 @@ void Stepper::pulse_phase_isr() {
     bool firstStep = true;
     USING_TIMED_PULSE();
   #endif
-  xyze_bool_t step_needed{0};
+  xyze_bool_t step_needed{};
 
   do {
     #define _APPLY_STEP(AXIS, INV, ALWAYS) AXIS ##_APPLY_STEP(INV, ALWAYS)

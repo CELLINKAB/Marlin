@@ -48,8 +48,8 @@ xyz_long_t Backlash::residual_error{0};
 #endif
 
 #if ENABLED(MEASURE_BACKLASH_WHEN_PROBING)
-  xyz_float_t Backlash::measured_mm{0};
-  xyz_uint8_t Backlash::measured_count{0};
+  xyz_float_t Backlash::measured_mm{};
+  xyz_uint8_t Backlash::measured_count{};
 #endif
 
 Backlash backlash;
@@ -93,6 +93,7 @@ void Backlash::add_correction_steps(const int32_t &da, const int32_t &db, const 
     // smoothing distance. Since the computation of this proportion involves a floating point
     // division, defer computation until needed.
     float segment_proportion = 0;
+
   #endif
 
   const float f_corr = float(correction) / all_on;

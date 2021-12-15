@@ -95,7 +95,7 @@ void _man_probe_pt(const xy_pos_t &xy) {
   void _goto_tower_x() { _goto_tower_a(210); }
   void _goto_tower_y() { _goto_tower_a(330); }
   void _goto_tower_z() { _goto_tower_a( 90); }
-  void _goto_center()  { xy_pos_t ctr{0}; _man_probe_pt(ctr); }
+  void _goto_center()  { xy_pos_t ctr{}; _man_probe_pt(ctr); }
 
 #endif
 

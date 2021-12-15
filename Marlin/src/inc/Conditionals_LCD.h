@@ -759,13 +759,13 @@
  */
 #if HAS_HOTEND_OFFSET
   #ifndef HOTEND_OFFSET_X
-    #define HOTEND_OFFSET_X { 0 } // X offsets for each extruder
+    #define HOTEND_OFFSET_X{} // X offsets for each extruder
   #endif
   #ifndef HOTEND_OFFSET_Y
-    #define HOTEND_OFFSET_Y { 0 } // Y offsets for each extruder
+    #define HOTEND_OFFSET_Y{} // Y offsets for each extruder
   #endif
   #ifndef HOTEND_OFFSET_Z
-    #define HOTEND_OFFSET_Z { 0 } // Z offsets for each extruder
+    #define HOTEND_OFFSET_Z{} // Z offsets for each extruder
   #endif
 #endif
 

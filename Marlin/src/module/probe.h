@@ -233,7 +233,7 @@ public:
         #if HAS_BED_PROBE
           NOZZLE_TO_PROBE_OFFSET
         #else
-          { 0 }
+        {}
         #endif
       );
       static constexpr xy_pos_t default_probe_xy_offset = xy_pos_t({ default_probe_xyz_offset.x,  default_probe_xyz_offset.y });

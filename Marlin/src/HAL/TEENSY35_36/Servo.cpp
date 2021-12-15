@@ -32,7 +32,7 @@
 
 #include "Servo.h"
 
-uint8_t servoPin[MAX_SERVOS] = { 0 };
+uint8_t servoPin[MAX_SERVOS]{};
 
 int8_t libServo::attach(const int inPin) {
   if (servoIndex >= MAX_SERVOS) return -1;
