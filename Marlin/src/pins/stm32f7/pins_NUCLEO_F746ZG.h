@@ -87,14 +87,14 @@
  *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
- *   (E_STEP) PA7 | · · | PE4 (E_EN)                    PD13 | · · | PE7   PROBE_RX
- *    (E_DIR) PF2 | · · | PE5 (E_STOP)                  PD12 | · · | GND
+ *            PA7 | · · | PE4 (E_EN)                    PD13 | · · | PE7   PROBE_RX
+ *    (E_DIR) PF2 | · · | PE5 (E_STEP)                  PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
- *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
+ *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
  * (optical1) PD0 | · · | PF7                            PA0 | · · | PE15
- * (optical2) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
- *  (Y2_STOP) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
+ * (optical2) PD1 | · · | PF9                            PB0 | · · | PB10 (FAN)
+ *  (Y2_STOP) PG0 | · · | PG1                            PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
@@ -106,10 +106,10 @@
     #define Z_MIN_PIN PG1
     #define Z_MAX_PIN PG0
 #else
-    #define X_STOP_PIN PB12
-    #define Y_STOP_PIN PF9
+    #define X_STOP_PIN PF7
+    #define Y_STOP_PIN PE3
     #define Y2_STOP_PIN PG0
-    #define Z_STOP_PIN PG1
+    #define Z_STOP_PIN PE12
 #endif
 
 //
@@ -137,17 +137,17 @@
 
 #if HAS_TMC_UART
 
-    #define X_HARDWARE_SERIAL  MSerial6
-    #define Y_HARDWARE_SERIAL  MSerial6
-    #define Y2_HARDWARE_SERIAL MSerial6
-    #define Z_HARDWARE_SERIAL  MSerial6
+    #define X_HARDWARE_SERIAL  MSerial2
+    #define Y_HARDWARE_SERIAL  MSerial2
+    #define Y2_HARDWARE_SERIAL MSerial2
+    #define Z_HARDWARE_SERIAL  MSerial2
 
     #define X_SLAVE_ADDRESS  0
     #define Y_SLAVE_ADDRESS  2
     #define Y2_SLAVE_ADDRESS 1
     #define Z_SLAVE_ADDRESS  3
 
-    #define E0_HARDWARE_SERIAL MSerial2
+    #define E0_HARDWARE_SERIAL MSerial6
     #define E0_SLAVE_ADDRESS 0
 
 #else // HAS_TMC_UART
