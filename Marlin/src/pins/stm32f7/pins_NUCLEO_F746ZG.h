@@ -65,10 +65,10 @@
  * Assignments may not be ideal, and not every assignment has been tested.
  * Proceed at your own risk.
  *                                                            _CN7_
- *                                              (X_STEP) PC6 | · · | PB8 (X_EN)
- *                                              (X_DIR) PB15 | · · | PB9 (X_CS/UART)
- *                                                      PB13 | · · | AVDD
- *                 _CN8_                                PB12 | · · | GND
+ *                                              (X_STEP) PC6 | · · | PB8 (I2C_SCL)
+ *                                              (X_DIR) PB15 | · · | PB9 (I2C_SDA)
+ *                                               (X_EN) PB13 | · · | AVDD
+ *                 _CN8_                       (X_DIAG) PB12 | · · | GND
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
@@ -92,7 +92,7 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_CS/UART)        (Z_DIR) PE2 | · · | PE12 (Z_CS/UART)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
- * (optical1) PD0 | · · | PF7 (X_MIN)                    PA0 | · · | PE15
+ * (optical1) PD0 | · · | PF7                            PA0 | · · | PE15
  * (optical2) PD1 | · · | PF9 (Y_MIN)                    PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (Z_MIN)                    PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
@@ -106,7 +106,7 @@
     #define Z_MIN_PIN PG1
     #define Z_MAX_PIN PG0
 #else
-    #define X_STOP_PIN PF7
+    #define X_STOP_PIN PB12
     #define Y_STOP_PIN PF9
     #define Y2_STOP_PIN PG0
     #define Z_STOP_PIN PG1
@@ -117,23 +117,19 @@
 //
 #define X_STEP_PIN PC6
 #define X_DIR_PIN PB15
-#define X_ENABLE_PIN PB8
-#define X_CS_PIN PB9
+#define X_ENABLE_PIN PB13
 
 #define Y_STEP_PIN PF1
 #define Y_DIR_PIN PF0
 #define Y_ENABLE_PIN PE6
-#define Y_CS_PIN PE3
 
 #define Y2_STEP_PIN PB6
 #define Y2_DIR_PIN PB2
 #define Y2_ENABLE_PIN PF4
-#define Y2_CS_PIN PC2
 
 #define Z_STEP_PIN PD11
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
-#define Z_CS_PIN PE12
 
 #define E0_STEP_PIN PE5
 #define E0_DIR_PIN PF2
@@ -154,6 +150,11 @@
     #define E0_HARDWARE_SERIAL MSerial2
     #define E0_SLAVE_ADDRESS 0
 
+#else // HAS_TMC_UART
+  #define X_CS_PIN PB12
+  #define Y_CS_PIN PE3
+  #define Y2_CS_PIN PC2
+  #define Z_CS_PIN PE12
 #endif // HAS_TMC_UART
 
 #if ENABLED(LID_GRIPPER_STATION)
@@ -187,6 +188,12 @@
 #if ENABLED(OPTICAL_AUTOCAL)
   #define OPTICAL_SENSOR_1_PIN PD0
   #define OPTICAL_SENSOR_2_PIN PD1
+#endif
+
+#if ENABLED(STM_INEMO_IMU_SUPPORT)
+  #define STM_INEMO_SDA_PIN PB9
+  #define STM_INEMO_SCL_PIN PB8
+  #define STM_INEMO_SAD_0_BIT 0
 #endif
 //
 // Temperature Sensors
