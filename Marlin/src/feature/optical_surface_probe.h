@@ -9,6 +9,7 @@
 #endif
 
 #include <string_view>
+#include <numeric>
 // using namespace std::string_view_literals;
 
 struct OpticalSurfaceProbe
@@ -23,9 +24,21 @@ struct OpticalSurfaceProbe
 
     void init();
 
-    uint32_t get_distance() const
+    uint32_t get_distance_raw() const
     {
         return analogRead(OPT_SURF_IN_PIN);
+    }
+
+    float get_distance() const
+    {
+        float distances[5]{};
+
+        for (float& distance : distances) {
+            auto raw = get_distance_raw();
+            distance = (raw + 2448) / 145.52f;
+            delay(20);
+        }
+        return std::accumulate(std::cbegin(distances), std::cend(distances), 0.0f) / 5;
     }
 
     #if ENABLED(GLOBAL_INTERVAL_REPORTER)
