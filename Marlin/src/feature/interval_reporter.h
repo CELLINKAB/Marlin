@@ -21,9 +21,9 @@ struct IntervalReporter
 
     inline void stop() { if (channel) channel->enabled = false; }
 
-    inline static const uint32_t get_interval_ms() { return get_interval_us() / 1000UL; }
+    inline static uint32_t get_interval_ms() { return get_interval_us() / 1000UL; }
 
-    inline static const uint32_t get_interval_us() { 
+    inline static uint32_t get_interval_us() { 
         return timer.getOverflow(TimerFormat_t::MICROSEC_FORMAT);
     }
 
@@ -43,7 +43,7 @@ private:
         callback_function_t fn;
 
         Reporter() = default;
-        explicit Reporter(callback_function_t fn) : valid(true), fn(fn) {}
+        explicit Reporter(callback_function_t fn) : valid(true), enable(false), fn(fn) {}
     };
 
     Reporter * channel;
