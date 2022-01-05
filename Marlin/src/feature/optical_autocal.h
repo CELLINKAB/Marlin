@@ -73,8 +73,6 @@ private:
         const xy_pos_t xy_offset = find_xy_offset(feedrate);
         if (xy_offset == XY_OFFSET_ERR)
             return false;
-        if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-            SERIAL_ECHOLNPAIR("XY offset: ", xy_offset);
 
         do_blocking_move_to_xy_z(xy_offset, z_offset - MEDIUM_Z_INCREMENT);
 
@@ -209,6 +207,9 @@ private:
         // sensors cross at a 90 degree angle, which creates two congruent isoscles
         // right triangles with legs in the X and Y directions, both of value dy/2
         const float xy_offset = dy / 2.0f;
+
+         if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
+            SERIAL_ECHOLNPAIR("XY offset: ", xy_offset);
 
         const float x = START_POSITION.x - xy_offset;
         const float y = nozzle_y1 + xy_offset;
