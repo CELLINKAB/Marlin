@@ -9,8 +9,8 @@
 
   void GcodeSuite::M1100()
   {
-    const auto val = probe.get_distance();
-    SERIAL_ECHOLNPAIR("Probe raw reading: ", val);
+    const auto val = probe.get_distance_avg();
+    SERIAL_ECHOLNPAIR("Probe avg reading: ", val);
 
     #if ENABLED(GLOBAL_INTERVAL_REPORTER)
       const auto ms = parser.intval('P', 0);

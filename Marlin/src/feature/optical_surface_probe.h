@@ -29,14 +29,18 @@ struct OpticalSurfaceProbe
         return analogRead(OPT_SURF_IN_PIN);
     }
 
-    float get_distance() const
+    float get_distance_mm() const
+    {
+        return (get_distance_raw() + 2448) / 145.52f;
+    }
+
+    float get_distance_avg() const
     {
         float distances[5]{};
 
         for (float& distance : distances) {
-            auto raw = get_distance_raw();
-            distance = (raw + 2448) / 145.52f;
             delay(20);
+            distance = get_distance_mm();
         }
         return std::accumulate(std::cbegin(distances), std::cend(distances), 0.0f) / 5;
     }
@@ -76,7 +80,7 @@ private:
         IntervalReporter reporter{[this]
                                 {
                                     const auto position = planner.get_axis_positions_mm();
-                                    SERIAL_ECHOLNPAIR("prb:", get_distance(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
+                                    SERIAL_ECHOLNPAIR("prb:", get_distance_mm(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
                                 }};
     #endif
 
