@@ -43,7 +43,7 @@ private:
         callback_function_t fn;
 
         Reporter() = default;
-        explicit Reporter(callback_function_t fn) : valid(true), enable(false), fn(fn) {}
+        explicit Reporter(callback_function_t fn) : valid(true), enabled(false), fn(fn) {}
     };
 
     Reporter * channel;
