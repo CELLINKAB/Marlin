@@ -2002,12 +2002,12 @@
  * Override if the automatically selected points are inadequate.
  */
 #if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
-  //#define PROBE_PT_1_X 15
-  //#define PROBE_PT_1_Y 180
-  //#define PROBE_PT_2_X 15
-  //#define PROBE_PT_2_Y 20
-  //#define PROBE_PT_3_X 170
-  //#define PROBE_PT_3_Y 20
+  #define PROBE_PT_1_X 3
+  #define PROBE_PT_1_Y 23
+  #define PROBE_PT_2_X 3
+  #define PROBE_PT_2_Y 86
+  #define PROBE_PT_3_X 84
+  #define PROBE_PT_3_Y 23
 #endif
 
 /**
@@ -2690,7 +2690,7 @@
   #define INTERPOLATE      true
 
   #if AXIS_IS_TMC(X)
-    #define X_CURRENT       700        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #define X_CURRENT       600        // (mA) RMS current. Multiply by 1.414 for peak current.
     #define X_CURRENT_HOME  350        // (mA) RMS current for sensorless homing
     #define X_MICROSTEPS     16        // 0..256
     #define X_RSENSE          0.11
@@ -2710,7 +2710,7 @@
   #endif
 
   #if AXIS_IS_TMC(Y)
-    #define Y_CURRENT       700
+    #define Y_CURRENT       600
     #define Y_CURRENT_HOME  450
     #define Y_MICROSTEPS     16
     #define Y_RSENSE          0.11
@@ -2720,7 +2720,7 @@
   #endif
 
   #if AXIS_IS_TMC(Y2)
-    #define Y2_CURRENT      700
+    #define Y2_CURRENT      600
     #define Y2_CURRENT_HOME 450
     #define Y2_MICROSTEPS    Y_MICROSTEPS
     #define Y2_RSENSE         0.11
@@ -2730,7 +2730,7 @@
   #endif
 
   #if AXIS_IS_TMC(Z)
-    #define Z_CURRENT       700
+    #define Z_CURRENT       600
     #define Z_CURRENT_HOME  450
     #define Z_MICROSTEPS     32
     #define Z_RSENSE          0.11
@@ -2800,7 +2800,7 @@
   #endif
 
   #if AXIS_IS_TMC(E0)
-    #define E0_CURRENT      800
+    #define E0_CURRENT      400
     #define E0_MICROSTEPS    32
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
@@ -4431,7 +4431,7 @@
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
 #endif
 
-#define OPTICAL_SURFACE_PROBE
+//#define OPTICAL_SURFACE_PROBE
 #if ENABLED(OPTICAL_SURFACE_PROBE)
   #define ____HELLO____ :)
 #endif

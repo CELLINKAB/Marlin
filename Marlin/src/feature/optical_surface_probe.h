@@ -80,7 +80,7 @@ private:
         IntervalReporter reporter{[this]
                                 {
                                     const auto position = planner.get_axis_positions_mm();
-                                    SERIAL_ECHOLNPAIR("prb:", get_distance_mm(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
+                                    SERIAL_ECHOLNPGM("prb:", get_distance_mm(), ",X:", position.x, ",Y:", position.y, ",Z:", position.z);
                                 }};
     #endif
 

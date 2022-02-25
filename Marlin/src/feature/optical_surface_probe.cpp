@@ -5,20 +5,6 @@
   #include "../gcode/gcode.h"
   #include "../gcode/parser.h"
 
-  static OpticalSurfaceProbe probe;
-
-  void GcodeSuite::M1100()
-  {
-    const auto val = probe.get_distance_avg();
-    SERIAL_ECHOLNPAIR("Probe avg reading: ", val);
-
-    #if ENABLED(GLOBAL_INTERVAL_REPORTER)
-      const auto ms = parser.intval('P', 0);
-      if (ms > 0) IntervalReporter::set_interval_ms(ms);
-
-      const auto start = parser.boolval('S');
-      probe.interval_report(start);
-    #endif
-  }
+  static OpticalSurfaceProbe opt_probe;
 
 #endif // OPTICAL_SURFACE_PROBE

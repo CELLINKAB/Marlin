@@ -458,6 +458,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 510: G510(); break;                                  // Perform autocalibration routine
       #endif
 
+      #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
+        case 529: G529(); break;
+      #endif
+
       #if ENABLED(DEBUG_GCODE_PARSER)
         case 800: parser.debug(); break;                          // G800: GCode Parser Test for G
       #endif
@@ -1070,7 +1074,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 3426: M3426(); break;   
       #endif
                                    // M3426: Read MCP3426 ADC (over i2c)
-      #if ENABLED(OPTICAL_SURFACE_PROBE)
+      #if ENABLED(HAS_ANALOG_PROBE)
         case 1100: M1100(); break;
       #endif
 

@@ -47,7 +47,7 @@
   #include "../feature/joystick.h"
 #endif
 
-#if HAS_BED_PROBE
+#if HAS_BED_PROBE && DISABLED(OPTICAL_SURFACE_PROBE)
   #include "probe.h"
 #endif
 
@@ -722,7 +722,7 @@ void Endstops::update() {
     #endif
   #endif
 
-  #if HAS_BED_PROBE
+  #if HAS_BED_PROBE && DISABLED(HAS_ANALOG_PROBE)
     // When closing the gap check the enabled probe
     if (probe_switch_activated())
       UPDATE_ENDSTOP_BIT(Z, TERN(USES_Z_MIN_PROBE_PIN, MIN_PROBE, MIN));

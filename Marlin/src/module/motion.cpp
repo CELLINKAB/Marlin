@@ -1595,9 +1595,9 @@ void prepare_line_to_destination() {
             const bool bad_home = (time_delta > HOME_SANITY_CHECKING_ERROR_MARGIN || 
                                    time_delta < -HOME_SANITY_CHECKING_ERROR_MARGIN);
             if (DEBUGGING(INFO)) 
-              SERIAL_ECHOLNPAIR("axis:", AS_CHAR(AXIS_CHAR(axis))," distance:",expected_distance," feedrate:",home_fr_mm_s," expected stop time:", time_to_stop, " difference from expected:", time_delta);
+              SERIAL_ECHOLNPGM("axis:", AS_CHAR(AXIS_CHAR(axis))," distance:",expected_distance," feedrate:",home_fr_mm_s," expected stop time:", time_to_stop, " difference from expected:", time_delta);
             if (DEBUGGING(ERRORS) && bad_home) 
-              SERIAL_ECHOLNPAIR("homing fault! ms difference from expected: ", time_delta, ", axis: ", AS_CHAR(AXIS_CHAR(axis)));
+              SERIAL_ECHOLNPGM("homing fault! ms difference from expected: ", time_delta, ", axis: ", AS_CHAR(AXIS_CHAR(axis)));
         #endif
 
       #if HOMING_Z_WITH_PROBE && HAS_QUIET_PROBING

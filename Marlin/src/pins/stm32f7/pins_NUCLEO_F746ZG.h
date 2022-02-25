@@ -87,8 +87,8 @@
  *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
- *            PA7 | · · | PE4 (E_EN)                    PD13 | · · | PE7   PROBE_RX
- *    (E_DIR) PF2 | · · | PE5 (E_STEP)                  PD12 | · · | GND
+ *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
+ *    (E_DIR) PF2 | · · | PE5 (E_STEP)       (RDP_STOP) PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
@@ -194,6 +194,12 @@
   #define STM_INEMO_SDA_PIN PB9
   #define STM_INEMO_SCL_PIN PB8
   #define STM_INEMO_SAD_0_BIT 0
+#endif
+
+#if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
+  #define RDP_EN_PIN PD13
+  #define RDP_STOP_PIN PD12
+  #define PROBE_READ_PIN PC3
 #endif
 //
 // Temperature Sensors

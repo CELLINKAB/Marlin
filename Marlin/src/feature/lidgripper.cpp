@@ -66,7 +66,7 @@ const int32_t LidGripper::grip()
     if (move_steps > LID_GRIPPER_DETECTION_THRESHOLD)
     {
         if (DEBUGGING(INFO))
-            SERIAL_ECHOLNPAIR("retracting due to grip threshold passed: ", LID_GRIPPER_DETECTION_THRESHOLD);
+            SERIAL_ECHOLNPGM("retracting due to grip threshold passed: ", LID_GRIPPER_DETECTION_THRESHOLD);
         retract();
     }
     else
@@ -150,8 +150,8 @@ const uint32_t LidGripper::move_gripper_until_stall(Dir direction)
         stall_triggered = true;
         if (DEBUGGING(INFO))
         {
-            SERIAL_ECHOLNPAIR("LG stall value: ", driver.SG_RESULT());
-            SERIAL_ECHOLNPAIR("Grip stall steps: ", steps);
+            SERIAL_ECHOLNPGM("LG stall value: ", driver.SG_RESULT());
+            SERIAL_ECHOLNPGM("Grip stall steps: ", steps);
         }
         detachInterrupt(pins.STOP);
     };

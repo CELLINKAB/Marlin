@@ -38,7 +38,7 @@ struct OpticalAutocal
             SERIAL_ERROR_MSG("autocalibration failed!");
         }
         else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
-            SERIAL_ECHOLNPAIR("Nozzle offset: ", tool_offset);
+            SERIAL_ECHOLNPGM("Nozzle offset: ", tool_offset);
 
         return success;
     }
@@ -66,7 +66,7 @@ private:
         if (z_offset == Z_OFFSET_ERR)
             return false;
         else if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-            SERIAL_ECHOLNPAIR("Z offset: ", z_offset);
+            SERIAL_ECHOLNPGM("Z offset: ", z_offset);
 
         do_blocking_move_to_z(z_offset - MEDIUM_Z_INCREMENT); // ensure nozzle is visible to both sensors
 
@@ -85,7 +85,7 @@ private:
                             z_offset + END_POSITION_PRINTBED_DELTA.z
                             );
             if (DEBUGGING(INFO) || DEBUGGING(LEVELING)) 
-                print_pos(tool_offset, "Calibrated tool offset:");
+                print_pos(tool_offset, F("Calibrated tool offset:"));
             do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
             do_blocking_move_to_xy(tool_offset);
             //planner.set_position_mm({0.0,0.0,0.0});
@@ -125,7 +125,7 @@ private:
             read_sensor_1 = false;
             delay(delay_5mm);
             read_sensor_2 = true;
-            if DEBUGGING(LEVELING) SERIAL_ECHOLNPAIR("sensor 1 triggered Y", y);
+            if DEBUGGING(LEVELING) SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
         };
         auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm]
         {
@@ -136,7 +136,7 @@ private:
             read_sensor_2 = false;
             delay(delay_5mm);
             read_sensor_1 = true;
-            if DEBUGGING(LEVELING) SERIAL_ECHOLNPAIR("sensor 2 triggered Y", y);
+            if DEBUGGING(LEVELING) SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
         };
 
         attachInterrupt(SENSOR_1, isr1, RISING);
@@ -166,7 +166,7 @@ private:
             y4[i] = sensor_1_trigger_y_pos;
 
             if DEBUGGING (LEVELING)
-                SERIAL_ECHOLNPAIR(
+                SERIAL_ECHOLNPGM(
                     "sweep: ", i,
                     " y1: ", y1[i],
                     " y2: ", y2[i],
@@ -209,7 +209,7 @@ private:
         const float xy_offset = dy / 2.0f;
 
          if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-            SERIAL_ECHOLNPAIR("XY offset: ", xy_offset);
+            SERIAL_ECHOLNPGM("XY offset: ", xy_offset);
 
         const float x = START_POSITION.x - xy_offset;
         const float y = nozzle_y1 + xy_offset;
@@ -230,7 +230,7 @@ private:
         if (DEBUGGING(ERRORS) && z <= soft_endstop.min.z)
             SERIAL_ERROR_MSG("No nozzle found during Z sweep!");
         else if DEBUGGING (LEVELING)
-            SERIAL_ECHOLNPAIR("Z sweep increment=", inc, "; found nozzle at z=", z);
+            SERIAL_ECHOLNPGM("Z sweep increment=", inc, "; found nozzle at z=", z);
 
         condition = false;
         return (z + inc) + inc; // report position before interrupt triggered

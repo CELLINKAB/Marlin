@@ -606,6 +606,10 @@ private:
     static void G510();
   #endif
 
+  #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
+    static void G529();
+  #endif
+
   #if HAS_RESUME_CONTINUE
     static void M0_M1();
   #endif
@@ -1240,7 +1244,7 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
-  #if ENABLED(OPTICAL_SURFACE_PROBE)
+  #if ENABLED(HAS_ANALOG_PROBE)
     static void M1100();
   #endif
 

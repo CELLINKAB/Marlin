@@ -62,7 +62,7 @@ void GcodeSuite::M420() {
   const bool seen_S = parser.seen('S'),
              to_enable = seen_S ? parser.value_bool() : planner.leveling_active;
 
-  #if ENABLED(MARLIN_DEV_MODE)
+  #if ENABLED(MARLIN_DEV_MODE, GRID_MAX_POINTS_X)
     if (parser.intval('S') == 2) {
       const float x_min = probe.min_x(), x_max = probe.max_x(),
                   y_min = probe.min_y(), y_max = probe.max_y();
