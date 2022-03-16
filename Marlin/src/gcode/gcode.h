@@ -1248,6 +1248,10 @@ private:
     static void M1100();
   #endif
 
+  #if ANY_PIN(PRESSURE_SENSOR)
+    static void M1111();
+  #endif
+
   static void T(const int8_t tool_index);
 
 };
