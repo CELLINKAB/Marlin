@@ -63,7 +63,7 @@ void GcodeSuite::M1113()
     const auto feedrate = parser.feedrateval('F');
 
     planner.synchronize();
-    const auto pos = planner.get_axis_positions_mm();
+    const auto pos = current_position.copy();
     const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
 
     for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles)
@@ -75,4 +75,5 @@ void GcodeSuite::M1113()
     if (parser.seen('L')) planner.buffer_segment(retract_pos, feedrate);
 
     planner.synchronize();
+    sync_plan_position_e();
 }
