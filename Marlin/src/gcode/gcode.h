@@ -1252,6 +1252,12 @@ private:
     static void M1111();
   #endif
 
+  // TODO: gate or change these
+  // slider valve move
+  static void M1112();
+  // easy mix instruction
+  static void M1113();
+
   static void T(const int8_t tool_index);
 
 };

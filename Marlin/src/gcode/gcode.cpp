@@ -1082,6 +1082,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1111: M1111(); break;
       #endif
 
+      //TODO: Move or elaborate these functions
+      // slider valve control
+      case 1112: M1112(); break;
+      // easy mixing
+      case 1113: M1113(); break;
+
       default: parser.unknown_command_warning(); break;
     }
     break;
