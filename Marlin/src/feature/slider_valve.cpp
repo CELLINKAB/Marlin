@@ -6,6 +6,9 @@
 
 #define SLIDER_SERVO servo[0]
 
+namespace cartridge
+{
+
 enum class SliderPosition : uint8_t
 {
     Extrude = 0,
@@ -33,6 +36,8 @@ constexpr int slider_map(SliderPosition position)
 
 static SliderPosition current_slider_pos = SliderPosition::Extrude;
 
+}
+
 void GcodeSuite::M1112()
 {
     const auto slider_position = parser.intval('P', -1);
@@ -41,14 +46,14 @@ void GcodeSuite::M1112()
         SERIAL_ECHO_MSG("P value must be between 0 and 3");
         return;
     }
-    const auto enum_slider_val = static_cast<SliderPosition>(slider_position);
-    SLIDER_SERVO.move(slider_map(enum_slider_val));
-    current_slider_pos = enum_slider_val;
+    const auto enum_slider_val = static_cast<cartridge::SliderPosition>(slider_position);
+    SLIDER_SERVO.move(cartridge::slider_map(enum_slider_val));
+    cartridge::current_slider_pos = enum_slider_val;
 }
 
 void GcodeSuite::M1113()
 {
-    if (current_slider_pos == SliderPosition::Extrude)
+    if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude)
     {
         SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
         return;
