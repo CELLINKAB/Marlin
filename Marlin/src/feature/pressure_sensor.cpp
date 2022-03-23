@@ -38,7 +38,7 @@ void GcodeSuite::M1111()
         for (auto &val : sensor_values)
         {
             val = analogRead(PRESSURE_SENSOR_PIN);
-            delay(50);
+            delay(1000 / SAMPLES);
         }
         pressure_zero_offset = std::accumulate(std::cbegin(sensor_values), std::cend(sensor_values), 0) / SAMPLES;
         if DEBUGGING (INFO)
