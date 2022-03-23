@@ -161,7 +161,7 @@
 #define SERVO0_PIN PE15
 
 // Pressure sensor
-#define PRESSURE_SENSOR_PIN PF3
+#define PRESSURE_SENSOR_PIN PF5
 
 #if ENABLED(LID_GRIPPER_STATION)
     // #define LG_STEP_PIN         PD12
