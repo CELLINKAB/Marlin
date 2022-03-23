@@ -36,7 +36,7 @@ void GcodeSuite::M1111()
 
     if (parser.seenval('T'))
         pressure_zero_offset = parser.ulongval('T');
-    else if (parser.seen_test('T'){
+    else if (parser.seen_test('T')){
         if (DEBUGGING(INFO))
             SERIAL_ECHO_MSG("Training pressure sensor...");
         static constexpr size_t SAMPLES = PRESSURE_SENSOR_TRAINING_SAMPLES;
