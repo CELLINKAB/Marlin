@@ -2,7 +2,11 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if ANY_PIN(PRESSURE_SENSOR)
+#if ENABLED(ANALOG_PRESSURE_SENSOR)
+
+#if !ANY_PIN(PRESSURE_SENSOR)
+#error "PRESSURE_SENSOR_PIN must be defined for analog pressure sensor!"
+#endif
 
 #include "../gcode/gcode.h"
 #include "interval_reporter.h"
@@ -11,15 +15,17 @@
 
 void GcodeSuite::M1111()
 {
-    static uint32_t pressure_zero_offset = 165;
-    static constexpr float KPA_SCALE_FACTOR = 4.1792;
+    static uint32_t pressure_zero_offset = INITIAL_SENSOR_ZERO_OFFSET;
+    static constexpr float KPA_SCALE_FACTOR = SENSOR_KPA_SCALE_FACTOR;
     static auto report_fn = []()
     {
-        static constexpr size_t SAMPLES = 3;
+        static constexpr size_t SAMPLES = PRESSURE_SENSOR_REPORT_SAMPLES;
         uint32_t sensor_readings[SAMPLES]{};
-        for (auto& val : sensor_readings) {
+        for (auto &val : sensor_readings)
+        {
             val = analogRead(PRESSURE_SENSOR_PIN);
-            delay(1);
+            if constexpr (SAMPLES > 1)
+                delayMicroseconds(1000 / SAMPLES);
         }
         auto avg_reading = std::accumulate(std::cbegin(sensor_readings), std::cend(sensor_readings), 0) / SAMPLES;
         auto shifted_reading = (avg_reading > pressure_zero_offset) ? (avg_reading - pressure_zero_offset) : 0;
@@ -33,7 +39,7 @@ void GcodeSuite::M1111()
     else if (parser.seen_test('T'){
         if (DEBUGGING(INFO))
             SERIAL_ECHO_MSG("Training pressure sensor...");
-        static constexpr size_t SAMPLES = 40;
+        static constexpr size_t SAMPLES = PRESSURE_SENSOR_TRAINING_SAMPLES;
         uint32_t sensor_values[SAMPLES]{};
         for (auto &val : sensor_values)
         {
@@ -60,4 +66,4 @@ void GcodeSuite::M1111()
         pressure_sensor.stop();
 }
 
-#endif
+#endif // ANALOG_PRESSURE_SENSOR
