@@ -92,9 +92,9 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
- * (optical1) PD0 | · · | PF7                            PA0 | · · | PE15 (SERVO0)
- * (optical2) PD1 | · · | PF9                            PB0 | · · | PB10 (FAN)
- *  (Y2_STOP) PG0 | · · | PG1                            PE0 | · · | PB11 (FAN1)
+ * (optical1) PD0 | · · | PF7 (E2_STOP)                  PA0 | · · | PE15 (SERVO0)
+ * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
+ *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)                  PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
@@ -110,6 +110,9 @@
     #define Y_STOP_PIN PE3
     #define Y2_STOP_PIN PG0
     #define Z_STOP_PIN PE12
+    #define E0_STOP_PIN PG1
+    #define E1_STOP_PIN PF9
+    #define E2_STOP_PIN PF7
 #endif
 
 //
