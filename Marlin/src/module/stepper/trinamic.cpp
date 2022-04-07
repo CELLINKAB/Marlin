@@ -917,6 +917,14 @@ void reset_trinamic_drivers() {
     TERN_(I_SENSORLESS, stepperI.homing_threshold(I_STALL_SENSITIVITY));
     TERN_(J_SENSORLESS, stepperJ.homing_threshold(J_STALL_SENSITIVITY));
     TERN_(K_SENSORLESS, stepperK.homing_threshold(K_STALL_SENSITIVITY));
+    TERN_(E0_SENSORLESS, stepperE0.homing_threshold(E0_STALL_SENSITIVITY));
+    TERN_(E1_SENSORLESS, stepperE1.homing_threshold(E1_STALL_SENSITIVITY));
+    TERN_(E2_SENSORLESS, stepperE2.homing_threshold(E2_STALL_SENSITIVITY));
+    TERN_(E3_SENSORLESS, stepperE3.homing_threshold(E3_STALL_SENSITIVITY));
+    TERN_(E4_SENSORLESS, stepperE4.homing_threshold(E4_STALL_SENSITIVITY));
+    TERN_(E5_SENSORLESS, stepperE5.homing_threshold(E5_STALL_SENSITIVITY));
+    TERN_(E6_SENSORLESS, stepperE6.homing_threshold(E6_STALL_SENSITIVITY));
+    TERN_(E7_SENSORLESS, stepperE7.homing_threshold(E7_STALL_SENSITIVITY));
   #endif
 
   #ifdef TMC_ADV

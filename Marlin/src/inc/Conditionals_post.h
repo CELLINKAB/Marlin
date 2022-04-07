@@ -2075,6 +2075,9 @@
   #endif
 
   #if AXIS_IS_TMC(E0)
+    #if defined(E0_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E0)
+      #define E0_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E0)
       #define E0_HAS_STEALTHCHOP 1
     #endif
@@ -2089,6 +2092,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E1)
+    #if defined(E1_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E1)
+      #define E1_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E1)
       #define E1_HAS_STEALTHCHOP 1
     #endif
@@ -2103,6 +2109,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E2)
+    #if defined(E2_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E2)
+      #define E2_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E2)
       #define E2_HAS_STEALTHCHOP 1
     #endif
@@ -2117,6 +2126,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E3)
+    #if defined(E3_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E3)
+      #define E3_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E3)
       #define E3_HAS_STEALTHCHOP 1
     #endif
@@ -2131,6 +2143,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E4)
+    #if defined(E4_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E4)
+      #define E4_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E4)
       #define E4_HAS_STEALTHCHOP 1
     #endif
@@ -2145,6 +2160,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E5)
+    #if defined(E5_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E5)
+      #define E5_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E5)
       #define E5_HAS_STEALTHCHOP 1
     #endif
@@ -2159,6 +2177,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E6)
+    #if defined(E6_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E6)
+      #define E6_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E6)
       #define E6_HAS_STEALTHCHOP 1
     #endif
@@ -2173,6 +2194,9 @@
     #endif
   #endif
   #if AXIS_IS_TMC(E7)
+    #if defined(E7_STALL_SENSITIVITY) && AXIS_HAS_STALLGUARD(E7)
+      #define E7_SENSORLESS 1
+    #endif
     #if AXIS_HAS_STEALTHCHOP(E7)
       #define E7_HAS_STEALTHCHOP 1
     #endif

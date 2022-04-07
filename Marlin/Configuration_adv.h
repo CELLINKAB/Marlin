@@ -3085,6 +3085,20 @@
     //#define SPI_ENDSTOPS              // TMC2130 only
     #define IMPROVE_HOMING_RELIABILITY
 
+    // On most systems it doesn't make sense to use stallguard
+    // on the extruding axis. It is not checked during homing,
+    // and is only relevant for specialized applications with
+    // their own custom G-codes
+    #define E_STALL_SENSITIVITY  56
+    #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E3_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E4_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E5_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E6_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    //#define E7_STALL_SENSITIVITY E_STALL_SENSITIVITY
+
     // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
     #define SENSORLESS_HOME_SANITY_CHECKING
     #if ENABLED(SENSORLESS_HOME_SANITY_CHECKING)
