@@ -458,6 +458,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 510: G510(); break;                                  // Perform autocalibration routine
       #endif
 
+      // TODO: gate this feature
+      case 511: G511(); break;
+
       #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
         case 529: G529(); break;
       #endif

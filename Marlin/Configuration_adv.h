@@ -3089,7 +3089,7 @@
     // on the extruding axis. It is not checked during homing,
     // and is only relevant for specialized applications with
     // their own custom G-codes
-    #define E_STALL_SENSITIVITY  56
+    #define E_STALL_SENSITIVITY  60
     #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
