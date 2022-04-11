@@ -30,20 +30,23 @@ void GcodeSuite::G511()
 
     planner.synchronize();
 
-    bool stall_triggered = false;
+    static auto bottomout_isr = callback_function_t{[]
+                                                    {
+                                                        CRITICAL_SECTION_START();
+                                                        planner.quick_stop();
+                                                        CRITICAL_SECTION_END();
+                                                        detachInterrupt(E0_STOP_PIN);
+                                                    }};
     attachInterrupt(
         E0_STOP_PIN,
-        [&stall_triggered]
-        { stall_triggered = true; },
+        bottomout_isr,
         RISING);
 
     auto end_position = current_position.copy();
     end_position.e += 3000.0f;
     planner.buffer_segment(end_position, parser.feedrateval('F', 10.0f));
-    const auto timeout = millis() + 3000;
-    while (!stall_triggered && millis() < timeout)
-        idle();
-    quickstop_stepper();
-    detachInterrupt(E0_STOP_PIN);
+    planner.synchronize();
+    set_current_from_steppers_for_axis(AxisEnum::E0_AXIS);
+    sync_plan_position();
 }
 #endif
