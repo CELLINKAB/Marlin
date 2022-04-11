@@ -21,12 +21,9 @@ void GcodeSuite::G511()
         return 0;
     }();
 
-    if (READ(E0_STOP_PIN))
-    {
-        SERIAL_ERROR_MSG("motor already signalling stall");
-
-        return;
-    }
+    const auto feedrate = parser.feedrateval('F', 6.0f);
+    current_position.e -= 100.0f;
+    planner.buffer_segment(current_position, feedrate);
 
     planner.synchronize();
 
@@ -37,14 +34,15 @@ void GcodeSuite::G511()
                                                         CRITICAL_SECTION_END();
                                                         detachInterrupt(E0_STOP_PIN);
                                                     }};
-    attachInterrupt(
-        E0_STOP_PIN,
-        bottomout_isr,
-        RISING);
+    
 
     auto end_position = current_position.copy();
     end_position.e += 3000.0f;
-    planner.buffer_segment(end_position, parser.feedrateval('F', 10.0f));
+    planner.buffer_segment(end_position, feedrate);
+    attachInterrupt(
+        E0_STOP_PIN,
+        bottomout_isr,
+        HIGH);
     planner.synchronize();
     set_current_from_steppers_for_axis(AxisEnum::E0_AXIS);
     sync_plan_position();

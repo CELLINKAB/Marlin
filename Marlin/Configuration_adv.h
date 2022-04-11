@@ -2800,7 +2800,7 @@
   #endif
 
   #if AXIS_IS_TMC(E0)
-    #define E0_CURRENT      400
+    #define E0_CURRENT      350
     #define E0_MICROSTEPS    32
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
@@ -3089,7 +3089,7 @@
     // on the extruding axis. It is not checked during homing,
     // and is only relevant for specialized applications with
     // their own custom G-codes
-    #define E_STALL_SENSITIVITY  60
+    #define E_STALL_SENSITIVITY  46
     #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
