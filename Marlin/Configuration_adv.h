@@ -3099,6 +3099,10 @@
     //#define E6_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E7_STALL_SENSITIVITY E_STALL_SENSITIVITY
 
+    #define E_BOTTOMOUT_FEEDRATE 6.0f
+    #define E_BOTTOMOUT_BACKOFF 100.0f
+    #define E_BOTTOMOUT_MAX_DISTANCE 3000.0f
+
     // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
     #define SENSORLESS_HOME_SANITY_CHECKING
     #if ENABLED(SENSORLESS_HOME_SANITY_CHECKING)

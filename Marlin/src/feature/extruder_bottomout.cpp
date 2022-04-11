@@ -21,8 +21,8 @@ void GcodeSuite::G511()
         return 0;
     }();
 
-    const auto feedrate = parser.feedrateval('F', 6.0f);
-    current_position.e -= 100.0f;
+    constexpr static feedRate_t feedrate = E_BOTTOMOUT_FEEDRATE;
+    current_position.e -= E_BOTTOMOUT_BACKOFF;
     planner.buffer_segment(current_position, feedrate);
 
     planner.synchronize();
@@ -37,7 +37,7 @@ void GcodeSuite::G511()
     
 
     auto end_position = current_position.copy();
-    end_position.e += 3000.0f;
+    end_position.e += E_BOTTOMOUT_MAX_DISTANCE;
     planner.buffer_segment(end_position, feedrate);
     attachInterrupt(
         E0_STOP_PIN,
