@@ -28,6 +28,8 @@ void GcodeSuite::G511()
         return;
     }
 
+    planner.synchronize();
+
     bool stall_triggered = false;
     attachInterrupt(
         E0_STOP_PIN,
