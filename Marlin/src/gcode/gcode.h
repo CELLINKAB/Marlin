@@ -606,8 +606,9 @@ private:
     static void G510();
   #endif
 
-  // TODO: gate this feature
-  static void G511();
+  #if ENABLED(EXTRUDER_BOTTOMOUT)
+    static void G511();
+  #endif
 
   #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
     static void G529();

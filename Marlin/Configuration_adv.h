@@ -3089,19 +3089,22 @@
     // on the extruding axis. It is not checked during homing,
     // and is only relevant for specialized applications with
     // their own custom G-codes
-    #define E_STALL_SENSITIVITY  46
-    #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E3_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E4_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E5_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E6_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E7_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    #define EXTRUDER_BOTTOMOUT
+    #if ENABLED(EXTRUDER_BOTTOMOUT)
+      #define E_STALL_SENSITIVITY  46
+      #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E3_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E4_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E5_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E6_STALL_SENSITIVITY E_STALL_SENSITIVITY
+      //#define E7_STALL_SENSITIVITY E_STALL_SENSITIVITY
 
-    #define E_BOTTOMOUT_FEEDRATE 6.0f
-    #define E_BOTTOMOUT_BACKOFF 100.0f
-    #define E_BOTTOMOUT_MAX_DISTANCE 3000.0f
+      #define E_BOTTOMOUT_FEEDRATE 6.0f
+      #define E_BOTTOMOUT_BACKOFF 100.0f
+      #define E_BOTTOMOUT_MAX_DISTANCE 3000.0f
+    #endif
 
     // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
     #define SENSORLESS_HOME_SANITY_CHECKING
