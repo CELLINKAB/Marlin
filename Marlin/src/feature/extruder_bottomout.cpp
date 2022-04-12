@@ -13,6 +13,8 @@
 
 void GcodeSuite::G511()
 {
+    // lazy initialization to ensure good ordering with global systems.
+    // static ensures this is only called on first run.
     static auto init_ [[maybe_unused]] = []
     {
         tmc_enable_stallguard(stepperE0);
