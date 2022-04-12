@@ -13,8 +13,7 @@
 
 void GcodeSuite::G511()
 {
-    // const uint8_t extruder = parser.byteval('E', 0xff);
-    static auto init_ = []
+    static auto init_ [[maybe_unused]] = []
     {
         tmc_enable_stallguard(stepperE0);
         SET_INPUT_PULLUP(E0_STOP_PIN);
@@ -34,7 +33,6 @@ void GcodeSuite::G511()
                                                         CRITICAL_SECTION_END();
                                                         detachInterrupt(E0_STOP_PIN);
                                                     }};
-    
 
     auto end_position = current_position.copy();
     end_position.e += E_BOTTOMOUT_MAX_DISTANCE;
