@@ -2,7 +2,7 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if ENABLED(EXTRUDER_BOTTOMOUT)
+#if HAS_E_BOTTOMOUT
 #include "../gcode/gcode.h"
 #include "../module/planner.h"
 #include "../module/stepper/trinamic.h"
@@ -55,4 +55,4 @@ void GcodeSuite::G511()
     set_current_from_steppers_for_axis(AxisEnum::E0_AXIS);
     sync_plan_position();
 }
-#endif
+#endif // HAS_E_BOTTOMOUT

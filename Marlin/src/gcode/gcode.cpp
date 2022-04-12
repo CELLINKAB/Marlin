@@ -458,7 +458,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 510: G510(); break;                                  // Perform autocalibration routine
       #endif
 
-      #if ENABLED(EXTRUDER_BOTTOMOUT)
+      #if HAS_E_BOTTOMOUT
         case 511: G511(); break;
       #endif
 

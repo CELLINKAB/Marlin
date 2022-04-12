@@ -606,7 +606,7 @@ private:
     static void G510();
   #endif
 
-  #if ENABLED(EXTRUDER_BOTTOMOUT)
+  #if HAS_E_BOTTOMOUT
     static void G511();
   #endif
 
