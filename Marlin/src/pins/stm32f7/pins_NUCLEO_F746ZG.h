@@ -94,7 +94,7 @@
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
  * (optical1) PD0 | · · | PF7 (E2_STOP)                  PA0 | · · | PE15 (SERVO0)
  * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
- *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)                  PE0 | · · | PB11 (FAN1)
+ *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
@@ -220,6 +220,8 @@
 
 #define CALIBRATION_PIN PF8
 #define CALIBRATION_PIN_PULLUP
+
+#define Z_MIN_PROBE_PIN PE0
 
 #define LED_PIN LED_BLUE
 
