@@ -3,12 +3,10 @@
 #pragma once
 
 #include "../inc/MarlinConfig.h"
-
-#include "tmc_util.h"
-
+#include "../module/planner.h"
 #include "../module/stepper/trinamic.h"
 
-#include "../module/planner.h"
+#include "tmc_util.h"
 
 struct LGPins
 {
@@ -50,16 +48,14 @@ private:
 
     void move_from_gripper();
 
-
     void move_to_gripper();
 
     const uint32_t move_gripper_until_stall(Dir);
-
 };
 
 #if ENABLED(LID_GRIPPER_STATION)
-    // #if !PINS_EXIST(LG_STEP, LG_DIR, LG_EN, LG_STOP)
-    //     #error "The pins LG_STEP, LG_DIR, LG_EN, and LG_STOP must be defined to use a lid gripper!"
-    // #endif
-    extern LidGripper lid_gripper;
+// #if !PINS_EXIST(LG_STEP, LG_DIR, LG_EN, LG_STOP)
+//     #error "The pins LG_STEP, LG_DIR, LG_EN, and LG_STOP must be defined to use a lid gripper!"
+// #endif
+extern LidGripper lid_gripper;
 #endif

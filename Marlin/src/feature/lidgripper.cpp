@@ -4,16 +4,18 @@
 
 #if ENABLED(LID_GRIPPER_STATION)
 
-#include "../gcode/gcode.h"
+#    include "../gcode/gcode.h"
 
-#include "lidgripper.h"
+#    include "lidgripper.h"
 
 // pin definitions
-constexpr LGPins LG1_PINS {LG_EN_PIN, LG_STOP_PIN, LG_INDEX_PIN};
+constexpr LGPins LG1_PINS{LG_EN_PIN, LG_STOP_PIN, LG_INDEX_PIN};
 
 /// public member functions ///
 
-LidGripper::LidGripper(const LGPins pins, uint8_t addr) : pins(pins), driver(&LG_HARDWARE_SERIAL, 0.11, addr)
+LidGripper::LidGripper(const LGPins pins, uint8_t addr)
+    : pins(pins)
+    , driver(&LG_HARDWARE_SERIAL, 0.11, addr)
 {
     OUT_WRITE(pins.EN, LOW); // enable on power on in case we were gripping during power cut
     SET_INPUT(pins.STOP);
@@ -63,14 +65,12 @@ const int32_t LidGripper::grip()
 
     const uint32_t move_steps = move_gripper_until_stall(Dir::GRIP);
 
-    if (move_steps > LID_GRIPPER_DETECTION_THRESHOLD)
-    {
+    if (move_steps > LID_GRIPPER_DETECTION_THRESHOLD) {
         if (DEBUGGING(INFO))
-            SERIAL_ECHOLNPGM("retracting due to grip threshold passed: ", LID_GRIPPER_DETECTION_THRESHOLD);
+            SERIAL_ECHOLNPGM("retracting due to grip threshold passed: ",
+                             LID_GRIPPER_DETECTION_THRESHOLD);
         retract();
-    }
-    else
-    {
+    } else {
         gripping = true;
         move_from_gripper();
     }
@@ -138,18 +138,15 @@ const uint32_t LidGripper::move_gripper_until_stall(Dir direction)
     uint32_t steps = 0;
     bool stall_triggered = false;
 
-    if DEBUGGING (INFO)
-    {
+    if DEBUGGING (INFO) {
         tmc_print_sgt(driver);
         tmc_print_current(driver);
     }
 
-    auto stop = [this, &stall_triggered, &steps]
-    {
+    auto stop = [this, &stall_triggered, &steps] {
         driver.VACTUAL(0);
         stall_triggered = true;
-        if (DEBUGGING(INFO))
-        {
+        if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPGM("LG stall value: ", driver.SG_RESULT());
             SERIAL_ECHOLNPGM("Grip stall steps: ", steps);
         }
@@ -158,23 +155,19 @@ const uint32_t LidGripper::move_gripper_until_stall(Dir direction)
 
     attachInterrupt(pins.STOP, stop, RISING);
     attachInterrupt(
-        pins.INDEX, [&steps]
-        { ++steps; },
-        CHANGE);
+        pins.INDEX, [&steps] { ++steps; }, CHANGE);
 
     int velocity = ((direction == Dir::GRIP) ? LID_GRIPPER_VELOCITY : -(LID_GRIPPER_VELOCITY));
     driver.VACTUAL(velocity);
 
     // wait until stall, passed threshold, or timeout
     auto timeout = millis() + 5000;
-    while (!stall_triggered && steps < LID_GRIPPER_DETECTION_THRESHOLD && millis() < timeout)
-    {
+    while (!stall_triggered && steps < LID_GRIPPER_DETECTION_THRESHOLD && millis() < timeout) {
         delay(500);
         idle();
     }
 
-    if (!stall_triggered)
-    {
+    if (!stall_triggered) {
         stop();
         SERIAL_ERROR_MSG("Lid Gripper did not stall!");
     }

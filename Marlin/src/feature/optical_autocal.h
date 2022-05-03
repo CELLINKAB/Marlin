@@ -7,7 +7,6 @@
 #include <array>
 #include <numeric>
 
-
 struct OpticalAutocal
 {
     inline static constexpr xyz_pos_t START_POSITION{AUTOCAL_START_POSITION};
@@ -55,10 +54,10 @@ private:
 
     /**
      * @brief Perform a multi-step sweep of optical sensors to find precise tool offset
-     * 
-     * @param z_increment 
+     *
+     * @param z_increment
      * @param feedrate mm/s
-     * @param cycles 
+     * @param cycles
      */
     bool full_sensor_sweep(const float feedrate)
     {
@@ -79,21 +78,21 @@ private:
         const bool sensor_1_check = READ(SENSOR_1);
         const bool sensor_2_check = READ(SENSOR_2);
 
-        if (sensor_1_check && sensor_2_check) {
+        if (sensor_1_check && sensor_2_check)
+        {
             tool_offset.set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
                             xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
-                            z_offset + END_POSITION_PRINTBED_DELTA.z
-                            );
-            if (DEBUGGING(INFO) || DEBUGGING(LEVELING)) 
+                            z_offset + END_POSITION_PRINTBED_DELTA.z);
+            if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
                 print_pos(tool_offset, F("Calibrated tool offset:"));
             do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
             do_blocking_move_to_xy(tool_offset);
-            //planner.set_position_mm({0.0,0.0,0.0});
-            
+            // planner.set_position_mm({0.0,0.0,0.0});
         }
         else
             SERIAL_ERROR_MSG("Autocalibration succeeded but sanity check failed!"
-                             "\nsensor 1: ", sensor_1_check,
+                             "\nsensor 1: ",
+                             sensor_1_check,
                              "\nsensor 2: ", sensor_2_check);
 
         return true;
@@ -102,7 +101,7 @@ private:
     /**
      * @brief sweep in y direction across both sensors to derive nozzle centerpoint distance between beams
      *        then use that value to calculate the precise offset for both X and Y using sensor geometry
-     * 
+     *
      * @param feedrate mm/s
      * @return const xy_pos_t XY coordinate of the intersection of both optical sensors
      */
@@ -125,7 +124,8 @@ private:
             read_sensor_1 = false;
             delay(delay_5mm);
             read_sensor_2 = true;
-            if DEBUGGING(LEVELING) SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
+            if DEBUGGING (LEVELING)
+                SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
         };
         auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm]
         {
@@ -136,7 +136,8 @@ private:
             read_sensor_2 = false;
             delay(delay_5mm);
             read_sensor_1 = true;
-            if DEBUGGING(LEVELING) SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
+            if DEBUGGING (LEVELING)
+                SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
         };
 
         attachInterrupt(SENSOR_1, isr1, RISING);
@@ -187,7 +188,7 @@ private:
 
         if (any_non_zero)
         {
-            SERIAL_ERROR_MSG("zero values in sweep! Check optical sensors.","Calibration aborted.");
+            SERIAL_ERROR_MSG("zero values in sweep! Check optical sensors.", "Calibration aborted.");
             return XY_OFFSET_ERR;
         }
 
@@ -208,7 +209,7 @@ private:
         // right triangles with legs in the X and Y directions, both of value dy/2
         const float xy_offset = dy / 2.0f;
 
-         if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
+        if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
             SERIAL_ECHOLNPGM("XY offset: ", xy_offset);
 
         const float x = START_POSITION.x - xy_offset;
@@ -256,7 +257,7 @@ private:
 
         if (z <= (soft_endstop.min.z + PRECISE_Z_INCREMENT))
             z = Z_OFFSET_ERR;
-        
+
         return z;
     }
 };

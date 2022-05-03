@@ -1,13 +1,12 @@
 // Copyright Cellink 2022 - GPL-v3
 
-#include "../module/servo.h"
 #include "../gcode/gcode.h"
 #include "../module/planner.h"
+#include "../module/servo.h"
 
 #define SLIDER_SERVO servo[0]
 
-namespace cartridge
-{
+namespace cartridge {
 
 enum class SliderPosition : uint8_t
 {
@@ -19,8 +18,7 @@ enum class SliderPosition : uint8_t
 
 constexpr int slider_map(SliderPosition position)
 {
-    switch (position)
-    {
+    switch (position) {
     case SliderPosition::Extrude:
         return 0;
     case SliderPosition::MaterialMix:
@@ -36,13 +34,12 @@ constexpr int slider_map(SliderPosition position)
 
 static SliderPosition current_slider_pos = SliderPosition::Extrude;
 
-}
+} // namespace cartridge
 
 void GcodeSuite::M1112()
 {
     const auto slider_position = parser.intval('P', -1);
-    if (slider_position < 0 || slider_position > 3)
-    {
+    if (slider_position < 0 || slider_position > 3) {
         SERIAL_ECHO_MSG("P value must be between 0 and 3");
         return;
     }
@@ -53,8 +50,7 @@ void GcodeSuite::M1112()
 
 void GcodeSuite::M1113()
 {
-    if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude)
-    {
+    if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude) {
         SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
         return;
     }
@@ -66,13 +62,13 @@ void GcodeSuite::M1113()
     const auto pos = current_position.copy();
     const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
 
-    for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles)
-    {
+    for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles) {
         planner.buffer_segment(retract_pos, feedrate);
         planner.buffer_segment(pos, feedrate);
     }
 
-    if (parser.seen('L')) planner.buffer_segment(retract_pos, feedrate);
+    if (parser.seen('L'))
+        planner.buffer_segment(retract_pos, feedrate);
 
     planner.synchronize();
     sync_plan_position_e();
