@@ -889,7 +889,7 @@ void MarlinSettings::postprocess() {
         EEPROM_WRITE(bbl.get_grid_spacing());
         EEPROM_WRITE(bbl.get_grid_start());
       #else
-        const xy_pos_t bilinear_start{0}, bilinear_grid_spacing{0};
+        const xy_pos_t bilinear_start{}, bilinear_grid_spacing{};
         EEPROM_WRITE(bilinear_grid_spacing);
         EEPROM_WRITE(bilinear_start);
       #endif
@@ -2067,7 +2067,7 @@ void MarlinSettings::postprocess() {
       // Controller Fan
       //
       {
-        controllerFan_settings_t cfs = { 0 };
+        controllerFan_settings_t cfs = {};
         _FIELD_TEST(controllerFan_settings);
         EEPROM_READ(cfs);
         TERN_(CONTROLLER_FAN_EDITABLE, if (!validating) controllerFan.settings = cfs);
