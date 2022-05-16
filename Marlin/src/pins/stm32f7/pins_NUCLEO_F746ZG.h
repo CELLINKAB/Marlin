@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#if NOT_TARGET(STM32F746xx)
+#if NOT_TARGET(STM32F767xx)
 #error "Oops! Select an STM32F746 environment"
 #endif
 
