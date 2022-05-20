@@ -1148,13 +1148,14 @@
   #define SMART_EFFECTOR_MOD_PIN  -1  // Connect a GPIO pin to the Smart Effector MOD pin
 #endif
 
-// Cellink InduProbe displacement sensor based probe
-//#define RETRACTING_DISPLACEMENT_PROBE
-#if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
-  #define RDP_MOTOR_STALL_SENSITIVITY 25
+// Probe that stows and deploys using a TMC stepper with stallguard features
+#define STEPPER_RETRACTING_PROBE
+
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #define PROBE_MOTOR_STALL_SENSITIVITY 25
   // RMS current for driver to supply to motor (mA)
-  #define RDP_MOTOR_CURRENT 400
-  #define RDP_MOTOR_VELOCITY 15000
+  #define PROBE_MOTOR_CURRENT 400
+  #define PROBE_MOTOR_VELOCITY 15000
 #endif
 
 /**
