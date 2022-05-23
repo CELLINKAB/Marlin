@@ -205,10 +205,9 @@
   #define STM_INEMO_SAD_0_BIT 0
 #endif
 
-#if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
-  #define RDP_EN_PIN PD13
-  #define RDP_STOP_PIN PD12
-  #define PROBE_READ_PIN PC3
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #define PROBE_EN_PIN PD13
+  #define PROBE_STOP_PIN PD12
 #endif
 //
 // Temperature Sensors
