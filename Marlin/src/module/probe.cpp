@@ -98,6 +98,10 @@
   #include "../feature/analog_surface_probe.h"
 #endif
 
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #include "../feature/stepper_retracting_probe.h"
+#endif
+
 #if ENABLED(EXTENSIBLE_UI)
   #include "../lcd/extui/ui_api.h"
 #elif ENABLED(DWIN_LCD_PROUI)
@@ -365,6 +369,10 @@ FORCE_INLINE void probe_specific_action(const bool deploy) {
   #elif ENABLED(RACK_AND_PINION_PROBE)
 
     do_blocking_move_to_x(deploy ? Z_PROBE_DEPLOY_X : Z_PROBE_RETRACT_X);
+
+  #elif ENABLED(STEPPER_RETRACTING_PROBE)
+  
+    deploy ? stepper_probe.deploy() : stepper_probe.stow();
 
   #elif DISABLED(PAUSE_BEFORE_DEPLOY_STOW)
 

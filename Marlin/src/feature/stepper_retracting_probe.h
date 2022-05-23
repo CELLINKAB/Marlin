@@ -43,12 +43,12 @@ struct StepperRetractingProbe
     }
 
 private:
-    constexpr static int32_t DEPLOY_VELOCITY = 49000;
+    constexpr static int32_t DEPLOY_VELOCITY = 40000;
     constexpr static int32_t STOW_VELOCITY = -65000;
     constexpr static uint8_t HW_ADDRESS = 2;
-    constexpr static uint8_t STALL_THRESHOLD = 65;
-    constexpr static uint32_t MOTOR_CURRENT = 280;
-    constexpr static uint32_t STOW_TIME = 2000;
+    constexpr static uint8_t STALL_THRESHOLD = 45;
+    constexpr static uint32_t MOTOR_CURRENT = 200;
+    constexpr static uint32_t STOW_TIME = 7000;
 
     enum class ProbeState
     {
