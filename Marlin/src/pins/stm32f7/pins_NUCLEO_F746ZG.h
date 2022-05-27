@@ -84,7 +84,7 @@
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
  *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
  * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
- *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
+ *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX/E_TX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
  *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
@@ -164,7 +164,8 @@
 #define SERVO0_PIN PE15
 
 // Pressure sensor
-#define PRESSURE_SENSOR_PIN PF5
+#define PRESSURE_SENSOR_PIN PF3
+#define PRESSURE_SENSOR_2_PIN PF5
 
 #if ENABLED(LID_GRIPPER_STATION)
     // #define LG_STEP_PIN         PD12

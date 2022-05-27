@@ -4,66 +4,56 @@
 
 #if ENABLED(ANALOG_PRESSURE_SENSOR)
 
-#if !ANY_PIN(PRESSURE_SENSOR)
-#error "PRESSURE_SENSOR_PIN must be defined for analog pressure sensor!"
-#endif
+#    if !ANY_PIN(PRESSURE_SENSOR)
+#        error "PRESSURE_SENSOR_PIN must be defined for analog pressure sensor!"
+#    endif
 
-#include "../gcode/gcode.h"
-#include "interval_reporter.h"
+#    include "../gcode/gcode.h"
+#    include "../module/planner.h"
 
-#include <numeric>
+#    include "interval_reporter.h"
+#    include "pressure_sensor.h"
 
 void GcodeSuite::M1111()
 {
-    static uint32_t pressure_zero_offset = INITIAL_SENSOR_ZERO_OFFSET;
-    static constexpr float KPA_SCALE_FACTOR = SENSOR_KPA_SCALE_FACTOR;
-    static auto report_fn = []()
-    {
-        static constexpr size_t SAMPLES = PRESSURE_SENSOR_REPORT_SAMPLES;
-        uint32_t sensor_readings[SAMPLES]{};
-        for (auto &val : sensor_readings)
-        {
-            val = analogRead(PRESSURE_SENSOR_PIN);
-            if constexpr (SAMPLES > 1)
-                delayMicroseconds(1000 / SAMPLES);
-        }
-        auto avg_reading = std::accumulate(std::cbegin(sensor_readings), std::cend(sensor_readings), 0) / SAMPLES;
-        auto shifted_reading = (avg_reading > pressure_zero_offset) ? (avg_reading - pressure_zero_offset) : 0;
-        auto kpa_reading = static_cast<float>(shifted_reading) * KPA_SCALE_FACTOR;
-        SERIAL_ECHO_MSG("Pressure (kPa):", kpa_reading);
+    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN,2.0896f);
+    static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN,1.39307f);
+    static auto report_fn = []() {
+        const float reading_1 = sensor_1.read_avg();
+        const float e_pos = current_position.e;
+        const auto time = millis();
+        const float reading_2 = sensor_2.read_avg();
+        SERIAL_ECHOLNPGM("T=", time, ",E=", e_pos, ",P1=", reading_1, ",P2=", reading_2);
     };
-    static IntervalReporter pressure_sensor(report_fn);
+    static IntervalReporter pressure_sensor_reporter(report_fn);
 
-    if (parser.seenval('T'))
-        pressure_zero_offset = parser.ulongval('T');
-    else if (parser.seen_test('T')){
+    if (parser.seen_test('T')) {
         if (DEBUGGING(INFO))
             SERIAL_ECHO_MSG("Training pressure sensor...");
-        static constexpr size_t SAMPLES = PRESSURE_SENSOR_TRAINING_SAMPLES;
-        uint32_t sensor_values[SAMPLES]{};
-        for (auto &val : sensor_values)
-        {
-            val = analogRead(PRESSURE_SENSOR_PIN);
-            delay(1000 / SAMPLES);
+        sensor_1.tare();
+        sensor_2.tare();
+        if DEBUGGING (INFO) {
+            SERIAL_ECHOLNPAIR_F("pressure sensor 1 new offset: ", sensor_1.offset);
+            SERIAL_ECHOLNPAIR_F("pressure sensor 2 new offset: ", sensor_2.offset);
         }
-        pressure_zero_offset = std::accumulate(std::cbegin(sensor_values), std::cend(sensor_values), 0) / SAMPLES;
-        if DEBUGGING (INFO)
-            SERIAL_ECHOLNPGM("new sensor offset: ", pressure_zero_offset);
         return;
     }
 
     if (parser.seen_test('R'))
-        SERIAL_ECHO_MSG("Pressure (raw):", analogRead(PRESSURE_SENSOR_PIN));
+        SERIAL_ECHO_MSG("Pressure (raw) sensor 1:",
+                        sensor_1.read_raw(),
+                        ", sensor 2:",
+                        sensor_2.read_raw());
     else
         report_fn();
 
     if (int period = parser.intval('P'); period > 0)
-        pressure_sensor.set_interval_ms(period);
+        pressure_sensor_reporter.set_interval_ms(period);
 
     if (parser.boolval('S'))
-        pressure_sensor.start();
+        pressure_sensor_reporter.start();
     else
-        pressure_sensor.stop();
+        pressure_sensor_reporter.stop();
 }
 
 #endif // ANALOG_PRESSURE_SENSOR
