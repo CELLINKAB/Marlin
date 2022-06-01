@@ -36,7 +36,7 @@ void GcodeSuite::M1111()
             break;
         case 2:
             sensor_2.scalar = factor;
-
+            break;
         default:
             SERIAL_ECHO_MSG("Need to specify I1/2 (index) for factor change!");
             break;
