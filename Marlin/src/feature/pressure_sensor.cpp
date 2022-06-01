@@ -16,8 +16,8 @@
 
 void GcodeSuite::M1111()
 {
-    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN,2.0896f);
-    static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN,1.39307f);
+    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN, 2.0896f);
+    static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN, 1.39307f);
     static auto report_fn = []() {
         const float reading_1 = sensor_1.read_avg();
         const float e_pos = current_position.e;
@@ -27,7 +27,25 @@ void GcodeSuite::M1111()
     };
     static IntervalReporter pressure_sensor_reporter(report_fn);
 
-    if (parser.seen_test('T')) {
+    if (parser.seen('F')) {
+        float factor = parser.value_float();
+        uint8_t sensor_index = parser.byteval('I', 0);
+        switch (sensor_index) {
+        case 1:
+            sensor_1.scalar = factor;
+            break;
+        case 2:
+            sensor_2.scalar = factor;
+
+        default:
+            SERIAL_ECHO_MSG("Need to specify I1/2 (index) for factor change!");
+            break;
+        }
+        return;
+    }
+
+    if (parser.seen_test('T'))
+    {
         if (DEBUGGING(INFO))
             SERIAL_ECHO_MSG("Training pressure sensor...");
         sensor_1.tare();
