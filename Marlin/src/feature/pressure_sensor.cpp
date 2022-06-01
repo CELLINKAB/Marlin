@@ -16,8 +16,8 @@
 
 void GcodeSuite::M1111()
 {
-    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN, 2.0896f);
-    static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN, 1.39307f);
+    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN, 0.5302574309f);
+    static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN, 0.4188586991f);
     static auto report_fn = []() {
         const float reading_1 = sensor_1.read_avg();
         const float e_pos = current_position.e;
