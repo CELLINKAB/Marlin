@@ -68,7 +68,7 @@
  *                                              (X_STEP) PC6 | · · | PB8 (I2C_SCL)
  *                                              (X_DIR) PB15 | · · | PB9 (I2C_SDA)
  *                                               (X_EN) PB13 | · · | AVDD
- *                 _CN8_                       (X_DIAG) PB12 | · · | GND
+ *                 _CN8_                                PB12 | · · | GND
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
@@ -92,7 +92,7 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
- * (optical1) PD0 | · · | PF7 (E2_STOP)                  PA0 | · · | PE15 (SERVO0)
+ * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 (SERVO0)
  * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
