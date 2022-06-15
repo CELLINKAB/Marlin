@@ -18,7 +18,7 @@ struct StepperRetractingProbe
     {
         switch (state) {
         case ProbeState::Deployed:
-            return;
+            [[fallthrough]];
         case ProbeState::Unknown:
             stepper.raw_move(STOW_VELOCITY);
             delay(200);
@@ -27,7 +27,6 @@ struct StepperRetractingProbe
         case ProbeState::Stowed:
             stepper.blocking_move_until_stall(DEPLOY_VELOCITY);
             state = ProbeState::Deployed;
-            return;
         }
     }
 
@@ -43,11 +42,11 @@ struct StepperRetractingProbe
     }
 
 private:
-    constexpr static int32_t DEPLOY_VELOCITY = 40000;
+    constexpr static int32_t DEPLOY_VELOCITY = 38000;
     constexpr static int32_t STOW_VELOCITY = -65000;
     constexpr static uint8_t HW_ADDRESS = 2;
-    constexpr static uint8_t STALL_THRESHOLD = 45;
-    constexpr static uint32_t MOTOR_CURRENT = 200;
+    constexpr static uint8_t STALL_THRESHOLD = 55;
+    constexpr static uint32_t MOTOR_CURRENT = 225;
     constexpr static uint32_t STOW_TIME = 7000;
 
     enum class ProbeState

@@ -24,6 +24,11 @@ struct AnalogPressureSensor
      */
     uint32_t read_raw() const { return analogRead(pin); } // not portable
 
+    float read_volts() const
+    {
+        return (ADC_VREF / static_cast<float>(1 << ADC_RESOLUTION)) * static_cast<float>(analogRead(pin));
+    }
+
     /**
      * @brief read the sensor and return scaled kPa reading
      * 
@@ -39,7 +44,7 @@ struct AnalogPressureSensor
         uint32_t samples[40]{};
         for (uint32_t& sample : samples) {
             sample = read_raw();
-            delay(2);
+            delay(1);
         }
         float avg_raw = std::accumulate(std::cbegin(samples), std::cend(samples), 0.0f) / 40.0f;
         return apply_scaling_leveling(avg_raw, with_scaling, with_offset);
