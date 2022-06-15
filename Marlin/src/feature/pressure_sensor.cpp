@@ -44,8 +44,7 @@ void GcodeSuite::M1111()
         return;
     }
 
-    if (parser.seen_test('T'))
-    {
+    if (parser.seen_test('T')) {
         if (DEBUGGING(INFO))
             SERIAL_ECHO_MSG("Training pressure sensor...");
         sensor_1.tare();
@@ -62,7 +61,9 @@ void GcodeSuite::M1111()
                         sensor_1.read_raw(),
                         ", sensor 2:",
                         sensor_2.read_raw());
-    else
+    else if (parser.seen_test('V')) {
+        SERIAL_ECHO_MSG("Voltage sensor 1:", sensor_1.read_volts(), ", sensor 2:", sensor_2.read_volts());
+    } else
         report_fn();
 
     if (int period = parser.intval('P'); period > 0)
