@@ -8,8 +8,7 @@
 
 namespace cartridge {
 
-enum class SliderPosition : uint8_t
-{
+enum class SliderPosition : uint8_t {
     Extrude = 0,
     MaterialMix = 1,
     CellMix = 2,
@@ -50,6 +49,11 @@ void GcodeSuite::M1112()
 
 void GcodeSuite::M1113()
 {
+    static bool [[maybe_unused]] _init = []() {
+        OUT_WRITE(PRESSURE_VALVE_1_PIN, HIGH);
+        OUT_WRITE(PRESSURE_VALVE_2_PIN, LOW);
+        return true;
+    }();
     if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude) {
         SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
         return;
@@ -63,8 +67,16 @@ void GcodeSuite::M1113()
     const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
 
     for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles) {
+        WRITE(PRESSURE_VALVE_1_PIN, LOW);
+        WRITE(PRESSURE_VALVE_2_PIN, HIGH);
+        delay(50);
         planner.buffer_segment(retract_pos, feedrate);
+        planner.synchronize();
+        WRITE(PRESSURE_VALVE_2_PIN, LOW);
+        WRITE(PRESSURE_VALVE_1_PIN, HIGH);
+        delay(50);
         planner.buffer_segment(pos, feedrate);
+        planner.synchronize();
     }
 
     if (parser.seen('L'))

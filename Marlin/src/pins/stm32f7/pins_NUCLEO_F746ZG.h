@@ -72,9 +72,9 @@
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
- *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14
- *            +5V | · · | PC12 TX                        PA4 | · · | PD15
- *            GND | · · | PD2  RX                        PB4 | · · | PF12 
+ *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14 (pvalve_1)
+ *            +5V | · · | PC12 TX                        PA4 | · · | PD15 (pvalve_2)
+ *            GND | · · | PD2  RX                        PB4 | · · | PF12 (pvalve_3)
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
@@ -112,7 +112,7 @@
     #define Z_STOP_PIN PE12
     #define E0_STOP_PIN PG1
     #define E1_STOP_PIN PF9
-    #define E2_STOP_PIN PF7
+    //#define E2_STOP_PIN PF7
 #endif
 
 //
@@ -166,6 +166,12 @@
 // Pressure sensor
 #define PRESSURE_SENSOR_PIN PF3
 #define PRESSURE_SENSOR_2_PIN PF5
+
+// Pressure valves
+#define PRESSURE_VALVE_1_PIN PD14
+#define PRESSURE_VALVE_2_PIN PD15
+#define PRESSURE_VALVE_3_PIN
+
 
 #if ENABLED(LID_GRIPPER_STATION)
     // #define LG_STEP_PIN         PD12
