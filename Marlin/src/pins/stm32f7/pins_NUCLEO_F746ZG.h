@@ -68,13 +68,13 @@
  *                                              (X_STEP) PC6 | · · | PB8 (I2C_SCL)
  *                                              (X_DIR) PB15 | · · | PB9 (I2C_SDA)
  *                                               (X_EN) PB13 | · · | AVDD
- *                 _CN8_                       (X_DIAG) PB12 | · · | GND
+ *                 _CN8_                                PB12 | · · | GND
  *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
  *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
  *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
- *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14
- *            +5V | · · | PC12 TX                        PA4 | · · | PD15
- *            GND | · · | PD2  RX                        PB4 | · · | PF12 
+ *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14 (pvalve_1)
+ *            +5V | · · | PC12 TX                        PA4 | · · | PD15 (pvalve_2)
+ *            GND | · · | PD2  RX                        PB4 | · · | PF12 (pvalve_3)
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
@@ -84,7 +84,7 @@
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
  *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
  * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
- *            PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
+ *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX/E_TX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
  *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
@@ -92,7 +92,7 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
- * (optical1) PD0 | · · | PF7 (E2_STOP)                  PA0 | · · | PE15 (SERVO0)
+ * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 (SERVO0)
  * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
@@ -112,7 +112,7 @@
     #define Z_STOP_PIN PE12
     #define E0_STOP_PIN PG1
     #define E1_STOP_PIN PF9
-    #define E2_STOP_PIN PF7
+    //#define E2_STOP_PIN PF7
 #endif
 
 //
@@ -164,7 +164,14 @@
 #define SERVO0_PIN PE15
 
 // Pressure sensor
-#define PRESSURE_SENSOR_PIN PF5
+#define PRESSURE_SENSOR_PIN PF3
+#define PRESSURE_SENSOR_2_PIN PF5
+
+// Pressure valves
+#define PRESSURE_VALVE_1_PIN PD14
+#define PRESSURE_VALVE_2_PIN PD15
+#define PRESSURE_VALVE_3_PIN
+
 
 #if ENABLED(LID_GRIPPER_STATION)
     // #define LG_STEP_PIN         PD12
