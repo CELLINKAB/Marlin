@@ -47,15 +47,21 @@ void GcodeSuite::M1112()
     cartridge::current_slider_pos = enum_slider_val;
 }
 
-static void set_valves(bool pressure) {
-    [[maybe_unused]]static bool _init = []() {
+[[maybe_unused]] static bool _init = []() {
         OUT_WRITE(PRESSURE_VALVE_1_PIN, HIGH);
         OUT_WRITE(PRESSURE_VALVE_2_PIN, LOW);
         return true;
     }();
-    WRITE(PRESSURE_VALVE_1_PIN, pressure);
-    WRITE(PRESSURE_VALVE_2_PIN, !pressure);
+
+static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate) {
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
+    WRITE(PRESSURE_VALVE_2_PIN, LOW);
     delay(100);
+    planner.buffer_segment(pos, feedrate);
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, LOW);
+    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
 }
 
 void GcodeSuite::M1113()
@@ -68,28 +74,17 @@ void GcodeSuite::M1113()
     const auto volume = parser.axisunitsval('E', AxisEnum::E_AXIS);
     const auto feedrate = parser.feedrateval('F');
 
-    set_valves(false);
-
-    planner.synchronize();
     const auto pos = current_position.copy();
     const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
 
     for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles) {
-        set_valves(true);
-        planner.buffer_segment(retract_pos, feedrate);
-        planner.synchronize();
-        set_valves(false);
+        pneumatic_assisted_move(retract_pos, feedrate);
         planner.buffer_segment(pos, feedrate);
-        planner.synchronize();
     }
 
     if (parser.seen('L')) {
-        set_valves(true);
-        planner.buffer_segment(retract_pos, feedrate);
+        pneumatic_assisted_move(retract_pos, feedrate);
     }
 
-    set_valves(false);
-
-    planner.synchronize();
     sync_plan_position_e();
 }
