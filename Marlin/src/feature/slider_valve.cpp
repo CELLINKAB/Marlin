@@ -47,40 +47,48 @@ void GcodeSuite::M1112()
     cartridge::current_slider_pos = enum_slider_val;
 }
 
-void GcodeSuite::M1113()
-{
-    static bool [[maybe_unused]] _init = []() {
+static void set_valves(bool pressure) {
+    [[maybe_unused]]static bool _init = []() {
         OUT_WRITE(PRESSURE_VALVE_1_PIN, HIGH);
         OUT_WRITE(PRESSURE_VALVE_2_PIN, LOW);
         return true;
     }();
-    if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude) {
-        SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
-        return;
-    }
+    WRITE(PRESSURE_VALVE_1_PIN, pressure);
+    WRITE(PRESSURE_VALVE_2_PIN, !pressure);
+    delay(100);
+}
+
+void GcodeSuite::M1113()
+{
+    // if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude) {
+    //     SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
+    //     return;
+    // }
 
     const auto volume = parser.axisunitsval('E', AxisEnum::E_AXIS);
     const auto feedrate = parser.feedrateval('F');
+
+    set_valves(false);
 
     planner.synchronize();
     const auto pos = current_position.copy();
     const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
 
     for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles) {
-        WRITE(PRESSURE_VALVE_1_PIN, LOW);
-        WRITE(PRESSURE_VALVE_2_PIN, HIGH);
-        delay(50);
+        set_valves(true);
         planner.buffer_segment(retract_pos, feedrate);
         planner.synchronize();
-        WRITE(PRESSURE_VALVE_2_PIN, LOW);
-        WRITE(PRESSURE_VALVE_1_PIN, HIGH);
-        delay(50);
+        set_valves(false);
         planner.buffer_segment(pos, feedrate);
         planner.synchronize();
     }
 
-    if (parser.seen('L'))
+    if (parser.seen('L')) {
+        set_valves(true);
         planner.buffer_segment(retract_pos, feedrate);
+    }
+
+    set_valves(false);
 
     planner.synchronize();
     sync_plan_position_e();
