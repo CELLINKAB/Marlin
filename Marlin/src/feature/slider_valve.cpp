@@ -47,13 +47,9 @@ void GcodeSuite::M1112()
     cartridge::current_slider_pos = enum_slider_val;
 }
 
-[[maybe_unused]] static bool _init = []() {
-        OUT_WRITE(PRESSURE_VALVE_1_PIN, HIGH);
-        OUT_WRITE(PRESSURE_VALVE_2_PIN, LOW);
-        return true;
-    }();
 
-static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate) {
+void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate)
+{
     planner.synchronize();
     WRITE(PRESSURE_VALVE_1_PIN, HIGH);
     WRITE(PRESSURE_VALVE_2_PIN, LOW);
@@ -63,6 +59,7 @@ static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate) {
     WRITE(PRESSURE_VALVE_1_PIN, LOW);
     WRITE(PRESSURE_VALVE_2_PIN, HIGH);
 }
+
 
 void GcodeSuite::M1113()
 {

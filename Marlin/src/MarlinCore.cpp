@@ -256,6 +256,8 @@
   #include "feature/easythreed_ui.h"
 #endif
 
+
+
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
 MarlinState marlin_state = MF_INITIALIZING;
@@ -1625,6 +1627,11 @@ void setup() {
   #if ENABLED(LID_GRIPPER_STATION)
     SETUP_RUN(lid_gripper.init_pins());
   #endif
+
+  // TODO: put in separate .h
+  // setup pneumatic valves correctly for startup
+  OUT_WRITE(PRESSURE_VALVE_1_PIN, LOW);
+  OUT_WRITE(PRESSURE_VALVE_2_PIN, HIGH);
 
   marlin_state = MF_RUNNING;
 
