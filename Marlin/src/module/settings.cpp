@@ -1343,6 +1343,14 @@ void MarlinSettings::postprocess() {
         TERN_(Z2_SENSORLESS, tmc_sgt.Z2 = stepperZ2.homing_threshold());
         TERN_(Z3_SENSORLESS, tmc_sgt.Z3 = stepperZ3.homing_threshold());
         TERN_(Z4_SENSORLESS, tmc_sgt.Z4 = stepperZ4.homing_threshold());
+        TERN_(E0_SENSORLESS, tmc_sgt.E0 = stepperE0.homing_threshold());
+        TERN_(E1_SENSORLESS, tmc_sgt.E1 = stepperE1.homing_threshold());
+        TERN_(E2_SENSORLESS, tmc_sgt.E2 = stepperE2.homing_threshold());
+        TERN_(E3_SENSORLESS, tmc_sgt.E3 = stepperE3.homing_threshold());
+        TERN_(E4_SENSORLESS, tmc_sgt.E4 = stepperE4.homing_threshold());
+        TERN_(E5_SENSORLESS, tmc_sgt.E5 = stepperE5.homing_threshold());
+        TERN_(E6_SENSORLESS, tmc_sgt.E6 = stepperE6.homing_threshold());
+        TERN_(E7_SENSORLESS, tmc_sgt.E7 = stepperE7.homing_threshold());
       #endif
       EEPROM_WRITE(tmc_sgt);
     }
@@ -2266,6 +2274,14 @@ void MarlinSettings::postprocess() {
             TERN_(Z2_SENSORLESS, stepperZ2.homing_threshold(tmc_sgt.Z2));
             TERN_(Z3_SENSORLESS, stepperZ3.homing_threshold(tmc_sgt.Z3));
             TERN_(Z4_SENSORLESS, stepperZ4.homing_threshold(tmc_sgt.Z4));
+            TERN_(E0_SENSORLESS, stepperE0.homing_threshold(tmc_sgt.E0));
+            TERN_(E1_SENSORLESS, stepperE1.homing_threshold(tmc_sgt.E1));
+            TERN_(E2_SENSORLESS, stepperE2.homing_threshold(tmc_sgt.E2));
+            TERN_(E3_SENSORLESS, stepperE3.homing_threshold(tmc_sgt.E3));
+            TERN_(E4_SENSORLESS, stepperE4.homing_threshold(tmc_sgt.E4));
+            TERN_(E5_SENSORLESS, stepperE5.homing_threshold(tmc_sgt.E5));
+            TERN_(E6_SENSORLESS, stepperE6.homing_threshold(tmc_sgt.E6));
+            TERN_(E7_SENSORLESS, stepperE7.homing_threshold(tmc_sgt.E7));
           }
         #endif
       }
