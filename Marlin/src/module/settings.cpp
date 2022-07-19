@@ -177,6 +177,10 @@
   void MAC_report();
 #endif
 
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #include "../feature/stepper_retracting_probe.h"
+#endif
+
 #define _EN_ITEM(N) , E##N
 
 typedef struct { uint16_t LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4 REPEAT(E_STEPPERS, _EN_ITEM); } tmc_stepper_current_t;
@@ -552,6 +556,10 @@ typedef struct SettingsDataStruct {
 
   #if HAS_MULTI_LANGUAGE
     uint8_t ui_language;                                // M414 S
+  #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    StepperRetractingProbe::Config srp_conf;
   #endif
 
 } SettingsData;
@@ -1563,6 +1571,8 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(ui.language);
     #endif
 
+    TERN_(STEPPER_RETRACTING_PROBE, EEPROM_WRITE(stepper_probe.get_config()));
+
     //
     // Report final CRC and Data Size
     //
@@ -2511,6 +2521,14 @@ void MarlinSettings::postprocess() {
         if (ui_language >= NUM_LANGUAGES) ui_language = 0;
         ui.set_language(ui_language);
       }
+      #endif
+
+      #if ENABLED(STEPPER_RETRACTING_PROBE)
+        {
+          StepperRetractingProbe::Config srp_conf;
+          EEPROM_READ(srp_conf);
+          stepper_probe.set_config(srp_conf);
+        }
       #endif
 
       //
@@ -3498,6 +3516,9 @@ void MarlinSettings::reset() {
     #endif
 
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
+
+    TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
+    
   }
 
 #endif // !DISABLE_M503
