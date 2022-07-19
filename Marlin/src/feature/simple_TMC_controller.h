@@ -136,6 +136,14 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         return count;
     }
 
+    void rms_current(uint32_t current) {
+        driver->rms_current(current);
+    }
+
+    void stall_threshold(uint8_t threshold) {
+        driver->homing_threshold(threshold);
+    }
+
 private:
     TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>* driver;
 
