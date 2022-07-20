@@ -451,7 +451,7 @@
 
     bool report = true;
     const uint8_t index = parser.byteval('I');
-    LOOP_LOGICAL_AXES(i) if (parser.seen(AXIS_CHAR(i))) {
+    LOOP_LOGICAL_AXES(i) if (parser.seen(axis_codes[i])) {
       const int16_t value = parser.value_int();
       report = false;
       switch (i) {

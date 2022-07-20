@@ -34,8 +34,9 @@ struct StepperRetractingProbe
                  SRP_STOW_VELOCITY,
                  SRP_STALL_THRESHOLD,
                  SRP_STEPPER_CURRENT,
-                 SRP_RETRACT_TIME}, stepper{
-        STMC::init(SimpleTMCConfig(PROBE_SERIAL_ADDRESS, config.stall_threshold, config.stepper_current))}
+                 SRP_RETRACT_TIME}
+        , stepper{STMC::init(
+              SimpleTMCConfig(PROBE_SERIAL_ADDRESS, config.stall_threshold, config.stepper_current))}
     {}
 
     void deploy()
@@ -65,18 +66,42 @@ struct StepperRetractingProbe
         state = ProbeState::Stowed;
     }
 
-    const Config& get_config() const {
-        return config;
-    }
+    const Config& get_config() const { return config; }
 
-    void set_config(const Config& conf) {
+    void set_config(const Config& conf)
+    {
         // load config from flash
         stepper.rms_current(conf.stepper_current);
         stepper.stall_threshold(conf.stall_threshold);
         config = conf;
     }
 
-    void report_config(bool for_replay) {}
+    void report_config(bool for_replay) const
+    {
+        if (for_replay) {
+            SERIAL_ECHOLNPGM_P("M1029 T",
+                               config.stall_threshold,
+                               " C",
+                               config.stepper_current,
+                               " S",
+                               config.stow_velocity,
+                               " D",
+                               config.deploy_velocity,
+                               " M",
+                               config.minimum_retract_time);
+        } else {
+            SERIAL_ECHOLNPGM_P("Stall threshold: ",
+                               config.stall_threshold,
+                               "\nStepper current: ",
+                               config.stepper_current,
+                               "\nStow velocity: ",
+                               config.stow_velocity,
+                               "\nDeploy velocity: ",
+                               config.deploy_velocity,
+                               "\nBackoff time: ",
+                               config.minimum_retract_time);
+        }
+    }
 
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
