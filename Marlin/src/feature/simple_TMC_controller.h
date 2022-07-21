@@ -136,11 +136,11 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         return count;
     }
 
-    void rms_current(uint32_t current) {
+    void rms_current(uint16_t current) {
         driver->rms_current(current);
     }
 
-    void stall_threshold(uint8_t threshold) {
+    void stall_threshold(int16_t threshold) {
         driver->homing_threshold(threshold);
     }
 

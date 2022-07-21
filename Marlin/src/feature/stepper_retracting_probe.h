@@ -24,8 +24,8 @@ struct StepperRetractingProbe
     {
         int32_t deploy_velocity;
         int32_t stow_velocity;
-        uint8_t stall_threshold;
-        uint32_t stepper_current;
+        int16_t stall_threshold;
+        uint16_t stepper_current;
         uint32_t minimum_retract_time;
     };
 
