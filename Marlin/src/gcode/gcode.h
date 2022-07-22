@@ -1248,6 +1248,10 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    static void M1029();
+  #endif
+
   #if ENABLED(HAS_ANALOG_PROBE)
     static void M1100();
   #endif

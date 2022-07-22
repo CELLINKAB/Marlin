@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V86"
+#define EEPROM_VERSION "V87"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -177,11 +177,15 @@
   void MAC_report();
 #endif
 
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #include "../feature/stepper_retracting_probe.h"
+#endif
+
 #define _EN_ITEM(N) , E##N
 
 typedef struct { uint16_t LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4 REPEAT(E_STEPPERS, _EN_ITEM); } tmc_stepper_current_t;
 typedef struct { uint32_t LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4 REPEAT(E_STEPPERS, _EN_ITEM); } tmc_hybrid_threshold_t;
-typedef struct {  int16_t LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4;                              } tmc_sgt_t;
+typedef struct {  int16_t LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4 REPEAT(E_STEPPERS, _EN_ITEM); } tmc_sgt_t;
 typedef struct {     bool LINEAR_AXIS_LIST(X, Y, Z, I, J, K), X2, Y2, Z2, Z3, Z4 REPEAT(E_STEPPERS, _EN_ITEM); } tmc_stealth_enabled_t;
 
 #undef _EN_ITEM
@@ -552,6 +556,10 @@ typedef struct SettingsDataStruct {
 
   #if HAS_MULTI_LANGUAGE
     uint8_t ui_language;                                // M414 S
+  #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    StepperRetractingProbe::Config srp_conf;
   #endif
 
 } SettingsData;
@@ -1335,6 +1343,14 @@ void MarlinSettings::postprocess() {
         TERN_(Z2_SENSORLESS, tmc_sgt.Z2 = stepperZ2.homing_threshold());
         TERN_(Z3_SENSORLESS, tmc_sgt.Z3 = stepperZ3.homing_threshold());
         TERN_(Z4_SENSORLESS, tmc_sgt.Z4 = stepperZ4.homing_threshold());
+        TERN_(E0_SENSORLESS, tmc_sgt.E0 = stepperE0.homing_threshold());
+        TERN_(E1_SENSORLESS, tmc_sgt.E1 = stepperE1.homing_threshold());
+        TERN_(E2_SENSORLESS, tmc_sgt.E2 = stepperE2.homing_threshold());
+        TERN_(E3_SENSORLESS, tmc_sgt.E3 = stepperE3.homing_threshold());
+        TERN_(E4_SENSORLESS, tmc_sgt.E4 = stepperE4.homing_threshold());
+        TERN_(E5_SENSORLESS, tmc_sgt.E5 = stepperE5.homing_threshold());
+        TERN_(E6_SENSORLESS, tmc_sgt.E6 = stepperE6.homing_threshold());
+        TERN_(E7_SENSORLESS, tmc_sgt.E7 = stepperE7.homing_threshold());
       #endif
       EEPROM_WRITE(tmc_sgt);
     }
@@ -1562,6 +1578,8 @@ void MarlinSettings::postprocess() {
     #if HAS_MULTI_LANGUAGE
       EEPROM_WRITE(ui.language);
     #endif
+
+    TERN_(STEPPER_RETRACTING_PROBE, EEPROM_WRITE(stepper_probe.get_config()));
 
     //
     // Report final CRC and Data Size
@@ -2256,6 +2274,14 @@ void MarlinSettings::postprocess() {
             TERN_(Z2_SENSORLESS, stepperZ2.homing_threshold(tmc_sgt.Z2));
             TERN_(Z3_SENSORLESS, stepperZ3.homing_threshold(tmc_sgt.Z3));
             TERN_(Z4_SENSORLESS, stepperZ4.homing_threshold(tmc_sgt.Z4));
+            TERN_(E0_SENSORLESS, stepperE0.homing_threshold(tmc_sgt.E0));
+            TERN_(E1_SENSORLESS, stepperE1.homing_threshold(tmc_sgt.E1));
+            TERN_(E2_SENSORLESS, stepperE2.homing_threshold(tmc_sgt.E2));
+            TERN_(E3_SENSORLESS, stepperE3.homing_threshold(tmc_sgt.E3));
+            TERN_(E4_SENSORLESS, stepperE4.homing_threshold(tmc_sgt.E4));
+            TERN_(E5_SENSORLESS, stepperE5.homing_threshold(tmc_sgt.E5));
+            TERN_(E6_SENSORLESS, stepperE6.homing_threshold(tmc_sgt.E6));
+            TERN_(E7_SENSORLESS, stepperE7.homing_threshold(tmc_sgt.E7));
           }
         #endif
       }
@@ -2511,6 +2537,14 @@ void MarlinSettings::postprocess() {
         if (ui_language >= NUM_LANGUAGES) ui_language = 0;
         ui.set_language(ui_language);
       }
+      #endif
+
+      #if ENABLED(STEPPER_RETRACTING_PROBE)
+        {
+          StepperRetractingProbe::Config srp_conf;
+          EEPROM_READ(srp_conf);
+          stepper_probe.set_config(srp_conf);
+        }
       #endif
 
       //
@@ -3498,6 +3532,9 @@ void MarlinSettings::reset() {
     #endif
 
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
+
+    TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
+
   }
 
 #endif // !DISABLE_M503

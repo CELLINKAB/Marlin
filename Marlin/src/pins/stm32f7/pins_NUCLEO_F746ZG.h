@@ -215,6 +215,7 @@
 #if ENABLED(STEPPER_RETRACTING_PROBE)
   #define PROBE_EN_PIN PD13
   #define PROBE_STOP_PIN PD12
+  #define PROBE_SERIAL_ADDRESS 2
 #endif
 //
 // Temperature Sensors

@@ -451,7 +451,7 @@
 
     bool report = true;
     const uint8_t index = parser.byteval('I');
-    LOOP_LINEAR_AXES(i) if (parser.seen(AXIS_CHAR(i))) {
+    LOOP_LOGICAL_AXES(i) if (parser.seen(axis_codes[i])) {
       const int16_t value = parser.value_int();
       report = false;
       switch (i) {
@@ -484,6 +484,22 @@
         #if K_SENSORLESS
           case K_AXIS: stepperK.homing_threshold(value); break;
         #endif
+        #if E0_SENSORLESS || E1_SENSORLESS || E2_SENSORLESS || E3_SENSORLESS || E4_SENSORLESS || E5_SENSORLESS || E6_SENSORLESS || E7_SENSORLESS
+          case E_AXIS:
+            switch (index)
+            {
+              TERN_(E0_SENSORLESS, case 0: stepperE0.homing_threshold(value); break);
+              TERN_(E1_SENSORLESS, case 1: stepperE1.homing_threshold(value); break);
+              TERN_(E2_SENSORLESS, case 2: stepperE2.homing_threshold(value); break);
+              TERN_(E3_SENSORLESS, case 3: stepperE3.homing_threshold(value); break);
+              TERN_(E4_SENSORLESS, case 4: stepperE4.homing_threshold(value); break);
+              TERN_(E5_SENSORLESS, case 5: stepperE5.homing_threshold(value); break);
+              TERN_(E6_SENSORLESS, case 6: stepperE6.homing_threshold(value); break);
+              TERN_(E7_SENSORLESS, case 7: stepperE7.homing_threshold(value); break);
+              default: break;
+            }
+            break;
+        #endif
       }
     }
 
@@ -499,6 +515,14 @@
       TERN_(I_SENSORLESS, tmc_print_sgt(stepperI));
       TERN_(J_SENSORLESS, tmc_print_sgt(stepperJ));
       TERN_(K_SENSORLESS, tmc_print_sgt(stepperK));
+      TERN_(E0_SENSORLESS, tmc_print_sgt(stepperE0));
+      TERN_(E1_SENSORLESS, tmc_print_sgt(stepperE1));
+      TERN_(E2_SENSORLESS, tmc_print_sgt(stepperE2));
+      TERN_(E3_SENSORLESS, tmc_print_sgt(stepperE3));
+      TERN_(E4_SENSORLESS, tmc_print_sgt(stepperE4));
+      TERN_(E5_SENSORLESS, tmc_print_sgt(stepperE5));
+      TERN_(E6_SENSORLESS, tmc_print_sgt(stepperE6));
+      TERN_(E7_SENSORLESS, tmc_print_sgt(stepperE7));
     }
   }
 
@@ -560,6 +584,38 @@
     #if K_SENSORLESS
       say_M914(forReplay);
       SERIAL_ECHOLNPGM_P(SP_K_STR, stepperK.homing_threshold());
+    #endif
+    #if E0_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I0 E", stepperE0.homing_threshold());
+    #endif
+    #if E1_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I1 E", stepperE1.homing_threshold());
+    #endif
+    #if E2_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I2 E", stepperE2.homing_threshold());
+    #endif
+    #if E3_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I3 E", stepperE3.homing_threshold());
+    #endif
+    #if E4_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I4 E", stepperE4.homing_threshold());
+    #endif
+    #if E5_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I5 E", stepperE5.homing_threshold());
+    #endif
+    #if E6_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I6 E", stepperE6.homing_threshold());
+    #endif
+    #if E7_SENSORLESS
+      say_M914(forReplay);
+      SERIAL_ECHOLNPGM_P(" I7 E", stepperE7.homing_threshold());
     #endif
   }
 

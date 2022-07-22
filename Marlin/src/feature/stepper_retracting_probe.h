@@ -12,20 +12,45 @@
 // read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
 // probe types inherit from Probe<StowDeploy, ProbeType>
 
+#define SRP_DEPLOY_VELOCITY 38000
+#define SRP_STOW_VELOCITY -65000
+#define SRP_STALL_THRESHOLD 55
+#define SRP_STEPPER_CURRENT 225
+#define SRP_RETRACT_TIME 8000
+
 struct StepperRetractingProbe
 {
+    struct Config
+    {
+        int32_t deploy_velocity;
+        int32_t stow_velocity;
+        int16_t stall_threshold;
+        uint16_t stepper_current;
+        uint32_t minimum_retract_time;
+    };
+
+    StepperRetractingProbe()
+        : config{SRP_DEPLOY_VELOCITY,
+                 SRP_STOW_VELOCITY,
+                 SRP_STALL_THRESHOLD,
+                 SRP_STEPPER_CURRENT,
+                 SRP_RETRACT_TIME}
+        , stepper{STMC::init(
+              SimpleTMCConfig(PROBE_SERIAL_ADDRESS, config.stall_threshold, config.stepper_current))}
+    {}
+
     void deploy()
     {
         switch (state) {
         case ProbeState::Deployed:
             [[fallthrough]];
         case ProbeState::Unknown:
-            stepper.raw_move(STOW_VELOCITY);
+            stepper.raw_move(config.stow_velocity);
             delay(200);
             stepper.stop();
             [[fallthrough]];
         case ProbeState::Stowed:
-            stepper.blocking_move_until_stall(DEPLOY_VELOCITY);
+            stepper.blocking_move_until_stall(config.deploy_velocity);
             state = ProbeState::Deployed;
         }
     }
@@ -35,29 +60,61 @@ struct StepperRetractingProbe
         if (state != ProbeState::Deployed) {
             deploy();
         }
-        stepper.raw_move(STOW_VELOCITY);
-        delay(STOW_TIME);
+        stepper.raw_move(config.stow_velocity);
+        delay(config.minimum_retract_time);
         stepper.stop();
         state = ProbeState::Stowed;
     }
 
-private:
-    constexpr static int32_t DEPLOY_VELOCITY = 38000;
-    constexpr static int32_t STOW_VELOCITY = -65000;
-    constexpr static uint8_t HW_ADDRESS = 2;
-    constexpr static uint8_t STALL_THRESHOLD = 55;
-    constexpr static uint32_t MOTOR_CURRENT = 225;
-    constexpr static uint32_t STOW_TIME = 7000;
+    const Config& get_config() const { return config; }
 
-    enum class ProbeState
+    void set_config(const Config& conf)
     {
+        // load config from flash
+        stepper.rms_current(conf.stepper_current);
+        stepper.stall_threshold(conf.stall_threshold);
+        config = conf;
+    }
+
+    void report_config(bool for_replay) const
+    {
+        if (for_replay) {
+            SERIAL_ECHOLNPGM_P("M1029 T",
+                               config.stall_threshold,
+                               " C",
+                               config.stepper_current,
+                               " S",
+                               config.stow_velocity,
+                               " D",
+                               config.deploy_velocity,
+                               " M",
+                               config.minimum_retract_time);
+        } else {
+            SERIAL_ECHOLNPGM_P("Stall threshold: ",
+                               config.stall_threshold,
+                               "\nStepper current: ",
+                               config.stepper_current,
+                               "\nStow velocity: ",
+                               config.stow_velocity,
+                               "\nDeploy velocity: ",
+                               config.deploy_velocity,
+                               "\nBackoff time: ",
+                               config.minimum_retract_time);
+        }
+    }
+
+private:
+    using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
+
+    Config config;
+
+    enum class ProbeState {
         Unknown,
         Stowed,
         Deployed
     } state = ProbeState::Unknown;
 
-    using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
-    STMC::type stepper{STMC::init(SimpleTMCConfig(HW_ADDRESS, STALL_THRESHOLD, MOTOR_CURRENT))};
+    STMC::type stepper;
 };
 
 extern StepperRetractingProbe stepper_probe;
