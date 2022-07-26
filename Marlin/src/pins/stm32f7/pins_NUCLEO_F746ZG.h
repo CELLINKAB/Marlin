@@ -217,6 +217,15 @@
   #define PROBE_STOP_PIN PD12
   #define PROBE_SERIAL_ADDRESS 2
 #endif
+
+
+// cartridge station communication
+#define CHANTRELLE_SUPPORT
+#if ENABLED(CHANTRELLE_SUPPORT)
+  #define CHANT_SERIAL MSerial7
+
+#endif
+
 //
 // Temperature Sensors
 //
