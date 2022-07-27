@@ -79,7 +79,7 @@
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
  *                                                      AVDD | · · | PF13 (BTN_EN1)
- *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
+ *                 _CN9_                                AGND | · · | PE9  (CHANT_RTS)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
  *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
@@ -223,7 +223,8 @@
 #define CHANTRELLE_SUPPORT
 #if ENABLED(CHANTRELLE_SUPPORT)
   #define CHANT_SERIAL MSerial7
-
+  #define USING_HW_SERIAL7 1
+  #define CHANT_RTS_PIN PE9
 #endif
 
 //
