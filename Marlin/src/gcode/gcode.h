@@ -1260,6 +1260,10 @@ private:
     static void M1111();
   #endif
 
+  #if ENABLED(CHANTRELLE_SUPPORT)
+    static void M1069();
+  #endif
+
   // TODO: gate or change these
   // slider valve move
   static void M1112();

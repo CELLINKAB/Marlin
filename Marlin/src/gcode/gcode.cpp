@@ -1096,6 +1096,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       // easy mixing
       case 1113: M1113(); break;
 
+      #if ENABLED(CHANTRELLE_SUPPORT)
+        case 1069: M1069(); break;
+      #endif
+
       default: parser.unknown_command_warning(); break;
     }
     break;
