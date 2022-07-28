@@ -3,6 +3,7 @@
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../inc/MarlinConfig.h"
+#include "crc.h"
 
 #define CHANT_MAX_MSG_LEN 128
 
@@ -15,16 +16,23 @@ void debug_echo_cmd(const char* msg)
         return true;
     }();
     char buf[CHANT_MAX_MSG_LEN]{};
+    uint8_t crc_buf[sizeof(uint16_t)]{};
     const size_t msg_len = strlen(msg);
-    SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes");
+    static_assert(sizeof(char) == sizeof(uint8_t), "expected char width to be 8 bits");
+    uint16_t crc = crcCalculate16(CRC_INIT_BYTE16, msg, msg_len);
+    memcpy(crc_buf, &crc, sizeof(uint16_t));
+    SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", crc);
     CHANT_SERIAL.print(msg);
+    CHANT_SERIAL.write(crc_buf, sizeof(uint16_t));
     WRITE(CHANT_RTS_PIN, LOW);
-    const size_t new_len = CHANT_SERIAL.readBytes(buf, msg_len + 1);
+    const size_t new_len = CHANT_SERIAL.readBytes(buf, msg_len);
+    CHANT_SERIAL.readBytes(crc_buf, sizeof(uint16_t));
     WRITE(CHANT_RTS_PIN, HIGH);
-    SERIAL_ECHOLNPGM_P("received '", buf, "' from chant, ", new_len, " bytes");
+    memcpy(&crc, crc_buf, sizeof(uint16_t));
+    SERIAL_ECHOLNPGM_P("received '", buf, "' from chant, ", new_len, " bytes, crc:", crc);
 }
 
-const char* command_switch(uint32_t command)
+constexpr const char* command_switch(uint32_t command)
 {
     switch (command) {
     case 0:
