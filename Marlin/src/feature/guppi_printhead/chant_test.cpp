@@ -19,7 +19,7 @@ void debug_echo_cmd(const char* msg)
     uint8_t crc_buf[sizeof(uint16_t)]{};
     const size_t msg_len = strlen(msg);
     static_assert(sizeof(char) == sizeof(uint8_t), "expected char width to be 8 bits");
-    uint16_t crc = crcCalculate16(CRC_INIT_BYTE16, msg, msg_len);
+    uint16_t crc = crc16_from_data(msg, msg_len);
     memcpy(crc_buf, &crc, sizeof(uint16_t));
     SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", crc);
     CHANT_SERIAL.print(msg);
