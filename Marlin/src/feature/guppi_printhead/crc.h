@@ -81,7 +81,7 @@ constexpr uint16_t crc16_from_bytes(const uint8_t* data, size_t len, uint16_t in
 uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_INIT_BYTE16)
 {
     const uint8_t* c = static_cast<const uint8_t*>(c_ptr);
-    return crc_from_bytes(c, len, initData);
+    return crc16_from_bytes(c, len, initData);
 }
 
 #endif /* CRC_H_ */
