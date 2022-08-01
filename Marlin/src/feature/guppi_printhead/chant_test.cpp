@@ -3,7 +3,6 @@
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../inc/MarlinConfig.h"
-#include "crc.h"
 #include "request.h"
 
 #define CHANT_MAX_MSG_LEN 128
@@ -13,25 +12,26 @@ namespace printhead
 
 void debug_echo_cmd(const char* msg)
 {
-    [[maybe_unused]] static bool bootstrap = []() {
+    [[maybe_unused]] static printhead::Controller ph_1 = []() {
         //CHANT_SERIAL.setHalfDuplex();
         CHANT_SERIAL.begin(115200);
         OUT_WRITE(CHANT_RTS_PIN, HIGH);
-        return true;
+        return printhead::Controller(CHANT_SERIAL, printhead::Index::One);
     }();
     char buf[CHANT_MAX_MSG_LEN]{};
     uint8_t crc_buf[sizeof(uint16_t)]{};
     const size_t msg_len = strlen(msg);
     static_assert(sizeof(char) == sizeof(uint8_t), "expected char width to be 8 bits");
-    uint16_t crc = crc16_from_data(msg, msg_len);
-    memcpy(crc_buf, &crc, sizeof(uint16_t));
-    SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", crc);
-    CHANT_SERIAL.print(msg);
-    CHANT_SERIAL.write(crc_buf, sizeof(uint16_t));
+    printhead::Request packet(Index::One, Command::SYRINGEPUMP_20ML_START, reinterpret_cast<const uint8_t*>(msg), msg_len);
+    SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", packet.crc);
+    printhead::send(packet, CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, LOW);
+    uint8_t discard[3];
+    CHANT_SERIAL.readBytes(discard, 3);
     const size_t new_len = CHANT_SERIAL.readBytes(buf, msg_len);
     CHANT_SERIAL.readBytes(crc_buf, sizeof(uint16_t));
     WRITE(CHANT_RTS_PIN, HIGH);
+    uint16_t crc;
     memcpy(&crc, crc_buf, sizeof(uint16_t));
     SERIAL_ECHOLNPGM_P("received '", buf, "' from chant, ", new_len, " bytes, crc:", crc);
 }
