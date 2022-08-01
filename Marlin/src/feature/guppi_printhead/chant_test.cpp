@@ -4,8 +4,12 @@
 #include "../../gcode/parser.h"
 #include "../../inc/MarlinConfig.h"
 #include "crc.h"
+#include "request.h"
 
 #define CHANT_MAX_MSG_LEN 128
+
+namespace printhead
+{
 
 void debug_echo_cmd(const char* msg)
 {
@@ -46,9 +50,11 @@ constexpr const char* command_switch(uint32_t command)
     }
 }
 
+} // namespace printhead
+
 void GcodeSuite::M1069()
 {
     uint32_t command = parser.ulongval('C');
 
-    debug_echo_cmd(command_switch(command));
+    printhead::debug_echo_cmd(printhead::command_switch(command));
 }

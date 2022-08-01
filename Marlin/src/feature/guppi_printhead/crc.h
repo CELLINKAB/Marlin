@@ -16,6 +16,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+namespace printhead
+{
 //The first data for the crc
 static constexpr uint16_t CRC_INIT_BYTE16 = 0xCAFE;
 
@@ -83,5 +85,7 @@ uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_
     const uint8_t* c = static_cast<const uint8_t*>(c_ptr);
     return crc16_from_bytes(c, len, initData);
 }
+
+} // namespace printhead
 
 #endif /* CRC_H_ */
