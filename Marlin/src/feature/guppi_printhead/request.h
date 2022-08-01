@@ -152,14 +152,14 @@ struct Request
     Command command;
     const uint8_t* payload;
     uint8_t payload_size;
-
-    static Request set_temp(Index index, int temperature)
-    {
-        return Request
-        {
-            index, Command::
-        }
-    }
+    uint16_t crc;
+    constexpr Request(Index index, Command cmd, const uint8_t* message_payload, uint8_t message_size)
+        : ph_index(index)
+        , command(cmd)
+        , payload(message_payload)
+        , payload_size(message_size)
+        , crc(crc16_from_bytes(payload, payload_size))
+    {}
 };
 
 enum class Result {
@@ -174,15 +174,34 @@ Result send(Request request, HardwareSerial& serial)
     memcpy(&index_byte, &request.ph_index, 1);
     uint8_t command_bytes[2];
     memcpy(command_bytes, &request.command, 2);
-
-    uint16_t crc = crc16_from_bytes(request.payload, request.payload_size);
     uint8_t crc_bytes[2];
-    memcpy(crc_bytes, &crc, 2);
+    memcpy(crc_bytes, &request.crc, 2);
 
     serial.write(index_byte);
     serial.write(command_bytes, 2);
     serial.write(request.payload, request.payload_size);
     serial.write(crc_bytes, 2);
+
+    return Result::Ok;
 }
+
+class Controller
+{
+    HardwareSerial& bus;
+    Index index;
+
+public:
+    Controller(HardwareSerial& ph_bus, Index ph_index)
+        : bus(ph_bus)
+        , index(ph_index)
+    {}
+    Result set_temp(int16_t temperature)
+    {
+        uint8_t payload[2]{};
+        memcpy(payload, &temperature, 2);
+        Request request(index, Command::SET_TEMP, payload, 2);
+        return send(request, bus);
+    }
+};
 
 } // namespace printhead
