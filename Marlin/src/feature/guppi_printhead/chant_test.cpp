@@ -26,14 +26,9 @@ void debug_echo_cmd(const char* msg)
     SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", packet.crc);
     printhead::send(packet, CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, LOW);
-    uint8_t discard[3];
-    CHANT_SERIAL.readBytes(discard, 3);
-    const size_t new_len = CHANT_SERIAL.readBytes(buf, msg_len);
-    CHANT_SERIAL.readBytes(crc_buf, sizeof(uint16_t));
+    Response response = receive(CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, HIGH);
-    uint16_t crc;
-    memcpy(&crc, crc_buf, sizeof(uint16_t));
-    SERIAL_ECHOLNPGM_P("received '", buf, "' from chant, ", new_len, " bytes, crc:", crc);
+    SERIAL_ECHOLNPGM_P("received '", (const char*)response.packet.payload, "' from chant, ", response.packet.payload_size, " bytes, crc:", response.packet.crc);
 }
 
 constexpr const char* command_switch(uint32_t command)
