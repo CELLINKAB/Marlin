@@ -278,6 +278,8 @@ bool wait_for_heatup = true;
       idle(TERN_(ADVANCED_PAUSE_FEATURE, no_sleep));
     wait_for_user = false;
     while (ui.button_pressed()) safe_delay(50);
+        planner.quick_resume();
+
   }
 
 #endif

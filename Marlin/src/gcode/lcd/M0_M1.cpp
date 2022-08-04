@@ -53,7 +53,10 @@ void GcodeSuite::M0_M1() {
   if (parser.seenval('P')) ms = parser.value_millis();              // Milliseconds to wait
   if (parser.seenval('S')) ms = parser.value_millis_from_seconds(); // Seconds to wait
 
-  planner.synchronize();
+  if (parser.seen('N')) 
+    planner.quick_pause();
+  else 
+    planner.synchronize();
 
   #if HAS_MARLINUI_MENU
 
