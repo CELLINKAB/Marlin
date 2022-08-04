@@ -28,7 +28,12 @@ void debug_echo_cmd(const char* msg)
     WRITE(CHANT_RTS_PIN, LOW);
     Response response = receive(CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, HIGH);
-    SERIAL_ECHOLNPGM_P("received '", (const char*)response.packet.payload, "' from chant, ", response.packet.payload_size, " bytes, crc:", response.packet.crc);
+    if (response.result != Result::Ok)
+        {SERIAL_ECHO("Packet returned bad!");
+        return;}
+    SERIAL_ECHOLN("Packet returned OK!");
+    SERIAL_ECHOLNPGM("New CRC:", response.packet.crc);
+    //SERIAL_ECHOLNPGM_P("received '", (const char*)response.packet.payload, "' from chant, ", response.packet.payload_size, " bytes, crc:", response.packet.crc);
 }
 
 constexpr const char* command_switch(uint32_t command)
