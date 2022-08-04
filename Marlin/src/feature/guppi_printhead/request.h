@@ -139,7 +139,7 @@ enum class Command : uint16_t {
     NOF_CMDS
 };
 
-enum class Index : uint8_t {
+enum class Index : uint16_t {
     All,
     One,
     Two,
@@ -150,22 +150,28 @@ struct Packet
 {
     Index ph_index;
     Command command;
+    uint16_t payload_size;
     const uint8_t* payload;
-    uint8_t payload_size;
     uint16_t crc;
     constexpr Packet(Index index, Command cmd, const uint8_t* message_payload, uint8_t message_size)
         : ph_index(index)
         , command(cmd)
-        , payload(message_payload)
         , payload_size(message_size)
+        , payload(message_payload)
         , crc(crc16_from_bytes(payload, payload_size))
     {}
-    constexpr Packet(): ph_index(Index::All), command(Command::ACK), payload(nullptr), payload_size(0), crc(0) {}
+    constexpr Packet()
+        : ph_index(Index::All)
+        , command(Command::ACK)
+        , payload_size(0)
+        , payload(nullptr)
+        , crc(0)
+    {}
     Packet(Index index, Command cmd, const void* message_payload, uint8_t message_size)
         : ph_index(index)
         , command(cmd)
-        , payload(static_cast<const uint8_t*>(message_payload))
         , payload_size(message_size)
+        , payload(static_cast<const uint8_t*>(message_payload))
         , crc(crc16_from_data(payload, payload_size))
     {}
 };
@@ -180,17 +186,20 @@ enum class Result {
 
 Result send(const Packet& request, HardwareSerial& serial)
 {
-    static_assert(sizeof(Index) == 1 && sizeof(Command) == 2, "Unexpected packet enum byte-widths");
-    uint8_t index_byte;
-    memcpy(&index_byte, &request.ph_index, 1);
+    static_assert(sizeof(Index) == 2 && sizeof(Command) == 2, "Unexpected packet enum byte-widths");
+
+    uint8_t index_bytes[2];
+    memcpy(index_bytes, &request.ph_index, 2);
     uint8_t command_bytes[2];
     memcpy(command_bytes, &request.command, 2);
+    uint8_t size_bytes[2];
+    memcpy(size_bytes, &request.payload_size, 2);
     uint8_t crc_bytes[2];
     memcpy(crc_bytes, &request.crc, 2);
 
-    serial.write(index_byte);
+    serial.write(index_bytes, 2);
     serial.write(command_bytes, 2);
-    serial.write(request.payload_size);
+    serial.write(size_bytes, 2);
     serial.write(request.payload, request.payload_size);
     serial.write(crc_bytes, 2);
 
@@ -199,7 +208,8 @@ Result send(const Packet& request, HardwareSerial& serial)
     return Result::Ok;
 }
 
-struct Response {
+struct Response
+{
     Packet packet;
     Result result;
 };
@@ -209,19 +219,19 @@ Response receive(HardwareSerial& serial)
     // this seems bug-prone...
     static uint8_t packet_buffer[64];
 
-    Packet incoming{};
+    Packet incoming;
 
     auto bytes_received = serial.readBytes(packet_buffer, 64);
 
     if (bytes_received < 6)
         return Response{incoming, Result::TooShort};
-    memcpy(&incoming.ph_index, &packet_buffer[0], 1);
-    memcpy(&incoming.command, &packet_buffer[1], 2);
-    memcpy(&incoming.payload_size, &packet_buffer[3], 1);
-    if (incoming.payload_size !=  bytes_received - 6)
+    memcpy(&incoming.ph_index, &packet_buffer[0], 2);
+    memcpy(&incoming.command, &packet_buffer[2], 2);
+    memcpy(&incoming.payload_size, &packet_buffer[4], 2);
+    if (incoming.payload_size != bytes_received - 8)
         return Response{incoming, Result::BadSize};
-    incoming.payload = &packet_buffer[4];
-    memcpy(&incoming.crc, &packet_buffer[4 + incoming.payload_size], 2);
+    incoming.payload = &packet_buffer[6];
+    memcpy(&incoming.crc, &packet_buffer[6 + incoming.payload_size], 2);
     uint16_t crc = crc16_from_bytes(incoming.payload, incoming.payload_size);
 
     if (crc != incoming.crc)
