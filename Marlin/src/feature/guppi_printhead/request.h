@@ -160,6 +160,13 @@ struct Request
         , payload_size(message_size)
         , crc(crc16_from_bytes(payload, payload_size))
     {}
+    Request(Index index, Command cmd, const void* message_payload, uint8_t message_size)
+        : ph_index(index)
+        , command(cmd)
+        , payload(static_cast<const uint8_t*>(message_payload))
+        , payload_size(message_size)
+        , crc(crc16_from_data(payload, payload_size))
+    {}
 };
 
 enum class Result {
@@ -168,7 +175,7 @@ enum class Result {
     Something,
 };
 
-Result send(Request request, HardwareSerial& serial)
+Result send(const Request& request, HardwareSerial& serial)
 {
     uint8_t index_byte;
     memcpy(&index_byte, &request.ph_index, 1);
@@ -181,6 +188,8 @@ Result send(Request request, HardwareSerial& serial)
     serial.write(command_bytes, 2);
     serial.write(request.payload, request.payload_size);
     serial.write(crc_bytes, 2);
+
+    // should read an ACK after this write to assure complete transaction
 
     return Result::Ok;
 }
@@ -195,11 +204,13 @@ public:
         : bus(ph_bus)
         , index(ph_index)
     {}
-    Result set_temp(int16_t temperature)
+    Result set_temp(float temperature)
     {
-        uint8_t payload[2]{};
-        memcpy(payload, &temperature, 2);
-        Request request(index, Command::SET_TEMP, payload, 2);
+        static constexpr size_t PAYLOAD_SIZE = sizeof(uint16_t);
+        uint16_t converted_temp = static_cast<uint16_t>(temperature * 100.0f + 30000.0f);
+        uint8_t payload[PAYLOAD_SIZE]{};
+        memcpy(payload, &converted_temp, PAYLOAD_SIZE);
+        Request request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
         return send(request, bus);
     }
 };

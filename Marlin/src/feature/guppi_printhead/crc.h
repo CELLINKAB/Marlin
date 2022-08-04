@@ -61,6 +61,7 @@ inline constexpr uint16_t crc16_iteration(uint16_t crc_state, const uint8_t next
     return crc_state;
 }
 
+
 constexpr uint16_t crc16_from_bytes(const uint8_t* data, size_t len, uint16_t init_data = CRC_INIT_BYTE16)
 {
     uint16_t crc = init_data;
@@ -80,7 +81,7 @@ constexpr uint16_t crc16_from_bytes(const uint8_t* data, size_t len, uint16_t in
  * @param initData if extending from a previous CRC calculation, use the CRC previously calculated here, otherwise the default init value is used
  * @return constexpr uint16_t 
  */
-uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_INIT_BYTE16)
+constexpr uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_INIT_BYTE16)
 {
     const uint8_t* c = static_cast<const uint8_t*>(c_ptr);
     return crc16_from_bytes(c, len, initData);
