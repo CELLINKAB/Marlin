@@ -22,7 +22,7 @@ void debug_echo_cmd(const char* msg)
     uint8_t crc_buf[sizeof(uint16_t)]{};
     const size_t msg_len = strlen(msg);
     static_assert(sizeof(char) == sizeof(uint8_t), "expected char width to be 8 bits");
-    printhead::Request packet(Index::One, Command::SYRINGEPUMP_20ML_START, msg, msg_len);
+    printhead::Packet packet(Index::One, Command::SYRINGEPUMP_20ML_START, msg, msg_len);
     SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", packet.crc);
     printhead::send(packet, CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, LOW);

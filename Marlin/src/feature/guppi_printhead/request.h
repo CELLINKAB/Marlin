@@ -139,28 +139,29 @@ enum class Command : uint16_t {
     NOF_CMDS
 };
 
-enum class Index {
+enum class Index : uint8_t {
     All,
     One,
     Two,
     Three
 };
 
-struct Request
+struct Packet
 {
     Index ph_index;
     Command command;
     const uint8_t* payload;
     uint8_t payload_size;
     uint16_t crc;
-    constexpr Request(Index index, Command cmd, const uint8_t* message_payload, uint8_t message_size)
+    constexpr Packet(Index index, Command cmd, const uint8_t* message_payload, uint8_t message_size)
         : ph_index(index)
         , command(cmd)
         , payload(message_payload)
         , payload_size(message_size)
         , crc(crc16_from_bytes(payload, payload_size))
     {}
-    Request(Index index, Command cmd, const void* message_payload, uint8_t message_size)
+    constexpr Packet(): ph_index(Index::All), command(Command::ACK), payload(nullptr), payload_size(0), crc(0) {}
+    Packet(Index index, Command cmd, const void* message_payload, uint8_t message_size)
         : ph_index(index)
         , command(cmd)
         , payload(static_cast<const uint8_t*>(message_payload))
@@ -172,11 +173,14 @@ struct Request
 enum class Result {
     Ok,
     Busy,
-    Something,
+    TooShort,
+    BadSize,
+    ChecksumFailed
 };
 
-Result send(const Request& request, HardwareSerial& serial)
+Result send(const Packet& request, HardwareSerial& serial)
 {
+    static_assert(sizeof(Index) == 1 && sizeof(Command) == 2, "Unexpected packet enum byte-widths");
     uint8_t index_byte;
     memcpy(&index_byte, &request.ph_index, 1);
     uint8_t command_bytes[2];
@@ -186,12 +190,46 @@ Result send(const Request& request, HardwareSerial& serial)
 
     serial.write(index_byte);
     serial.write(command_bytes, 2);
+    serial.write(request.payload_size);
     serial.write(request.payload, request.payload_size);
     serial.write(crc_bytes, 2);
 
     // should read an ACK after this write to assure complete transaction
 
     return Result::Ok;
+}
+
+struct Response {
+    Packet packet;
+    Result result;
+};
+
+Response receive(HardwareSerial& serial)
+{
+    // this seems bug-prone...
+    static uint8_t packet_buffer[64];
+
+    Packet incoming{};
+
+    auto bytes_received = serial.readBytes(packet_buffer, 64);
+
+    if (bytes_received < 6)
+        return Response{incoming, Result::TooShort};
+    memcpy(&incoming.ph_index, &packet_buffer[0], 1);
+    memcpy(&incoming.command, &packet_buffer[1], 2);
+    memcpy(&incoming.payload_size, &packet_buffer[3], 1);
+    if (incoming.payload_size !=  bytes_received - 6)
+        return Response{incoming, Result::BadSize};
+    incoming.payload = &packet_buffer[4];
+    memcpy(&incoming.crc, &packet_buffer[4 + incoming.payload_size], 2);
+    uint16_t crc = crc16_from_bytes(incoming.payload, incoming.payload_size);
+
+    if (crc != incoming.crc)
+        return Response{incoming, Result::ChecksumFailed};
+
+    return Response{incoming, Result::Ok};
+
+    // ACK would go here
 }
 
 class Controller
@@ -210,7 +248,7 @@ public:
         uint16_t converted_temp = static_cast<uint16_t>(temperature * 100.0f + 30000.0f);
         uint8_t payload[PAYLOAD_SIZE]{};
         memcpy(payload, &converted_temp, PAYLOAD_SIZE);
-        Request request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
+        Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
         return send(request, bus);
     }
 };
