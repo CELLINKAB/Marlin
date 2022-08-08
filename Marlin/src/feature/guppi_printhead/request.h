@@ -167,6 +167,13 @@ struct Packet
         , payload(nullptr)
         , crc(0)
     {}
+    constexpr Packet(Index index, Command cmd)
+        : ph_index(index)
+        , command(cmd)
+        , payload_size(0)
+        , payload(nullptr)
+        , crc(0)
+    {}
     Packet(Index index, Command cmd, const void* message_payload, uint8_t message_size)
         : ph_index(index)
         , command(cmd)
@@ -300,6 +307,46 @@ public:
         Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
         return send(request, bus);
     }
+    Response get_info()
+    {
+        Packet packet(index, Command::GET_DEVICE_INFO);
+        Response response;
+        if (response.result = send(packet, bus))
+            return response;
+        return receive(bus); // TODO: parse response into type
+    }
+    Response get_fw_version()
+    {
+        Packet packet(index, Command::GET_SW_VERSION);
+        Response response;
+        if (response.result = send(packet, bus))
+            return response;
+        return receive(bus); //TODO: parse result into relevant type
+    }
+    Result set_pid(float p, float i, float d)
+    {
+        static constexpr PAYLOAD_SIZE = 6;
+        uint16_t p_ = static_cast<uint16_t>(p * 100);
+        uint16_t i_ = static_cast<uint16_t>(i * 100);
+        uint16_t d_ = static_cast<uint16_t>(d * 100);
+
+        uint8_t payload[PAYLOAD_SIZE];
+        memcpy(payload, &p_, 2);
+        memcpy(payload + 2, &i_, 2);
+        memcpy(payload + 4, &d_, 2);
+
+        Packet packet(index, Command::SET_PID, payload, PAYLOAD_SIZE);
+        return send(packet, bus);
+    }
+    Response get_pid()
+    {
+        Packet packet(index, Command::GET_PID);
+        Response response;
+        if (response.result = send(packet, bus))
+            return response;
+        return receive(bus); // TODO: parse incoming response and return payload values
+    }
+    
 };
 
 } // namespace printhead
