@@ -28,7 +28,7 @@ void debug_echo_cmd(const char* msg)
     WRITE(CHANT_RTS_PIN, LOW);
     Response response = receive(CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, HIGH);
-    if (response.result != Result::Ok)
+    if (response.result != Result::OK)
         {SERIAL_ECHO("Packet returned bad!");
         return;}
     SERIAL_ECHOLN("Packet returned OK!");

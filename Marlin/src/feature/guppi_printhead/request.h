@@ -196,15 +196,42 @@ struct Packet
         static_assert(sizeof(crc) == sizeof(CrcBytes), "Packet crc sizing incorrect");
         CrcBytes bytes;
         memcpy(bytes.data(), &crc, 2);
+        return bytes;
     }
 };
 
 enum class Result {
-    Ok,
-    Busy,
-    TooShort,
-    BadSize,
-    ChecksumFailed
+    OK,
+    BAD_CRC,
+    BUSY,
+    PACKET_TOO_SHORT,
+    BAD_PAYLOAD_SIZE,
+};
+
+enum class ErrorPayload {
+    OK,
+    INVALID_CRC,
+    INVALID_CMD,
+    WDOG_RESET,
+    MAX_TEMP,
+    MIN_TEMP,
+    ADDRESS_SETUP,
+    CHIP_SELECT,
+    MICRO_STEP,
+    MOTOR_DIR,
+    HEATER_TIMEOUT,
+    HEATER_SENSOR_ERROR,
+    HEATER_OVERTEMP,
+    ENDSTOP_TOP_HIT,
+    ENDSTOP_BOTTOM_HIT,
+    MOTOR_TIMEOUT,
+    HEATER_BROKEN,
+    PHYSICS,
+    HEATER_DISCONNECTED,
+    INVALID_PARAM,
+    VALVE_BROKEN,
+    PARAM_STORE,
+    PARAM_LOAD,
 };
 
 Result send(const Packet& request, HardwareSerial& serial)
@@ -217,7 +244,7 @@ Result send(const Packet& request, HardwareSerial& serial)
 
     // should read an ACK after this write to assure complete transaction
 
-    return Result::Ok;
+    return Result::OK;
 }
 
 struct Response
@@ -236,20 +263,20 @@ Response receive(HardwareSerial& serial)
     auto bytes_received = serial.readBytes(packet_buffer, 64);
 
     if (bytes_received < 6)
-        return Response{incoming, Result::TooShort};
+        return Response{incoming, Result::PACKET_TOO_SHORT};
     memcpy(&incoming.ph_index, &packet_buffer[0], 2);
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
     if (incoming.payload_size != bytes_received - 8)
-        return Response{incoming, Result::BadSize};
+        return Response{incoming, Result::BAD_PAYLOAD_SIZE};
     incoming.payload = &packet_buffer[6];
     memcpy(&incoming.crc, &packet_buffer[6 + incoming.payload_size], 2);
     uint16_t crc = crc16_from_bytes(incoming.payload, incoming.payload_size);
 
     if (crc != incoming.crc)
-        return Response{incoming, Result::ChecksumFailed};
+        return Response{incoming, Result::BAD_CRC};
 
-    return Response{incoming, Result::Ok};
+    return Response{incoming, Result::OK};
 
     // ACK would go here
 }
