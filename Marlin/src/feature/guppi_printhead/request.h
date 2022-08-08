@@ -174,6 +174,29 @@ struct Packet
         , payload(static_cast<const uint8_t*>(message_payload))
         , crc(crc16_from_data(payload, payload_size))
     {}
+
+    using HeaderBytes = std::array<uint8_t, 6>;
+    using CrcBytes = std::array<uint8_t, 2>;
+
+    HeaderBytes header_bytes() const
+    {
+        static_assert(sizeof(ph_index) + sizeof(command) + sizeof(payload_size) == sizeof(HeaderBytes),
+                      "Packet metadata sizing incorrect");
+        HeaderBytes bytes;
+        auto* ptr = bytes.data();
+
+        memcpy(ptr, &ph_index, 2);
+        memcpy(ptr + 2, &command, 2);
+        memcpy(ptr + 4, &payload_size, 2);
+        return bytes;
+    }
+
+    CrcBytes crc_bytes() const
+    {
+        static_assert(sizeof(crc) == sizeof(CrcBytes), "Packet crc sizing incorrect");
+        CrcBytes bytes;
+        memcpy(bytes.data(), &crc, 2);
+    }
 };
 
 enum class Result {
@@ -186,22 +209,11 @@ enum class Result {
 
 Result send(const Packet& request, HardwareSerial& serial)
 {
-    static_assert(sizeof(Index) == 2 && sizeof(Command) == 2, "Unexpected packet enum byte-widths");
-
-    uint8_t index_bytes[2];
-    memcpy(index_bytes, &request.ph_index, 2);
-    uint8_t command_bytes[2];
-    memcpy(command_bytes, &request.command, 2);
-    uint8_t size_bytes[2];
-    memcpy(size_bytes, &request.payload_size, 2);
-    uint8_t crc_bytes[2];
-    memcpy(crc_bytes, &request.crc, 2);
-
-    serial.write(index_bytes, 2);
-    serial.write(command_bytes, 2);
-    serial.write(size_bytes, 2);
+    const auto header = request.header_bytes();
+    const auto crc = request.crc_bytes();
+    serial.write(header.data(), header.size());
     serial.write(request.payload, request.payload_size);
-    serial.write(crc_bytes, 2);
+    serial.write(crc.data(), crc.size());
 
     // should read an ACK after this write to assure complete transaction
 
