@@ -67,17 +67,17 @@ Packet::CrcBytes Packet::crc_bytes() const
     return bytes;
 }
 
-Result Controller::set_temp(float temperature)
+Result Controller::set_temp(Index index, float temperature)
 {
     static constexpr size_t PAYLOAD_SIZE = sizeof(uint16_t);
-    uint16_t converted_temp = static_cast<uint16_t>(temperature * 100.0f + 30000.0f);
+    uint16_t converted_temp = static_cast<uint16_t>((temperature * 100.0f) + 30000.0f);
     uint8_t payload[PAYLOAD_SIZE]{};
     memcpy(payload, &converted_temp, PAYLOAD_SIZE);
     Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
     return send(request, bus);
 }
 
-Response Controller::get_info()
+Response Controller::get_info(Index index)
 {
     Packet packet(index, Command::GET_DEVICE_INFO);
     Response response;
@@ -86,7 +86,7 @@ Response Controller::get_info()
     return receive(bus); // TODO: parse response into type
 }
 
-Response Controller::get_fw_version()
+Response Controller::get_fw_version(Index index)
 {
     Packet packet(index, Command::GET_SW_VERSION);
     Response response;
@@ -95,7 +95,7 @@ Response Controller::get_fw_version()
     return receive(bus); //TODO: parse result into relevant type
 }
 
-Result Controller::set_pid(float p, float i, float d)
+Result Controller::set_pid(Index index, float p, float i, float d)
 {
     static constexpr uint8_t PAYLOAD_SIZE = 6;
     uint16_t p_ = static_cast<uint16_t>(p * 100);
@@ -111,7 +111,7 @@ Result Controller::set_pid(float p, float i, float d)
     return send(packet, bus);
 }
 
-Response Controller::get_pid()
+Response Controller::get_pid(Index index)
 {
     Packet packet(index, Command::GET_PID);
     Response response;

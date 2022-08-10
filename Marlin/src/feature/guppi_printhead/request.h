@@ -142,10 +142,11 @@ enum class Command : uint16_t {
 };
 
 enum class Index : uint16_t {
-    All,
+    None,
     One,
     Two,
-    Three
+    Three,
+    All = 0xffff,
 };
 
 struct Packet
@@ -239,18 +240,16 @@ Response receive(HardwareSerial& serial);
 class Controller
 {
     HardwareSerial& bus;
-    Index index;
 
 public:
-    Controller(HardwareSerial& ph_bus, Index ph_index)
+    Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
-        , index(ph_index)
     {}
-    Result set_temp(float temperature);
-    Response get_info();
-    Response get_fw_version();
-    Result set_pid(float p, float i, float d);
-    Response get_pid();
+    Result set_temp(Index index, float temperature);
+    Response get_info(Index index);
+    Response get_fw_version(Index index);
+    Result set_pid(Index index, float p, float i, float d);
+    Response get_pid(Index index);
 
 };
 

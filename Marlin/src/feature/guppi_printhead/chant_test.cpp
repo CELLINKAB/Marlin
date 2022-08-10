@@ -16,7 +16,7 @@ void debug_echo_cmd(const char* msg)
         //CHANT_SERIAL.setHalfDuplex();
         CHANT_SERIAL.begin(115200);
         OUT_WRITE(CHANT_RTS_PIN, HIGH);
-        return printhead::Controller(CHANT_SERIAL, printhead::Index::One);
+        return printhead::Controller(CHANT_SERIAL);
     }();
     char buf[CHANT_MAX_MSG_LEN]{};
     uint8_t crc_buf[sizeof(uint16_t)]{};
