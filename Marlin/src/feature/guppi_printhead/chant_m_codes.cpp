@@ -2,7 +2,40 @@
 
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
+
 #include "request.h"
+
+printhead::Controller ph_controller(CHANT_SERIAL);
+
+inline printhead::Index get_ph_index()
+{
+    uint8_t tool = GcodeSuite::get_target_extruder_from_command();
+    switch (tool) {
+    case 1:
+    case 2:
+    case 3:
+        return static_cast<printhead::Index>(tool);
+    default:
+        return printhead::Index::None;
+    }
+}
+
+#define HANDLE_NONE_INDEX(index) \
+    if (index == printhead::Index::None) \
+    return
+
+#define APPLY_ALL_INDEX(operation, ...) \
+    operation(printhead::Index::One, __VA_ARGS__); \
+    operation(printhead::Index::Two, __VA_ARGS__); \
+    operation(printhead::Index::Three, __VA_ARGS__)
+
+#define HANDLE_ANY_INDEX(index, operation, ...) \
+    HANDLE_NONE_INDEX(index); \
+    if (index == printhead::Index::All) { \
+        APPLY_ALL_INDEX(operation, __VA_ARGS__); \
+        return; \
+    } \
+    operation(index, __VA_ARGS__)
 
 //StartActuatingPrinthead
 void GcodeSuite::M750() {}
@@ -15,7 +48,12 @@ void GcodeSuite::M753() {}
 //EnumeratePrintheads
 void GcodeSuite::M770() {}
 //SetCurrentPrintheadTemp
-void GcodeSuite::M771() {}
+void GcodeSuite::M771()
+{
+    const printhead::Index index = get_ph_index();
+    const float temperature = parser.floatval('C');
+    HANDLE_ANY_INDEX(index, ph_controller.set_temp, temperature);
+}
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
 //SetPrintheadPressure
