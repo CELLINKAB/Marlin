@@ -245,11 +245,28 @@ public:
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
-    Result set_temp(Index index, float temperature);
+    // Metadata methods
     Response get_info(Index index);
     Response get_fw_version(Index index);
+    // Temperature methods
+    Result set_temperature(Index index, float temperature);
+    Response get_temperature(Index index);
     Result set_pid(Index index, float p, float i, float d);
     Response get_pid(Index index);
+    // Stepper Driver methods
+    Result set_extrusion_speed(Index index, feedRate_t feedrate);
+    Response get_extrusion_speed(Index index);
+    Result set_stallguard_threshold(Index index, uint8_t threshold);
+    Response get_stallguard_threshold(Index index);
+    Result set_microsteps(Index index, uint8_t microsteps);
+    Response get_microsteps(Index index);
+    Result set_rms_current(Index index, uint16_t mA);
+    Response get_rms_current(Index index);
+    Result set_hold_current(Index index, uint16_t mA);
+    Result home_printhead(Index index);
+    Result start_extruding(Index index);
+    Result stop_extruding(Index index);
+
 
 };
 

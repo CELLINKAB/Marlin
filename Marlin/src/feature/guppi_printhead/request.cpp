@@ -67,7 +67,7 @@ Packet::CrcBytes Packet::crc_bytes() const
     return bytes;
 }
 
-Result Controller::set_temp(Index index, float temperature)
+Result Controller::set_temperature(Index index, float temperature)
 {
     static constexpr size_t PAYLOAD_SIZE = sizeof(uint16_t);
     uint16_t converted_temp = static_cast<uint16_t>((temperature * 100.0f) + 30000.0f);
@@ -76,6 +76,8 @@ Result Controller::set_temp(Index index, float temperature)
     Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
     return send(request, bus);
 }
+
+Response Controller::get_temperature(Index index) {}
 
 Response Controller::get_info(Index index)
 {
@@ -119,3 +121,16 @@ Response Controller::get_pid(Index index)
         return response;
     return receive(bus); // TODO: parse incoming response and return payload values
 }
+
+Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
+Response Controller::get_extrusion_speed(Index index) {}
+Result Controller::set_stallguard_threshold(Index index, uint8_t threshold) {}
+Response Controller::get_stallguard_threshold(Index index) {}
+Result Controller::set_microsteps(Index index, uint8_t microsteps) {}
+Response Controller::get_microsteps(Index index) {}
+Result Controller::set_rms_current(Index index, uint16_t mA) {}
+Response Controller::get_rms_current(Index index) {}
+Result Controller::set_hold_current(Index index, uint16_t mA) {}
+Result Controller::home_printhead(Index index) {}
+Result Controller::start_extruding(Index index) {}
+Result Controller::stop_extruding(Index index) {}

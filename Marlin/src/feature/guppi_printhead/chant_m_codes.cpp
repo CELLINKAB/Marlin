@@ -68,7 +68,7 @@ void GcodeSuite::M771()
 {
     const printhead::Index index = get_ph_index();
     const float temperature = parser.floatval('C');
-    HANDLE_ANY_INDEX(index, ph_controller.set_temp, temperature);
+    HANDLE_ANY_INDEX(index, ph_controller.set_temperature, temperature);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -318,6 +318,7 @@ void GcodeSuite::M2040() {}
 
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2041() {}
+
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2042() {}
 
