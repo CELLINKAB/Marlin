@@ -146,7 +146,7 @@ enum class Index : uint16_t {
     One,
     Two,
     Three,
-    All = 0xffff,
+    All = 0xff, // max value for Marlin tool
 };
 
 struct Packet
@@ -164,7 +164,7 @@ struct Packet
         , crc(crc16_from_bytes(payload, payload_size))
     {}
     constexpr Packet()
-        : ph_index(Index::All)
+        : ph_index(Index::None)
         , command(Command::ACK)
         , payload_size(0)
         , payload(nullptr)

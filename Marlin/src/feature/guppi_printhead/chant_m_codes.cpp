@@ -7,18 +7,30 @@
 
 printhead::Controller ph_controller(CHANT_SERIAL);
 
+//
+// Helper functions
+//
+
 inline printhead::Index get_ph_index()
 {
     uint8_t tool = GcodeSuite::get_target_extruder_from_command();
     switch (tool) {
     case 1:
+        [[fallthrough]];
     case 2:
+        [[fallthrough]];
     case 3:
+        [[fallthrough]];
+    case 0xff:
         return static_cast<printhead::Index>(tool);
     default:
         return printhead::Index::None;
     }
 }
+
+//
+// Helper Macros
+//
 
 #define HANDLE_NONE_INDEX(index) \
     if (index == printhead::Index::None) \
@@ -36,6 +48,10 @@ inline printhead::Index get_ph_index()
         return; \
     } \
     operation(index, __VA_ARGS__)
+
+//
+// Common printhead commands
+//
 
 //StartActuatingPrinthead
 void GcodeSuite::M750() {}
@@ -61,7 +77,14 @@ void GcodeSuite::M773() {}
 //GetPrintheadPressure
 void GcodeSuite::M774() {}
 //SetPrintHdHeaterPIDparams
-void GcodeSuite::M777() {}
+void GcodeSuite::M777()
+{
+    const printhead::Index index = get_ph_index();
+    const float p = parser.floatval('P');
+    const float i = parser.floatval('I');
+    const float d = parser.floatval('D');
+    HANDLE_ANY_INDEX(index, ph_controller.set_pid, p, i, d);
+}
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
 //SetPrintheadTempFilterParams
@@ -181,7 +204,18 @@ void GcodeSuite::M1004() {}
 //GetPHMountedStatus
 void GcodeSuite::M1005() {}
 //SendCustomCommandToPH
-void GcodeSuite::M1006() {}
+void GcodeSuite::M1006()
+{
+    const printhead::Index index = get_ph_index();
+    const uint16_t cmd_arg = parser.ushortval('C');
+    // The following is dangerous and may lead to undefined behavior due to unconstrained enum variants.
+    const printhead::Command command = static_cast<printhead::Command>(cmd_arg);
+    if (!parser.string_arg)
+        return;
+
+    const uint16_t msg_len = strlen(parser.string_arg);
+    printhead::Packet(index, command, parser.string_arg, msg_len);
+}
 //ResetAwaitingResponse
 void GcodeSuite::M1008() {}
 //SetPrintheadHeaterValue
@@ -244,3 +278,201 @@ void GcodeSuite::M1065() {}
 void GcodeSuite::M1066() {}
 //DBGRetrieveCurrentExtADC
 void GcodeSuite::M1070() {}
+
+//
+// Syringe pump codes
+//
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2030() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2031() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2032() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2033() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2034() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2035() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2036() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2037() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2038() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2039() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2040() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2041() {}
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2042() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2043() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2044() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2045() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2046() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2047() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2048() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2049() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2050() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2051() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2052() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2053() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2054() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2055() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2056() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2057() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2058() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2059() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2060() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2061() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2063() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2064() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2065() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2066() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2067() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2068() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2069() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2070() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2071() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2072() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2073() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2075() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2076() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2080() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2081() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2082() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2083() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2084() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2085() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2086() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2087() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2090() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2091() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2092() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2093() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2095() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2096() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2097() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2098() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2099() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2100() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2110() {}
+
+//SetPHIntExtrusionSpeed
+void GcodeSuite::M2111() {}
