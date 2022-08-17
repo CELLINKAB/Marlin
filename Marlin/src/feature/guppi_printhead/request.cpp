@@ -46,6 +46,13 @@ Response printhead::receive(HardwareSerial& serial)
     // ACK would go here
 }
 
+Response printhead::send_and_receive(Packet packet, HardwareSerial& serial) {
+    Response response;
+    response.result = send(packet, serial);
+    if (response.result != Result::OK) return response;
+    return receive(serial);
+}
+
 Packet::HeaderBytes Packet::header_bytes() const
 {
     static_assert(sizeof(ph_index) + sizeof(command) + sizeof(payload_size) == sizeof(HeaderBytes),
@@ -82,19 +89,13 @@ Response Controller::get_temperature(Index index) {}
 Response Controller::get_info(Index index)
 {
     Packet packet(index, Command::GET_DEVICE_INFO);
-    Response response;
-    if ((response.result = send(packet, bus)) != Result::OK)
-        return response;
-    return receive(bus); // TODO: parse response into type
+    return send_and_receive(packet, bus); // TODO: parse response into type
 }
 
 Response Controller::get_fw_version(Index index)
 {
     Packet packet(index, Command::GET_SW_VERSION);
-    Response response;
-    if ((response.result = send(packet, bus)) != Result::OK)
-        return response;
-    return receive(bus); //TODO: parse result into relevant type
+    return send_and_receive(packet, bus); //TODO: parse result into relevant type
 }
 
 Result Controller::set_pid(Index index, float p, float i, float d)
@@ -116,23 +117,40 @@ Result Controller::set_pid(Index index, float p, float i, float d)
 Response Controller::get_pid(Index index)
 {
     Packet packet(index, Command::GET_PID);
-    Response response;
-    if ((response.result = send(packet, bus)) != Result::OK)
-        return response;
-    return receive(bus); // TODO: parse incoming response and return payload values
+    return send_and_receive(packet, bus); // TODO: parse incoming response and return payload values
 }
 
 Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
-Response Controller::get_extrusion_speed(Index index) {}
-Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold) {}
-Response Controller::get_extruder_stallguard_threshold(Index index) {}
-Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps) {}
-Response Controller::get_extruder_microsteps(Index index) {}
+Response Controller::get_extrusion_speed(Index index) {
+    Packet packet(index, Command::GET_EXTRUSION_SPEED);
+    return send_and_receive(packet, bus);
+}
+Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold) {
+    Packet packet(index, Command::SYRINGEPUMP_SET_ESTOP_THRESH, &threshold, 1);
+    return send(packet, bus);
+}
+Response Controller::get_extruder_stallguard_threshold(Index index) {
+    Packet packet(index, Command::SYRINGEPUMP_GET_ESTOP_THRESH);
+    return send_and_receive(packet, bus);
+}
+Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps) {
+    Packet packet(index, Command::SET_MICROSTEP, &microsteps, 1);
+    return send(packet, bus);
+}
+Response Controller::get_extruder_microsteps(Index index) {
+    Packet packet(index, Command::GET_MICROSTEP);
+    return send_and_receive(packet, bus);
+}
 Result Controller::set_extruder_rms_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_rms_current(Index index) {}
 Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
-Result Controller::home_extruder(Index index) {}
-Result Controller::start_extruding(Index index) {}
+Result Controller::home_extruder(Index index, ExtruderDirection direction) {
+    Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, 1);
+    return send(packet, bus);
+}
+Result Controller::start_extruding(Index index) {
+    Packet packet(index, Command::SYRINGEPUMP_START);
+}
 Result Controller::stop_extruding(Index index) {}
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
