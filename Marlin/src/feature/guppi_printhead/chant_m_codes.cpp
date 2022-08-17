@@ -282,198 +282,133 @@ void GcodeSuite::M1070() {}
 //
 // Syringe pump codes
 //
-
-//SetPHIntExtrusionSpeed
+//SetPHExtrusionSpeed
 void GcodeSuite::M2030() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHExtrusionSpeed
 void GcodeSuite::M2031() {}
-
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHIntExtrusionSpeed
 void GcodeSuite::M2033() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHExtrusionStepVol
 void GcodeSuite::M2034() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHExtrusionStepVol
 void GcodeSuite::M2035() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHFullstepExtrusionVol
 void GcodeSuite::M2036() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHMicrostep
 void GcodeSuite::M2038() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHMicrostep
 void GcodeSuite::M2039() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHStatusByte
 void GcodeSuite::M2040() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHEndStopThreshold
 void GcodeSuite::M2041() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHEndStopThreshold
 void GcodeSuite::M2042() {}
-
-//SetPHIntExtrusionSpeed
+//GetPPHEndstopValues
 void GcodeSuite::M2043() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHReadableStatus
 void GcodeSuite::M2044() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHExtrusionDirection
 void GcodeSuite::M2045() {}
-
-//SetPHIntExtrusionSpeed
+//ControlPHMotorStatus
 void GcodeSuite::M2046() {}
-
-//SetPHIntExtrusionSpeed
+//HomePrinthead
 void GcodeSuite::M2047() {}
-
-//SetPHIntExtrusionSpeed
+//PHCurrHomingStatus
 void GcodeSuite::M2048() {}
-
-//SetPHIntExtrusionSpeed
+//DebugPHMicrosteps
 void GcodeSuite::M2049() {}
-
-//SetPHIntExtrusionSpeed
+//DebugExtrudeDirection
 void GcodeSuite::M2050() {}
-
-//SetPHIntExtrusionSpeed
+//ControlSyringeExtrusionVol
 void GcodeSuite::M2051() {}
-
-//SetPHIntExtrusionSpeed
+//HeaterSelfTest
 void GcodeSuite::M2052() {}
-
-//SetPHIntExtrusionSpeed
+//TurnOffHeater
 void GcodeSuite::M2053() {}
-
-//SetPHIntExtrusionSpeed
+//GetTempControlCurrent
 void GcodeSuite::M2054() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHInternalTemp
 void GcodeSuite::M2055() {}
-
-//SetPHIntExtrusionSpeed
+//GetBuckMeasOutputVoltage
 void GcodeSuite::M2056() {}
-
-//SetPHIntExtrusionSpeed
+//SetMaxCoolingVoltage
 void GcodeSuite::M2057() {}
-
-//SetPHIntExtrusionSpeed
+//GetMaxCoolingPower
 void GcodeSuite::M2058() {}
-
-//SetPHIntExtrusionSpeed
+//SetPeltierPolarity
 void GcodeSuite::M2059() {}
-
-//SetPHIntExtrusionSpeed
+//SetTempContBuckCalib
 void GcodeSuite::M2060() {}
-
-//SetPHIntExtrusionSpeed
+//GetTempContPHBuckCalibVal
 void GcodeSuite::M2061() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHPeakTime
 void GcodeSuite::M2063() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHPeakTime
 void GcodeSuite::M2064() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHOpenTime
 void GcodeSuite::M2065() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHOpenTime
 void GcodeSuite::M2066() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHCycleTime
 void GcodeSuite::M2067() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHCycleTime
 void GcodeSuite::M2068() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHPeakCurrent
 void GcodeSuite::M2069() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHPeakCurrent
 void GcodeSuite::M2070() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHHoldCurrent
 void GcodeSuite::M2071() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHHoldCurrent
 void GcodeSuite::M2072() {}
-
-//SetPHIntExtrusionSpeed
+//ControlPHAirSupply
 void GcodeSuite::M2073() {}
-
-//SetPHIntExtrusionSpeed
+//StartInkjetSelfTest
 void GcodeSuite::M2075() {}
-
-//SetPHIntExtrusionSpeed
+//GetInkjetSelfTestResult
 void GcodeSuite::M2076() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHLEDOutputMode
 void GcodeSuite::M2080() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHPhotocuringPow
 void GcodeSuite::M2081() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHPhotocuringPow
 void GcodeSuite::M2082() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHLEDWaveLength
 void GcodeSuite::M2083() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHLEDPhotoFeedback
 void GcodeSuite::M2084() {}
-
-//SetPHIntExtrusionSpeed
+//StartPHExtLEDCalibNSelfTest
 void GcodeSuite::M2085() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHCalibResult
 void GcodeSuite::M2086() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHExtLEDVoltage
 void GcodeSuite::M2087() {}
-
-//SetPHIntExtrusionSpeed
+//GuppiParamsStore
 void GcodeSuite::M2090() {}
-
-//SetPHIntExtrusionSpeed
+//GuppiParamsRestoreToDefault
 void GcodeSuite::M2091() {}
-
-//SetPHIntExtrusionSpeed
+//GuppiParamsReset
 void GcodeSuite::M2092() {}
-
-//SetPHIntExtrusionSpeed
+//GuppiParamsRestore
 void GcodeSuite::M2093() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHTempCorrModel
 void GcodeSuite::M2095() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHTempCorrModel
 void GcodeSuite::M2096() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHTempRegIParams
 void GcodeSuite::M2097() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHTempRegIParams
 void GcodeSuite::M2098() {}
-
-//SetPHIntExtrusionSpeed
+//SetPHTempRegOvershoot
 void GcodeSuite::M2099() {}
-
-//SetPHIntExtrusionSpeed
+//GetPHTempRegOvershoot
 void GcodeSuite::M2100() {}
-
-//SetPHIntExtrusionSpeed
+//SetCoaxialCouple
 void GcodeSuite::M2110() {}
-
-//SetPHIntExtrusionSpeed
+//ResetCoaxialCouple
 void GcodeSuite::M2111() {}
