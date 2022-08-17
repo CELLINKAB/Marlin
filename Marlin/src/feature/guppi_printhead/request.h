@@ -254,18 +254,29 @@ public:
     Result set_pid(Index index, float p, float i, float d);
     Response get_pid(Index index);
     // Stepper Driver methods
-    Result set_extrusion_speed(Index index, feedRate_t feedrate);
-    Response get_extrusion_speed(Index index);
-    Result set_stallguard_threshold(Index index, uint8_t threshold);
-    Response get_stallguard_threshold(Index index);
-    Result set_microsteps(Index index, uint8_t microsteps);
-    Response get_microsteps(Index index);
-    Result set_rms_current(Index index, uint16_t mA);
-    Response get_rms_current(Index index);
-    Result set_hold_current(Index index, uint16_t mA);
-    Result home_printhead(Index index);
-    Result start_extruding(Index index);
-    Result stop_extruding(Index index);
+    set_extrusion_speed(Index index, feedRate_t feedrate);
+    get_extrusion_speed(Index index);
+    set_extruder_stallguard_threshold(Index index, uint8_t threshold);
+    get_extruder_stallguard_threshold(Index index);
+    set_extruder_microsteps(Index index, uint8_t microsteps);
+    get_extruder_microsteps(Index index);
+    set_extruder_rms_current(Index index, uint16_t mA);
+    get_extruder_rms_current(Index index);
+    set_extruder_hold_current(Index index, uint16_t mA);
+    home_extruder(Index index);
+    start_extruding(Index index);
+    stop_extruding(Index index);
+    set_valve_speed(Index index, feedRate_t feedrate);
+    get_valve_speed(Index index);
+    set_valve_stallguard_threshold(Index index, uint8_t threshold);
+    get_valve_stallguard_threshold(Index index);
+    set_valve_microsteps(Index index, uint8_t microsteps);
+    get_valve_microsteps(Index index);
+    set_valve_rms_current(Index index, uint16_t mA);
+    get_valve_rms_current(Index index);
+    set_valve_hold_current(Index index, uint16_t mA);
+    home_slider_valve(Index index);
+    move_slider_valve(Index index, uint16_t steps);
 
 
 };

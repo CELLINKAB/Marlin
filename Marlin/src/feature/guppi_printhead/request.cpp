@@ -124,13 +124,24 @@ Response Controller::get_pid(Index index)
 
 Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
 Response Controller::get_extrusion_speed(Index index) {}
-Result Controller::set_stallguard_threshold(Index index, uint8_t threshold) {}
-Response Controller::get_stallguard_threshold(Index index) {}
-Result Controller::set_microsteps(Index index, uint8_t microsteps) {}
-Response Controller::get_microsteps(Index index) {}
-Result Controller::set_rms_current(Index index, uint16_t mA) {}
-Response Controller::get_rms_current(Index index) {}
-Result Controller::set_hold_current(Index index, uint16_t mA) {}
-Result Controller::home_printhead(Index index) {}
+Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold) {}
+Response Controller::get_extruder_stallguard_threshold(Index index) {}
+Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps) {}
+Response Controller::get_extruder_microsteps(Index index) {}
+Result Controller::set_extruder_rms_current(Index index, uint16_t mA) {}
+Response Controller::get_extruder_rms_current(Index index) {}
+Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
+Result Controller::home_extruder(Index index) {}
 Result Controller::start_extruding(Index index) {}
 Result Controller::stop_extruding(Index index) {}
+
+Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
+Response Controller::get_valve_speed(Index index) {}
+Result Controller::set_valve_stallguard_threshold(Index index, uint8_t threshold) {}
+Response Controller::get_valve_stallguard_threshold(Index index) {}
+Result Controller::set_valve_microsteps(Index index, uint8_t microsteps) {}
+Response Controller::get_valve_microsteps(Index index) {}
+Result Controller::set_valve_rms_current(Index index, uint16_t mA) {}
+Response Controller::get_valve_rms_current(Index index) {}
+Result Controller::set_valve_hold_current(Index index, uint16_t mA) {}
+Result Controller::move_slider_valve(Index index, uint16_t steps) {}
