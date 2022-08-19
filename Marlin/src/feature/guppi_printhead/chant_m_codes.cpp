@@ -430,7 +430,7 @@ void GcodeSuite::M2072()
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
     uint16_t current;
-    memcpy(current, response.packet.payload, 2);
+    memcpy(&current, response.packet.payload, 2);
     SERIAL_ECHOLNPGM_P("Printhead ",
                        static_cast<uint8_t>(response.packet.ph_index),
                        " hold current:",
