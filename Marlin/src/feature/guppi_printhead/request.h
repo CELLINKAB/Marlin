@@ -270,6 +270,7 @@ public:
     Result set_extruder_rms_current(Index index, uint16_t mA);
     Response get_extruder_rms_current(Index index);
     Result set_extruder_hold_current(Index index, uint16_t mA);
+    Response get_extruder_hold_current(Index index);
     Result home_extruder(Index index, ExtruderDirection direction);
     Result start_extruding(Index index);
     Result stop_extruding(Index index);

@@ -28,6 +28,11 @@ inline printhead::Index get_ph_index()
     }
 }
 
+constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
+{
+    return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
+}
+
 //
 // Helper Macros
 //
@@ -37,17 +42,17 @@ inline printhead::Index get_ph_index()
     return
 
 #define APPLY_ALL_INDEX(operation, ...) \
-    operation(printhead::Index::One, __VA_ARGS__); \
-    operation(printhead::Index::Two, __VA_ARGS__); \
-    operation(printhead::Index::Three, __VA_ARGS__)
+    operation(printhead::Index::One, ##__VA_ARGS__); \
+    operation(printhead::Index::Two, ##__VA_ARGS__); \
+    operation(printhead::Index::Three, ##__VA_ARGS__)
 
 #define HANDLE_ANY_INDEX(index, operation, ...) \
     HANDLE_NONE_INDEX(index); \
     if (index == printhead::Index::All) { \
-        APPLY_ALL_INDEX(operation, __VA_ARGS__); \
+        APPLY_ALL_INDEX(operation, ##__VA_ARGS__); \
         return; \
     } \
-    operation(index, __VA_ARGS__)
+    operation(index, ##__VA_ARGS__)
 
 //
 // Common printhead commands
@@ -283,9 +288,20 @@ void GcodeSuite::M1070() {}
 // Syringe pump codes
 //
 //SetPHExtrusionSpeed
-void GcodeSuite::M2030() {}
+void GcodeSuite::M2030()
+{
+    const auto index = get_ph_index();
+    const feedRate_t feedrate = parser.feedrateval('F');
+    if (feedrate == 0.0f)
+        return;
+    HANDLE_ANY_INDEX(index, ph_controller.set_extrusion_speed, feedrate);
+}
 //GetPHExtrusionSpeed
-void GcodeSuite::M2031() {}
+void GcodeSuite::M2031()
+{
+    const auto index = get_ph_index();
+    HANDLE_ANY_INDEX(index, ph_controller.get_extrusion_speed);
+}
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
 //GetPHIntExtrusionSpeed
@@ -299,13 +315,31 @@ void GcodeSuite::M2036() {}
 //GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
 //SetPHMicrostep
-void GcodeSuite::M2038() {}
+void GcodeSuite::M2038()
+{
+    const auto index = get_ph_index();
+    const uint8_t microsteps = parser.byteval('M');
+    if (microsteps == 0)
+        return;
+    HANDLE_ANY_INDEX(index, ph_controller.set_extruder_microsteps, microsteps);
+}
 //GetPHMicrostep
-void GcodeSuite::M2039() {}
+void GcodeSuite::M2039()
+{
+    const auto index = get_ph_index();
+    HANDLE_ANY_INDEX(index, ph_controller.get_extruder_microsteps);
+}
 //GetPHStatusByte
 void GcodeSuite::M2040() {}
 //SetPHEndStopThreshold
-void GcodeSuite::M2041() {}
+void GcodeSuite::M2041()
+{
+    const auto index = get_ph_index();
+    const uint8_t sg_threshold = parser.byteval('S');
+    if (sg_threshold == 0)
+        return;
+    ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
+}
 //GetPHEndStopThreshold
 void GcodeSuite::M2042() {}
 //GetPPHEndstopValues
@@ -317,7 +351,12 @@ void GcodeSuite::M2045() {}
 //ControlPHMotorStatus
 void GcodeSuite::M2046() {}
 //HomePrinthead
-void GcodeSuite::M2047() {}
+void GcodeSuite::M2047()
+{
+    const auto index = get_ph_index();
+    const auto direction = extrude_dir_from_bool(parser.boolval('D'));
+    ph_controller.home_extruder(index, direction);
+}
 //PHCurrHomingStatus
 void GcodeSuite::M2048() {}
 //DebugPHMicrosteps
@@ -359,13 +398,44 @@ void GcodeSuite::M2067() {}
 //GetPHCycleTime
 void GcodeSuite::M2068() {}
 //SetPHPeakCurrent
-void GcodeSuite::M2069() {}
+void GcodeSuite::M2069()
+{
+    const auto index = get_ph_index();
+    const uint16_t current = parser.ushortval('C');
+    ph_controller.set_extruder_rms_current(index, current);
+}
 //GetPHPeakCurrent
-void GcodeSuite::M2070() {}
+void GcodeSuite::M2070()
+{
+    const auto index = get_ph_index();
+    const auto response = ph_controller.get_extruder_rms_current(index);
+    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
+        return;
+    uint16_t current;
+    memcpy(current, response.packet.payload, 2);
+    SERIAL_ECHOLNPGM_P("Printhead ", static_cast<uint8_t>(response.packet.ph_index), " current:", current);
+}
 //SetPHHoldCurrent
-void GcodeSuite::M2071() {}
+void GcodeSuite::M2071()
+{
+    const auto index = get_ph_index();
+    const uint16_t current = parser.ushortval('C');
+    ph_controller.set_extruder_hold_current(index, current);
+}
 //GetPHHoldCurrent
-void GcodeSuite::M2072() {}
+void GcodeSuite::M2072()
+{
+    const auto index = get_ph_index();
+    const auto response = ph_controller.get_extruder_hold_current(index);
+    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
+        return;
+    uint16_t current;
+    memcpy(current, response.packet.payload, 2);
+    SERIAL_ECHOLNPGM_P("Printhead ",
+                       static_cast<uint8_t>(response.packet.ph_index),
+                       " hold current:",
+                       current);
+}
 //ControlPHAirSupply
 void GcodeSuite::M2073() {}
 //StartInkjetSelfTest

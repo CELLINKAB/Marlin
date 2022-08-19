@@ -144,6 +144,7 @@ Response Controller::get_extruder_microsteps(Index index) {
 Result Controller::set_extruder_rms_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_rms_current(Index index) {}
 Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
+Result Controller::get_extruder_hold_current(Index index) {}
 Result Controller::home_extruder(Index index, ExtruderDirection direction) {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, 1);
     return send(packet, bus);
