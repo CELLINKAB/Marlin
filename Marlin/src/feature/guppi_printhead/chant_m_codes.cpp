@@ -37,22 +37,11 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
 // Helper Macros
 //
 
-#define HANDLE_NONE_INDEX(index) \
-    if (index == printhead::Index::None) \
+// this will declare a variable in scope, be careful!
+#define BIND_INDEX_OR_RETURN(index_var_name) \
+    const printhead::Index index_var_name = get_ph_index(); \
+    if (index_var_name == printhead::Index::None) \
     return
-
-#define APPLY_ALL_INDEX(operation, ...) \
-    operation(printhead::Index::One, ##__VA_ARGS__); \
-    operation(printhead::Index::Two, ##__VA_ARGS__); \
-    operation(printhead::Index::Three, ##__VA_ARGS__)
-
-#define HANDLE_ANY_INDEX(index, operation, ...) \
-    HANDLE_NONE_INDEX(index); \
-    if (index == printhead::Index::All) { \
-        APPLY_ALL_INDEX(operation, ##__VA_ARGS__); \
-        return; \
-    } \
-    operation(index, ##__VA_ARGS__)
 
 //
 // Common printhead commands
@@ -71,9 +60,9 @@ void GcodeSuite::M770() {}
 //SetCurrentPrintheadTemp
 void GcodeSuite::M771()
 {
-    const printhead::Index index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const float temperature = parser.floatval('C');
-    HANDLE_ANY_INDEX(index, ph_controller.set_temperature, temperature);
+    ph_controller.set_temperature(index, temperature);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -84,11 +73,11 @@ void GcodeSuite::M774() {}
 //SetPrintHdHeaterPIDparams
 void GcodeSuite::M777()
 {
-    const printhead::Index index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
-    HANDLE_ANY_INDEX(index, ph_controller.set_pid, p, i, d);
+    ph_controller.set_pid(index, p, i, d);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -211,7 +200,7 @@ void GcodeSuite::M1005() {}
 //SendCustomCommandToPH
 void GcodeSuite::M1006()
 {
-    const printhead::Index index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const uint16_t cmd_arg = parser.ushortval('C');
     // The following is dangerous and may lead to undefined behavior due to unconstrained enum variants.
     const printhead::Command command = static_cast<printhead::Command>(cmd_arg);
@@ -290,17 +279,17 @@ void GcodeSuite::M1070() {}
 //SetPHExtrusionSpeed
 void GcodeSuite::M2030()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const feedRate_t feedrate = parser.feedrateval('F');
     if (feedrate == 0.0f)
         return;
-    HANDLE_ANY_INDEX(index, ph_controller.set_extrusion_speed, feedrate);
+    ph_controller.set_extrusion_speed(index, feedrate);
 }
 //GetPHExtrusionSpeed
 void GcodeSuite::M2031()
 {
-    const auto index = get_ph_index();
-    HANDLE_ANY_INDEX(index, ph_controller.get_extrusion_speed);
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.get_extrusion_speed(index);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
@@ -317,31 +306,35 @@ void GcodeSuite::M2037() {}
 //SetPHMicrostep
 void GcodeSuite::M2038()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const uint8_t microsteps = parser.byteval('M');
     if (microsteps == 0)
         return;
-    HANDLE_ANY_INDEX(index, ph_controller.set_extruder_microsteps, microsteps);
+    ph_controller.set_extruder_microsteps(index, microsteps);
 }
 //GetPHMicrostep
 void GcodeSuite::M2039()
 {
-    const auto index = get_ph_index();
-    HANDLE_ANY_INDEX(index, ph_controller.get_extruder_microsteps);
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.get_extruder_microsteps(index);
 }
 //GetPHStatusByte
 void GcodeSuite::M2040() {}
 //SetPHEndStopThreshold
 void GcodeSuite::M2041()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const uint8_t sg_threshold = parser.byteval('S');
     if (sg_threshold == 0)
         return;
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
 }
 //GetPHEndStopThreshold
-void GcodeSuite::M2042() {}
+void GcodeSuite::M2042()
+{
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.get_extruder_stallguard_threshold(index);
+}
 //GetPPHEndstopValues
 void GcodeSuite::M2043() {}
 //GetPHReadableStatus
@@ -353,7 +346,7 @@ void GcodeSuite::M2046() {}
 //HomePrinthead
 void GcodeSuite::M2047()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const auto direction = extrude_dir_from_bool(parser.boolval('D'));
     ph_controller.home_extruder(index, direction);
 }
@@ -400,32 +393,32 @@ void GcodeSuite::M2068() {}
 //SetPHPeakCurrent
 void GcodeSuite::M2069()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const uint16_t current = parser.ushortval('C');
     ph_controller.set_extruder_rms_current(index, current);
 }
 //GetPHPeakCurrent
 void GcodeSuite::M2070()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const auto response = ph_controller.get_extruder_rms_current(index);
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
     uint16_t current;
-    memcpy(current, response.packet.payload, 2);
+    memcpy(&current, response.packet.payload, 2);
     SERIAL_ECHOLNPGM_P("Printhead ", static_cast<uint8_t>(response.packet.ph_index), " current:", current);
 }
 //SetPHHoldCurrent
 void GcodeSuite::M2071()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const uint16_t current = parser.ushortval('C');
     ph_controller.set_extruder_hold_current(index, current);
 }
 //GetPHHoldCurrent
 void GcodeSuite::M2072()
 {
-    const auto index = get_ph_index();
+    BIND_INDEX_OR_RETURN(index);
     const auto response = ph_controller.get_extruder_hold_current(index);
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
