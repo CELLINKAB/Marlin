@@ -2808,12 +2808,12 @@
   #endif
 
   #if AXIS_IS_TMC(E0)
-    #define E0_CURRENT      350
+    #define E0_CURRENT      700
     #define E0_MICROSTEPS    32
     #define E0_RSENSE         0.11
     #define E0_CHAIN_POS     -1
     //#define E0_INTERPOLATE true
-    //#define E0_HOLD_MULTIPLIER 0.5
+    #define E0_HOLD_MULTIPLIER 0.1
   #endif
 
   #if AXIS_IS_TMC(E1)
@@ -4451,7 +4451,7 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {240.0, 186.0, 25.0}
+  #define AUTOCAL_START_POSITION {48, 55, 5}
   #define AUTOCAL_DEFAULT_FEEDRATE 60.0
   #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.5, -84.4, -9.0}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
