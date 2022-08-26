@@ -2010,12 +2010,12 @@
  * Override if the automatically selected points are inadequate.
  */
 #if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
-  #define PROBE_PT_1_X 40
-  #define PROBE_PT_1_Y -34
-  #define PROBE_PT_2_X -32
-  #define PROBE_PT_2_Y -34
-  #define PROBE_PT_3_X -32
-  #define PROBE_PT_3_Y 30
+  #define PROBE_PT_1_X -50
+  #define PROBE_PT_1_Y -30
+  #define PROBE_PT_2_X -50
+  #define PROBE_PT_2_Y 30
+  #define PROBE_PT_3_X 30
+  #define PROBE_PT_3_Y 0
 #endif
 
 /**
@@ -2038,8 +2038,8 @@
  * the probe to be unable to reach any points.
  */
 #if PROBE_SELECTED && !IS_KINEMATIC
-  //#define PROBING_MARGIN_LEFT PROBING_MARGIN
-  //#define PROBING_MARGIN_RIGHT PROBING_MARGIN
+  //#define PROBING_MARGIN_LEFT 20
+  #define PROBING_MARGIN_RIGHT 20
   //#define PROBING_MARGIN_FRONT PROBING_MARGIN
   //#define PROBING_MARGIN_BACK PROBING_MARGIN
 #endif
@@ -2048,7 +2048,7 @@
   // Override the mesh area if the automatic (max) area is too large
   //#define MESH_MIN_X MESH_INSET
   //#define MESH_MIN_Y MESH_INSET
-  //#define MESH_MAX_X X_BED_SIZE - (MESH_INSET)
+  //#define MESH_MAX_X X_BED_SIZE - 24
   //#define MESH_MAX_Y Y_BED_SIZE - (MESH_INSET)
 #endif
 
@@ -4451,7 +4451,7 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {48, 55, 5}
+  #define AUTOCAL_START_POSITION {48, 58, 5}
   #define AUTOCAL_DEFAULT_FEEDRATE 60.0
   #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.5, -84.4, -9.0}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
