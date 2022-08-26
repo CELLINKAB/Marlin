@@ -143,11 +143,11 @@
 //#define BLUETOOTH
 
 // Name displayed in the LCD "Ready" message and Info menu
-//#define CUSTOM_MACHINE_NAME "3D Printer"
+#define CUSTOM_MACHINE_NAME "BIO CELL X"
 
 // Printer's unique ID, used by some programs to differentiate between machines.
 // Choose your own or use a service like https://www.uuidgenerator.net/version4
-//#define MACHINE_UUID "00000000-0000-0000-0000-000000000000"
+#define MACHINE_UUID "c11f54d8-24a7-11ed-94dc-2cdb07d43f8b"
 
 /**
  * Define the number of coordinated linear axes.
@@ -937,14 +937,14 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 320, 320, 1280, 800}
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 320, 320, 1280, 21023}
 
 /**
  * Default Max Feed Rate (mm/s)
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 200, 200, 40, 40}
+#define DEFAULT_MAX_FEEDRATE          { 200, 200, 40, 10}
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -1210,11 +1210,11 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { 140, 67, -15 }
+#define NOZZLE_TO_PROBE_OFFSET { -245, -34, -15 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
-#define PROBING_MARGIN 1
+#define PROBING_MARGIN 2
 
 // X and Y axis travel speed (mm/min) between probes
 #define XY_PROBE_FEEDRATE (100*60)
@@ -1413,12 +1413,12 @@
 #define Y_BED_SIZE 72
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS -175
-#define Y_MIN_POS -122
+#define X_MIN_POS -120
+#define Y_MIN_POS -50
 #define Z_MIN_POS 0
-#define X_MAX_POS 175
-#define Y_MAX_POS 122
-#define Z_MAX_POS 35
+#define X_MAX_POS 280
+#define Y_MAX_POS 194
+#define Z_MAX_POS 44
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0

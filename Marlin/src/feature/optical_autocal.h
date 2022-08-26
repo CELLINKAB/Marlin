@@ -1,8 +1,8 @@
 
 #include "../MarlinCore.h"
-#include "../module/planner.h"
-#include "../module/motion.h"
 #include "../gcode/gcode.h"
+#include "../module/motion.h"
+#include "../module/planner.h"
 
 #include <array>
 #include <numeric>
@@ -31,12 +31,10 @@ struct OpticalAutocal
         planner.synchronize();
 
         const bool success = full_sensor_sweep(feedrate);
-        if (!success)
-        {
+        if (!success) {
             do_blocking_move_to(START_POSITION);
             SERIAL_ERROR_MSG("autocalibration failed!");
-        }
-        else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
+        } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
             SERIAL_ECHOLNPGM("Nozzle offset: ", tool_offset);
 
         return success;
@@ -78,22 +76,23 @@ private:
         const bool sensor_1_check = READ(SENSOR_1);
         const bool sensor_2_check = READ(SENSOR_2);
 
-        if (sensor_1_check && sensor_2_check)
-        {
-            tool_offset.set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
-                            xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
-                            z_offset + END_POSITION_PRINTBED_DELTA.z);
-            if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-                print_pos(tool_offset, F("Calibrated tool offset:"));
-            do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
-            do_blocking_move_to_xy(tool_offset);
-            // planner.set_position_mm({0.0,0.0,0.0});
-        }
-        else
+        if (!(sensor_1_check && sensor_2_check)) {
             SERIAL_ERROR_MSG("Autocalibration succeeded but sanity check failed!"
                              "\nsensor 1: ",
                              sensor_1_check,
-                             "\nsensor 2: ", sensor_2_check);
+                             "\nsensor 2: ",
+                             sensor_2_check);
+            //return false;
+        }
+
+        tool_offset.set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
+                        xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
+                        z_offset + END_POSITION_PRINTBED_DELTA.z);
+        if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
+            print_pos(tool_offset, F("Calibrated tool offset:"));
+        do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
+        do_blocking_move_to_xy(tool_offset);
+        // planner.set_position_mm({0.0,0.0,0.0});
 
         return true;
     }
@@ -115,8 +114,7 @@ private:
         const unsigned int delay_5mm = static_cast<int>(5000.0f / feedrate ?: feedrate_mm_s);
 
         // enable sensors
-        auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_5mm]
-        {
+        auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_5mm] {
             const float y = planner.get_axis_positions_mm().y;
             if (!read_sensor_1)
                 return;
@@ -127,8 +125,7 @@ private:
             if DEBUGGING (LEVELING)
                 SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
         };
-        auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm]
-        {
+        auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm] {
             const float y = planner.get_axis_positions_mm().y;
             if (!read_sensor_2)
                 return;
@@ -150,8 +147,7 @@ private:
         YSweepArray y3{0.0f};
         YSweepArray y4{0.0f};
 
-        for (size_t i = 0; i < NUM_CYCLES; ++i)
-        {
+        for (size_t i = 0; i < NUM_CYCLES; ++i) {
             read_sensor_1 = true;
             read_sensor_2 = false;
 
@@ -167,33 +163,27 @@ private:
             y4[i] = sensor_1_trigger_y_pos;
 
             if DEBUGGING (LEVELING)
-                SERIAL_ECHOLNPGM(
-                    "sweep: ", i,
-                    " y1: ", y1[i],
-                    " y2: ", y2[i],
-                    " y3: ", y3[i],
-                    " y4: ", y4[i]);
+                SERIAL_ECHOLNPGM("sweep: ", i, " y1: ", y1[i], " y2: ", y2[i], " y3: ", y3[i], " y4: ", y4[i]);
         }
 
         detachInterrupt(SENSOR_1);
         detachInterrupt(SENSOR_2);
 
-        auto check_non_zero = [](const auto containter) -> bool
-        {
-            return std::any_of(containter.cbegin(), containter.cend(), [](const float v)
-                               { return v == 0.0f; });
+        auto check_non_zero = [](const auto containter) -> bool {
+            return std::any_of(containter.cbegin(), containter.cend(), [](const float v) {
+                return v == 0.0f;
+            });
         };
 
-        const bool any_non_zero = check_non_zero(y1) || check_non_zero(y2) || check_non_zero(y3) || check_non_zero(y4);
+        const bool any_non_zero = check_non_zero(y1) || check_non_zero(y2) || check_non_zero(y3)
+                                  || check_non_zero(y4);
 
-        if (any_non_zero)
-        {
+        if (any_non_zero) {
             SERIAL_ERROR_MSG("zero values in sweep! Check optical sensors.", "Calibration aborted.");
             return XY_OFFSET_ERR;
         }
 
-        auto cycles_avg = [](const auto s1, const auto s2) -> float
-        {
+        auto cycles_avg = [](const auto s1, const auto s2) -> float {
             const float sum_s1 = std::accumulate(s1.cbegin(), s1.cend(), 0.0f);
             const float sum_s2 = std::accumulate(s2.cbegin(), s2.cend(), 0.0f);
             const float avg = (sum_s1 + sum_s2) / (s1.size() + s2.size());
@@ -218,10 +208,9 @@ private:
         return {x, y};
     }
 
-    float scan_for_tip(float z, const float inc, bool &condition, const float feedrate) const
+    float scan_for_tip(float z, const float inc, bool& condition, const float feedrate) const
     {
-        while (!condition && z > soft_endstop.min.z)
-        {
+        while (!condition && z > soft_endstop.min.z) {
             do_blocking_move_to_z(z, feedrate);
             do_blocking_move_to_y(START_POSITION.y + SHORT_Y_RANGE, feedrate);
             do_blocking_move_to_y(START_POSITION.y, feedrate);
@@ -243,9 +232,7 @@ private:
         bool triggered = false;
 
         attachInterrupt(
-            SENSOR_1, [&]
-            { triggered = true; },
-            RISING);
+            SENSOR_1, [&] { triggered = true; }, RISING);
 
         z = scan_for_tip(z, COARSE_Z_INCREMENT, triggered, feedrate);
         z = scan_for_tip(z, MEDIUM_Z_INCREMENT, triggered, feedrate);
