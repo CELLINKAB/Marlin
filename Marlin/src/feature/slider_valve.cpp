@@ -3,6 +3,7 @@
 #include "../gcode/gcode.h"
 #include "../module/planner.h"
 #include "../module/servo.h"
+#include "extruder_bottomout.h"
 
 #define SLIDER_SERVO servo[0]
 
@@ -37,14 +38,28 @@ static SliderPosition current_slider_pos = SliderPosition::Extrude;
 
 void GcodeSuite::M1112()
 {
+    static bool homed = [](){
+        bottomout_extruder(E1_STOP_PIN);
+        return true;
+    }();
+
+    active_extruder = 1;
+
+    const auto absolute_position = parser.floatval('A');
+    planner.synchronize();
+    auto pos = current_position.copy();
+    pos.e = absolute_position;
+    planner.buffer_segment(pos, 1.0);
+    planner.synchronize();
+
+    
     const auto slider_position = parser.intval('P', -1);
     if (slider_position < 0 || slider_position > 3) {
         SERIAL_ECHO_MSG("P value must be between 0 and 3");
         return;
     }
-    const auto enum_slider_val = static_cast<cartridge::SliderPosition>(slider_position);
-    SLIDER_SERVO.move(cartridge::slider_map(enum_slider_val));
-    cartridge::current_slider_pos = enum_slider_val;
+
+  
 }
 
 
