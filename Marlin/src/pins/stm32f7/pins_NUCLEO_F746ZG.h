@@ -81,11 +81,11 @@
  *                                                      AVDD | · · | PF13 (BTN_EN1)
  *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
- * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
- *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
- * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
- *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
- *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX/E_TX
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)         (E1_STEP) PB1 | · · | PF14 (E1_EN)
+ *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)         (E1_DIR)  PC2 | · · | PE13
+ * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 
+ *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
+ *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
  *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
  *    (E_DIR) PF2 | · · | PE5 (E_STEP)       (RDP_STOP) PD12 | · · | GND
@@ -138,6 +138,10 @@
 #define E0_DIR_PIN PF2
 #define E0_ENABLE_PIN PE4
 
+#define E1_STEP_PIN PB1
+#define E1_DIR_PIN PC2
+#define E1_ENABLE_PIN PF14
+
 #if HAS_TMC_UART
 
     #define X_HARDWARE_SERIAL  MSerial2
@@ -152,6 +156,9 @@
 
     #define E0_HARDWARE_SERIAL MSerial6
     #define E0_SLAVE_ADDRESS 0
+
+    #define E1_HARDWARE_SERIAL MSerial6
+    #define E1_SLAVE_ADDRESS 3
 
 #else // HAS_TMC_UART
   #define X_CS_PIN PB12
@@ -221,9 +228,11 @@
 // Temperature Sensors
 //
 #define TEMP_0_PIN PA3
+#define TEMP_1_PIN PC3
 //#define TEMP_BED_PIN PC0
 
 #define HEATER_0_PIN PA15
+#define HEATER_1_PIN PA15
 
 #define CALIBRATION_PIN PF8
 #define CALIBRATION_PIN_PULLUP
