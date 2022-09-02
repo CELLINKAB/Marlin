@@ -3,6 +3,7 @@
 #include "../gcode/gcode.h"
 #include "../module/planner.h"
 #include "../module/servo.h"
+
 #include "extruder_bottomout.h"
 
 #define SLIDER_SERVO servo[0]
@@ -38,30 +39,34 @@ static SliderPosition current_slider_pos = SliderPosition::Extrude;
 
 void GcodeSuite::M1112()
 {
-    static bool homed = [](){
+    static bool homed [[maybe_unused]] = []() {
         bottomout_extruder(E1_STOP_PIN);
         return true;
     }();
 
     active_extruder = 1;
 
-    const auto absolute_position = parser.floatval('A');
-    planner.synchronize();
-    auto pos = current_position.copy();
-    pos.e = absolute_position;
-    planner.buffer_segment(pos, 1.0);
-    planner.synchronize();
+    if (parser.seen('H')) {
+        bottomout_extruder(E1_STOP_PIN);
+        return;
+    }
 
-    
+    if (parser.seen('A')) {
+        const auto absolute_position = parser.value_float();
+        planner.synchronize();
+        auto pos = current_position.copy();
+        pos.e = absolute_position;
+        planner.buffer_line(pos, 1.0);
+        planner.synchronize();
+        return;
+    }
+
     const auto slider_position = parser.intval('P', -1);
     if (slider_position < 0 || slider_position > 3) {
         SERIAL_ECHO_MSG("P value must be between 0 and 3");
         return;
     }
-
-  
 }
-
 
 void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate)
 {
@@ -74,7 +79,6 @@ void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate)
     WRITE(PRESSURE_VALVE_1_PIN, LOW);
     WRITE(PRESSURE_VALVE_2_PIN, HIGH);
 }
-
 
 void GcodeSuite::M1113()
 {
