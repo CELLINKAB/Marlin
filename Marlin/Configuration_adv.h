@@ -2338,7 +2338,7 @@
 //#define NO_TIMEOUTS 1000 // Milliseconds
 
 // Some clients will have this feature soon. This could make the NO_TIMEOUTS unnecessary.
-#define CELLINK_ADVANCED_OK
+#define CELLINK_OK
 //#define ADVANCED_OK
 
 // Printrun may have trouble receiving long strings all at once.
