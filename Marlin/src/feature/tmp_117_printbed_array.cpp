@@ -23,7 +23,7 @@ static std::array<TMP117<TwoWire>, 4> bed_sensors{[]() {
     return std::array{sensor_1, sensor_2, sensor_3, sensor_4};
 }()};
 
-double get_tmp117_printbed_temp()
+double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     for (auto& sensor : bed_sensors) {

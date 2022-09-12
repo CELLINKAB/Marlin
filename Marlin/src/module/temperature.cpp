@@ -141,6 +141,10 @@
   #endif
 #endif
 
+#if TEMP_SENSOR_BED_IS_TMP117
+  #include "../feature/tmp117_printbed.h"
+#endif
+
 #if ENABLED(PID_EXTRUSION_SCALING)
   #include "stepper.h"
 #endif
@@ -2084,7 +2088,7 @@ void Temperature::updateTemperaturesFromRawValues() {
     HOTEND_LOOP() temp_hotend[e].celsius = analog_to_celsius_hotend(temp_hotend[e].getraw(), e);
   #endif
 
-  TERN_(HAS_HEATED_BED,     temp_bed.celsius       = analog_to_celsius_bed(temp_bed.getraw()));
+  TERN_(HAS_HEATED_BED,     temp_bed.celsius       = TERN(TEMP_SENSOR_BED_IS_TMP117, get_tmp117_bed_temp(), analog_to_celsius_bed(temp_bed.getraw())));
   TERN_(HAS_TEMP_CHAMBER,   temp_chamber.celsius   = analog_to_celsius_chamber(temp_chamber.getraw()));
   TERN_(HAS_TEMP_COOLER,    temp_cooler.celsius    = analog_to_celsius_cooler(temp_cooler.getraw()));
   TERN_(HAS_TEMP_PROBE,     temp_probe.celsius     = analog_to_celsius_probe(temp_probe.getraw()));

@@ -2,4 +2,4 @@
 
 #pragma once
 
-double get_tmp117_printbed_temp();
+double get_tmp117_bed_temp();
