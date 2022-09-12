@@ -433,7 +433,9 @@
   #undef HEATER_7_MAXTEMP
 #endif
 
-#if TEMP_SENSOR_BED == -4
+#if TEMP_SENSOR_BED == -10
+  #define TEMP_SENSOR_BED_IS_TMP117 1
+#elif TEMP_SENSOR_BED == -4
   #define TEMP_SENSOR_BED_IS_AD8495 1
 #elif TEMP_SENSOR_BED == -3
   #error "MAX31855 Thermocouples (-3) not supported for TEMP_SENSOR_BED."

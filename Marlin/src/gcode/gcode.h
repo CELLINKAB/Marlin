@@ -1256,6 +1256,10 @@ private:
     static void M1100();
   #endif
 
+  #if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
+    static void M802();
+  #endif
+
   #if ANY_PIN(PRESSURE_SENSOR)
     static void M1111();
   #endif

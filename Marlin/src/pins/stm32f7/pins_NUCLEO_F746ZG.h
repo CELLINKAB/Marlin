@@ -78,12 +78,12 @@
  *            GND | · · | PG2                                 ￣￣￣
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
- *                                                      AVDD | · · | PF13 (BTN_EN1)
- *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
- *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
- * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PROBE_LED_ON)
- *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 (PROBE_MFI)
- * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (PROBE_ERR)
+ *                                                      AVDD | · · | PF13 
+ *                 _CN9_                                AGND | · · | PE9  
+ *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 
+ *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 
+ * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 
  *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  LG_TX/E_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   LG_RX/E_TX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
@@ -92,7 +92,7 @@
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
- * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 (SERVO0)
+ * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 
  * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
@@ -217,11 +217,16 @@
   #define PROBE_STOP_PIN PD12
   #define PROBE_SERIAL_ADDRESS 2
 #endif
+
 //
 // Temperature Sensors
 //
+
+#define I2C_SCL_PIN PF13
+#define I2C_SDA_PIN PE9
+
 #define TEMP_0_PIN PA3
-//#define TEMP_BED_PIN PC0
+#define TEMP_BED_SLAVE_ADDR 75 // 5v
 
 #define HEATER_0_PIN PA15
 
