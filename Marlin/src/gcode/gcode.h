@@ -492,6 +492,10 @@ private:
     static void G6();
   #endif
 
+  #if ENABLED(G7_RELATIVE_MOVE)
+    static void G7();
+  #endif
+
   #if ENABLED(FWRETRACT)
     static void G10();
     static void G11();

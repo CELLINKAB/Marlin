@@ -4478,6 +4478,8 @@
   #define PRESSURE_SENSOR_REPORT_SAMPLES 3
 #endif
 
+#define G7_RELATIVE_MOVE
+
 // @section develop
 
 //
