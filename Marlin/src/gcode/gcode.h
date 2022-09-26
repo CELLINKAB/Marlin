@@ -1252,6 +1252,18 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(CELLINK_REPORTING)
+    static void M797(); // reset nozzle calibration
+
+    static void M801(); // set printbed temp
+    static void M802(); // get printbed temp
+
+    static void M824(); // get active tool
+
+    static void M1015(); // get current position
+    static void M1016(); // get current machine position
+  #endif
+
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     static void M1029();
   #endif
