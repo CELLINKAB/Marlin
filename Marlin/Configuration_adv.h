@@ -2338,7 +2338,7 @@
 //#define NO_TIMEOUTS 1000 // Milliseconds
 
 // Some clients will have this feature soon. This could make the NO_TIMEOUTS unnecessary.
-#define CELLINK_OK
+#define CELLINK_REPORTING
 //#define ADVANCED_OK
 
 // Printrun may have trouble receiving long strings all at once.
@@ -4477,6 +4477,8 @@
   #define PRESSURE_SENSOR_TRAINING_SAMPLES 40
   #define PRESSURE_SENSOR_REPORT_SAMPLES 3
 #endif
+
+#define G7_RELATIVE_MOVE
 
 // @section develop
 

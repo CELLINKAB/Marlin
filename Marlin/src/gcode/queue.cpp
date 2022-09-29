@@ -253,7 +253,7 @@ void GCodeQueue::RingBuffer::ok_to_send() {
   #endif
   if (command.skip_ok) return;
   SERIAL_ECHOPGM(STR_OK);
-  #if ENABLED(CELLINK_OK) || ENABLED(ADVANCED_OK)
+  #if ENABLED(CELLINK_REPORTING) || ENABLED(ADVANCED_OK)
     char* p = command.buffer;
     if (*p == 'N') {
       TERN(ADVANCED_OK, SERIAL_CHAR(' ', *p++), ++p; SERIAL_CHAR(':', ' '));

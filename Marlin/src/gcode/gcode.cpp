@@ -347,6 +347,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 6: G6(); break;                                      // G6: Direct Stepper Move
       #endif
 
+      #if ENABLED(G7_RELATIVE_MOVE)
+        case 7: G7(); break;
+      #endif
+
       #if ENABLED(FWRETRACT)
         case 10: G10(); break;                                    // G10: Retract / Swap Retract
         case 11: G11(); break;                                    // G11: Recover / Swap Recover
@@ -1086,12 +1090,25 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1100: M1100(); break;
       #endif
 
-      #if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
-        case 802: M802(); break;
-      #endif
-
       #if ANY_PIN(PRESSURE_SENSOR)
         case 1111: M1111(); break;
+      #endif
+
+      #if ENABLED(CELLINK_REPORTING)
+        case 797: M797(); break; // reset nozzle calibration
+
+        case 801: M801(); break; // set bed temperature
+        case 802: M802(); break; // get bed temperature
+
+        case 821: M821(); break; // get home status
+
+        case 824: M824(); break; // get active tool
+
+        case 1015: M1015(); break; // get current position
+        case 1016: M1016(); break; // get current machine position
+
+        case 1017:M1017(); break; // multi-line status report
+
       #endif
 
       //TODO: Move or elaborate these functions

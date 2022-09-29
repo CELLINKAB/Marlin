@@ -492,6 +492,10 @@ private:
     static void G6();
   #endif
 
+  #if ENABLED(G7_RELATIVE_MOVE)
+    static void G7();
+  #endif
+
   #if ENABLED(FWRETRACT)
     static void G10();
     static void G11();
@@ -1248,16 +1252,28 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(CELLINK_REPORTING)
+    static void M797(); // reset nozzle calibration
+
+    static void M801(); // set printbed temp
+    static void M802(); // get printbed temp
+
+    static void M821(); // get homing status
+
+    static void M824(); // get active tool
+
+    static void M1015(); // get current position
+    static void M1016(); // get current machine position
+
+    static void M1017(); // multi-line status report
+  #endif
+
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     static void M1029();
   #endif
 
   #if ENABLED(HAS_ANALOG_PROBE)
     static void M1100();
-  #endif
-
-  #if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
-    static void M802();
   #endif
 
   #if ANY_PIN(PRESSURE_SENSOR)
