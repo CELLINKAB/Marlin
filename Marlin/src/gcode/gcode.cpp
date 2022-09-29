@@ -348,7 +348,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(G7_RELATIVE_MOVE)
-        case 7: G&(); break;
+        case 7: G7(); break;
       #endif
 
       #if ENABLED(FWRETRACT)
@@ -1100,10 +1100,14 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 801: M801(); break; // set bed temperature
         case 802: M802(); break; // get bed temperature
 
-        case 842: M824(); break; // get active tool
+        case 821: M821(); break; // get home status
+
+        case 824: M824(); break; // get active tool
 
         case 1015: M1015(); break; // get current position
         case 1016: M1016(); break; // get current machine position
+
+        case 1017:M1017(); break; // multi-line status report
 
       #endif
 
