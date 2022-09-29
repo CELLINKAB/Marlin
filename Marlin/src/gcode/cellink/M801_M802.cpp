@@ -1,15 +1,15 @@
 // Copyright Cellink 2022 - GPLv3
 
-#include "../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfig.h"
 
-#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
-#    include "../gcode/gcode.h"
-#    include "tmp117/TMP117.h"
+#if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+#    include "../gcode.h"
+#    include "../../feature/tmp117/TMP117.h"
 
 #    include <array>
 #    include <numeric>
 
-#    include "tmp117_printbed.h"
+#    include "../../feature/tmp117_printbed.h"
 
 static std::array<TMP117<TwoWire>, 4>& bed_sensors()
 {
@@ -37,11 +37,12 @@ double get_tmp117_bed_temp()
     return avg;
 }
 
+// get bed temp
 void GcodeSuite::M802()
 {
     uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
-        SERIAL_ECHO("bed_temperature_");
+        SERIAL_ECHO("PBT");
         SERIAL_ECHO(sensor_num++);
         SERIAL_CHAR(':');
         SERIAL_ECHO_F(sensor.getTemperature());
@@ -50,4 +51,6 @@ void GcodeSuite::M802()
     SERIAL_EOL();
 }
 
-#endif // TEMP_SENSOR_BED_IS_TMP117
+void GcodeSuite::M801() {}
+
+#endif // CELLINK_REPORTING
