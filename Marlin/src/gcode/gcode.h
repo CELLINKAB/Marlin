@@ -1254,6 +1254,8 @@ private:
 
   #if ENABLED(CELLINK_REPORTING)
     static void M797(); // reset nozzle calibration
+    static void M798(); // get tool calibration status
+    static void M799(); // get tool calibration offsets
 
     static void M801(); // set printbed temp
     static void M802(); // get printbed temp
