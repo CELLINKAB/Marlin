@@ -1,0 +1,109 @@
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
+ *
+ * Based on Sprinter and grbl.
+ * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+#pragma once
+
+#if NOT_TARGET(STM32F767xx)
+#error "Oops! Select an STM32F746 environment"
+#endif
+
+#define BOARD_INFO_NAME "CELLINK_MYCORRHIZA_V1"
+#define DEFAULT_MACHINE_NAME "Exocyte"
+
+//
+// Steppers
+//
+#define X_STEP_PIN PD12
+#define X_DIR_PIN PD10
+#define X_ENABLE_PIN PD11
+#define X_STOP_PIN PD9
+#define X_HARDWARE_SERIAL  MSerial2
+#define X_SLAVE_ADDRESS  0
+
+#define Y_STEP_PIN PD13
+#define Y_DIR_PIN PB15
+#define Y_ENABLE_PIN PD8
+#define Y1_STOP_PIN PB14
+#define Y_HARDWARE_SERIAL  MSerial2
+#define Y_SLAVE_ADDRESS  2
+
+#define Y2_STEP_PIN PD14
+#define Y2_DIR_PIN PG3
+#define Y2_ENABLE_PIN PG2
+#define Y2_STOP_PIN PG4
+#define Y2_HARDWARE_SERIAL MSerial2
+#define Y2_SLAVE_ADDRESS 1
+
+#define Z_STEP_PIN PD15
+#define Z_DIR_PIN PG6
+#define Z_ENABLE_PIN PG5
+#define Z_STOP_PIN PG7
+#define Z_HARDWARE_SERIAL  MSerial2
+#define Z_SLAVE_ADDRESS  3
+
+#define SP_ENABLE_PIN PC11
+#define SP_INDEX_PIN PC12
+#define SP_STOP_PIN PD2
+#define SP_HARDWARE_SERIAL
+#define SP_SLAVE_ADDRESS 
+
+#define PC_STEP_PIN PB9
+#define PC_DIR_PIN PB10
+#define PC_ENABLE_PIN PE15
+#define PC_STOP_PIN PE14
+#define PC_HARDWARE_SERIAL
+#define PC_SLAVE_ADDRESS
+
+//
+// bed leveling and calibration
+//
+
+#define OPTICAL_SENSOR_1_PIN PC4
+#define OPTICAL_SENSOR_2_PIN PC5
+
+#define Z_MIN_PROBE_PIN PC6
+
+//
+// temperature sensing and control
+//
+
+#define PRINTBED_TEMP_SCL_PIN PB6
+#define PRINTBED_TEMP_SDA_PIN PB7
+
+//
+// pneumatics
+//
+
+#define PRESSURE_REGULATOR_PIN PB2
+
+#define PRESSURE_SENSOR_1_PIN PF12
+#define PRESSURE_SENSOR_2_PIN PF_11
+
+#define PRESSURE_VALVE_1_PIN PF13
+#define PRESSURE_VALVE_2_PIN PF14
+#define PRESSURE_VALVE_3_PIN PF15
+#define PRESSURE_VALVE_C1_PIN PG0
+#define PRESSURE_VALVE_C2_PIN PG1
+#define PRESSURE_VALVE_C3_PIN PE7
+
+//
+// leds
+//

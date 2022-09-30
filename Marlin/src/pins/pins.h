@@ -704,6 +704,8 @@
   #include "stm32f7/pins_NUCLEO_F767ZI.h"       // STM32F7                                env:NUCLEO_F767ZI
 #elif MB(NUCLEO_F746ZG)
   #include "stm32f7/pins_NUCLEO_F746ZG.h"       // STM32F7                                env:NUCLEO_F746ZG
+#elif MB(MYCORRHIZA_V1)
+  #include "stm32f7/pins_MYCORRHIZA_V1.h"
 #elif MB(BTT_SKR_SE_BX)
   #include "stm32h7/pins_BTT_SKR_SE_BX.h"       // STM32H7                                env:BTT_SKR_SE_BX
 #elif MB(TEENSY41)
