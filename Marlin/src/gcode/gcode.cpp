@@ -1096,6 +1096,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if ENABLED(CELLINK_REPORTING)
         case 797: M797(); break; // reset nozzle calibration
+        case 798: M798(); break; // get nozzle calibration status
+        case 799: M799(); break; // get nozzle calibration offsets
 
         case 801: M801(); break; // set bed temperature
         case 802: M802(); break; // get bed temperature
