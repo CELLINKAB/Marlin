@@ -79,7 +79,7 @@
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
  *                                                      AVDD | · · | PF13 
- *                 _CN9_                                AGND | · · | PE9  
+ *                 _CN9_                                AGND | · · | PE9  (CHANT_RTS)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 
  *    (PROBE) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13 
@@ -216,6 +216,15 @@
   #define PROBE_EN_PIN PD13
   #define PROBE_STOP_PIN PD12
   #define PROBE_SERIAL_ADDRESS 2
+#endif
+
+
+// cartridge station communication
+#define CHANTRELLE_SUPPORT
+#if ENABLED(CHANTRELLE_SUPPORT)
+  #define CHANT_SERIAL MSerial7
+  #define USING_HW_SERIAL7 1
+  #define CHANT_RTS_PIN PE9
 #endif
 
 //
