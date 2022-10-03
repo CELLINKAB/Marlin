@@ -1,9 +1,13 @@
 // copyright a thing in a place with a license by some people
 
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(CHANTARELLE_SUPPORT)
+
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
-#include "../../inc/MarlinConfig.h"
 #include "request.h"
+
 
 #define CHANT_MAX_MSG_LEN 128
 
@@ -15,7 +19,7 @@ void debug_echo_cmd(const char* msg)
     [[maybe_unused]] static printhead::Controller ph_1 = []() {
         //CHANT_SERIAL.setHalfDuplex();
         CHANT_SERIAL.begin(115200);
-        OUT_WRITE(CHANT_RTS_PIN, HIGH);
+        OUT_WRITE(CHANT_RTS_PIN, LOW);
         return printhead::Controller(CHANT_SERIAL);
     }();
     char buf[CHANT_MAX_MSG_LEN]{};
@@ -25,9 +29,9 @@ void debug_echo_cmd(const char* msg)
     printhead::Packet packet(Index::One, Command::SYRINGEPUMP_20ML_START, msg, msg_len);
     SERIAL_ECHOLNPGM_P("sending '", msg, "' to chant, ", msg_len, " bytes, crc:", packet.crc);
     printhead::send(packet, CHANT_SERIAL);
-    WRITE(CHANT_RTS_PIN, LOW);
-    Response response = receive(CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, HIGH);
+    Response response = receive(CHANT_SERIAL);
+    WRITE(CHANT_RTS_PIN, LOW);
     if (response.result != Result::OK)
         {SERIAL_ECHO("Packet returned bad!");
         return;}
@@ -58,3 +62,6 @@ void GcodeSuite::M1069()
 
     printhead::debug_echo_cmd(printhead::command_switch(command));
 }
+
+
+#endif // CHANTARELLE_SUPPORT

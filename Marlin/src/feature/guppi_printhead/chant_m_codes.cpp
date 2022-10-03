@@ -5,6 +5,8 @@
 
 #include "request.h"
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+
 printhead::Controller ph_controller(CHANT_SERIAL);
 
 //
@@ -116,17 +118,17 @@ void GcodeSuite::M795() {}
 //GetPHSWVersion
 void GcodeSuite::M796() {}
 //SetPHNotCalibrated
-void GcodeSuite::M797() {}
-//SetPrintheadExternalPWM
-void GcodeSuite::M798() {}
-//GetPrintheadExternalPWM
-void GcodeSuite::M799() {}
+// void GcodeSuite::M797() {}
+// //SetPrintheadExternalPWM
+// void GcodeSuite::M798() {}
+// //GetPrintheadExternalPWM
+// void GcodeSuite::M799() {}
 //DisableBedTempController
 void GcodeSuite::M800() {}
 //SetBedTempController
-void GcodeSuite::M801() {}
-//GetBedTempControllerInfo
-void GcodeSuite::M802() {}
+// void GcodeSuite::M801() {}
+// //GetBedTempControllerInfo
+// void GcodeSuite::M802() {}
 //SetPeltierOutputLimit
 void GcodeSuite::M803() {}
 //SetThermistorUnifiedParams
@@ -154,13 +156,13 @@ void GcodeSuite::M818() {}
 //SetBedCoolingFans
 void GcodeSuite::M819() {}
 //PrinterHomingStatus
-void GcodeSuite::M821() {}
+// void GcodeSuite::M821() {}
 //ControlAirPumpStatus
 void GcodeSuite::M822() {}
 //SafePark
 void GcodeSuite::M823() {}
 //GetCurrActiveTool
-void GcodeSuite::M824() {}
+// void GcodeSuite::M824() {}
 //GetCurrPhotocuringParams
 void GcodeSuite::M825() {}
 //SetHomeDirection
@@ -215,11 +217,11 @@ void GcodeSuite::M1008() {}
 //SetPrintheadHeaterValue
 void GcodeSuite::M1012() {}
 //PrintCurrentPosition
-void GcodeSuite::M1015() {}
-//PrintCurrentMechanicalPos
-void GcodeSuite::M1016() {}
-//PrintCurrentToolOffset
-void GcodeSuite::M1017() {}
+// void GcodeSuite::M1015() {}
+// //PrintCurrentMechanicalPos
+// void GcodeSuite::M1016() {}
+// //PrintCurrentToolOffset
+// void GcodeSuite::M1017() {}
 //DbgPhCom
 void GcodeSuite::M1018() {}
 //ReadExternalGPIOs
@@ -475,3 +477,5 @@ void GcodeSuite::M2100() {}
 void GcodeSuite::M2110() {}
 //ResetCoaxialCouple
 void GcodeSuite::M2111() {}
+
+#endif //  CHANTARELLE_SUPPORT
