@@ -4,7 +4,7 @@
 
 #if ENABLED(ANALOG_PRESSURE_SENSOR)
 
-#    if !ANY_PIN(PRESSURE_SENSOR)
+#    if !ANY_PIN(PRESSURE_SENSOR_1)
 #        error "PRESSURE_SENSOR_PIN must be defined for analog pressure sensor!"
 #    endif
 
@@ -16,7 +16,7 @@
 
 void GcodeSuite::M1111()
 {
-    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_PIN, 0.5302574309f);
+    static AnalogPressureSensor sensor_1(PRESSURE_SENSOR_1_PIN, 0.5302574309f);
     static AnalogPressureSensor sensor_2(PRESSURE_SENSOR_2_PIN, 0.4188586991f);
     static auto report_fn = []() {
         const float reading_1 = sensor_1.read_avg();
