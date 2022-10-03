@@ -63,19 +63,31 @@
 #endif
 #if USING_HW_SERIAL2
   #ifdef I_DONT_TRUST_MSERIAL
-    HardwareSerial MSerial2(PD6, PD5);
+    HardwareSerial MSerial2(MSERIAL2_RX_PIN, MSERIAL2_TX_PIN);
   #else 
     DECLARE_SERIAL_PORT(2)
   #endif
 #endif
 #if USING_HW_SERIAL3
-  DECLARE_SERIAL_PORT(3)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial3(PC10);
+  #else
+    DECLARE_SERIAL_PORT(3)
+  #endif
 #endif
 #if USING_HW_SERIAL4
-  DECLARE_SERIAL_PORT(4)
+    #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial3;
+  #else
+    DECLARE_SERIAL_PORT(4)
+  #endif
 #endif
 #if USING_HW_SERIAL5
-  DECLARE_SERIAL_PORT(5)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial5(PB13);
+  #else
+    DECLARE_SERIAL_PORT(5)
+  #endif
 #endif
 #if USING_HW_SERIAL6
   #ifdef I_DONT_TRUST_MSERIAL
