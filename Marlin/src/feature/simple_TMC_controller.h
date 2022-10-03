@@ -8,7 +8,6 @@
 
 #include "tmc_util.h"
 
-#define SIMPLE_TMC_HW_SERIAL MSerial6
 #define SIMPLE_TMC_BAUDRATE 115200
 
 /**
