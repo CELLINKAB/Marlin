@@ -98,6 +98,14 @@
  *                 ￣￣￣                                     ￣￣￣￣
  */
 
+// custom serial pins
+#define MSERIAL2_RX_PIN PD6
+#define MSERIAL2_TX_PIN PD5
+//#define MSERIAL6_RX_PIN
+//#define MSERIAL6_TX_PIN
+//#define MSERIAL7_RX_PIN
+//#define MSERIAL7_TX_PIN
+
 #if DISABLED(SENSORLESS_HOMING)
     #define X_MIN_PIN PF7
     #define X_MAX_PIN PD0
