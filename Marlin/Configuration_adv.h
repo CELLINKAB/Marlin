@@ -1015,7 +1015,7 @@
 
 // @section motion
 
-#define AXIS_RELATIVE_MODES { false, false, false, true}
+#define AXIS_RELATIVE_MODES { false, false, false}
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -4470,7 +4470,7 @@
   #define INTERVAL_REPORTER_DEFAULT_INTERVAL 1'000'000
 #endif
 
-#define ANALOG_PRESSURE_SENSOR
+//#define ANALOG_PRESSURE_SENSOR
 #if ENABLED(ANALOG_PRESSURE_SENSOR)
   #define SENSOR_KPA_SCALE_FACTOR 4.1792f
   #define INITIAL_SENSOR_ZERO_OFFSET 165u
