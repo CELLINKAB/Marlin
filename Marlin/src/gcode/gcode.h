@@ -1282,7 +1282,7 @@ private:
     static void M1111();
   #endif
 
-  #if ENABLED(CHANTRELLE_SUPPORT)
+  #if ENABLED(CHANTARELLE_SUPPORT)
     static void M750();
     static void M751();
     static void M752();
@@ -1311,12 +1311,12 @@ private:
     static void M794();
     static void M795();
     static void M796();
-    static void M797();
-    static void M798();
-    static void M799();
+    // static void M797();
+    // static void M798();
+    // static void M799();
     static void M800();
-    static void M801();
-    static void M802();
+    // static void M801();
+    // static void M802();
     static void M803();
     static void M804();
     static void M805();
@@ -1330,10 +1330,10 @@ private:
     static void M817();
     static void M818();
     static void M819();
-    static void M821();
+    // static void M821();
     static void M822();
     static void M823();
-    static void M824();
+    // static void M824();
     static void M825();
     static void M826();
     static void M830();
@@ -1355,9 +1355,9 @@ private:
     static void M1006();
     static void M1008();
     static void M1012();
-    static void M1015();
-    static void M1016();
-    static void M1017();
+    // static void M1015();
+    // static void M1016();
+    // static void M1017();
     static void M1018();
     static void M1020();
     static void M1023();

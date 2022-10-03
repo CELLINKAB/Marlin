@@ -1115,11 +1115,11 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       //TODO: Move or elaborate these functions
       // slider valve control
-      case 1112: M1112(); break;
+      // case 1112: M1112(); break;
       // easy mixing
-      case 1113: M1113(); break;
+      // case 1113: M1113(); break;
 
-      #if ENABLED(CHANTRELLE_SUPPORT)
+      #if ENABLED(CHANTARELLE_SUPPORT)
       // TODO: check for conflicts
         case 750: M750(); break;
         case 751: M751(); break;
@@ -1149,12 +1149,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 794: M794(); break;
         case 795: M795(); break;
         case 796: M796(); break;
-        case 797: M797(); break;
-        case 798: M798(); break;
-        case 799: M799(); break;
+        // case 797: M797(); break;
+        // case 798: M798(); break;
+        // case 799: M799(); break;
         case 800: M800(); break;
-        case 801: M801(); break;
-        case 802: M802(); break;
+        // case 801: M801(); break;
+        // case 802: M802(); break;
         case 803: M803(); break;
         case 804: M804(); break;
         case 805: M805(); break;
@@ -1168,10 +1168,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 817: M817(); break;
         case 818: M818(); break;
         case 819: M819(); break;
-        case 821: M821(); break;
+        // case 821: M821(); break;
         case 822: M822(); break;
         case 823: M823(); break;
-        case 824: M824(); break;
+        // case 824: M824(); break;
         case 825: M825(); break;
         case 826: M826(); break;
         case 830: M830(); break;
@@ -1193,9 +1193,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1006: M1006(); break;
         case 1008: M1008(); break;
         case 1012: M1012(); break;
-        case 1015: M1015(); break;
-        case 1016: M1016(); break;
-        case 1017: M1017(); break;
+        // case 1015: M1015(); break;
+        // case 1016: M1016(); break;
+        // case 1017: M1017(); break;
         case 1018: M1018(); break;
         case 1020: M1020(); break;
         case 1023: M1023(); break;
