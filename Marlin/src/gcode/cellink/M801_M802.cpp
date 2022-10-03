@@ -14,13 +14,15 @@
 static std::array<TMP117<TwoWire>, 4>& bed_sensors()
 {
     static std::array<TMP117<TwoWire>, 4> sensors{[]() {
-        TMP117 sensor_1(TMPAddr::GND);
+        static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
+        pb_i2c.begin();
+        TMP117 sensor_1(TMPAddr::GND, pb_i2c);
         sensor_1.init(nullptr);
-        TMP117 sensor_2(TMPAddr::SCL);
+        TMP117 sensor_2(TMPAddr::SCL, pb_i2c);
         sensor_2.init(nullptr);
-        TMP117 sensor_3(TMPAddr::SDA);
+        TMP117 sensor_3(TMPAddr::SDA, pb_i2c);
         sensor_3.init(nullptr);
-        TMP117 sensor_4(TMPAddr::VCC);
+        TMP117 sensor_4(TMPAddr::VCC, pb_i2c);
         sensor_4.init(nullptr);
         return std::array{sensor_1, sensor_2, sensor_3, sensor_4};
     }()};
