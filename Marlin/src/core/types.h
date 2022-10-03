@@ -449,7 +449,7 @@ struct XYZval {
   FI operator const XYval<T>&()                  const { return *(const XYval<T>*)this; }
 
   // Cast to a type with more fields by making a new object
-  FI operator       XYZEval<T>()                 const { return { LINEAR_AXIS_LIST(x, y, z, i, j, k), 0 /*e*/ }; }
+  FI operator       XYZEval<T>()                 const { return { LINEAR_AXIS_LIST(x, y, z, i, j, k)}; }
 
   // Accessor via an AxisEnum (or any integer) [index]
   FI       T&   operator[](const int n)                { return pos[n]; }
