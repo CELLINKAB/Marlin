@@ -57,6 +57,8 @@ void bottomout_extruder(pin_t extruder_stop_pin)
 
     // cleanup needed to ensure future moves work as expected
     planner.set_e_position_mm(0.0f);
+    set_current_from_steppers_for_axis(AxisEnum::E_AXIS);
+    sync_plan_position();
 }
 
 constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
@@ -111,9 +113,9 @@ void GcodeSuite::G513()
     const auto pre_command_relative_mode = axis_relative;
     set_e_absolute();
 
-    destination = current_position;
-    destination.e = position;
-    planner.buffer_line(destination, 1.0, 1);
+    auto new_pos = current_position.copy();
+    new_pos.e = position;
+    planner.buffer_line(new_pos, 0.5, 1);
     planner.synchronize();
 
     // make sure relative mode settings weren't overwritten from user perspective
