@@ -463,8 +463,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if HAS_E_BOTTOMOUT
-        case 511: G511(); break;
-        case 512: G512(); break;
+        case 511: G511(); break; // G511 home extruder
+        case 512: G512(); break; // G512 home slider valve
+        case 513: G513(); break; // G513 move slider valve
+        case 514: G514(); break; // G514 pneumatic move/mixing extrude
       #endif
 
       #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)

@@ -613,6 +613,8 @@ private:
   #if HAS_E_BOTTOMOUT
     static void G511();
     static void G512();
+    static void G513();
+    static void G514();
   #endif
 
   #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
