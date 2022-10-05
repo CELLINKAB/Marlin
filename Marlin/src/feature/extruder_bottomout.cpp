@@ -14,6 +14,7 @@
     tmc_enable_stallguard(stepperE##index); \
     SET_INPUT_PULLUP(E##index##_STOP_PIN)
     
+static bool slider_valve_homed = false;
 
 void bottomout_extruder(pin_t extruder_stop_pin)
 {
@@ -28,7 +29,7 @@ void bottomout_extruder(pin_t extruder_stop_pin)
         TERN_(EXTRUDERS > 5, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(5));
         return 0;
     }();
-    static callback_function_t bottomout_isr{[extruder_stop_pin] {
+    callback_function_t bottomout_isr{[extruder_stop_pin] {
         // critical section necessary as stepper ISR running during
         // planner.quick_stop() creates a race condition for clearing
         // the block buffer causing an infinite "busy" loop.
@@ -55,28 +56,95 @@ void bottomout_extruder(pin_t extruder_stop_pin)
     planner.synchronize(); // spins until move completed or bottomout_isr clears buffer
 
     // cleanup needed to ensure future moves work as expected
-    set_current_from_steppers_for_axis(AxisEnum::E_AXIS);
-    sync_plan_position();
+    planner.set_e_position_mm(0.0f);
 }
 
 constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
 {
     switch (extruder_index) {
-        case 0: TERN_(defined(E0_STOP_PIN), return E0_STOP_PIN);
-        case 1: /*TERN_(defined(E1_STOP_PIN),*/ return E1_STOP_PIN;
-        case 2: TERN_(defined(E2_STOP_PIN), return E2_STOP_PIN);
-        case 3: TERN_(defined(E3_STOP_PIN), return E3_STOP_PIN);
-        case 4: TERN_(defined(E4_STOP_PIN), return E4_STOP_PIN);
-        case 5: TERN_(defined(E5_STOP_PIN), return E5_STOP_PIN);
-        case 6: TERN_(defined(E6_STOP_PIN), return E6_STOP_PIN);
+        case 0: TERN_(E0_STOP_PIN, return E0_STOP_PIN);
+        case 1: TERN_(E1_STOP_PIN, return E1_STOP_PIN);
+        case 2: TERN_(E2_STOP_PIN, return E2_STOP_PIN);
+        case 3: TERN_(E3_STOP_PIN, return E3_STOP_PIN);
+        case 4: TERN_(E4_STOP_PIN, return E4_STOP_PIN);
+        case 5: TERN_(E5_STOP_PIN, return E5_STOP_PIN);
+        case 6: TERN_(E6_STOP_PIN, return E6_STOP_PIN);
         default: return 0;
     };
 }
 
+/**
+ * @brief Home extruder
+ * 
+ */
 void GcodeSuite::G511()
 {
     int8_t extruder_index = get_target_extruder_from_command();
     if (extruder_index == -1) return;
     bottomout_extruder(get_extruder_stop_pin_from_index(extruder_index));
+}
+
+/**
+ * @brief Home slider valve
+ * 
+ */
+void GcodeSuite::G512()
+{
+    if (slider_valve_homed) return;
+    const auto pre_command_extruder = active_extruder;
+    active_extruder = 1; // hard coded slider valve as extruder for now
+    bottomout_extruder(get_extruder_stop_pin_from_index(active_extruder));
+    active_extruder = pre_command_extruder;
+    slider_valve_homed = true;
+}
+
+/**
+ * @brief Slider valve move
+ * 
+ */
+void GcodeSuite::G513()
+{
+    if (!slider_valve_homed) return;
+    if (!parser.seenval('P')) return;
+    const float position = parser.value_float();
+    planner.synchronize();
+    const auto pre_command_relative_mode = axis_relative;
+    set_e_absolute();
+
+    destination = current_position;
+    destination.e = position;
+    planner.buffer_line(destination, 1.0, 1);
+    planner.synchronize();
+
+    // make sure relative mode settings weren't overwritten from user perspective
+    axis_relative = pre_command_relative_mode;
+}
+
+
+static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate_mm_s)
+{
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
+    WRITE(PRESSURE_VALVE_2_PIN, LOW);
+    delay(100);
+    planner.buffer_segment(pos, feedrate_mm_s);
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, LOW);
+    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
+}
+
+/**
+ * @brief mixing extrude / pneumatic move
+ * 
+ */
+void GcodeSuite::G514()
+{
+    if (!parser.seenval('E')) return;
+    const float volume = parser.value_axis_units(AxisEnum::E_AXIS);
+    const float feedrate_mm_m = parser.feedrateval('F');
+    const auto pos = current_position + xyze_pos_t{0, 0, 0, volume};
+    
+    pneumatic_assisted_move(pos, MMM_TO_MMS(feedrate_mm_m));
+    
 }
 #endif // HAS_E_BOTTOMOUT
