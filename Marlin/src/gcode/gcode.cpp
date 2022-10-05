@@ -464,6 +464,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if HAS_E_BOTTOMOUT
         case 511: G511(); break;
+        case 512: G512(); break;
       #endif
 
       #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
