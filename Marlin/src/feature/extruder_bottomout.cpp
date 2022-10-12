@@ -85,9 +85,12 @@ constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
  */
 void GcodeSuite::G511()
 {
+    static bool homed = false;
+    if (parser.seen_test('O') && homed) return;
     int8_t extruder_index = get_target_extruder_from_command();
     if (extruder_index == -1) return;
     bottomout_extruder(E0_STOP_PIN);
+    homed = true;
 }
 
 /**
@@ -96,7 +99,7 @@ void GcodeSuite::G511()
  */
 void GcodeSuite::G512()
 {
-    if (slider_valve_homed) return;
+    if (parser.seen_test('O') && slider_valve_homed) return;
     const auto pre_command_extruder = active_extruder;
     active_extruder = 1; // hard coded slider valve as extruder for now
     bottomout_extruder(E1_STOP_PIN);
@@ -145,12 +148,14 @@ static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate_mm_s)
  */
 void GcodeSuite::G514()
 {
-    if (!parser.seenval('E')) return;
-    const float volume = parser.value_axis_units(AxisEnum::E_AXIS);
-    const float feedrate_mm_m = parser.feedrateval('F');
-    const auto pos = current_position + xyze_pos_t{0, 0, 0, volume};
-    
-    pneumatic_assisted_move(pos, MMM_TO_MMS(feedrate_mm_m));
-    
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
+    WRITE(PRESSURE_VALVE_2_PIN, LOW);
+    delay(100);
+    G0_G1();
+    planner.synchronize();
+    WRITE(PRESSURE_VALVE_1_PIN, LOW);
+    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
+    delay(100);
 }
 #endif // HAS_E_BOTTOMOUT
