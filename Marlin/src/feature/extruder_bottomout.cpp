@@ -21,12 +21,16 @@ void bottomout_extruder(pin_t extruder_stop_pin)
     // lazy initialization to ensure good ordering with global systems.
     // static ensures this is only called on first run.
     static auto init_ [[maybe_unused]] = [] {
-        TERN_(EXTRUDERS > 0, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(0));
-        TERN_(EXTRUDERS > 1, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(1));
-        TERN_(EXTRUDERS > 2, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(2));
-        TERN_(EXTRUDERS > 3, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(3));
-        TERN_(EXTRUDERS > 4, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(4));
-        TERN_(EXTRUDERS > 5, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(5));
+        tmc_enable_stallguard(stepperE0); 
+    SET_INPUT_PULLUP(E0_STOP_PIN);
+    tmc_enable_stallguard(stepperE1);
+    SET_INPUT_PULLUP(E1_STOP_PIN);
+        // TERN_(EXTRUDERS > 0, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(0));
+        // TERN_(EXTRUDERS > 1, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(1));
+        // TERN_(EXTRUDERS > 2, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(2));
+        // TERN_(EXTRUDERS > 3, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(3));
+        // TERN_(EXTRUDERS > 4, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(4));
+        // TERN_(EXTRUDERS > 5, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(5));
         return 0;
     }();
     callback_function_t bottomout_isr{[extruder_stop_pin] {
@@ -83,7 +87,7 @@ void GcodeSuite::G511()
 {
     int8_t extruder_index = get_target_extruder_from_command();
     if (extruder_index == -1) return;
-    bottomout_extruder(get_extruder_stop_pin_from_index(extruder_index));
+    bottomout_extruder(E0_STOP_PIN);
 }
 
 /**
@@ -95,7 +99,7 @@ void GcodeSuite::G512()
     if (slider_valve_homed) return;
     const auto pre_command_extruder = active_extruder;
     active_extruder = 1; // hard coded slider valve as extruder for now
-    bottomout_extruder(get_extruder_stop_pin_from_index(active_extruder));
+    bottomout_extruder(E1_STOP_PIN);
     active_extruder = pre_command_extruder;
     slider_valve_homed = true;
 }
