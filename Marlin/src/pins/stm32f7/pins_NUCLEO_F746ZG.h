@@ -82,8 +82,8 @@
  *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)         (E1_STEP) PB1 | · · | PF14 (E1_EN)
- *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)         (E1_DIR)  PC2 | · · | PE13
- * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 
+ *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
+ * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (E1_DIR) 
  *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
  *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
@@ -139,7 +139,7 @@
 #define E0_ENABLE_PIN PE4
 
 #define E1_STEP_PIN PB1
-#define E1_DIR_PIN PC2
+#define E1_DIR_PIN PF15
 #define E1_ENABLE_PIN PF14
 
 #if HAS_TMC_UART
