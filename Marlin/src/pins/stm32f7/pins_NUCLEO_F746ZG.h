@@ -139,7 +139,7 @@
 #define E0_ENABLE_PIN PE4
 
 #define E1_STEP_PIN PB1
-#define E1_DIR_PIN PF15
+#define E1_DIR_PIN PE11
 #define E1_ENABLE_PIN PF14
 
 #if HAS_TMC_UART
