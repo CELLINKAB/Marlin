@@ -2818,7 +2818,7 @@
   #endif
 
   #if AXIS_IS_TMC(E1)
-    #define E1_CURRENT      800
+    #define E1_CURRENT      700
     #define E1_MICROSTEPS   E0_MICROSTEPS
     #define E1_RSENSE         0.11
     #define E1_CHAIN_POS     -1
@@ -3100,7 +3100,7 @@
     // their own custom G-codes
     #define E_STALL_SENSITIVITY  46
     #define E0_STALL_SENSITIVITY E_STALL_SENSITIVITY
-    //#define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
+    #define E1_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E2_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E3_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E4_STALL_SENSITIVITY E_STALL_SENSITIVITY
@@ -3108,9 +3108,9 @@
     //#define E6_STALL_SENSITIVITY E_STALL_SENSITIVITY
     //#define E7_STALL_SENSITIVITY E_STALL_SENSITIVITY
 
-    #define E_BOTTOMOUT_FEEDRATE 6.0f
-    #define E_BOTTOMOUT_BACKOFF 100.0f
-    #define E_BOTTOMOUT_MAX_DISTANCE 3000.0f
+    #define E_BOTTOMOUT_FEEDRATE 2.0f
+    #define E_BOTTOMOUT_BACKOFF 10.0f
+    #define E_BOTTOMOUT_MAX_DISTANCE 9000.0f
 
     // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
     #define SENSORLESS_HOME_SANITY_CHECKING
