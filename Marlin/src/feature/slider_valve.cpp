@@ -4,6 +4,8 @@
 #include "../module/planner.h"
 #include "../module/servo.h"
 
+#if ENABLED(SLIDER_VALVE)
+
 #include "extruder_bottomout.h"
 
 #define SLIDER_SERVO servo[0]
@@ -104,3 +106,5 @@ void GcodeSuite::M1113()
 
     sync_plan_position_e();
 }
+
+#endif // SLIDER_VALVE

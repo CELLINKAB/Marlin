@@ -79,7 +79,7 @@
  *            VIN | · · | PG3
  *                 ￣￣￣                                      _CN10
  *                                                      AVDD | · · | PF13 (BTN_EN1)
- *                 _CN9_                                AGND | · · | PE9  (BTN_EN2)
+ *                 _CN9_                                AGND | · · | PE9  (CHANT_RTS)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)         (E1_STEP) PB1 | · · | PF14 (E1_EN)
  *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
@@ -97,6 +97,14 @@
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
  *                 ￣￣￣                                     ￣￣￣￣
  */
+
+// custom serial pins
+#define MSERIAL2_RX_PIN PD6
+#define MSERIAL2_TX_PIN PD5
+//#define MSERIAL6_RX_PIN
+//#define MSERIAL6_TX_PIN
+//#define MSERIAL7_RX_PIN
+//#define MSERIAL7_TX_PIN
 
 #if DISABLED(SENSORLESS_HOMING)
     #define X_MIN_PIN PF7
@@ -223,6 +231,15 @@
   #define PROBE_EN_PIN PD13
   #define PROBE_STOP_PIN PD12
   #define PROBE_SERIAL_ADDRESS 2
+#endif
+
+
+// cartridge station communication
+#define CHANTRELLE_SUPPORT
+#if ENABLED(CHANTRELLE_SUPPORT)
+  #define CHANT_SERIAL MSerial7
+  #define USING_HW_SERIAL7 1
+  #define CHANT_RTS_PIN PE9
 #endif
 
 //

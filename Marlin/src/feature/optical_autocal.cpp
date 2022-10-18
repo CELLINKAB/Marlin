@@ -1,5 +1,5 @@
 
-#include "../MarlinCore.h"
+#include "../inc/MarlinConfig.h"
 
 #if ENABLED(OPTICAL_AUTOCAL)
 
