@@ -179,7 +179,7 @@
 #define SERVO0_PIN PE15
 
 // Pressure sensor
-#define PRESSURE_SENSOR_PIN PF3
+#define PRESSURE_SENSOR_1_PIN PF3
 #define PRESSURE_SENSOR_2_PIN PF5
 
 // Pressure valves
@@ -231,6 +231,8 @@
   #define PROBE_EN_PIN PD13
   #define PROBE_STOP_PIN PD12
   #define PROBE_SERIAL_ADDRESS 2
+
+  #define SIMPLE_TMC_HW_SERIAL E0_HARDWARE_SERIAL
 #endif
 
 
@@ -251,7 +253,8 @@
 
 #define TEMP_0_PIN PA3
 #define TEMP_1_PIN PC3
-#define TEMP_BED_SLAVE_ADDR 75 // 5v
+#define PRINTBED_TEMP_SDA_PIN PB9
+#define PRINTBED_TEMP_SCL_PIN PB8
 
 #define HEATER_0_PIN PA15
 #define HEATER_1_PIN PA15

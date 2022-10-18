@@ -1093,7 +1093,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1100: M1100(); break;
       #endif
 
-      #if ANY_PIN(PRESSURE_SENSOR)
+      #if ANY_PIN(PRESSURE_SENSOR_1)
         case 1111: M1111(); break;
       #endif
 

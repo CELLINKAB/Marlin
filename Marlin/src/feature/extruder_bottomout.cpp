@@ -65,19 +65,19 @@ void bottomout_extruder(pin_t extruder_stop_pin)
     sync_plan_position();
 }
 
-constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
-{
-    switch (extruder_index) {
-        case 0: TERN_(E0_STOP_PIN, return E0_STOP_PIN);
-        case 1: TERN_(E1_STOP_PIN, return E1_STOP_PIN);
-        case 2: TERN_(E2_STOP_PIN, return E2_STOP_PIN);
-        case 3: TERN_(E3_STOP_PIN, return E3_STOP_PIN);
-        case 4: TERN_(E4_STOP_PIN, return E4_STOP_PIN);
-        case 5: TERN_(E5_STOP_PIN, return E5_STOP_PIN);
-        case 6: TERN_(E6_STOP_PIN, return E6_STOP_PIN);
-        default: return 0;
-    };
-}
+// constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
+// {
+//     switch (extruder_index) {
+//         case 0: TERN_(E0_STOP_PIN, return E0_STOP_PIN);
+//         case 1: TERN_(E1_STOP_PIN, return E1_STOP_PIN);
+//         case 2: TERN_(E2_STOP_PIN, return E2_STOP_PIN);
+//         case 3: TERN_(E3_STOP_PIN, return E3_STOP_PIN);
+//         case 4: TERN_(E4_STOP_PIN, return E4_STOP_PIN);
+//         case 5: TERN_(E5_STOP_PIN, return E5_STOP_PIN);
+//         case 6: TERN_(E6_STOP_PIN, return E6_STOP_PIN);
+//         default: return 0;
+//     };
+// }
 
 /**
  * @brief Home extruder
