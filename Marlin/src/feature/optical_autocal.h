@@ -18,7 +18,7 @@ struct OpticalAutocal
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
     using YSweepArray = std::array<float, NUM_CYCLES>;
 
-    OpticalAutocal();
+    OpticalAutocal() = default;
 
     bool full_autocal_routine(float feedrate);
     bool is_calibrated() const;
@@ -32,6 +32,8 @@ private:
     static constexpr float MEDIUM_Z_INCREMENT = 1.0f;
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
+
+    static uint32_t sensor_polarity;
 
     xyz_pos_t tool_offset;
 

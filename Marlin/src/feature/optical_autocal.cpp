@@ -5,18 +5,29 @@
 
 #    include "optical_autocal.h"
 
-OpticalAutocal::OpticalAutocal()
-    : tool_offset()
-{
-    SET_INPUT(SENSOR_1);
-    SET_INPUT(SENSOR_2);
-}
+uint32_t OpticalAutocal::sensor_polarity = RISING;
 
 bool OpticalAutocal::full_autocal_routine(float feedrate)
 {
     home_if_needed();
     do_blocking_move_to(START_POSITION);
     planner.synchronize();
+
+    static auto set_polarity [[maybe_unused]] = []{
+        SET_INPUT(SENSOR_1);
+        SET_INPUT(SENSOR_2);
+
+        const auto sensor_1_polarity = READ(SENSOR_1);
+        const auto sensor_2_polarity = READ(SENSOR_2);
+
+        if (sensor_1_polarity != sensor_2_polarity) {
+            SERIAL_ERROR_MSG("optical autocal sensor polarity mismatch!");
+            return false;
+        }
+
+        OpticalAutocal::sensor_polarity = (sensor_1_polarity == LOW) ? RISING : FALLING;
+        return true;
+    }();
 
     const bool success = full_sensor_sweep(feedrate);
     if (!success) {
@@ -117,8 +128,8 @@ xy_pos_t OpticalAutocal::find_xy_offset(const float feedrate) const
             SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
     };
 
-    attachInterrupt(SENSOR_1, isr1, RISING);
-    attachInterrupt(SENSOR_2, isr2, RISING);
+    attachInterrupt(SENSOR_1, isr1, sensor_polarity);
+    attachInterrupt(SENSOR_2, isr2, sensor_polarity);
 
     // y1 - cross sensor 1 forwards; y2 - cross sensor 2 forwards
     // y3 - cross sensor 2 backwards; y4 - cross sensor 1 backwards
@@ -212,7 +223,7 @@ float OpticalAutocal::find_z_offset(const float feedrate) const
     bool triggered = false;
 
     attachInterrupt(
-        SENSOR_1, [&] { triggered = true; }, RISING);
+        SENSOR_1, [&] { triggered = true; }, sensor_polarity);
 
     z = scan_for_tip(z, COARSE_Z_INCREMENT, triggered, feedrate);
     z = scan_for_tip(z, MEDIUM_Z_INCREMENT, triggered, feedrate);
