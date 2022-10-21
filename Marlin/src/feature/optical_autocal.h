@@ -33,6 +33,8 @@ private:
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
+    static uint32_t sensor_polarity;
+
     xyz_pos_t tool_offset;
 
     /**
