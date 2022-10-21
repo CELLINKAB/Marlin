@@ -1463,6 +1463,8 @@ private:
   // easy mix instruction
   static void M1113();
 
+  static void M1115();
+
   static void T(const int8_t tool_index);
 
 };
