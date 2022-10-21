@@ -7,13 +7,16 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-OpticalAutocal::OpticalAutocal()
-    : tool_offset()
+bool OpticalAutocal::full_autocal_routine(float feedrate)
 {
-    SET_INPUT(SENSOR_1);
-    SET_INPUT(SENSOR_2);
+    home_if_needed();
+    do_blocking_move_to(START_POSITION);
+    planner.synchronize();
 
     static auto set_polarity [[maybe_unused]] = []{
+        SET_INPUT(SENSOR_1);
+        SET_INPUT(SENSOR_2);
+
         const auto sensor_1_polarity = READ(SENSOR_1);
         const auto sensor_2_polarity = READ(SENSOR_2);
 
@@ -25,13 +28,6 @@ OpticalAutocal::OpticalAutocal()
         OpticalAutocal::sensor_polarity = (sensor_1_polarity == LOW) ? RISING : FALLING;
         return true;
     }();
-}
-
-bool OpticalAutocal::full_autocal_routine(float feedrate)
-{
-    home_if_needed();
-    do_blocking_move_to(START_POSITION);
-    planner.synchronize();
 
     const bool success = full_sensor_sweep(feedrate);
     if (!success) {
