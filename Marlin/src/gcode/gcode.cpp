@@ -1122,8 +1122,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       // easy mixing
       // case 1113: M1113(); break;
 
-      case 1115: M1115(); break;
-
       #if ENABLED(CHANTARELLE_SUPPORT)
       // TODO: check for conflicts
         case 750: M750(); break;
