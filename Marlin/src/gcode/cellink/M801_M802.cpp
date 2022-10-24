@@ -53,6 +53,8 @@ void GcodeSuite::M802()
     SERIAL_EOL();
 }
 
-void GcodeSuite::M801() {}
+void GcodeSuite::M801() {
+    M140();
+}
 
 #endif // CELLINK_REPORTING
