@@ -793,7 +793,16 @@ class Temperature {
 
       static void setTargetBed(const celsius_t celsius) {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
-        temp_bed.target = _MIN(celsius, BED_MAX_TARGET);
+        temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
+        // TODO: this code is too specific to the driver used
+        static const auto init_other_pins [[maybe_unused]] = []{
+          OUT_WRITE(HEATER_BED_DIR_1_PIN, LOW);
+          OUT_WRITE(HEATER_BED_DIR_2_PIN, LOW);
+          OUT_WRITE(HEATER_BED_EN_PIN, HIGH);
+          return true;
+        }();  
+        WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
+        WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
         start_watching_bed();
       }
 

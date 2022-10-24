@@ -1475,7 +1475,10 @@ void Temperature::manage_heater() {
               else if (temp_bed.celsius <= temp_bed.target - (BED_HYSTERESIS))
                 temp_bed.soft_pwm_amount = MAX_BED_POWER >> 1;
             #else // !PIDTEMPBED && !BED_LIMIT_SWITCHING
-              temp_bed.soft_pwm_amount = temp_bed.celsius < temp_bed.target ? MAX_BED_POWER >> 1 : 0;
+            // TODO: this code is too specific to the driver used
+              bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
+              bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
+              temp_bed.soft_pwm_amount = needs_power ? MAX_BED_POWER >> 1 : 0;
             #endif
           }
           else {
