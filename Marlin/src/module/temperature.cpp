@@ -1476,7 +1476,13 @@ void Temperature::manage_heater() {
                 temp_bed.soft_pwm_amount = MAX_BED_POWER >> 1;
             #else // !PIDTEMPBED && !BED_LIMIT_SWITCHING
             // TODO: this code is too specific to the driver used
+            #ifdef HEATER_BED_DIR_1_PIN
               bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
+            #elif ENABLED(MYCORRHIZA_V1)
+              constexpr bool active_cooling = true;
+            #else
+              constexpr bool active_cooling = false;
+            #endif
               bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
               temp_bed.soft_pwm_amount = needs_power ? MAX_BED_POWER >> 1 : 0;
             #endif

@@ -795,14 +795,18 @@ class Temperature {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
         // TODO: this code is too specific to the driver used
-        static const auto init_other_pins [[maybe_unused]] = []{
-          OUT_WRITE(HEATER_BED_DIR_1_PIN, LOW);
-          OUT_WRITE(HEATER_BED_DIR_2_PIN, LOW);
-          OUT_WRITE(HEATER_BED_EN_PIN, HIGH);
-          return true;
-        }();  
-        WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
-        WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
+        #if ENABLED(HEATER_BED_DIR_1_PIN, HEATER_BED_DIR_2_PIN, HEATER_BED_EN_PIN)
+          static const auto init_other_pins [[maybe_unused]] = []{
+            OUT_WRITE(HEATER_BED_DIR_1_PIN, LOW);
+            OUT_WRITE(HEATER_BED_DIR_2_PIN, LOW);
+            OUT_WRITE(HEATER_BED_EN_PIN, HIGH);
+            return true;
+          }();  
+          WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
+          WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
+        #elif ENABLED(MYCORRHIZA_V1)
+          static bool init_other_pins = []{OUT_WRITE(HEATER_BED_2_PIN, LOW); return true;}();
+        #endif
         start_watching_bed();
       }
 
