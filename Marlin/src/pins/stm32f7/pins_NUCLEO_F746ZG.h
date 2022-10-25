@@ -248,8 +248,8 @@
 // Temperature Sensors
 //
 
-#define I2C_SCL_PIN PF13
-#define I2C_SDA_PIN PE9
+#define I2C_SCL_PIN PB8
+#define I2C_SDA_PIN PB9
 
 #define TEMP_0_PIN PA3
 #define TEMP_1_PIN PC3
