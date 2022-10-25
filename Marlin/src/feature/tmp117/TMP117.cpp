@@ -10,7 +10,9 @@
  */
 
 #include "TMP117.h"
+
 #include <Wire.h>
+#include <cstring>
 
 /**
  * @brief Construct a new template<typename Bus>
@@ -27,7 +29,7 @@ TMP117<Bus>::TMP117(TMPAddr addr, Bus& alt_bus)
     , alert_type(TMP117_ALERT::NOALERT)
     , newDataCallback(nullptr)
 {
-  bus.begin();
+    bus.begin();
 }
 
 /**
@@ -45,15 +47,15 @@ TMP117<Bus>::TMP117(uint8_t addr, Bus& alt_bus)
     , alert_type(TMP117_ALERT::NOALERT)
     , newDataCallback(nullptr)
 {
-  bus.begin();
+    bus.begin();
 }
 
 /*!
     @brief   Initialize in default mode 
     @param   _newDataCallback   callback function will be called when new data is available
 */
-template<typename Bus> void
-TMP117<Bus>::init(void (*_newDataCallback)(void))
+template<typename Bus>
+void TMP117<Bus>::init(void (*_newDataCallback)(void))
 {
     setConvMode(TMP117_CMODE::CONTINUOUS);
     setConvTime(TMP117_CONVT::C125mS);
@@ -68,7 +70,7 @@ TMP117<Bus>::init(void (*_newDataCallback)(void))
     @brief    Read configuration register and handle events.
               Should be called in loop in order to call callback functions 
 */
-template<typename Bus> 
+template<typename Bus>
 void TMP117<Bus>::update(void)
 {
     readConfig();
@@ -368,7 +370,6 @@ uint16_t TMP117<Bus>::readEEPROM(uint8_t eeprom_nr)
 /* ********************* Library internal functions  ******************** */
 /**************************************************************************/
 
-
 /*!
     @brief    Write two bytes (16 bits) to TMP117 I2C sensor
     
@@ -380,8 +381,8 @@ void TMP117<Bus>::i2cWrite2B(uint8_t reg, uint16_t data)
 {
     bus.beginTransmission(address);
     bus.write(reg);
-    bus.write((data >> 8));
-    bus.write((data & 0xff));
+    bus.write(static_cast<uint8_t>(data >> 8));
+    bus.write(static_cast<uint8_t>(data & 0xff));
     bus.endTransmission();
     delay(10);
 }
@@ -396,18 +397,21 @@ void TMP117<Bus>::i2cWrite2B(uint8_t reg, uint16_t data)
 template<typename Bus>
 uint16_t TMP117<Bus>::i2cRead2B(uint8_t reg)
 {
-    uint8_t data[2] = {0};
-    int16_t datac = 0;
+    uint8_t data[2]{};
+    int16_t datac; // error value
 
     bus.beginTransmission(address);
     bus.write(reg);
     bus.endTransmission();
     bus.requestFrom((uint8_t) address, (uint8_t) 2);
-    if (bus.available() <= 2) {
-        data[0] = bus.read();
-        data[1] = bus.read();
-        datac = ((data[0] << 8) | data[1]);
-    }
+
+    // bus byte order is opposite of memcpy byte order
+    // bus.available() always returns true so don't bother checking
+    data[1] = bus.read();
+    data[0] = bus.read();
+    std::memcpy(&datac, data, 2);
+
+    bus.flush();
     return datac;
 }
 
