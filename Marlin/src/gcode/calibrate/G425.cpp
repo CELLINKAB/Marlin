@@ -255,7 +255,7 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
 
   park_above_object(m, uncertainty);
 
-  #define _ACASE(N,A,B) case A: dir = -1; case B: axis = N##_AXIS; break
+  #define _ACASE(N,A,B) case A: dir = -1; [[fallthrough]]; case B: axis = N##_AXIS; break
   #define _PCASE(N) _ACASE(N, N##MINIMUM, N##MAXIMUM)
 
   switch (side) {
