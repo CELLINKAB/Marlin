@@ -1,0 +1,48 @@
+{
+    "build": {
+      "cpu": "cortex-m7",
+      "extra_flags": "-DSTM32F767xx -DHSE_VALUE=16000000U",
+      "f_cpu": "216000000L",
+      "framework_extra_flags": {
+        "arduino": "-DCUSTOM_PERIPHERAL_PINS"
+      },
+      "mcu": "stm32f767zgt6",
+      "product_line": "STM32F767xx",
+      "variant": "MARLIN_MYCORRHIZA_V1"
+    },
+    "connectivity": [
+      "can"
+    ],
+    "debug": {
+      "default_tools": [
+        "stlink"
+      ],
+      "jlink_device": "STM32F767ZG",
+      "onboard_tools": [
+        "stlink"
+      ],
+      "openocd_target": "stm32f7x",
+      "svd_path": "STM32F767.svd"
+    },
+    "frameworks": [
+      "arduino",
+      "cmsis",
+      "stm32cube",
+      "libopencm3"
+    ],
+    "name": "Cellink Bioprinter Controller",
+    "upload": {
+      "maximum_ram_size": 524288,
+      "maximum_size": 1048576,
+      "protocol": "stlink",
+      "protocols": [
+        "jlink",
+        "cmsis-dap",
+        "stlink",
+        "blackmagic",
+        "serial"
+      ]
+    },
+    "url": "https://cellink.com",
+    "vendor": "Cellink"
+  }
