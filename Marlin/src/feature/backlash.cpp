@@ -30,7 +30,7 @@
 #include "../module/planner.h"
 
 axis_bits_t Backlash::last_direction_bits;
-xyz_long_t Backlash::residual_error{0};
+xyz_long_t Backlash::residual_error{};
 
 #ifdef BACKLASH_DISTANCE_MM
   #if ENABLED(BACKLASH_GCODE)
