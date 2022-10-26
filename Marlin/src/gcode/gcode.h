@@ -1281,7 +1281,7 @@ private:
     static void M1100();
   #endif
 
-  #if ANY_PIN(PRESSURE_SENSOR_1)
+  #if ENABLED(ANALOG_PRESSURE_SENSOR)
     static void M1111();
   #endif
 
