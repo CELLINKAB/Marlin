@@ -1,7 +1,7 @@
 {
     "build": {
       "cpu": "cortex-m7",
-      "extra_flags": "-DSTM32F767xx -DHSE_VALUE=16000000U",
+      "extra_flags": "-DSTM32F767xx -DARDUINO_MYCORRHIZA_V1",
       "f_cpu": "216000000L",
       "framework_extra_flags": {
         "arduino": "-DCUSTOM_PERIPHERAL_PINS"
