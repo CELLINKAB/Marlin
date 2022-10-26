@@ -198,25 +198,25 @@
 
 // SPI definitions
 #ifndef PIN_SPI_SS
-  #define PIN_SPI_SS            PA4
+  #define PIN_SPI_SS            PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_SS1
-  #define PIN_SPI_SS1           PA15
+  #define PIN_SPI_SS1           PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_SS2
-  #define PIN_SPI_SS2           PG10
+  #define PIN_SPI_SS2           PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_SS3
   #define PIN_SPI_SS3           PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_MOSI
-  #define PIN_SPI_MOSI          PA7
+  #define PIN_SPI_MOSI          PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_MISO
-  #define PIN_SPI_MISO          PA6
+  #define PIN_SPI_MISO          PNUM_NOT_DEFINED
 #endif
 #ifndef PIN_SPI_SCK
-  #define PIN_SPI_SCK           PA5
+  #define PIN_SPI_SCK           PNUM_NOT_DEFINED
 #endif
 
 // I2C definitions
@@ -244,25 +244,20 @@
 // Default pin used for generic 'Serial' instance
 // Mandatory for Firmata
 #ifndef PIN_SERIAL_RX
-  #define PIN_SERIAL_RX         PA1
+  #define PIN_SERIAL_RX         PA11
 #endif
 #ifndef PIN_SERIAL_TX
-  #define PIN_SERIAL_TX         PA0
+  #define PIN_SERIAL_TX         PA12
 #endif
+
+// Value of the External oscillator in Hz
+#define HSE_VALUE               16000000U
 
 // Extra HAL modules
 #if !defined(HAL_DAC_MODULE_DISABLED)
   #define HAL_DAC_MODULE_ENABLED
 #endif
-#if !defined(HAL_ETH_MODULE_DISABLED)
-  #define HAL_ETH_MODULE_ENABLED
-#endif
-#if !defined(HAL_QSPI_MODULE_DISABLED)
-  #define HAL_QSPI_MODULE_ENABLED
-#endif
-#if !defined(HAL_SD_MODULE_DISABLED)
-  #define HAL_SD_MODULE_ENABLED
-#endif
+
 
 /*----------------------------------------------------------------------------
  *        Arduino objects - C++ only
