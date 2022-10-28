@@ -1,4 +1,4 @@
-
+#include "../inc/MarlinConfig.h"
 
 #if ENABLED(FESTO_PNEUMATICS)
 
@@ -11,6 +11,13 @@ namespace pneumatics {
 //
 // Pressure Regulation
 //
+
+void set_regulator(float kPa)
+{
+    static constexpr pressure_factor = 20.4f; // temporary
+    uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
+    analogWrite(PRESSURE_REGULATOR_PIN, value);
+}
 
 //
 // Mixing
