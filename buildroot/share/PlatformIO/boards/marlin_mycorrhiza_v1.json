@@ -1,10 +1,10 @@
 {
     "build": {
       "cpu": "cortex-m7",
-      "extra_flags": "-DSTM32F767xx -DARDUINO_MYCORRHIZA_V1",
+      "extra_flags": "-DSTM32F767xx",
       "f_cpu": "216000000L",
       "framework_extra_flags": {
-        "arduino": "-DCUSTOM_PERIPHERAL_PINS"
+        "arduino": "-DARDUINO_MYCORRHIZA_V1"
       },
       "mcu": "stm32f767zgt6",
       "product_line": "STM32F767xx",
@@ -40,7 +40,8 @@
         "cmsis-dap",
         "stlink",
         "blackmagic",
-        "serial"
+        "serial",
+        "dfu"
       ]
     },
     "url": "https://cellink.com",

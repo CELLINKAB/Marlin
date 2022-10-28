@@ -15,7 +15,6 @@
  * STM32F767ZITx.xml, STM32F777ZITx.xml
  * CubeMX DB release 6.0.30
  */
-#if !defined(CUSTOM_PERIPHERAL_PINS)
 #include "Arduino.h"
 #include "PeripheralPins.h"
 
@@ -584,5 +583,3 @@ WEAK const PinMap PinMap_SD[] = {
   {NC,        NP,     0}
 };
 #endif
-
-#endif /* !CUSTOM_PERIPHERAL_PINS */

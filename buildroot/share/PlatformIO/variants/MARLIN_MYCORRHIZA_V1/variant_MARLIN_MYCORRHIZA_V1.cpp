@@ -165,8 +165,6 @@ const uint32_t analogInputPin[] = {
 extern "C" {
 #endif
 
-#include "PeripheralPins.c"
-
 /**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow :
