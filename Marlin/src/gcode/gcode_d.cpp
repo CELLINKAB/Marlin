@@ -264,7 +264,7 @@ void GcodeSuite::D(const int16_t dcode) {
           case 1: default: *(int*)0 = 451; break; // Write at bad address
           case 2: { volatile int a = 0; volatile int b = 452 / a; *(int*)&a = b; } break; // Divide by zero (some CPUs accept this, like ARM)
           case 3: { *(uint32_t*)&type[1] = 453; volatile int a = *(int*)&type[1]; type[0] = a / 255; } break; // Unaligned access (some CPUs accept this)
-          case 4: { volatile void (*func)() = (volatile void (*)()) 0xE0000000; func(); } break; // Invalid instruction
+          case 4: { void (*func)() = (void (*)()) 0xE0000000; func(); } break; // Invalid instruction
         }
         break;
       }

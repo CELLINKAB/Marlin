@@ -101,6 +101,9 @@
 #define PRINTBED_TEMP_SCL_PIN PB6
 #define PRINTBED_TEMP_SDA_PIN PB7
 
+#define HEATER_BED_PIN PE9
+#define HEATER_BED_2_PIN PE11
+
 //
 // pneumatics
 //
