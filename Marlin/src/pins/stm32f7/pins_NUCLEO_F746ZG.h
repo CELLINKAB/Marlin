@@ -93,10 +93,13 @@
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14
  * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 
- * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN)
- *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1)
+ * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN(PB))
+ *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1(CC))
  *                 ￣￣￣                                     ￣￣￣￣
  */
+
+#define NEOPIXEL_PIN PE14
+#define NEOPIXEL2_PIN PE15
 
 // custom serial pins
 #define MSERIAL2_RX_PIN PD6
