@@ -36,7 +36,7 @@ struct SimpleTMCConfig
 };
 
 static auto* SIMPLE_TMC_SERIAL = [] {
-    SIMPLE_TMC_HW_SERIAL.begin(SIMPLE_TMC_BAUDRATE);
+    //SIMPLE_TMC_HW_SERIAL.begin(SIMPLE_TMC_BAUDRATE);
     return &SIMPLE_TMC_HW_SERIAL;
 }();
 
@@ -89,15 +89,21 @@ struct SimpleTMC<EN, STOP, INDEX, true>
      * @brief begin moving and return on stall condition
      *
      * @param velocity signed step rate to move stepper at, negative values reverse direction
+     * @param timeout unsigned milliseconds after which the motor will stop regardless
      */
-    void blocking_move_until_stall(const int32_t velocity)
+    void blocking_move_until_stall(const int32_t velocity, millis_t timeout = 0)
     {
+        millis_t end_time = 0;
+        if (timeout > 0)
+            end_time = millis() + timeout;
         move_until_stall(velocity);
         while (driver->VACTUAL() != 0) {
             delay(1000);
             if DEBUGGING (INFO)
                 SERIAL_ECHOLNPGM("Stepper moving, SG:", driver->SG_RESULT());
             idle();
+            if (timeout > 0 && millis() > end_time)
+                stop();
         }
     }
 
@@ -135,13 +141,9 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         return count;
     }
 
-    void rms_current(uint16_t current) {
-        driver->rms_current(current);
-    }
+    void rms_current(uint16_t current) { driver->rms_current(current); }
 
-    void stall_threshold(int16_t threshold) {
-        driver->homing_threshold(threshold);
-    }
+    void stall_threshold(int16_t threshold) { driver->homing_threshold(threshold); }
 
 private:
     TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>* driver;
@@ -153,12 +155,7 @@ private:
      */
     SimpleTMC(TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>* driver_)
         : driver(driver_)
-    {
-        OUT_WRITE(EN, HIGH);
-        SET_INPUT_PULLUP(STOP);
-        if constexpr (INDEX != 0)
-            SET_INPUT(INDEX);
-    }
+    {}
 
     friend SimpleTMC<EN, STOP, INDEX, false>;
 };
@@ -183,6 +180,10 @@ struct SimpleTMC<EN, STOP, INDEX, false>
         static TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver(SIMPLE_TMC_SERIAL,
                                                                                   0.11f,
                                                                                   config.hw_address);
+        OUT_WRITE(EN, HIGH);
+        SET_INPUT_PULLUP(STOP);
+        if constexpr (INDEX != 0)
+            SET_INPUT(INDEX);
 
         TMC2208_n::GCONF_t gconf{};
         gconf.pdn_disable = true;      // Use UART

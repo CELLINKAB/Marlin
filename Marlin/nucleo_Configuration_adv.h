@@ -911,14 +911,6 @@
 
 #endif // BLTOUCH
 
-#if ENABLED(STEPPER_RETRACTING_PROBE)
-  #define SRP_DEPLOY_VELOCITY 38000
-  #define SRP_STOW_VELOCITY -65000
-  #define SRP_STALL_THRESHOLD 55
-  #define SRP_STEPPER_CURRENT 225
-  #define SRP_RETRACT_TIME 8000
-#endif
-
 // @section extras
 
 /**
