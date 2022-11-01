@@ -14,7 +14,7 @@ namespace pneumatics {
 
 void set_regulator(float kPa)
 {
-    static constexpr pressure_factor = 20.4f; // temporary
+    static constexpr float pressure_factor = 20.4f; // temporary
     uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
     analogWrite(PRESSURE_REGULATOR_PIN, value);
 }
@@ -55,7 +55,6 @@ void release_mixing_pressure(uint8_t tool)
 
 void gripper_release()
 {
-    static constexpr LID_GRIPPER_RELEASE_LEVEL = LID_GRIPPER_NORMALLY_CLOSED ? HIGH : LOW;
     #if ENABLED(CHECK_LID_GRIPPER_LOCATION_BEFORE_RELEASE)
         static constexpr xyz_pos_t safe_lid_drop_pos = LID_GRIPPER_RELEASE_LOCATION;
         if (current_position != safe_lid_drop_pos) {
@@ -63,9 +62,9 @@ void gripper_release()
             return;
         }
     #endif
-    WRITE(LID_GRIPPER_VACUUM_PIN, !PRESSURE_VALVE_CLOSE_LEVEL);
+    WRITE(GRIPPER_VACUUM_PIN, !PRESSURE_VALVE_CLOSE_LEVEL);
     delay(100);
-    WRITE(LID_GRIPPER_VACUUM_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    WRITE(GRIPPER_VACUUM_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 
 //
@@ -80,7 +79,7 @@ AnalogPressureSensor::AnalogPressureSensor(pin_t sense_pin, float scale_factor, 
     pinMode(sense_pin, INPUT_ANALOG);
 }
 
-float AnalogPressureSensor::read_avg(bool with_scaling = true, bool with_offset = true) const
+float AnalogPressureSensor::read_avg(bool with_scaling, bool with_offset) const
 {
     uint32_t samples[40]{};
     for (uint32_t& sample : samples) {
