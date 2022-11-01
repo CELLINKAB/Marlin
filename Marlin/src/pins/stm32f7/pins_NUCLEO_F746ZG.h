@@ -85,7 +85,7 @@
  *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
  * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (E1_DIR) 
  *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
- *           PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
+ *(PRESSURE3)PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
  *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
  *    (E_DIR) PF2 | · · | PE5 (E_STEP)       (RDP_STOP) PD12 | · · | GND
@@ -181,53 +181,29 @@
 // Servos
 #define SERVO0_PIN PE15
 
+// pressure regulator (DAC)
+#define PRESSURE_REGULATOR_PIN PB4
+
 // Pressure sensor
-#define PRESSURE_SENSOR_1_PIN PF3
-#define PRESSURE_SENSOR_2_PIN PF5
+#define GRIPPER_VACUUM_PIN PF3
+#define PRESSURE_TANK_PIN PF5
+#define PRESSURE_REGULATOR_SENSE_PIN PF10
 
 // Pressure valves
-#define PRESSURE_VALVE_1_PIN PD14
-#define PRESSURE_VALVE_2_PIN PD15
-#define PRESSURE_VALVE_3_PIN
+#define PRESSURE_VALVE_LID_PIN 
+#define PRESSURE_VALVE_PUMP_IN_PIN 
+#define PRESSURE_VALVE_PUMP_OUT_PIN 
+#define PRESSURE_VALVE_C1_PIN PD14
+#define PRESSURE_VALVE_C2_PIN PD15
+#define PRESSURE_VALVE_C3_PIN PF12
+#define PRESSURE_VALVE_CLOSE_LEVEL LOW
 
-
-#if ENABLED(LID_GRIPPER_STATION)
-    // #define LG_STEP_PIN         PD12
-    // #define LG_DIR_PIN          PF2
-    #define LG_INDEX_PIN        PF2
-    #define LG_EN_PIN           PE4
-
-    #define LG_HARDWARE_SERIAL MSerial2
-    #ifndef USING_HW_SERIAL2
-        #define USING_HW_SERIAL2 1
-    #endif
-    #define LG_SLAVE_ADDRESS    0
-    #define LG_STOP_PIN         PE5
-
-    //#define USING_HW_SERIAL4 1
-#endif
-
-#if ENABLED(OPTICAL_SURFACE_PROBE)
-    #define OPT_SURF_IN_PIN PC3 // white
-    #define OPT_SURF_ERR_PIN PF15 // brown
-    #define OPT_SURF_MFI_PIN PE13// violet
-    #define OPT_SURF_LED_ON_PIN PF14 // black
-
-    #define OPT_SURF_HW_SERIAL MSerial7
-    #ifndef USING_HW_SERIAL7
-      #define USING_HW_SERIAL7 1
-    #endif
-#endif
+// temporary enable
+#define FESTO_PNEUMATICS
 
 #if ENABLED(OPTICAL_AUTOCAL)
   #define OPTICAL_SENSOR_1_PIN PD0
   #define OPTICAL_SENSOR_2_PIN PD1
-#endif
-
-#if ENABLED(STM_INEMO_IMU_SUPPORT)
-  #define STM_INEMO_SDA_PIN PB9
-  #define STM_INEMO_SCL_PIN PB8
-  #define STM_INEMO_SAD_0_BIT 0
 #endif
 
 #if ENABLED(STEPPER_RETRACTING_PROBE)
