@@ -17,6 +17,7 @@ void GcodeSuite::M1029()
         stepper_probe.report_config(false);
         return;
     }
+    if (parser.seen('R')) stepper_probe.reset_position();
     StepperRetractingProbe::Config new_conf = stepper_probe.get_config();
     if (parser.seen('T'))
         new_conf.stall_threshold = parser.value_int();

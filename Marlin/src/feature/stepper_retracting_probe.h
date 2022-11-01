@@ -12,11 +12,11 @@
 // read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
 // probe types inherit from Probe<StowDeploy, ProbeType>
 
-#define SRP_DEPLOY_VELOCITY 38000
-#define SRP_STOW_VELOCITY -65000
-#define SRP_STALL_THRESHOLD 55
-#define SRP_STEPPER_CURRENT 225
-#define SRP_RETRACT_TIME 8000
+#define SRP_DEPLOY_VELOCITY 36000
+#define SRP_STOW_VELOCITY -64000
+#define SRP_STALL_THRESHOLD 120
+#define SRP_STEPPER_CURRENT 350
+#define SRP_RETRACT_TIME 9000
 
 struct StepperRetractingProbe
 {
@@ -50,7 +50,7 @@ struct StepperRetractingProbe
             stepper.stop();
             [[fallthrough]];
         case ProbeState::Stowed:
-            stepper.blocking_move_until_stall(config.deploy_velocity);
+            stepper.blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
             state = ProbeState::Deployed;
         }
     }
@@ -102,6 +102,8 @@ struct StepperRetractingProbe
                                config.minimum_retract_time);
         }
     }
+
+    inline void reset_position() {state = ProbeState::Unknown;}
 
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
