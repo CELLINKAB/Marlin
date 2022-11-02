@@ -69,33 +69,33 @@
  *                                              (X_DIR) PB15 | · · | PB9 (I2C_SDA)
  *                                               (X_EN) PB13 | · · | AVDD
  *                 _CN8_                                PB12 | · · | GND
- *             NC | · · | PC8                (HEATER_0) PA15 | · · | PA5  (SCLK)
- *          IOREF | · · | PC9                   (BEEPER) PC7 | · · | PA6  (MISO)
- *          RESET | · · | PC10                           PB5 | · · | PA7  (MOSI)
+ *             NC | · · | PC8                  (BED_EN) PA15 | · · | PA5  (SCLK)
+ *          IOREF | · · | PC9                (BED_DIR_1) PC7 | · · | PA6  (MISO)
+ *          RESET | · · | PC10               (BED_DIR_2) PB5 | · · | PA7  (MOSI)
  *          +3.3V | · · | PC11              (HEATER_BED) PB3 | · · | PD14 (pvalve_1)
- *            +5V | · · | PC12 TX                        PA4 | · · | PD15 (pvalve_2)
- *            GND | · · | PD2  RX                        PB4 | · · | PF12 (pvalve_3)
- *            GND | · · | PG2                                 ￣￣￣
+ *            +5V | · · | PC12 TX                     NC PA4 | · · | PD15 (pvalve_2)
+ *            GND | · · | PD2  RX                 (PREG) PB4 | · · | PF12 (pvalve_3)
+ *            GND | · · | PG2                                ￣￣￣
  *            VIN | · · | PG3
- *                 ￣￣￣                                      _CN10
- *                                                      AVDD | · · | PF13 (BTN_EN1)
- *                 _CN9_                                AGND | · · | PE9  (CHANT_RTS)
- *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (BTN_ENC)
- * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)         (E1_STEP) PB1 | · · | PF14 (E1_EN)
+ *                ￣￣￣                                       _CN10
+ *                                                      AVDD | · · | PF13 (PUMP_EN)
+ *                 _CN9_                                AGND | · · | PE9  (LID)
+ *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (PUMP_IN)
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PUMP_OUT)
  *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
- * (PRESSURE) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15 (E1_DIR) 
- *(PRESSURE2) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
- *(PRESSURE3)PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
+ *     (GRIP) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15  
+ *     (TANK) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
+ *(REG_SENSE)PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
  *            PA7 | · · | PE4 (E_EN)           (RDP_EN) PD13 | · · | PE7   PROBE_RX
  *    (E_DIR) PF2 | · · | PE5 (E_STEP)       (RDP_STOP) PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
  *            GND | · · | PF8 (calibration)              GND | · · | PE14 (NEOPIXEL)
- * (optical1) PD0 | · · | PF7 (X _STOP)                  PA0 | · · | PE15 (NEOPIXEL2)
- * (optical2) PD1 | · · | PF9 (E1_STOP)                  PB0 | · · | PB10 (FAN(PB))
+ * (optical1) PD0 | · · | PF7 (X _STOP)        (E1_STEP) PA0 | · · | PE15 (NEOPIXEL2)
+ * (optical2) PD1 | · · | PF9 (E1_STOP)         (E1_DIR) PB0 | · · | PB10 (FAN(PB))
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1(CC))
- *                 ￣￣￣                                     ￣￣￣￣
+ *                ￣￣￣                                     ￣￣￣￣
  */
 
 #define NEOPIXEL_PIN PE14
@@ -149,8 +149,8 @@
 #define E0_DIR_PIN PF2
 #define E0_ENABLE_PIN PE4
 
-#define E1_STEP_PIN PB1
-#define E1_DIR_PIN PE11
+#define E1_STEP_PIN PA0
+#define E1_DIR_PIN PB0
 #define E1_ENABLE_PIN PF14
 
 #if HAS_TMC_UART
@@ -190,9 +190,10 @@
 #define PRESSURE_REGULATOR_SENSE_PIN PF10
 
 // Pressure valves
-#define PRESSURE_VALVE_LID_PIN 
-#define PRESSURE_VALVE_PUMP_IN_PIN 
-#define PRESSURE_VALVE_PUMP_OUT_PIN 
+#define PRESSURE_VALVE_LID_PIN PE9
+#define PRESSURE_PUMP_EN_PIN PF13
+#define PRESSURE_VALVE_PUMP_IN_PIN PE11 
+#define PRESSURE_VALVE_PUMP_OUT_PIN PE14
 #define PRESSURE_VALVE_C1_PIN PD14
 #define PRESSURE_VALVE_C2_PIN PD15
 #define PRESSURE_VALVE_C3_PIN PF12
@@ -235,13 +236,17 @@
 #define PRINTBED_TEMP_SDA_PIN PB9
 #define PRINTBED_TEMP_SCL_PIN PB8
 
-#define HEATER_0_PIN PA15
-#define HEATER_1_PIN PA15
+#define HEATER_0_PIN NC
+#define HEATER_1_PIN NC
 
 #define HEATER_BED_PIN PB3
-#define HEATER_BED_DIR_1_PIN PD14
-#define HEATER_BED_DIR_2_PIN PD15
-#define HEATER_BED_EN_PIN PF12
+#define HEATER_BED_DIR_1_PIN PC7
+#define HEATER_BED_DIR_2_PIN PB5
+#define HEATER_BED_EN_PIN PA15
+#define STM_MOTOR_DRIVER_HEATER
+
+#define FAN_PIN PB10
+#define FAN1_PIN PB11
 
 #define CALIBRATION_PIN PF8
 #define CALIBRATION_PIN_PULLUP
