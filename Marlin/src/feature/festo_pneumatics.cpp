@@ -2,11 +2,39 @@
 
 #if ENABLED(FESTO_PNEUMATICS)
 
-#    include "festo_pneumatics.h"
-
 #    include "../module/planner.h"
 
+#    include "festo_pneumatics.h"
+
+#ifndef PRESSURE_VALVE_CLOSE_LEVEL
+  #define PRESSURE_VALVE_CLOSE_LEVEL LOW
+#endif
+#ifndef PRESSURE_VALVE_OPEN_LEVEL
+  #define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
+#endif
+
 namespace pneumatics {
+
+//
+// init
+//
+
+void init()
+{
+    OUT_WRITE(PRESSURE_VALVE_C1_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_C2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_C3_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_PUMP_IN_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
+
+    SET_INPUT(PRESSURE_REGULATOR_SENSE_PIN);
+    SET_INPUT(PRESSURE_TANK_PIN);
+    SET_INPUT(GRIPPER_VACUUM_PIN);
+
+    set_regulator(30.0f);
+}
 
 //
 // Pressure Regulation
@@ -14,9 +42,24 @@ namespace pneumatics {
 
 void set_regulator(float kPa)
 {
-    static constexpr float pressure_factor = 20.4f; // temporary
+    // 500kPa regulator 5V analog input, 12 bit DAC
+    static constexpr float pressure_factor = 20.4f;
     uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
     analogWrite(PRESSURE_REGULATOR_PIN, value);
+}
+
+void pressurize_tank(millis_t timeout_after_ms)
+{
+    static constexpr float TANK_PRESSURE_TARGET = 100.0f;
+    static constexpr float TANK_PRESSURE_MAX = 200.0f;
+    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) return;
+    WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
+    millis_t timeout = millis() + timeout_after_ms;
+    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET || millis() < timeout) {
+        idle();
+        delay(100);
+    }
+    WRITE(PRESSURE_PUMP_EN_PIN, LOW);
 }
 
 //
@@ -26,10 +69,14 @@ void set_regulator(float kPa)
 constexpr static pin_t get_valve(uint8_t tool)
 {
     switch (tool) {
-        case 0: return PRESSURE_VALVE_C1_PIN;
-        case 1: return PRESSURE_VALVE_C2_PIN;
-        case 2: return PRESSURE_VALVE_C3_PIN;
-        default: return NC;
+    case 0:
+        return PRESSURE_VALVE_C1_PIN;
+    case 1:
+        return PRESSURE_VALVE_C2_PIN;
+    case 2:
+        return PRESSURE_VALVE_C3_PIN;
+    default:
+        return NC;
     }
 }
 
@@ -37,7 +84,7 @@ void apply_mixing_pressure(uint8_t tool)
 {
     const pin_t pin = get_valve(tool);
     planner.synchronize();
-    WRITE(pin, !PRESSURE_VALVE_CLOSE_LEVEL);
+    WRITE(pin, PRESSURE_VALVE_OPEN_LEVEL);
     delay(100);
 }
 
@@ -55,16 +102,16 @@ void release_mixing_pressure(uint8_t tool)
 
 void gripper_release()
 {
-    #if ENABLED(CHECK_LID_GRIPPER_LOCATION_BEFORE_RELEASE)
-        static constexpr xyz_pos_t safe_lid_drop_pos = LID_GRIPPER_RELEASE_LOCATION;
-        if (current_position != safe_lid_drop_pos) {
-            SERIAL_ECHOLN("printbed in wrong location for release!");
-            return;
-        }
-    #endif
-    WRITE(GRIPPER_VACUUM_PIN, !PRESSURE_VALVE_CLOSE_LEVEL);
+#    if ENABLED(CHECK_LID_GRIPPER_LOCATION_BEFORE_RELEASE)
+    static constexpr xyz_pos_t safe_lid_drop_pos = LID_GRIPPER_RELEASE_LOCATION;
+    if (current_position != safe_lid_drop_pos) {
+        SERIAL_ERROR_MSG("printbed in wrong location for release!");
+        return;
+    }
+#    endif
+    WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     delay(100);
-    WRITE(GRIPPER_VACUUM_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 
 //

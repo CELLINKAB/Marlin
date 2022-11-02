@@ -7,9 +7,10 @@
 
 namespace pneumatics {
 
-#ifndef PRESSURE_VALVE_CLOSE_LEVEL
-  #define PRESSURE_VALVE_CLOSE_LEVEL LOW
-#endif
+void init();
+
+void set_regulator(float kPa);
+void pressurize_tank(millis_t timeout_after_ms = 10'000);
 
 void gripper_release();
 
