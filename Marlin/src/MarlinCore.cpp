@@ -162,8 +162,8 @@
   bool G38_did_trigger; // = false
 #endif
 
-#if ENABLED(LID_GRIPPER_STATION)
-  #include "feature/lidgripper.h"
+#if ENABLED(FESTO_PNEUMATICS)
+  #include "feature/festo_pneumatics.h"
 #endif
 
 #if ENABLED(DELTA)
@@ -1626,8 +1626,8 @@ void setup() {
     SETUP_RUN(easythreed_ui.init());
   #endif
 
-  #if ENABLED(LID_GRIPPER_STATION)
-    SETUP_RUN(lid_gripper.init_pins());
+  #if ENABLED(FESTO_PNEUMATICS)
+    SETUP_RUN(pneumatics::init());
   #endif
 
 
