@@ -795,7 +795,7 @@ class Temperature {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
         // TODO: this code is too specific to the driver used
-        #if ENABLED(HEATER_BED_DIR_1_PIN, HEATER_BED_DIR_2_PIN, HEATER_BED_EN_PIN)
+        #if ENABLED(STM_MOTOR_DRIVER_HEATER)
           static const auto init_other_pins [[maybe_unused]] = []{
             OUT_WRITE(HEATER_BED_DIR_1_PIN, LOW);
             OUT_WRITE(HEATER_BED_DIR_2_PIN, LOW);
