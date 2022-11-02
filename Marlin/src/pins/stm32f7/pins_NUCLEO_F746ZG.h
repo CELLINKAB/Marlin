@@ -83,7 +83,7 @@
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (PUMP_IN)
  * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PUMP_OUT)
  *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
- *     (GRIP) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15  
+ *     (GRIP) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15  (E1_EN)
  *     (TANK) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
  *(REG_SENSE)PF10 | · · | GND                   (Y2_DIR) PB2 | · · | PG9   E_RX
  *             NC | · · | PE2                            GND | · · | PE8   PROBE_TX
@@ -151,7 +151,7 @@
 
 #define E1_STEP_PIN PA0
 #define E1_DIR_PIN PB0
-#define E1_ENABLE_PIN PF14
+#define E1_ENABLE_PIN PF15
 
 #if HAS_TMC_UART
 
