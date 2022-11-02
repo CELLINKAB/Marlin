@@ -1281,10 +1281,6 @@ private:
     static void M1029();
   #endif
 
-  #if ENABLED(HAS_ANALOG_PROBE)
-    static void M1100();
-  #endif
-
   #if ENABLED(FESTO_PNEUMATICS)
     static void M1036(); // set pressure regulator
     static void M1062(); // get pressure sensors
