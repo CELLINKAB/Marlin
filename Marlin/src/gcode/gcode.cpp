@@ -466,7 +466,11 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 511: G511(); break; // G511 home extruder
         case 512: G512(); break; // G512 home slider valve
         case 513: G513(); break; // G513 move slider valve
+      #endif
+
+      #if ENABLED(FESTO_PNEUMATICS)
         case 514: G514(); break; // G514 pneumatic move/mixing extrude
+        case 515: G515(); break; // G515 lid gripper release
       #endif
 
       #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
@@ -1093,8 +1097,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1100: M1100(); break;
       #endif
 
-      #if ENABLED(ANALOG_PRESSURE_SENSOR)
-        case 1111: M1111(); break;
+      #if ENABLED(FESTO_PNEUMATICS)
+        case 1036: M1036(); break; // set pressure regulator
+        case 1062: M1062(); break; // get pressure sensors
+        case 1100: M1100(); break; // set pressure regulator offset
       #endif
 
       #if ENABLED(CELLINK_REPORTING)
@@ -1207,7 +1213,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1028: M1028(); break;
         case 1034: M1034(); break;
         case 1035: M1035(); break;
-        case 1036: M1036(); break;
+
         case 1037: M1037(); break;
         case 1038: M1038(); break;
         case 1039: M1039(); break;

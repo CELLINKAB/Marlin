@@ -614,7 +614,11 @@ private:
     static void G511();
     static void G512();
     static void G513();
-    static void G514();
+  #endif
+
+  #if ENABLED(FESTO_PNEUMATICS)
+    static void G514(); // G514 pneumatic move/mixing extrude
+    static void G515(); // G515 lid gripper release
   #endif
 
   #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
@@ -1277,14 +1281,12 @@ private:
     static void M1029();
   #endif
 
-  #if ENABLED(HAS_ANALOG_PROBE)
-    static void M1100();
+  #if ENABLED(FESTO_PNEUMATICS)
+    static void M1036(); // set pressure regulator
+    static void M1062(); // get pressure sensors
+    static void M1100(); // pressure regulator offset
   #endif
-
-  #if ENABLED(ANALOG_PRESSURE_SENSOR)
-    static void M1111();
-  #endif
-
+    
   #if ENABLED(CHANTARELLE_SUPPORT)
     static void M750();
     static void M751();
@@ -1381,7 +1383,6 @@ private:
     static void M1048();
     static void M1050();
     static void M1051();
-    static void M1062();
     static void M1063();
     static void M1064();
     static void M1065();
@@ -1460,8 +1461,6 @@ private:
   // TODO: gate or change these
   // slider valve move
   static void M1112();
-  // easy mix instruction
-  static void M1113();
 
   static void T(const int8_t tool_index);
 

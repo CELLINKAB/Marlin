@@ -70,41 +70,4 @@ void GcodeSuite::M1112()
     }
 }
 
-void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate)
-{
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
-    WRITE(PRESSURE_VALVE_2_PIN, LOW);
-    delay(100);
-    planner.buffer_segment(pos, feedrate);
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, LOW);
-    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
-}
-
-void GcodeSuite::M1113()
-{
-    // if (cartridge::current_slider_pos == cartridge::SliderPosition::Extrude) {
-    //     SERIAL_ERROR_MSG("Slider valve shouldn't be in Extrude position for mixing!");
-    //     return;
-    // }
-
-    const auto volume = parser.axisunitsval('E', AxisEnum::E_AXIS);
-    const auto feedrate = parser.feedrateval('F');
-
-    const auto pos = current_position.copy();
-    const auto retract_pos = pos - abce_pos_t{0, 0, 0, volume};
-
-    for (auto cycles = parser.ushortval('P'); cycles > 0; --cycles) {
-        pneumatic_assisted_move(retract_pos, feedrate);
-        planner.buffer_segment(pos, feedrate);
-    }
-
-    if (parser.seen('L')) {
-        pneumatic_assisted_move(retract_pos, feedrate);
-    }
-
-    sync_plan_position_e();
-}
-
 #endif // SLIDER_VALVE

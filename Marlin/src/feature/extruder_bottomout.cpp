@@ -129,33 +129,4 @@ void GcodeSuite::G513()
     axis_relative = pre_command_relative_mode;
 }
 
-
-static void pneumatic_assisted_move(abce_pos_t pos, feedRate_t feedrate_mm_s)
-{
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
-    WRITE(PRESSURE_VALVE_2_PIN, LOW);
-    delay(100);
-    planner.buffer_segment(pos, feedrate_mm_s);
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, LOW);
-    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
-}
-
-/**
- * @brief mixing extrude / pneumatic move
- * 
- */
-void GcodeSuite::G514()
-{
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, HIGH);
-    WRITE(PRESSURE_VALVE_2_PIN, LOW);
-    delay(100);
-    G0_G1();
-    planner.synchronize();
-    WRITE(PRESSURE_VALVE_1_PIN, LOW);
-    WRITE(PRESSURE_VALVE_2_PIN, HIGH);
-    delay(100);
-}
 #endif // HAS_E_BOTTOMOUT
