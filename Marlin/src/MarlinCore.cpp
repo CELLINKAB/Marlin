@@ -1181,6 +1181,7 @@ void setup() {
       SET_INPUT_PULLDOWN(FREEZE_PIN);
     #else
       SET_INPUT_PULLUP(FREEZE_PIN);
+      TERN_(FREEZE_MSG, attachInterrupt(FREEZE_PIN, [](){SERIAL_ERROR_MSG(FREEZE_MSG);}));
     #endif
   #endif
 

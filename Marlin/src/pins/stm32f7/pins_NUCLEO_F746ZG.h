@@ -81,7 +81,7 @@
  *                                                      AVDD | · · | PF13 (PUMP_EN)
  *                 _CN9_                                AGND | · · | PE9  (LID)
  *   (TEMP_0) PA3 | · · | PD7                            GND | · · | PE11 (PUMP_IN)
- * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)                   PB1 | · · | PF14 (PUMP_OUT)
+ * (TEMP_BED) PC0 | · · | PD6 (XYZ_RX)            (DOOR) PB1 | · · | PF14 (PUMP_OUT)
  *   (TEMP_1) PC3 | · · | PD5 (XYZ_TX)                   PC2 | · · | PE13
  *     (GRIP) PF3 | · · | PD4                    (Y2_EN) PF4 | · · | PF15  (E1_EN)
  *     (TANK) PF5 | · · | PD3                  (Y2_STEP) PB6 | · · | PG14  E_TX
@@ -253,6 +253,8 @@
 
 #define Z_MIN_PROBE_PIN PE0
 
-#define LED_PIN LED_BLUE
+//#define LED_PIN LED_BLUE
+
+#define FREEZE_PIN PB1
 
 
