@@ -1182,6 +1182,9 @@ void setup() {
     #else
       SET_INPUT_PULLUP(FREEZE_PIN);
     #endif
+    #ifdef FREEZE_MSG
+      attachInterrupt(FREEZE_PIN, static_cast<callback_function_t>([]{SERIAL_ERROR_MSG(FREEZE_MSG);}), TERN(FREEZE_STATE, RISING, FALLING));
+    #endif
   #endif
 
   #if HAS_SUICIDE

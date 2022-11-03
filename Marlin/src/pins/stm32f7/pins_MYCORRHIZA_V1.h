@@ -137,3 +137,9 @@
 #define USING_HW_SERIAL2 1
 #define CHANT_RTS_PIN PA1
 #define CHANT_IRQ_PIN PA4
+
+//
+// misc
+//
+
+#define FREEZE_PIN 
