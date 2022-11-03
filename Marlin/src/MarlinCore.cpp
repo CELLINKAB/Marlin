@@ -484,8 +484,15 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
     }
   #endif
 
-  #if HAS_FREEZE_PIN
-    stepper.frozen = READ(FREEZE_PIN) == FREEZE_STATE;
+  #if ENABLED(FREEZE_FEATURE)
+    bool new_freeze = READ(FREEZE_PIN) == FREEZE_STATE;
+    if (new_freeze != stepper.frozen)
+    {
+      #if defined(FREEZE_MSG)
+      SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
+      #endif
+      stepper.frozen = new_freeze;
+    } 
   #endif
 
   #if HAS_HOME
@@ -1181,9 +1188,6 @@ void setup() {
       SET_INPUT_PULLDOWN(FREEZE_PIN);
     #else
       SET_INPUT_PULLUP(FREEZE_PIN);
-    #endif
-    #ifdef FREEZE_MSG
-      attachInterrupt(FREEZE_PIN, static_cast<callback_function_t>([]{SERIAL_ECHOLNPGM(FREEZE_MSG, (READ(FREEZE_PIN) == FREEZE_STATE));}), CHANGE);
     #endif
   #endif
 
