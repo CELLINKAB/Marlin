@@ -108,11 +108,13 @@
 // pneumatics
 //
 
-#define PRESSURE_REGULATOR_SET_PIN PA7
+#define PRESSURE_REGULATOR_PIN PA7
 
 #define PRESSURE_REGULATOR_SENSE_PIN PB2
 #define GRIPPER_VACUUM_PIN PF12
 #define PRESSURE_TANK_PIN PF11
+
+#define PRESSURE_PUMP_EN_PIN PE8
 
 #define PRESSURE_VALVE_LID_PIN PF13
 #define PRESSURE_VALVE_PUMP_IN_PIN PF14
@@ -126,7 +128,8 @@
 // leds
 //
 
-
+#define NEOPIXEL_PIN PF0 // UI LED bar
+#define NEOPIXEL2_PIN PF1 // Chamber LED bar
 
 //
 // cartridge station
@@ -142,4 +145,4 @@
 // misc
 //
 
-#define FREEZE_PIN 
+#define FREEZE_PIN PA8

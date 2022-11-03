@@ -239,7 +239,7 @@ void GcodeSuite::M1034() {}
 //SetBedThermisterParams
 void GcodeSuite::M1035() {}
 //SetRegulatorPressure
-void GcodeSuite::M1036() {}
+//void GcodeSuite::M1036() {} - MOVED
 //GetAllAxesMotorCurrent
 void GcodeSuite::M1037() {}
 //GetPrintbedProbesStatus
@@ -263,7 +263,7 @@ void GcodeSuite::M1050() {}
 //CheckCurrentCompileVersion
 void GcodeSuite::M1051() {}
 //GetPressureAndExtrusionData
-void GcodeSuite::M1062() {}
+//void GcodeSuite::M1062() {} - MOVED
 //MovePrintheadsUpDownDBG
 void GcodeSuite::M1063() {}
 //IgnoreCurrentPrinthead

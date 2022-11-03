@@ -4349,97 +4349,8 @@
 
 #endif // MODULAR_PRINTHEADS
 
-// enbables support for pneumatic/pressure systems
-//#define PNEUMATIC_SYSTEM
-#if ENABLED(PNEUMATIC_SYSTEM)
-
-  //The maximum pressure we can use for extrusion in kPa
-  #define MAXIMUM_EXTRUDE_PRESSURE 		700 
-  //in Kpa. This is the minimum pressure required to be maintained in the tank.
-  #define TANK_REQUIRED_PRESSURE_DEFAULT 	260 
-  //Dictates how much more the tank needs to be filled
-  #define TANK_FULL_PRESSURE_DEFAULT		310	
-  // polarity pneumatic pins
-  #define AIR_RELEASE_PUMP_OPEN	false
-  #define AIR_RELEASE_TANK_OPEN false
-  #define AIR_SOURCE_EXTERNAL   true
-
-  #define AIRTANK_FULL_PRESSURE	(REQUIRED_TANK_PRESSURE*TANK_PRESSURE_BUFFER_FACTOR)
-
-  #define PRESSURE_PWM_BITS 12
-  #define PRESSURE_PWM_TOP ((1<<PRESSURE_PWM_BITS)-1)
-  //PWM-frewuency: 16000000/((2^12)*2) = 1953Hz
-  //Pressure-resolution= FULLSCALE/(2^12)
-
-  //The max voltage the control signal can have
-  #define PRESSURE_MAX_CTRL_VOLTAGE	5000
-  //The smallest control voltage that should be used (it's technically possible ot use smaller, but not meaningful)
-  #define PRESSURE_MIN_CTRL_VOLTAGE	10
-  //The maximum feedback voltage from the regulator output sensor. This will correspond to PRESSURE_FULL_SCALE
-  #define PRESSURE_FEEDBACK_MAX_VOLT	5000
-  //The minimum feedback voltage from the regulator output sensor. This corresponds to 0 pressure
-  #define PRESSURE_FEEDBACK_MIN_VOLT	1000
-
-  //The cycle time for the pump control task (ms)
-  #define PUMP_TASK_TIME	95
-  //Startup time for the pump (it cannot start under pressure). (ms)
-  #define PUMP_STARTUP_HOLDOFF	150
-
-  //Maximum pressure sensor pressure (for MPX5700AP). Unit is kPa
-  #define PRESSURE_SENSOR_MAX_PRESSURE 700
-  //The pressure sensor has some kind of offset when reading atmosphere pressure. This is in ADC ticks. Empirically measured.
-  #define PRESSURE_SENSOR_OFFSET 168
-
-  //The maximum number of regulators we can have
-  #define NOF_MAX_REGULATORS 2
-  
-  //Defines which printheads are supplied by which regulator
-
-  #define REGULATOR_1_PHS	{1,3,5} 
-  #if NOF_MAX_REGULATORS > 1
-    #define REGULATOR_2_PHS	{2,4,6}
-  #endif
-
-#endif // PNEUMATIC_SYSTEM
-
-// Enables the untrasonic auto calibration system.
-//#define ULTRASONIC_AUTOCALIBRATION
-
-
-// Enable door sensor feature
-//#define DOOR_OPEN_SENSOR
-#if ENABLED(DOOR_OPEN_SENSOR)
-  // override pin for door sensor, or definition place if no
-  // door sensor pin is defined for your board (interrupt capable input)
-  #define DOOR_OPEN_PIN_OVERIDE 0
-#endif
-
-// Enable power door opening feature
-//#define POWER_DOOR_OPENER
-
-// options for lid gripping station
-//#define LID_GRIPPER_STATION
-#if ENABLED(LID_GRIPPER_STATION)
-
-  // Position to move printbed before the lid gripper
-  // attempts to grip a lid {x,y,z}
-  #define LID_GRIPPER_COORDS {400,51,-10}
-
-  // define stall sensitivity to use sensorless lid detection and
-  // gripping ability, and to adjust the force needed to stop the
-  // lid gripper. (0-255)
-  #define LID_GRIPPER_STALL_SENSITIVITY 25
-  
-  // RMS current for driver to supply to motor (mA)
-  #define LID_GRIPPER_CURRENT 400
-
-  #define LID_GRIPPER_VELOCITY 15000
-
-  // if using stallguard lid detection and gripping, this value is
-  // the maximum number of mm the gripper should close before we
-  // know for sure there is no lid present.
-  #define LID_GRIPPER_DETECTION_THRESHOLD 50000
-#endif
+// enables support for pneumatic/pressure systems
+#define FESTO_PNEUMATICS
 
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
@@ -4450,24 +4361,11 @@
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
 #endif
 
-//#define OPTICAL_SURFACE_PROBE
-#if ENABLED(OPTICAL_SURFACE_PROBE)
-  #define ____HELLO____ :)
-#endif
-
 #define GLOBAL_INTERVAL_REPORTER
 #if ENABLED(GLOBAL_INTERVAL_REPORTER)
   #define INTERVAL_REPORTER_TIMER TIM12
   #define NUM_INTERVAL_REPORTER_SLOTS 4
   #define INTERVAL_REPORTER_DEFAULT_INTERVAL 1'000'000
-#endif
-
-//#define ANALOG_PRESSURE_SENSOR
-#if ENABLED(ANALOG_PRESSURE_SENSOR)
-  #define SENSOR_KPA_SCALE_FACTOR 4.1792f
-  #define INITIAL_SENSOR_ZERO_OFFSET 165u
-  #define PRESSURE_SENSOR_TRAINING_SAMPLES 40
-  #define PRESSURE_SENSOR_REPORT_SAMPLES 3
 #endif
 
 #define G7_RELATIVE_MOVE
