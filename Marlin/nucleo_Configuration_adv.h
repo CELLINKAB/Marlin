@@ -4141,8 +4141,8 @@
 #define FREEZE_FEATURE
 #if ENABLED(FREEZE_FEATURE)
   //#define FREEZE_PIN 41   // Override the default (KILL) pin here
-  #define FREEZE_STATE LOW  // State of pin indicating freeze
-  #define FREEZE_MSG "DOOR" // optional message to report on freeze
+  #define FREEZE_STATE HIGH  // State of pin indicating freeze
+  #define FREEZE_MSG "DOOR_OPEN" // optional message to report on freeze
 #endif
 
 /**
