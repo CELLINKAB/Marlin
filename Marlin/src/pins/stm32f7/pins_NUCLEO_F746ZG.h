@@ -255,6 +255,6 @@
 
 //#define LED_PIN LED_BLUE
 
-#define FREEZE_PIN PB1
+#define FREEZE_PIN USER_BTN
 
 
