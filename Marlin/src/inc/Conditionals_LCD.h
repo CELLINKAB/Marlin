@@ -644,7 +644,10 @@
 
   #define E_STEPPERS      1
   #define E_MANUAL        1
-
+#elif ENABLED(CHANTARELLE_SUPPORT)
+  #define E_STEPPERS 1
+  #define E_MANUAL 1
+  #define HOTENDS 0
 #endif
 
 // No inactive extruders with SWITCHING_NOZZLE or Průša MMU1

@@ -1047,6 +1047,15 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #endif
 
 /**
+ * chantarelle checks
+ */
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #if EXTRUDERS != 3
+    #error "Chantarelle uses 3 extruders!"
+    #endif
+#endif
+
+/**
  * Sanity checking for all Průša MMU
  */
 #ifdef SNMM
