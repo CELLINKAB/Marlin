@@ -207,10 +207,26 @@ Result Controller::set_valve_stallguard_threshold(Index index, uint8_t threshold
 Response Controller::get_valve_stallguard_threshold(Index index) {}
 Result Controller::set_valve_microsteps(Index index, uint8_t microsteps) {}
 Response Controller::get_valve_microsteps(Index index) {}
-Result Controller::set_valve_rms_current(Index index, uint16_t mA) {}
-Response Controller::get_valve_rms_current(Index index) {}
-Result Controller::set_valve_hold_current(Index index, uint16_t mA) {}
-Result Controller::move_slider_valve(Index index, uint16_t steps) {}
+Result Controller::set_valve_rms_current(Index index, uint16_t mA) {
+    Packet packet(index, Command::ERROR, &mA, sizeof(mA));
+    return send(packet, bus);
+}
+Response Controller::get_valve_rms_current(Index index) {
+    Packet packet(index, Command::ERROR);
+    return send_and_receive(packet, bus);
+}
+Result Controller::set_valve_hold_current(Index index, uint16_t mA) {
+    Packet packet(index, Command::ERROR, &mA, sizeof(mA));
+    return send(packet, bus);
+}
+Result Controller::home_slider_valve(Index index) {
+    Packet packet(index, Command::ERROR);
+    return send(packet, bus);
+}
+Result Controller::move_slider_valve(Index index, uint16_t steps) {
+    Packet packet(index, Command::ERROR, &steps, sizeof(steps));
+    return send(packet, bus);
+}
 
 void Controller::stop_active_extrudes()
 {
