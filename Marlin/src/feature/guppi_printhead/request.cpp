@@ -1,13 +1,17 @@
 
 
-#include "../../inc/MarlinConfig.h"
 #include "request.h"
+
+#include "../../inc/MarlinConfig.h"
 
 using namespace printhead;
 
 Result printhead::send(const Packet& request, HardwareSerial& serial)
 {
-    static auto init [[maybe_unused]] = []{OUT_WRITE(CHANT_RTS_PIN, LOW); return 0;}();
+    static auto init [[maybe_unused]] = [] {
+        OUT_WRITE(CHANT_RTS_PIN, LOW);
+        return 0;
+    }();
     const auto header = request.header_bytes();
     const auto crc = request.crc_bytes();
     WRITE(CHANT_RTS_PIN, HIGH);
@@ -50,10 +54,12 @@ Response printhead::receive(HardwareSerial& serial)
     // ACK would go here
 }
 
-Response printhead::send_and_receive(Packet packet, HardwareSerial& serial) {
+Response printhead::send_and_receive(Packet packet, HardwareSerial& serial)
+{
     Response response;
     response.result = send(packet, serial);
-    if (response.result != Result::OK) return response;
+    if (response.result != Result::OK)
+        return response;
     return receive(serial);
 }
 
@@ -78,6 +84,24 @@ Packet::CrcBytes Packet::crc_bytes() const
     return bytes;
 }
 
+void Controller::set_extruder_state(printhead::Index index, bool state)
+{
+    switch (index) {
+    case printhead::Index::One:
+        [[fallthrough]];
+    case printhead::Index::Two:
+        [[fallthrough]];
+    case printhead::Index::Three:
+        extruder_is_extruding[static_cast<size_t>(index)] = state;
+        break;
+    case printhead::Index::All:
+        for (bool& is_extruding : extruder_is_extruding)
+            is_extruding = state;
+        break;
+    default:
+        return;
+    }
+}
 
 void Controller::init()
 {
@@ -132,23 +156,28 @@ Response Controller::get_pid(Index index)
 }
 
 Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
-Response Controller::get_extrusion_speed(Index index) {
+Response Controller::get_extrusion_speed(Index index)
+{
     Packet packet(index, Command::GET_EXTRUSION_SPEED);
     return send_and_receive(packet, bus);
 }
-Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold) {
+Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold)
+{
     Packet packet(index, Command::SYRINGEPUMP_SET_ESTOP_THRESH, &threshold, 1);
     return send(packet, bus);
 }
-Response Controller::get_extruder_stallguard_threshold(Index index) {
+Response Controller::get_extruder_stallguard_threshold(Index index)
+{
     Packet packet(index, Command::SYRINGEPUMP_GET_ESTOP_THRESH);
     return send_and_receive(packet, bus);
 }
-Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps) {
+Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps)
+{
     Packet packet(index, Command::SET_MICROSTEP, &microsteps, 1);
     return send(packet, bus);
 }
-Response Controller::get_extruder_microsteps(Index index) {
+Response Controller::get_extruder_microsteps(Index index)
+{
     Packet packet(index, Command::GET_MICROSTEP);
     return send_and_receive(packet, bus);
 }
@@ -156,17 +185,20 @@ Result Controller::set_extruder_rms_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_rms_current(Index index) {}
 Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_hold_current(Index index) {}
-Result Controller::home_extruder(Index index, ExtruderDirection direction) {
+Result Controller::home_extruder(Index index, ExtruderDirection direction)
+{
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, 1);
     return send(packet, bus);
 }
-Result Controller::start_extruding(Index index) {
+Result Controller::start_extruding(Index index)
+{
     Packet packet(index, Command::SYRINGEPUMP_START);
     send(packet, bus);
-    extruder_is_extruding[index] = true;
+    set_extruder_state(index, true);
 }
-Result Controller::stop_extruding(Index index) {
-    extruder_is_extruding[index] = false;
+Result Controller::stop_extruding(Index index)
+{
+    set_extruder_state(index, false);
 }
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
@@ -182,8 +214,8 @@ Result Controller::move_slider_valve(Index index, uint16_t steps) {}
 
 void Controller::stop_active_extrudes()
 {
-    for (size_t i = 0; i < EXTRUDERS; ++i)
-    {
-        if (extruder_is_extruding[i]) stop_extruding(static_cast<printhead::Index>(i));
+    for (size_t i = 0; i < EXTRUDERS; ++i) {
+        if (extruder_is_extruding[i])
+            stop_extruding(static_cast<printhead::Index>(i));
     }
 }

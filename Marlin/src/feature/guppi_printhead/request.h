@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../inc/MarlinConfigPre.h"
+#include "../../inc/MarlinConfig.h"
 
 #include "crc.h"
 
@@ -248,6 +248,8 @@ class Controller
 {
     HardwareSerial& bus;
     bool extruder_is_extruding[EXTRUDERS];
+
+    void set_extruder_state(Index index, bool state);
 
 public:
     Controller(HardwareSerial& ph_bus)
