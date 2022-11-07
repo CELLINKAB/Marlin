@@ -139,7 +139,8 @@
 #define CHANT_SERIAL MSerial2
 #define USING_HW_SERIAL2 1
 #define CHANT_RTS_PIN PA1
-#define CHANT_IRQ_PIN PA4
+#define CHANT_IRQ1_PIN PA4
+#define CHANT_IRQ2_PIN PA6
 
 //
 // misc
