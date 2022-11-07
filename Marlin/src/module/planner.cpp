@@ -1439,6 +1439,7 @@ void Planner::check_axes_activity() {
     autotemp_enabled = autotemp_factor != 0;
   }
 
+  #if HAS_HOTEND
   /**
    * Called every so often to adjust the hotend target temperature
    * based on the extrusion speed, which is calculated from the blocks
@@ -1465,6 +1466,9 @@ void Planner::check_axes_activity() {
     oldt = t;
     thermalManager.setTargetHotend(t, active_extruder);
   }
+  #else
+    void Planner::autotemp_task() {}
+  #endif // HAS_HOTEND
 
 #endif
 

@@ -359,9 +359,9 @@ class Temperature {
 
   public:
 
-    #if HAS_HOTEND
-      static hotend_info_t temp_hotend[HOTENDS];
-      static const celsius_t hotend_maxtemp[HOTENDS];
+    #if HAS_HOTEND || ENABLED(CHANTARELLE_SUPPORT)
+      static hotend_info_t temp_hotend[3];
+      static const celsius_t hotend_maxtemp[3];
       static celsius_t hotend_max_target(const uint8_t e) { return hotend_maxtemp[e] - (HOTEND_OVERSHOOT); }
     #endif
     #if HAS_HEATED_BED
