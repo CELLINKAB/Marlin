@@ -166,6 +166,10 @@
   #include "feature/festo_pneumatics.h"
 #endif
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #include "feature/guppi_printhead/chantarelle.h"
+#endif
+
 #if ENABLED(DELTA)
   #include "module/delta.h"
 #elif ENABLED(POLARGRAPH)
@@ -1549,6 +1553,10 @@ void setup() {
     SETUP_RUN(swt_init());
   #elif ENABLED(ELECTROMAGNETIC_SWITCHING_TOOLHEAD)
     SETUP_RUN(est_init());
+  #endif
+
+  #if ENABLED(CHANTARELLE_SUPPORT)
+    ph_controller.init();
   #endif
 
   #if ENABLED(USE_WATCHDOG)

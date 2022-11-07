@@ -142,10 +142,10 @@ enum class Command : uint16_t {
 };
 
 enum class Index : uint16_t {
-    None,
     One,
     Two,
     Three,
+    None = 0xAA,
     All = 0xff, // max value for Marlin tool
 };
 
@@ -252,6 +252,8 @@ public:
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
+    void init();
+
     // Metadata methods
     Response get_info(Index index);
     Response get_fw_version(Index index);

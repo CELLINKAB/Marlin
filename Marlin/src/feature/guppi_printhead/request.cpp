@@ -7,11 +7,15 @@ using namespace printhead;
 
 Result printhead::send(const Packet& request, HardwareSerial& serial)
 {
+    static auto init [[maybe_unused]] = []{OUT_WRITE(CHANT_RTS_PIN, LOW); return 0;}();
     const auto header = request.header_bytes();
     const auto crc = request.crc_bytes();
+    WRITE(CHANT_RTS_PIN, HIGH);
     serial.write(header.data(), header.size());
     serial.write(request.payload, request.payload_size);
     serial.write(crc.data(), crc.size());
+    serial.flush();
+    WRITE(CHANT_RTS_PIN, LOW);
 
     // should read an ACK after this write to assure complete transaction
 
@@ -21,14 +25,14 @@ Result printhead::send(const Packet& request, HardwareSerial& serial)
 Response printhead::receive(HardwareSerial& serial)
 {
     // this seems bug-prone...
-    static uint8_t packet_buffer[64];
+    static uint8_t packet_buffer[128];
 
     Packet incoming;
 
-    auto bytes_received = serial.readBytes(packet_buffer, 64);
-
-    if (bytes_received < 6)
+    if (serial.available() < 6)
         return Response{incoming, Result::PACKET_TOO_SHORT};
+
+    auto bytes_received = serial.readBytes(packet_buffer, 128);
     memcpy(&incoming.ph_index, &packet_buffer[0], 2);
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
@@ -72,6 +76,13 @@ Packet::CrcBytes Packet::crc_bytes() const
     CrcBytes bytes;
     memcpy(bytes.data(), &crc, 2);
     return bytes;
+}
+
+
+void Controller::init()
+{
+    constexpr static unsigned CHANT_BAUDRATE = 115200;
+    bus.begin(CHANT_BAUDRATE);
 }
 
 Result Controller::set_temperature(Index index, float temperature)
