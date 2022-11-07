@@ -2,7 +2,7 @@
 
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
-#include "../../module/planner"
+#include "../../module/planner.h"
 
 #include "request.h"
 
