@@ -247,6 +247,7 @@ enum class ExtruderDirection : uint8_t {
 class Controller
 {
     HardwareSerial& bus;
+    bool extruder_is_extruding[EXTRUDERS];
 
 public:
     Controller(HardwareSerial& ph_bus)
@@ -288,6 +289,7 @@ public:
     Result set_valve_hold_current(Index index, uint16_t mA);
     Result home_slider_valve(Index index);
     Result move_slider_valve(Index index, uint16_t steps);
+    void stop_active_extrudes();
 
 
 };

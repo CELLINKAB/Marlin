@@ -162,8 +162,12 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction) {
 }
 Result Controller::start_extruding(Index index) {
     Packet packet(index, Command::SYRINGEPUMP_START);
+    send(packet, bus);
+    extruder_is_extruding[index] = true;
 }
-Result Controller::stop_extruding(Index index) {}
+Result Controller::stop_extruding(Index index) {
+    extruder_is_extruding[index] = false;
+}
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
 Response Controller::get_valve_speed(Index index) {}
@@ -175,3 +179,11 @@ Result Controller::set_valve_rms_current(Index index, uint16_t mA) {}
 Response Controller::get_valve_rms_current(Index index) {}
 Result Controller::set_valve_hold_current(Index index, uint16_t mA) {}
 Result Controller::move_slider_valve(Index index, uint16_t steps) {}
+
+void Controller::stop_active_extrudes()
+{
+    for (size_t i = 0; i < EXTRUDERS; ++i)
+    {
+        if (extruder_is_extruding[i]) stop_extruding(static_cast<printhead::Index>(i));
+    }
+}
