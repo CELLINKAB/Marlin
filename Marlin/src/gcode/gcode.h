@@ -610,7 +610,7 @@ private:
     static void G510();
   #endif
 
-  #if HAS_E_BOTTOMOUT
+  #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
     static void G511();
     static void G512();
     static void G513();

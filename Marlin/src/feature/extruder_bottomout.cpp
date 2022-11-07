@@ -129,4 +129,11 @@ void GcodeSuite::G513()
     axis_relative = pre_command_relative_mode;
 }
 
-#endif // HAS_E_BOTTOMOUT
+#elif ENABLED(CHANTARELLE_SUPPORT) 
+
+#include "../gcode/gcode.h"
+#include "guppi_printhead/chantarelle.h"
+
+
+
+#endif // HAS_E_BOTTOMOUT || CHANTARELLE_SUPPORT

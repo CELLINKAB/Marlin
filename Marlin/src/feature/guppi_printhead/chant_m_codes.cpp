@@ -47,6 +47,49 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
         if (index_var_name == printhead::Index::None) \
         return
 
+
+//
+// extruder bottomout
+//
+
+//
+// extruder bottomout
+//
+
+/**
+ * @brief Home extruder
+ * 
+ */
+void GcodeSuite::G511()
+{
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.home_extruder(index, printhead::ExtruderDirection::Extrude);
+}
+
+/**
+ * @brief Home slider valve
+ * 
+ */
+void GcodeSuite::G512()
+{
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.home_slider_valve(index);
+}
+
+/**
+ * @brief Slider valve move
+ * 
+ */
+void GcodeSuite::G513()
+{
+    static constexpr float sv_steps_per_mm = 1000.0f;
+    BIND_INDEX_OR_RETURN(index);
+    if (!parser.seen('P')) return;
+    float position = parser.value_float();
+    uint16_t steps = static_cast<uint16_t>(position * sv_steps_per_mm);
+    ph_controller.move_slider_valve(index, steps);
+}
+
 //
 // Common printhead commands
 //

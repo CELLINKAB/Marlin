@@ -462,7 +462,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 510: G510(); break;                                  // Perform autocalibration routine
       #endif
 
-      #if HAS_E_BOTTOMOUT
+      #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
         case 511: G511(); break; // G511 home extruder
         case 512: G512(); break; // G512 home slider valve
         case 513: G513(); break; // G513 move slider valve
