@@ -49,6 +49,11 @@
   #include "speed_lookuptable.h"
 #endif
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #include "../feature/guppi_printhead/chantarelle.h"
+#endif
+
+
 // Disable multiple steps per ISR
 //#define DISABLE_MULTI_STEPPING
 
@@ -466,7 +471,11 @@ class Stepper {
 
     static bool suspend() {
       const bool awake = is_awake();
-      if (awake) DISABLE_STEPPER_DRIVER_INTERRUPT();
+      if (awake) {DISABLE_STEPPER_DRIVER_INTERRUPT();
+      #if ENABLED(CHANTARELLE_SUPPORT)
+        ph_controller.stop_active_extrudes();
+      #endif
+      }
       return awake;
     }
 
