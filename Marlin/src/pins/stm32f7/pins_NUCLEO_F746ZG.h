@@ -137,9 +137,9 @@
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
 
-#define E0_STEP_PIN PE5
-#define E0_DIR_PIN PF2
-#define E0_ENABLE_PIN PE4
+#define CHANT_IRQ1_PIN PE5
+#define CHANT_IRQ2_PIN PF2
+// #define E0_ENABLE_PIN PE4
 
 #define E1_STEP_PIN PA0
 #define E1_DIR_PIN PB0
