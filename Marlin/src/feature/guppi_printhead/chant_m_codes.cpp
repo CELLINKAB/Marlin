@@ -2,10 +2,12 @@
 
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
+#include "../../module/planner"
 
 #include "request.h"
 
 #if ENABLED(CHANTARELLE_SUPPORT)
+
 
 printhead::Controller ph_controller(CHANT_SERIAL);
 
@@ -17,11 +19,11 @@ inline printhead::Index get_ph_index()
 {
     uint8_t tool = GcodeSuite::get_target_extruder_from_command();
     switch (tool) {
+    case 0:
+        [[fallthrough]];
     case 1:
         [[fallthrough]];
     case 2:
-        [[fallthrough]];
-    case 3:
         [[fallthrough]];
     case 0xff:
         return static_cast<printhead::Index>(tool);
@@ -40,14 +42,34 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
 //
 
 // this will declare a variable in scope, be careful!
-#define BIND_INDEX_OR_RETURN(index_var_name) \
-    const printhead::Index index_var_name = get_ph_index(); \
-    if (index_var_name == printhead::Index::None) \
-    return
+#    define BIND_INDEX_OR_RETURN(index_var_name) \
+        const printhead::Index index_var_name = get_ph_index(); \
+        if (index_var_name == printhead::Index::None) \
+        return
 
 //
 // Common printhead commands
 //
+
+// debug arbitrary command, super unsafe
+void GcodeSuite::M1069()
+{
+    static uint8_t cmd_buf[128]{};
+    const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
+    const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
+    const char* payload = parser.stringval('P');
+    if (!payload)
+        return;
+    uint8_t cmd_size = 0;
+    while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
+        cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+        ++cmd_size;
+        payload += 2;
+    }
+    printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
+    const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
+    if (response.result == printhead::Result::OK) SERIAL_ECHOLN((const char *)response.packet.payload);
+}
 
 //StartActuatingPrinthead
 void GcodeSuite::M750() {}
@@ -285,6 +307,7 @@ void GcodeSuite::M2030()
     const feedRate_t feedrate = parser.feedrateval('F');
     if (feedrate == 0.0f)
         return;
+        // TODO: maybe need to convert from uL/s to mm/m
     ph_controller.set_extrusion_speed(index, feedrate);
 }
 //GetPHExtrusionSpeed
