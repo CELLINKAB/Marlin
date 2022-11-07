@@ -56,12 +56,5 @@ constexpr const char* command_switch(uint32_t command)
 
 } // namespace printhead
 
-void GcodeSuite::M1069()
-{
-    uint32_t command = parser.ulongval('C');
-
-    printhead::debug_echo_cmd(printhead::command_switch(command));
-}
-
 
 #endif // CHANTARELLE_SUPPORT
