@@ -193,12 +193,14 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 Result Controller::start_extruding(Index index)
 {
     Packet packet(index, Command::SYRINGEPUMP_START);
-    send(packet, bus);
-    set_extruder_state(index, true);
+    const auto result = send(packet, bus);
+    if (result == Result::OK) set_extruder_state(index, true);
+    return result;
 }
 Result Controller::stop_extruding(Index index)
 {
     set_extruder_state(index, false);
+    return Result::OK;
 }
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
