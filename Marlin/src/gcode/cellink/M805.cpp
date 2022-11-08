@@ -1,14 +1,12 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(UV_CROSSLINKING)
+#if ENABLED(EXOCYTE_UV_CROSSLINKING)
 
-#include "../gcode.h"
-#include "../parser.h"
-
-#include "../../module/planner.h"
-
-#include "../../feature/simple_TMC_controller.h"
+#    include "../../feature/simple_TMC_controller.h"
+#    include "../../module/planner.h"
+#    include "../gcode.h"
+#    include "../parser.h"
 
 struct CuringLed
 {
@@ -18,20 +16,26 @@ struct CuringLed
 
 constexpr CuringLed led_for_wavelength(uint16_t wavelength)
 {
-    switch (wavelength)
-    case 365: return CuringLed{UV_365_PIN, 100};
-    case 400: return CuringLed{UV_400_PIN, 200};
-    case 480: return CuringLed{UV_480_PIN, 300};
-    case 520: return CuringLed{UV_520_PIN, 400};
-    default: return CuringLed{NC, 0};
+    switch (wavelength) {
+    case 400:
+        return CuringLed{PC_400_PIN, 200};
+    case 480:
+        return CuringLed{PC_480_PIN, 300};
+    case 520:
+        return CuringLed{PC_520_PIN, 400};
+    case 365:
+        return CuringLed{PC_365_PIN, 100};
+    default:
+        return CuringLed{static_cast<pin_t>(NC), 0};
+    }
 }
 
-constexpr pin_t 
-
-GcodeSuite::M805()
+void GcodeSuite::M805()
 {
-    static SimpleTMCStepper stepper = []{
-        // do the setup
+    static auto stepper = [] {
+        using TMC = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN>;
+        SimpleTMCConfig config(PC_SLAVE_ADDRESS, 100, 250);
+        return TMC::init(config);
     }();
 
     const uint8_t intensity = parser.byteval('I');
@@ -40,11 +44,12 @@ GcodeSuite::M805()
 
     const CuringLed led = led_for_wavelength(wavelength);
 
-    stepper.move(led.steps);
+    // move rainbow to correct position for selected LED
     millis_t end_time = millis() + duration;
-    pwm_start(led.pin, intensity, PERCENT_COMPARE_FORMAT);
-    while (millis() < duration) idle();
-    pwm_stop(led.pin);
+    analogWrite(led.pin, intensity);
+    while (millis() < duration)
+        idle();
+    analogWrite(led.pin, 0);
 }
 
-#endif // UV_CROSSLINKING
+#endif // EXOCYTE_UV_CROSSLINKING
