@@ -70,7 +70,7 @@
 #endif
 #if USING_HW_SERIAL3
   #ifdef I_DONT_TRUST_MSERIAL
-    HardwareSerial MSerial3(PC10);
+      HardwareSerial MSerial3(PC10);
   #else
     DECLARE_SERIAL_PORT(3)
   #endif
@@ -84,7 +84,7 @@
 #endif
 #if USING_HW_SERIAL5
   #ifdef I_DONT_TRUST_MSERIAL
-    HardwareSerial MSerial5(PB13);
+    HardwareSerial MSerial5(PB13_ALT0);
   #else
     DECLARE_SERIAL_PORT(5)
   #endif

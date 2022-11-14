@@ -599,6 +599,8 @@ enum StealthIndex : uint8_t {
         stepperE7.beginSerial(TMC_BAUD_RATE);
       #endif
     #endif
+          _SET_OUTPUT_OD(PC10_ALT1);
+      _SET_OUTPUT_OD(PB13_ALT0);
   }
 #endif
 
