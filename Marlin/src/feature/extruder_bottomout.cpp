@@ -15,8 +15,9 @@
     SET_INPUT_PULLUP(E##index##_STOP_PIN)
     
 static bool slider_valve_homed = false;
+static constexpr float VOLUME_FACTOR = 4.6 * 4.6 * 3.14159;
 
-void bottomout_extruder(pin_t extruder_stop_pin, float feedrate_mm_s, float backoff)
+void bottomout_extruder(pin_t extruder_stop_pin, float feedrate_mm_s, float backoff, float max_move)
 {
     // lazy initialization to ensure good ordering with global systems.
     // static ensures this is only called on first run.
@@ -48,9 +49,9 @@ void bottomout_extruder(pin_t extruder_stop_pin, float feedrate_mm_s, float back
     planner.buffer_segment(current_position, feedrate_mm_s);
     planner.synchronize();
 
-    const auto end_position = [] {
+    const auto end_position = [=] {
         auto pos = current_position.copy();
-        pos.e += E_BOTTOMOUT_MAX_DISTANCE;
+        pos.e += max_move;
         return pos;
     }();
     planner.buffer_segment(end_position, feedrate_mm_s);
@@ -76,7 +77,8 @@ void GcodeSuite::G511()
     if (extruder_index == -1) return;
     auto feedrate_mm_m = parser.feedrateval('F', E_BOTTOMOUT_FEEDRATE);
     auto backoff_distance = parser.floatval('B', E_BOTTOMOUT_BACKOFF);
-    bottomout_extruder(E0_STOP_PIN, MMM_TO_MMS(feedrate_mm_m), backoff_distance);
+    auto max_move = parser.floatval('D', E_BOTTOMOUT_MAX_DISTANCE);
+    bottomout_extruder(E0_STOP_PIN, MMM_TO_MMS(feedrate_mm_m), backoff_distance, max_move);
     homed = true;
 }
 
@@ -91,7 +93,8 @@ void GcodeSuite::G512()
     active_extruder = 1; // hard coded slider valve as extruder for now
     auto feedrate_mm_m = parser.feedrateval('F', E_BOTTOMOUT_FEEDRATE);
     auto backoff_distance = parser.floatval('B', E_BOTTOMOUT_BACKOFF);
-    bottomout_extruder(E1_STOP_PIN, MMM_TO_MMS(feedrate_mm_s), backoff_distance);
+    auto max_move = parser.floatval('D', E_BOTTOMOUT_MAX_DISTANCE) / VOLUME_FACTOR;
+    bottomout_extruder(E1_STOP_PIN, MMM_TO_MMS(feedrate_mm_s), backoff_distance, max_move);
     active_extruder = pre_command_extruder;
     slider_valve_homed = true;
 }
@@ -104,13 +107,13 @@ void GcodeSuite::G513()
 {
     if (!slider_valve_homed) return;
     if (!parser.seenval('P')) return;
-    const float position = parser.value_float();
+    const float position_mm = parser.value_float();
     planner.synchronize();
     const auto pre_command_relative_mode = axis_relative;
     set_e_absolute();
 
     auto new_pos = current_position.copy();
-    new_pos.e = position;
+    new_pos.e = position_mm / VOLUME_FACTOR;
     planner.buffer_line(new_pos, 0.5, 1);
     planner.synchronize();
 
