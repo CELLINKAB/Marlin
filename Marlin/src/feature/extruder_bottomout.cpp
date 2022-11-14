@@ -16,15 +16,15 @@
     
 static bool slider_valve_homed = false;
 
-void bottomout_extruder(pin_t extruder_stop_pin)
+void bottomout_extruder(pin_t extruder_stop_pin, float feedrate_mm_s, float backoff)
 {
     // lazy initialization to ensure good ordering with global systems.
     // static ensures this is only called on first run.
     static auto init_ [[maybe_unused]] = [] {
         tmc_enable_stallguard(stepperE0); 
-    SET_INPUT_PULLUP(E0_STOP_PIN);
-    tmc_enable_stallguard(stepperE1);
-    SET_INPUT_PULLUP(E1_STOP_PIN);
+        SET_INPUT_PULLUP(E0_STOP_PIN);
+        tmc_enable_stallguard(stepperE1);
+        SET_INPUT_PULLUP(E1_STOP_PIN);
         // TERN_(EXTRUDERS > 0, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(0));
         // TERN_(EXTRUDERS > 1, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(1));
         // TERN_(EXTRUDERS > 2, SETUP_EXTRUDER_BOTTOMOUT_STEPPER(2));
@@ -42,11 +42,10 @@ void bottomout_extruder(pin_t extruder_stop_pin)
         CRITICAL_SECTION_END();
         detachInterrupt(extruder_stop_pin);
     }};
-    constexpr static feedRate_t feedrate = E_BOTTOMOUT_FEEDRATE;
 
     // backoff in case extruder is already bottomed out, increases reliability.
-    current_position.e -= E_BOTTOMOUT_BACKOFF;
-    planner.buffer_segment(current_position, feedrate);
+    current_position.e -= backoff;
+    planner.buffer_segment(current_position, feedrate_mm_s);
     planner.synchronize();
 
     const auto end_position = [] {
@@ -54,7 +53,7 @@ void bottomout_extruder(pin_t extruder_stop_pin)
         pos.e += E_BOTTOMOUT_MAX_DISTANCE;
         return pos;
     }();
-    planner.buffer_segment(end_position, feedrate);
+    planner.buffer_segment(end_position, feedrate_mm_s);
     attachInterrupt(extruder_stop_pin, bottomout_isr, HIGH);
 
     planner.synchronize(); // spins until move completed or bottomout_isr clears buffer
@@ -64,20 +63,6 @@ void bottomout_extruder(pin_t extruder_stop_pin)
     set_current_from_steppers_for_axis(AxisEnum::E_AXIS);
     sync_plan_position();
 }
-
-// constexpr pin_t get_extruder_stop_pin_from_index(int8_t extruder_index)
-// {
-//     switch (extruder_index) {
-//         case 0: TERN_(E0_STOP_PIN, return E0_STOP_PIN);
-//         case 1: TERN_(E1_STOP_PIN, return E1_STOP_PIN);
-//         case 2: TERN_(E2_STOP_PIN, return E2_STOP_PIN);
-//         case 3: TERN_(E3_STOP_PIN, return E3_STOP_PIN);
-//         case 4: TERN_(E4_STOP_PIN, return E4_STOP_PIN);
-//         case 5: TERN_(E5_STOP_PIN, return E5_STOP_PIN);
-//         case 6: TERN_(E6_STOP_PIN, return E6_STOP_PIN);
-//         default: return 0;
-//     };
-// }
 
 /**
  * @brief Home extruder
@@ -89,7 +74,9 @@ void GcodeSuite::G511()
     if (parser.seen_test('O') && homed) return;
     int8_t extruder_index = get_target_extruder_from_command();
     if (extruder_index == -1) return;
-    bottomout_extruder(E0_STOP_PIN);
+    auto feedrate_mm_m = parser.feedrateval('F', E_BOTTOMOUT_FEEDRATE);
+    auto backoff_distance = parser.floatval('B', E_BOTTOMOUT_BACKOFF);
+    bottomout_extruder(E0_STOP_PIN, MMM_TO_MMS(feedrate_mm_m), backoff_distance);
     homed = true;
 }
 
@@ -102,7 +89,9 @@ void GcodeSuite::G512()
     if (parser.seen_test('O') && slider_valve_homed) return;
     const auto pre_command_extruder = active_extruder;
     active_extruder = 1; // hard coded slider valve as extruder for now
-    bottomout_extruder(E1_STOP_PIN);
+    auto feedrate_mm_m = parser.feedrateval('F', E_BOTTOMOUT_FEEDRATE);
+    auto backoff_distance = parser.floatval('B', E_BOTTOMOUT_BACKOFF);
+    bottomout_extruder(E1_STOP_PIN, MMM_TO_MMS(feedrate_mm_s), backoff_distance);
     active_extruder = pre_command_extruder;
     slider_valve_homed = true;
 }

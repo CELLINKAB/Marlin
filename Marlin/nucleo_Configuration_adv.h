@@ -3102,7 +3102,7 @@
 
     #define E_BOTTOMOUT_FEEDRATE 2.0f
     #define E_BOTTOMOUT_BACKOFF 10.0f
-    #define E_BOTTOMOUT_MAX_DISTANCE 9000.0f
+    #define E_BOTTOMOUT_MAX_DISTANCE 900.0f
 
     // On axis home for trusted axis, check that a stallguard false positive or negative didn't occur by timing the move
     #define SENSORLESS_HOME_SANITY_CHECKING
