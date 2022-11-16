@@ -191,6 +191,8 @@ struct Packet
     HeaderBytes header_bytes() const;
 
     CrcBytes crc_bytes() const;
+
+    void print() const;
 };
 
 enum class Result {
@@ -201,6 +203,17 @@ enum class Result {
     BAD_PAYLOAD_SIZE,
 };
 
+constexpr const char * string_from_result_code(Result result)
+{
+    switch (result) {
+        case Result::BAD_CRC: return "BAD_CRC";
+        case Result::BAD_PAYLOAD_SIZE: return "BAD_PAYLOAD_SIZE";
+        case Result::OK: return "OK";
+        case Result::PACKET_TOO_SHORT: return "PACKET_TOO_SHORT";
+        case Result::BUSY: return "BUSY";
+    }
+    __unreachable();
+}
 enum class ErrorPayload {
     OK,
     INVALID_CRC,
@@ -227,6 +240,7 @@ enum class ErrorPayload {
     PARAM_LOAD,
 };
 
+
 Result send(const Packet& request, HardwareSerial& serial);
 
 struct Response
@@ -234,6 +248,8 @@ struct Response
     Packet packet;
     Result result;
 };
+
+void print_response(Response response);
 
 Response receive(HardwareSerial& serial);
 
@@ -260,6 +276,9 @@ public:
     // Metadata methods
     Response get_info(Index index);
     Response get_fw_version(Index index);
+    Response get_all(Index index);
+    Response get_uuid(Index index);
+    Response get_status(Index index);
     // Temperature methods
     Result set_temperature(Index index, float temperature);
     Response get_temperature(Index index);

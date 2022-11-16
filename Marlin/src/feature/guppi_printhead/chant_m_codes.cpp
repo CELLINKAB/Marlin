@@ -8,7 +8,6 @@
 
 #if ENABLED(CHANTARELLE_SUPPORT)
 
-
 printhead::Controller ph_controller(CHANT_SERIAL);
 
 //
@@ -37,6 +36,18 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
 }
 
+void ph_debug_print(printhead::Response response)
+{
+    if (DEBUGGING(INFO))
+        printhead::print_response(response);
+}
+
+void ph_debug_print(printhead::Result result)
+{
+    if (DEBUGGING(INFO))
+        SERIAL_ECHOLN(printhead::string_from_result_code(result));
+}
+
 //
 // Helper Macros
 //
@@ -46,7 +57,6 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
         const printhead::Index index_var_name = get_ph_index(); \
         if (index_var_name == printhead::Index::None) \
         return
-
 
 //
 // extruder bottomout
@@ -63,7 +73,8 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
 void GcodeSuite::G511()
 {
     BIND_INDEX_OR_RETURN(index);
-    ph_controller.home_extruder(index, printhead::ExtruderDirection::Extrude);
+    auto res = ph_controller.home_extruder(index, printhead::ExtruderDirection::Extrude);
+    ph_debug_print(res);
 }
 
 /**
@@ -73,7 +84,8 @@ void GcodeSuite::G511()
 void GcodeSuite::G512()
 {
     BIND_INDEX_OR_RETURN(index);
-    ph_controller.home_slider_valve(index);
+    auto res = ph_controller.home_slider_valve(index);
+    ph_debug_print(res);
 }
 
 /**
@@ -84,10 +96,12 @@ void GcodeSuite::G513()
 {
     static constexpr float sv_steps_per_mm = 1000.0f;
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seen('P')) return;
+    if (!parser.seen('P'))
+        return;
     float position = parser.value_float();
     uint16_t steps = static_cast<uint16_t>(position * sv_steps_per_mm);
-    ph_controller.move_slider_valve(index, steps);
+    auto res = ph_controller.move_slider_valve(index, steps);
+    ph_debug_print(res);
 }
 
 //
@@ -111,7 +125,7 @@ void GcodeSuite::M1069()
     }
     printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
     const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
-    if (response.result == printhead::Result::OK) SERIAL_ECHOLN((const char *)response.packet.payload);
+    ph_debug_print(response);
 }
 
 //StartActuatingPrinthead
@@ -129,7 +143,8 @@ void GcodeSuite::M771()
 {
     BIND_INDEX_OR_RETURN(index);
     const float temperature = parser.floatval('C');
-    ph_controller.set_temperature(index, temperature);
+    auto res = ph_controller.set_temperature(index, temperature);
+    ph_debug_print(res);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -144,7 +159,8 @@ void GcodeSuite::M777()
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
-    ph_controller.set_pid(index, p, i, d);
+    auto res = ph_controller.set_pid(index, p, i, d);
+    ph_debug_print(res);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -161,7 +177,12 @@ void GcodeSuite::M783() {}
 //GetPrintheadMounted
 void GcodeSuite::M784() {}
 //GetPrintheadUUID
-void GcodeSuite::M785() {}
+void GcodeSuite::M785()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_uuid(index);
+    ph_debug_print(res);
+}
 //SetPrintheadLED
 void GcodeSuite::M786() {}
 //GetPrintheadLEDDetails
@@ -276,6 +297,7 @@ void GcodeSuite::M1006()
 
     const uint16_t msg_len = strlen(parser.string_arg);
     printhead::Packet(index, command, parser.string_arg, msg_len);
+    // gotta do something about private variables or whatever
 }
 //ResetAwaitingResponse
 void GcodeSuite::M1008() {}
@@ -350,14 +372,16 @@ void GcodeSuite::M2030()
     const feedRate_t feedrate = parser.feedrateval('F');
     if (feedrate == 0.0f)
         return;
-        // TODO: maybe need to convert from uL/s to mm/m
-    ph_controller.set_extrusion_speed(index, feedrate);
+    // TODO: maybe need to convert from uL/s to mm/m
+    auto res = ph_controller.set_extrusion_speed(index, feedrate);
+    ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
 void GcodeSuite::M2031()
 {
     BIND_INDEX_OR_RETURN(index);
-    ph_controller.get_extrusion_speed(index);
+    auto res = ph_controller.get_extrusion_speed(index);
+    ph_debug_print(res);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}

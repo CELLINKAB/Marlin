@@ -6,6 +6,13 @@
 
 using namespace printhead;
 
+void printhead::print_response(Response response)
+{
+    if (response.result != Result::OK) {SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result)); return;}
+
+    response.packet.print();
+}
+
 Result printhead::send(const Packet& request, HardwareSerial& serial)
 {
     static auto init [[maybe_unused]] = [] {
@@ -82,6 +89,24 @@ Packet::CrcBytes Packet::crc_bytes() const
     CrcBytes bytes;
     memcpy(bytes.data(), &crc, 2);
     return bytes;
+}
+
+void Packet::print() const
+{
+    SERIAL_PRINT(uint16_t(ph_index), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+    
+    SERIAL_PRINT(uint16_t(command), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINT(uint16_t(payload_size), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    for (size_t i = 0; i < payload_size; ++i)
+        SERIAL_PRINT(uint8_t(payload[i]), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINTLN(crc, PrintBase::Hex);
 }
 
 void Controller::set_extruder_state(printhead::Index index, bool state)
@@ -194,7 +219,8 @@ Result Controller::start_extruding(Index index)
 {
     Packet packet(index, Command::SYRINGEPUMP_START);
     const auto result = send(packet, bus);
-    if (result == Result::OK) set_extruder_state(index, true);
+    if (result == Result::OK)
+        set_extruder_state(index, true);
     return result;
 }
 Result Controller::stop_extruding(Index index)
@@ -209,25 +235,40 @@ Result Controller::set_valve_stallguard_threshold(Index index, uint8_t threshold
 Response Controller::get_valve_stallguard_threshold(Index index) {}
 Result Controller::set_valve_microsteps(Index index, uint8_t microsteps) {}
 Response Controller::get_valve_microsteps(Index index) {}
-Result Controller::set_valve_rms_current(Index index, uint16_t mA) {
+Result Controller::set_valve_rms_current(Index index, uint16_t mA)
+{
     Packet packet(index, Command::ERROR, &mA, sizeof(mA));
     return send(packet, bus);
 }
-Response Controller::get_valve_rms_current(Index index) {
+Response Controller::get_valve_rms_current(Index index)
+{ // TODO: UNIMPLEMENTED
     Packet packet(index, Command::ERROR);
     return send_and_receive(packet, bus);
 }
-Result Controller::set_valve_hold_current(Index index, uint16_t mA) {
+Result Controller::set_valve_hold_current(Index index, uint16_t mA)
+{ // TODO: UNIMPLEMENTED
     Packet packet(index, Command::ERROR, &mA, sizeof(mA));
     return send(packet, bus);
 }
-Result Controller::home_slider_valve(Index index) {
+Result Controller::home_slider_valve(Index index)
+{ // TODO: UNIMPLEMENTED
     Packet packet(index, Command::ERROR);
     return send(packet, bus);
 }
-Result Controller::move_slider_valve(Index index, uint16_t steps) {
+Result Controller::move_slider_valve(Index index, uint16_t steps)
+{ // TODO: UNIMPLEMENTED
     Packet packet(index, Command::ERROR, &steps, sizeof(steps));
     return send(packet, bus);
+}
+Response Controller::get_uuid(Index index)
+{
+    Packet packet(index, Command::GET_UNIQUE_ID);
+    return send_and_receive(packet, bus);
+}
+Response Controller::get_status(Index index)
+{
+    Packet packet(index, Command::GET_STATUS);
+    return send_and_receive(packet, bus);
 }
 
 void Controller::stop_active_extrudes()
