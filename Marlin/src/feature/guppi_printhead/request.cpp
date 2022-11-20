@@ -8,7 +8,7 @@ using namespace printhead;
 
 void printhead::print_response(Response response)
 {
-    if (response.result != Result::OK) {SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result)); return;}
+    if (response.result != Result::OK) {SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));}
 
     response.packet.print();
 }

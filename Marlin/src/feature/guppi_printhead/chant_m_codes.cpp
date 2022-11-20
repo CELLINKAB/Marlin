@@ -114,9 +114,7 @@ void GcodeSuite::M1069()
     static uint8_t cmd_buf[128]{};
     const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
     const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
-    const char* payload = parser.stringval('P');
-    if (!payload)
-        return;
+    const char* payload = parser.stringval('P', "");
     uint8_t cmd_size = 0;
     while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
         cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
