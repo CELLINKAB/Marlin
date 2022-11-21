@@ -804,7 +804,7 @@ class Temperature {
           }();  
           WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
           WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
-        #elif ENABLED(MYCORRHIZA_V1)
+        #elif ENABLED(MYCO_HEATER)
           static bool init_other_pins = []{OUT_WRITE(HEATER_BED_2_PIN, LOW); return true;}();
         #endif
         start_watching_bed();
