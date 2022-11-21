@@ -352,7 +352,7 @@
 // Offset of the extruders (uncomment if using more than one and relying on firmware to position when changing).
 // The offset has to be X=0, Y=0 for the extruder 0 hotend (default extruder).
 // For the other hotends it is their distance from the extruder 0 hotend.
-//#define HOTEND_OFFSET_X { 0.0, 20.00 } // (mm) relative X-offset for each nozzle
+#define HOTEND_OFFSET_X { -140.0, -280.00 } // (mm) relative X-offset for each nozzle
 //#define HOTEND_OFFSET_Y { 0.0, 5.00 }  // (mm) relative Y-offset for each nozzle
 //#define HOTEND_OFFSET_Z { 0.0, 0.00 }  // (mm) relative Z-offset for each nozzle
 
@@ -649,7 +649,7 @@
  * When set to any value below 255, enables a form of PWM to the bed that acts like a divider
  * so don't use it unless you are OK with PWM on your bed. (See the comment on enabling PIDTEMPBED)
  */
-#define MAX_BED_POWER 254 // limits duty cycle to bed; 255=full current
+#define MAX_BED_POWER 250 // limits duty cycle to bed; 255=full current
 
 #if ENABLED(PIDTEMPBED)
   //#define MIN_BED_POWER 0
@@ -1216,7 +1216,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -245, -34, -15 }
+#define NOZZLE_TO_PROBE_OFFSET { -113.5, -31, -15 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1419,11 +1419,11 @@
 #define Y_BED_SIZE 72
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
-#define X_MIN_POS -120
-#define Y_MIN_POS -50
+#define X_MIN_POS -369
+#define Y_MIN_POS -38.5
 #define Z_MIN_POS 0
-#define X_MAX_POS 280
-#define Y_MAX_POS 194
+#define X_MAX_POS 130
+#define Y_MAX_POS 206
 #define Z_MAX_POS 40
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
