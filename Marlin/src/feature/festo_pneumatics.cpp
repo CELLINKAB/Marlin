@@ -6,12 +6,12 @@
 
 #    include "festo_pneumatics.h"
 
-#ifndef PRESSURE_VALVE_CLOSE_LEVEL
-  #define PRESSURE_VALVE_CLOSE_LEVEL LOW
-#endif
-#ifndef PRESSURE_VALVE_OPEN_LEVEL
-  #define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
-#endif
+#    ifndef PRESSURE_VALVE_CLOSE_LEVEL
+#        define PRESSURE_VALVE_CLOSE_LEVEL LOW
+#    endif
+#    ifndef PRESSURE_VALVE_OPEN_LEVEL
+#        define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
+#    endif
 
 namespace pneumatics {
 
@@ -52,7 +52,8 @@ void pressurize_tank(millis_t timeout_after_ms)
 {
     static constexpr float TANK_PRESSURE_TARGET = 100.0f;
     static constexpr float TANK_PRESSURE_MAX = 200.0f;
-    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) return;
+    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX)
+        return;
     WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     millis_t timeout = millis() + timeout_after_ms;
     while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET || millis() < timeout) {
@@ -110,7 +111,10 @@ void gripper_release()
     }
 #    endif
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-    delay(100);
+    static constexpr millis_t MIN_LID_RELEASE_DURATION = 1000; // ms
+    millis_t gripper_rengage_time = millis() + MIN_LID_RELEASE_DURATION;
+    while (PENDING(millis(), gripper_rengage_time))
+        idle();
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 
