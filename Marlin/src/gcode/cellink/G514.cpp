@@ -14,6 +14,7 @@
 void GcodeSuite::G514()
 {
     const auto tool = get_target_extruder_from_command();
+    pneumatics::pressurize_tank();
     pneumatics::apply_mixing_pressure(tool);
     G0_G1();
     pneumatics::release_mixing_pressure(tool);

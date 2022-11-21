@@ -25,7 +25,7 @@ void init()
     OUT_WRITE(PRESSURE_VALVE_C2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_C3_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-    OUT_WRITE(PRESSURE_VALVE_PUMP_IN_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
 
@@ -34,6 +34,7 @@ void init()
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
     set_regulator(30.0f);
+    pressurize_tank();
 }
 
 //
@@ -56,7 +57,7 @@ void pressurize_tank(millis_t timeout_after_ms)
         return;
     WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     millis_t timeout = millis() + timeout_after_ms;
-    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET || millis() < timeout) {
+    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET && millis() < timeout) {
         idle();
         delay(100);
     }
