@@ -33,7 +33,7 @@ void init()
     SET_INPUT(PRESSURE_TANK_PIN);
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
-    set_regulator(30.0f);
+    set_regulator(3.0f);
     pressurize_tank();
 }
 
