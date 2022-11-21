@@ -104,6 +104,8 @@
 #define HEATER_BED_PIN PE9
 #define HEATER_BED_2_PIN PE11
 
+#define MYCO_HEATER
+
 #define FAN_PIN PE13
 #define FAN1_PIN PC8
 
