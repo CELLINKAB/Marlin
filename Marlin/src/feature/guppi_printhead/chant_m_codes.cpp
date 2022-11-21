@@ -397,9 +397,8 @@ void GcodeSuite::M2037() {}
 void GcodeSuite::M2038()
 {
     BIND_INDEX_OR_RETURN(index);
-    const uint8_t microsteps = parser.byteval('M');
-    if (microsteps == 0)
-        return;
+        if (!parser.seen('S')) return;
+    const uint8_t microsteps = parser.value_byte('S');
     ph_controller.set_extruder_microsteps(index, microsteps);
 }
 //GetPHMicrostep
@@ -414,9 +413,8 @@ void GcodeSuite::M2040() {}
 void GcodeSuite::M2041()
 {
     BIND_INDEX_OR_RETURN(index);
-    const uint8_t sg_threshold = parser.byteval('S');
-    if (sg_threshold == 0)
-        return;
+    if (!parser.seen('S')) return;
+    const uint8_t sg_threshold = parser.value_byte('S');
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
 }
 //GetPHEndStopThreshold

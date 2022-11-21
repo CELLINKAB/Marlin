@@ -180,7 +180,11 @@ Response Controller::get_pid(Index index)
     return send_and_receive(packet, bus); // TODO: parse incoming response and return payload values
 }
 
-Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
+Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {
+    const uint32_t feedrate_pl_s = static_cast<uint32_t>((feedrate / (4.6 * 4.6 * 3.14159265)) * 1000);
+    Packet packet(index, Command::SET_EXTRUSION_SPEED, &feedrate_pl_s, sizeof(feedrate_pl_s));
+    return send(packet, bus);
+}
 Response Controller::get_extrusion_speed(Index index)
 {
     Packet packet(index, Command::GET_EXTRUSION_SPEED);
@@ -257,7 +261,7 @@ Result Controller::home_slider_valve(Index index)
 }
 Result Controller::move_slider_valve(Index index, uint16_t steps)
 { // TODO: UNIMPLEMENTED
-    Packet packet(index, Command::ERROR, &steps, sizeof(steps));
+    Packet packet(index, Command::CHANTARELLE_ADD_SLIDER_STEPS, &steps, sizeof(steps));
     return send(packet, bus);
 }
 Response Controller::get_uuid(Index index)
