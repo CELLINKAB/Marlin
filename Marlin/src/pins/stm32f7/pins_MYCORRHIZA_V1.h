@@ -147,7 +147,7 @@
 
 #define PC_FEEDBACK PG14
 
-#define 
+#define EXOCYTE_UV_CROSSLINKING
 
 //
 // cartridge station
