@@ -89,10 +89,6 @@ PressureToken::~PressureToken()
 
 void update_tank()
 {
-        static bool initial_pressure [[maybe_unused]] = [] {
-        pressurize_tank();
-        return true;
-    }();
     if (!PressureToken::has_users())
         pump_enable(false);
     pump_enable(tank_pressure.read_avg() < TANK_PRESSURE_TARGET);
