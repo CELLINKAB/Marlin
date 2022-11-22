@@ -6,10 +6,8 @@
 
 #    include "festo_pneumatics.h"
 
-
-
-    static constexpr float TANK_PRESSURE_TARGET = 100.0f;
-    static constexpr float TANK_PRESSURE_MAX = 200.0f;
+static constexpr float TANK_PRESSURE_TARGET = 100.0f;
+static constexpr float TANK_PRESSURE_MAX = 200.0f;
 
 namespace pneumatics {
 
@@ -32,7 +30,6 @@ void init()
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
     set_regulator(3.0f);
-    pressurize_tank();
 }
 
 //
@@ -54,7 +51,6 @@ inline void pump_enable(bool enable)
 
 void pressurize_tank(millis_t timeout_after_ms)
 {
-
     if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) {
         pump_enable(false);
         return;
@@ -93,6 +89,10 @@ PressureToken::~PressureToken()
 
 void update_tank()
 {
+        static bool initial_pressure [[maybe_unused]] = [] {
+        pressurize_tank();
+        return true;
+    }();
     if (!PressureToken::has_users())
         pump_enable(false);
     pump_enable(tank_pressure.read_avg() < TANK_PRESSURE_TARGET);
