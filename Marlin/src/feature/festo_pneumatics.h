@@ -5,6 +5,13 @@
 
 #include <numeric>
 
+#    ifndef PRESSURE_VALVE_CLOSE_LEVEL
+#        define PRESSURE_VALVE_CLOSE_LEVEL LOW
+#    endif
+#    ifndef PRESSURE_VALVE_OPEN_LEVEL
+#        define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
+#    endif
+
 namespace pneumatics {
 
 void init();
@@ -16,6 +23,32 @@ void gripper_release();
 
 void apply_mixing_pressure(uint8_t tool);
 void release_mixing_pressure(uint8_t tool);
+
+// instance counter that enables pressure whenever something is using it
+struct [[maybe_unused]] PressureToken
+{
+    ~PressureToken();
+    PressureToken(const PressureToken& token) = delete;
+    PressureToken(PressureToken&& token) = delete;
+    PressureToken& operator=(const PressureToken& token) = delete;
+    PressureToken& operator=(PressureToken&& token) = delete;
+    inline static bool has_users() { return users > 0; }
+
+private:
+    PressureToken() { ++users; }
+    inline static uint32_t users = 0;
+    inline static void pressure_valves(bool enable)
+    {
+        WRITE(PRESSURE_PUMP_EN_PIN, enable ? HIGH : LOW);
+        WRITE(PRESSURE_VALVE_PUMP_OUT_PIN,
+              enable ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL);
+    }
+    friend PressureToken use_pressure();
+    friend void update_tank();
+};
+
+[[nodiscard]] PressureToken use_pressure();
+void update_tank();
 
 struct AnalogPressureSensor
 {

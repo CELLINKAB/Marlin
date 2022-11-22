@@ -742,6 +742,8 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
 
   TERN_(MONITOR_L6470_DRIVER_STATUS, L64xxManager.monitor_driver());
 
+  TERN_(FESTO_PNEUMATICS, pneumatics::update_tank(););
+
   // Limit check_axes_activity frequency to 10Hz
   static millis_t next_check_axes_ms = 0;
   if (ELAPSED(ms, next_check_axes_ms)) {
