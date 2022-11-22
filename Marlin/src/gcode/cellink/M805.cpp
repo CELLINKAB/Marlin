@@ -71,23 +71,28 @@ void move_rainbow(CuringLed led)
 
 void GcodeSuite::M805()
 {
-    static auto stepper = [] {
-        using TMC = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN>;
-        SimpleTMCConfig config(PC_SLAVE_ADDRESS, 100, 250);
-        return TMC::init(config);
+    static const bool init_pins [[maybe_unused]] = []{
+        OUT_WRITE(PC_365_PIN, LOW);
+        OUT_WRITE(PC_400_PIN, LOW);
+        OUT_WRITE(PC_480_PIN, LOW);
+        OUT_WRITE(PC_520_PIN, LOW);
     }();
-
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
     const millis_t duration = ((parser.ushortval('S') * 1000) + parser.ushortval('P'));
 
     const CuringLed led = led_for_wavelength(wavelength);
 
-    // move rainbow to correct position for selected LED
-    millis_t end_time = millis() + duration;
+    if (led.pin == -1) SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:", wavelength);
+
+    move_rainbow(led);
+    const millis_t end_time = millis() + duration;
     analogWrite(led.pin, intensity);
-    while (PENDING(millis(), end_time))
+    do {
         idle();
+        delay(100);
+    } while (static_cast<int32_t>(end_time - millis()) > 200);
+    if (millis_t now = millis(); end_time > now) delay(end_time - now);
     analogWrite(led.pin, 0);
 }
 
