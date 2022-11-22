@@ -73,6 +73,7 @@ void GcodeSuite::M805()
 {
     static auto stepper = [] {
         using TMC = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN>;
+        SimpleTMCConfig config(PC_SLAVE_ADDRESS, 100, 250);
         return TMC::init(config);
     }();
 
