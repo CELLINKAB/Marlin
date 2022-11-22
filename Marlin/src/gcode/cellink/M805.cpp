@@ -48,24 +48,31 @@ void single_step()
 void move_rainbow(CuringLed led)
 {
     static constexpr uint8_t stop_dir = LOW;
+    static constexpr uint32_t MAX_STEPS = 100'000;
     static uint32_t rainbow_position = []{
         OUT_WRITE(PC_DIR_PIN, stop_dir);
         OUT_WRITE(PC_STEP_PIN, LOW);
-        uint32_t max_steps = 100'000;
+        uint32_t max_steps = MAX_STEPS;
         while ( max_steps-- && READ(PC_STOP_PIN) == LOW) {
             single_step();
         }
         return 0;
     }();
     if (led.steps == rainbow_position) return;
-    //if (led.steps < rainbow_position)
+    uint8_t dir_value = (led.steps > rainbow_position) ? stop_dir : !stop_dir;
+    uint8_t dir_polarity = (dir_value == stop_dir) ? -1 : 1;
+    WRITE(PC_DIR_PIN, dir_value);
+    uint32_t absolute_steps = 0;
+        led.steps += dir_polarity;
+        ++absolute_steps;
+    }
+    // TODO: some error checking here
 }
 
 void GcodeSuite::M805()
 {
     static auto stepper = [] {
         using TMC = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN>;
-        SimpleTMCConfig config(PC_SLAVE_ADDRESS, 100, 250);
         return TMC::init(config);
     }();
 
@@ -78,7 +85,7 @@ void GcodeSuite::M805()
     // move rainbow to correct position for selected LED
     millis_t end_time = millis() + duration;
     analogWrite(led.pin, intensity);
-    while (millis() < duration)
+    while (PENDING(millis(), end_time))
         idle();
     analogWrite(led.pin, 0);
 }
