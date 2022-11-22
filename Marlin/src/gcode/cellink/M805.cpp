@@ -76,6 +76,7 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_400_PIN, LOW);
         OUT_WRITE(PC_480_PIN, LOW);
         OUT_WRITE(PC_520_PIN, LOW);
+        return true;
     }();
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
