@@ -80,7 +80,7 @@
 #define PC_ENABLE_PIN PE15
 #define PC_STOP_PIN PE14
 #define PC_HARDWARE_SERIAL MSerial5
-#define PC_SLAVE_ADDRESS
+#define PC_SLAVE_ADDRESS 2
 
 #define SIMPLE_TMC_HW_SERIAL MSerial5
 #define USING_HW_SERIAL5 1
@@ -137,6 +137,19 @@
 #define NEOPIXEL2_PIN PF1 // Chamber LED bar
 
 //
+// Photocuring LEDs
+//
+
+#define PC_365_PIN PG10
+#define PC_400_PIN PG11
+#define PC_480_PIN PG12
+#define PC_520_PIN PG13
+
+#define PC_FEEDBACK PG14
+
+#define 
+
+//
 // cartridge station
 //
 
@@ -146,6 +159,17 @@
 #define CHANT_RTS_PIN PA1
 #define CHANT_IRQ1_PIN PA4
 #define CHANT_IRQ2_PIN PA6
+
+//
+// Photocuring LEDs
+//
+
+#define PC_365_PIN PG10
+#define PC_400_PIN PG11
+#define PC_480_PIN PG12
+#define PC_520_PIN PG13
+
+#define PC_FEEDBACK PG14
 
 //
 // misc
