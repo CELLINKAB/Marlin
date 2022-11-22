@@ -232,6 +232,11 @@ Result Controller::stop_extruding(Index index)
     set_extruder_state(index, false);
     return Result::OK;
 }
+Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
+{
+    Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, &steps, sizeof(steps));
+    return send(packet, bus);
+}
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
 Response Controller::get_valve_speed(Index index) {}

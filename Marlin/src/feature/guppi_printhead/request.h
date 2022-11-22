@@ -299,6 +299,7 @@ public:
     Result home_extruder(Index index, ExtruderDirection direction);
     Result start_extruding(Index index);
     Result stop_extruding(Index index);
+    Result add_raw_extruder_steps(Index index, int32_t steps);
     // Slider Valve driver methods
     Result set_valve_speed(Index index, feedRate_t feedrate);
     Response get_valve_speed(Index index);
