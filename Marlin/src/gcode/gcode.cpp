@@ -1166,7 +1166,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         // case 802: M802(); break;
         case 803: M803(); break;
         case 804: M804(); break;
-        case 805: M805(); break;
+        case 805: M805(); break; // UV crosslinking
         case 806: M806(); break;
         case 807: M807(); break;
         case 808: M808(); break;

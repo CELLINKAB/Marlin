@@ -134,7 +134,7 @@ void GcodeSuite::M803() {}
 //SetThermistorUnifiedParams
 void GcodeSuite::M804() {}
 //SetUVCrosslinkingLEDs
-void GcodeSuite::M805() {}
+// void GcodeSuite::M805() {}
 //SetUVSterilization
 void GcodeSuite::M806() {}
 //SetCleanchamberFan
