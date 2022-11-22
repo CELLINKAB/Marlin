@@ -42,30 +42,30 @@ void single_step()
         idle();
         idle_counter = 0;
     }
-
 }
 
 void move_rainbow(CuringLed led)
 {
     static constexpr uint8_t stop_dir = LOW;
     static constexpr uint32_t MAX_STEPS = 100'000;
-    static uint32_t rainbow_position = []{
+    static uint32_t rainbow_position = [] {
         OUT_WRITE(PC_DIR_PIN, stop_dir);
         OUT_WRITE(PC_STEP_PIN, LOW);
         uint32_t max_steps = MAX_STEPS;
-        while ( max_steps-- && READ(PC_STOP_PIN) == LOW) {
+        while (max_steps-- && READ(PC_STOP_PIN) == LOW) {
             single_step();
         }
         return 0;
     }();
-    if (led.steps == rainbow_position) return;
+    if (led.steps == rainbow_position)
+        return;
     uint8_t dir_value = (led.steps > rainbow_position) ? stop_dir : !stop_dir;
     uint8_t dir_polarity = (dir_value == stop_dir) ? -1 : 1;
     WRITE(PC_DIR_PIN, dir_value);
     uint32_t absolute_steps = 0;
-        led.steps += dir_polarity;
-        ++absolute_steps;
-    }
+    led.steps += dir_polarity;
+    ++absolute_steps;
+
     // TODO: some error checking here
 }
 
