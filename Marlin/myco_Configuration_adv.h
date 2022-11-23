@@ -624,17 +624,17 @@
  */
 #define FOURWIRES_FANS      // Needed with AUTO_FAN when 4-wire PWM fans are installed
 //#define E0_FAN_TACHO_PIN -1
-//#define E0_FAN_TACHO_PULLUP
-#define E0_FAN_TACHO_PULLDOWN
+#define E0_FAN_TACHO_PULLUP
+//#define E0_FAN_TACHO_PULLDOWN
 //#define E1_FAN_TACHO_PIN -1
-//#define E1_FAN_TACHO_PULLUP
-#define E1_FAN_TACHO_PULLDOWN
+#define E1_FAN_TACHO_PULLUP
+//#define E1_FAN_TACHO_PULLDOWN
 //#define E2_FAN_TACHO_PIN -1
-//#define E2_FAN_TACHO_PULLUP
-#define E2_FAN_TACHO_PULLDOWN
+#define E2_FAN_TACHO_PULLUP
+//#define E2_FAN_TACHO_PULLDOWN
 //#define E3_FAN_TACHO_PIN -1
-//#define E3_FAN_TACHO_PULLUP
-#define E3_FAN_TACHO_PULLDOWN
+#define E3_FAN_TACHO_PULLUP
+//#define E3_FAN_TACHO_PULLDOWN
 //#define E4_FAN_TACHO_PIN -1
 //#define E4_FAN_TACHO_PULLUP
 //#define E4_FAN_TACHO_PULLDOWN
@@ -4138,7 +4138,7 @@
  * Instant freeze / unfreeze functionality
  * Potentially useful for emergency stop that allows being resumed.
  */
-//#define FREEZE_FEATURE
+#define FREEZE_FEATURE
 #if ENABLED(FREEZE_FEATURE)
   //#define FREEZE_PIN 41   // Override the default (KILL) pin here
   #define FREEZE_STATE LOW  // State of pin indicating freeze
