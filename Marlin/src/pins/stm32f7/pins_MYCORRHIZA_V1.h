@@ -104,6 +104,8 @@
 #define HEATER_BED_PIN PE9
 #define HEATER_BED_2_PIN PE11
 
+#define HEATER_BED_INVERTING true
+
 #define MYCO_HEATER
 
 #define FAN_PIN PE13
