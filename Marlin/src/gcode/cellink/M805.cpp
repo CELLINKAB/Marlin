@@ -76,6 +76,7 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_400_PIN, LOW);
         OUT_WRITE(PC_480_PIN, LOW);
         OUT_WRITE(PC_520_PIN, LOW);
+        pinMode(PC_PWM_PIN, PWM);
         return true;
     }();
     const uint8_t intensity = parser.byteval('I');
@@ -88,13 +89,15 @@ void GcodeSuite::M805()
 
     move_rainbow(led);
     const millis_t end_time = millis() + duration;
-    analogWrite(led.pin, intensity);
+    WRITE(led.pin, HIGH);
+    analogWrite(PC_PWM_PIN, intensity);
     do {
         idle();
         delay(100);
     } while (static_cast<int32_t>(end_time - millis()) > 200);
     if (millis_t now = millis(); end_time > now) delay(end_time - now);
-    analogWrite(led.pin, 0);
+    analogWrite(PC_PWM_PIN, 0);
+    WRITE(led.pin, LOW);
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING

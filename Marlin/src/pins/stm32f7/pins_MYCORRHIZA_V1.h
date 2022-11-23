@@ -145,6 +145,8 @@
 #define PC_480_PIN PG12
 #define PC_520_PIN PG13
 
+#define PC_PWM_PIN PB9
+
 #define PC_FEEDBACK PG14
 
 #define EXOCYTE_UV_CROSSLINKING
