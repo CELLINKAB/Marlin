@@ -622,19 +622,19 @@
  *
  * NOTE: Only works with fans up to 7000 RPM.
  */
-//#define FOURWIRES_FANS      // Needed with AUTO_FAN when 4-wire PWM fans are installed
+#define FOURWIRES_FANS      // Needed with AUTO_FAN when 4-wire PWM fans are installed
 //#define E0_FAN_TACHO_PIN -1
 //#define E0_FAN_TACHO_PULLUP
-//#define E0_FAN_TACHO_PULLDOWN
+#define E0_FAN_TACHO_PULLDOWN
 //#define E1_FAN_TACHO_PIN -1
 //#define E1_FAN_TACHO_PULLUP
-//#define E1_FAN_TACHO_PULLDOWN
+#define E1_FAN_TACHO_PULLDOWN
 //#define E2_FAN_TACHO_PIN -1
 //#define E2_FAN_TACHO_PULLUP
-//#define E2_FAN_TACHO_PULLDOWN
+#define E2_FAN_TACHO_PULLDOWN
 //#define E3_FAN_TACHO_PIN -1
 //#define E3_FAN_TACHO_PULLUP
-//#define E3_FAN_TACHO_PULLDOWN
+#define E3_FAN_TACHO_PULLDOWN
 //#define E4_FAN_TACHO_PIN -1
 //#define E4_FAN_TACHO_PULLUP
 //#define E4_FAN_TACHO_PULLDOWN
@@ -3761,7 +3761,7 @@
  * Auto-report fan speed with M123 S<seconds>
  * Requires fans with tachometer pins
  */
-//#define AUTO_REPORT_FANS
+#define AUTO_REPORT_FANS
 
 /**
  * Auto-report temperatures with M155 S<seconds>

@@ -2674,6 +2674,8 @@
   #endif
 #endif
 
+#define HAS_FANCHECK 1 // TODO: this is dumb to manually enable but it's fast for testing, instead this should get wired for PB and CC
+
 #if !HAS_TEMP_SENSOR
   #undef AUTO_REPORT_TEMPERATURES
 #endif

@@ -109,6 +109,11 @@
 #define FAN_PIN PE13
 #define FAN1_PIN PC8
 
+#define E0_FAN_TACHO_PIN PB1 // TEM_IFDBK
+#define E1_FAN_TACHO_PIN PA10
+#define E2_FAN_TACHO_PIN PC7
+#define E3_FAN_TACHO_PIN PG8
+
 //
 // pneumatics
 //
