@@ -1478,7 +1478,7 @@ void Temperature::manage_heater() {
             // TODO: this code is too specific to the driver used
             #ifdef HEATER_BED_DIR_1_PIN
               bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
-            #elif ENABLED(MYCORRHIZA_V1)
+            #elif ENABLED(MYCO_HEATER)
               constexpr bool active_cooling = true;
             #else
               constexpr bool active_cooling = false;
