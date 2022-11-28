@@ -66,13 +66,10 @@ void pressurize_tank(millis_t timeout_after_ms)
 
 PressureToken::~PressureToken()
 {
-    CRITICAL_SECTION_START();
     --users;
     if (has_users())
         return;
     pressure_valves(false);
-    users = 0;
-    CRITICAL_SECTION_END();
 }
 
 /**

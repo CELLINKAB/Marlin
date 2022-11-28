@@ -4,6 +4,7 @@
 #include "../inc/MarlinConfigPre.h"
 
 #include <numeric>
+#include <atomic>
 
 #    ifndef PRESSURE_VALVE_CLOSE_LEVEL
 #        define PRESSURE_VALVE_CLOSE_LEVEL LOW
@@ -32,11 +33,11 @@ struct [[maybe_unused]] PressureToken
     PressureToken(PressureToken&& token) = delete;
     PressureToken& operator=(const PressureToken& token) = delete;
     PressureToken& operator=(PressureToken&& token) = delete;
-    inline static bool has_users() { return users > 0; }
+    inline static bool has_users() { return users.load() > 0; }
 
 private:
     PressureToken() { ++users; }
-    inline static uint32_t users = 0;
+    inline static std::atomic_int users{0};
     inline static void pressure_valves(bool enable)
     {
         WRITE(PRESSURE_PUMP_EN_PIN, enable ? HIGH : LOW);
