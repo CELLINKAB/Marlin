@@ -88,7 +88,8 @@ void update_tank()
 {
     if (!PressureToken::has_users())
         pump_enable(false);
-    pump_enable(tank_pressure.read_avg() < TANK_PRESSURE_TARGET);
+    else
+        pump_enable(tank_pressure.read_avg() < TANK_PRESSURE_TARGET);
 }
 
 //
