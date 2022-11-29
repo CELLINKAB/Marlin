@@ -163,12 +163,27 @@
 //
 
 #define CHANTARELLE_SUPPORT
+
 #define CHANT_SERIAL MSerial2
 #define USING_HW_SERIAL2 1
 #define CHANT_RTS_PIN PA1
+
 #define CHANT_IRQ1_PIN PA4
 #define CHANT_IRQ2_PIN PA6
 
+//
+// UVC sterilization
+//
+
+#define UVC_PWM_PIN PD7
+
+#define UVC_TA_1_PIN PD5
+#define UVC_TA_2_PIN PD4
+#define UVC_TA_3_PIN PD3
+
+#define UVC_ALARM_PIN PD6
+
+#define UVC_ENABLE_PIN NC
 
 //
 // misc
