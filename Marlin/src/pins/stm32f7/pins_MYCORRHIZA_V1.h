@@ -147,10 +147,10 @@
 // Photocuring LEDs
 //
 
-#define PC_365_PIN PG10
-#define PC_400_PIN PG11
-#define PC_480_PIN PG12
-#define PC_520_PIN PG13
+#define PC_365_PIN PG13
+#define PC_400_PIN PG12
+#define PC_480_PIN PG11
+#define PC_520_PIN PG10
 
 #define PC_PWM_PIN PB9
 
