@@ -54,6 +54,18 @@ void GcodeSuite::M802()
 }
 
 void GcodeSuite::M801() {
+    #if ENABLED(MARLIN_DEV_MODE)
+    if (parser.seen('D'))
+    {
+        const auto tem_a_pwm = constrain(parser.ulongval('A', 255), 0, 255);
+        const auto tem_b_pwm = constrain(parser.ulongval('B', 255), 0, 255);
+        const auto frequency = parser.ulongval('F', 10'000);
+
+        pwm_start(digitalPinToPinName(HEATER_BED_2_PIN), frequency, tem_a_pwm, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
+        pwm_start(digitalPinToPinName(HEATER_BED_PIN), frequency, tem_b_pwm, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
+        return;
+    }
+    #endif
     M140();
 }
 
