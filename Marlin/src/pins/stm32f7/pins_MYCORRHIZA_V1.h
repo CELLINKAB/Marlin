@@ -183,7 +183,7 @@
 
 #define UVC_ALARM_PIN PD6
 
-#define UVC_ENABLE_PIN NC
+#define UVC_ENABLE_PIN PF4
 
 //
 // misc
