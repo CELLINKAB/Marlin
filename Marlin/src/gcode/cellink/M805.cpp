@@ -18,11 +18,17 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
 {
     switch (wavelength) {
     case 400:
+        [[fallthrough]];
+    case 405:
         return CuringLed{PC_400_PIN, 200};
     case 480:
+        [[fallthrough]];
+    case 485:
         return CuringLed{PC_480_PIN, 300};
     case 520:
         return CuringLed{PC_520_PIN, 400};
+    case 360:
+        [[fallthrough]];
     case 365:
         return CuringLed{PC_365_PIN, 100};
     default:
