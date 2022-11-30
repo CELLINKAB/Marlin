@@ -61,12 +61,13 @@ void GcodeSuite::M801() {
         const auto tem_b_pwm = constrain(parser.ulongval('B', 255), 0, 255);
         const auto frequency = parser.ulongval('F', 10'000);
 
-        pwm_start(digitalPinToPinName(HEATER_BED_2_PIN), frequency, tem_a_pwm, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
-        pwm_start(digitalPinToPinName(HEATER_BED_1_PIN), frequency, tem_b_pwm, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
+        analogWriteFrequency(frequency);
+        analogWrite(HEATER_BED_PIN, tem_b_pwm);
+        analogWrite(HEATER_BED_2_PIN, tem_a_pwm);
         return;
     }
     #endif
-    //M140();
+    M140();
 }
 
 #endif // CELLINK_REPORTING
