@@ -84,7 +84,7 @@ void GcodeSuite::G511()
 void GcodeSuite::G512()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.home_slider_valve(index);
+    auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
     ph_debug_print(res);
 }
 

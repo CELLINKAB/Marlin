@@ -99,7 +99,6 @@ enum class Command : uint16_t {
     SYRINGEPUMP_SET_FULLSTEP_VOLUME = 204,
     SYRINGEPUMP_GET_FULLSTEP_VOLUME = 205,
     SYRINGEPUMP_DEBUG_ADD_STEPS = 206,
-    CHANTARELLE_ADD_SLIDER_STEPS = 207,
     PNEUMATIC250C_START = 300,
     PNEUMATIC250C_SET_AMP_CORRECTIONS = 301,
     PNEUMATIC250C_GET_AMP_CORRECTIONS = 302,
@@ -139,6 +138,14 @@ enum class Command : uint16_t {
     CURING_GET_LED_SELFTEST_RESULT = 808,
     CURING_GET_LED_VOLTAGE = 809,
     TYPE_PNEUMATIC_10ML_START = 900,
+    SLIDER_MOVE_TO_HOME_POSITION = 1001,
+    DEBUG_ADD_SLIDER_STEPS = 1006,
+    DEBUG_SET_FAN_PWM = 1007,
+    DEBUG_SET_TEM_PWM = 1008,
+    DEBUG_GET_FAN_PWM = 1009,
+    DEBUG_GET_TEM_PWM = 1010,
+    DEBUG_GET_TEMPERATURE = 1011,
+
     NOF_CMDS
 };
 
@@ -261,10 +268,26 @@ enum class ExtruderDirection : uint8_t {
     Retract
 };
 
+enum class SliderDirection : uint8_t {
+    Push,
+    Pull
+};
+
+struct PrintheadState
+{
+    int32_t extruder_pos;
+    int32_t slider_pos;
+    uint16_t fan_set_speed;
+    uint16_t tem_set_temp;
+    bool extruder_is_homed;
+    bool slider_is_homed;
+    bool is_currently_extruding;
+};
+
 class Controller
 {
     HardwareSerial& bus;
-    bool extruder_is_extruding[EXTRUDERS];
+    std::array<PrintheadState, EXTRUDERS> ph_states;
 
     void set_extruder_state(Index index, bool state);
 
@@ -310,8 +333,8 @@ public:
     Result set_valve_rms_current(Index index, uint16_t mA);
     Response get_valve_rms_current(Index index);
     Result set_valve_hold_current(Index index, uint16_t mA);
-    Result home_slider_valve(Index index);
-    Result move_slider_valve(Index index, uint16_t steps);
+    Result home_slider_valve(Index index, SliderDirection dir);
+    Result move_slider_valve(Index index, int32_t steps);
     void stop_active_extrudes();
 
 

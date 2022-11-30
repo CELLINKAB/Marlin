@@ -8,7 +8,9 @@ using namespace printhead;
 
 void printhead::print_response(Response response)
 {
-    if (response.result != Result::OK) {SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));}
+    if (response.result != Result::OK) {
+        SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));
+    }
 
     response.packet.print();
 }
@@ -95,7 +97,7 @@ void Packet::print() const
 {
     SERIAL_PRINT(uint16_t(ph_index), PrintBase::Hex);
     SERIAL_CHAR(' ');
-    
+
     SERIAL_PRINT(uint16_t(command), PrintBase::Hex);
     SERIAL_CHAR(' ');
 
@@ -117,11 +119,11 @@ void Controller::set_extruder_state(printhead::Index index, bool state)
     case printhead::Index::Two:
         [[fallthrough]];
     case printhead::Index::Three:
-        extruder_is_extruding[static_cast<size_t>(index)] = state;
+        ph_states[static_cast<size_t>(index)].is_currently_extruding = state;
         break;
     case printhead::Index::All:
-        for (bool& is_extruding : extruder_is_extruding)
-            is_extruding = state;
+        for (auto& ph_state : ph_states)
+            ph_state.is_currently_extruding = state;
         break;
     default:
         return;
@@ -180,7 +182,8 @@ Response Controller::get_pid(Index index)
     return send_and_receive(packet, bus); // TODO: parse incoming response and return payload values
 }
 
-Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {
+Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate)
+{
     const uint32_t feedrate_pl_s = static_cast<uint32_t>((feedrate / (4.6 * 4.6 * 3.14159265)) * 1000);
     Packet packet(index, Command::SET_EXTRUSION_SPEED, &feedrate_pl_s, sizeof(feedrate_pl_s));
     return send(packet, bus);
@@ -216,8 +219,12 @@ Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_hold_current(Index index) {}
 Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
-    Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, 1);
-    return send(packet, bus);
+    Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, sizeof(direction));
+    auto res = send(packet, bus);
+
+    if (res == Result::OK)
+        ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
+    return res;
 }
 Result Controller::start_extruding(Index index)
 {
@@ -259,15 +266,25 @@ Result Controller::set_valve_hold_current(Index index, uint16_t mA)
     Packet packet(index, Command::ERROR, &mA, sizeof(mA));
     return send(packet, bus);
 }
-Result Controller::home_slider_valve(Index index)
-{ // TODO: UNIMPLEMENTED
-    Packet packet(index, Command::ERROR);
-    return send(packet, bus);
+Result Controller::home_slider_valve(Index index, SliderDirection dir)
+{
+    Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, &dir, sizeof(dir));
+    auto res = send(packet, bus);
+    if (res == Result::OK) {
+        ph_states[static_cast<uint8_t>(index)].slider_is_homed = true;
+    }
+    return res;
 }
-Result Controller::move_slider_valve(Index index, uint16_t steps)
-{ // TODO: UNIMPLEMENTED
-    Packet packet(index, Command::CHANTARELLE_ADD_SLIDER_STEPS, &steps, sizeof(steps));
-    return send(packet, bus);
+Result Controller::move_slider_valve(Index index, int32_t abs_steps)
+{
+    auto& state = ph_states[static_cast<uint8_t>(index)];
+    int32_t rel_steps = abs_steps - state.slider_pos;
+    Packet packet(index, Command::DEBUG_ADD_SLIDER_STEPS, &rel_steps, sizeof(rel_steps));
+    auto result = send(packet, bus);
+    if (result == Result::OK) {
+        state.slider_pos = abs_steps;
+    }
+    return result;
 }
 Response Controller::get_uuid(Index index)
 {
@@ -283,7 +300,7 @@ Response Controller::get_status(Index index)
 void Controller::stop_active_extrudes()
 {
     for (size_t i = 0; i < EXTRUDERS; ++i) {
-        if (extruder_is_extruding[i])
+        if (ph_states[i].is_currently_extruding)
             stop_extruding(static_cast<printhead::Index>(i));
     }
 }
