@@ -220,7 +220,7 @@ void GcodeSuite::M804() {}
 //SetUVCrosslinkingLEDs
 // void GcodeSuite::M805() {}
 //SetUVSterilization
-void GcodeSuite::M806() {}
+//void GcodeSuite::M806() {}
 //SetCleanchamberFan
 void GcodeSuite::M807() {}
 //SetAirValves

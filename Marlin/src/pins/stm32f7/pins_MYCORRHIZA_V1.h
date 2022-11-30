@@ -185,6 +185,8 @@
 
 #define UVC_ENABLE_PIN PF4
 
+#define UVC_STERILIZATION
+
 //
 // misc
 //
