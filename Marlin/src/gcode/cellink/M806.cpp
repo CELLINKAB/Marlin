@@ -8,10 +8,10 @@
 
 void GcodeSuite::M806()
 {
-    static const auto init_pins [[maybe_unused]] = []() {
+    static auto init_pins [[maybe_unused]] = []() {
         OUT_WRITE(UVC_ENABLE_PIN, LOW);
         OUT_WRITE(UVC_PWM_PIN, LOW);
-        SET_INPUT(UVC_ALARM_PIN);
+        SET_INPUT_PULLDOWN(UVC_ALARM_PIN);
         return true;
     }();
     
@@ -22,7 +22,7 @@ void GcodeSuite::M806()
 
     WRITE(UVC_ENABLE_PIN, HIGH);
     pwm_start(digitalPinToPinName(UVC_PWM_PIN), frequency, intensity, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
-    while ((READ(UVC_ALARM_PIN) == LOW) && PENDING(millis(), end_time))
+    while (/*(READ(UVC_ALARM_PIN) == LOW) &&*/ millis() < end_time)
     {
         delay(100);
         idle();
