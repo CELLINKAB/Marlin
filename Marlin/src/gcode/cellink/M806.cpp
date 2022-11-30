@@ -21,13 +21,13 @@ void GcodeSuite::M806()
     const auto end_time = millis() + (exposure_seconds * 1000);
 
     WRITE(UVC_ENABLE_PIN, HIGH);
-    pwm_start(digitalPinToPinName(UVC_PWM_PIN), frequency, intensity, TimerCompareFormat_t::RESOLUTION_8B_COMPARE_FORMAT);
+    analogWrite(UVC_PWM_PIN, intensity);
     while (/*(READ(UVC_ALARM_PIN) == LOW) &&*/ millis() < end_time)
     {
         delay(100);
         idle();
     }
-    pwm_stop(digitalPinToPinName(UVC_PWM_PIN));
+    analogWrite(UVC_PWM_PIN, 0);
     WRITE(UVC_ENABLE_PIN, LOW);
 }
 
