@@ -9,9 +9,9 @@
 void GcodeSuite::M806()
 {
     static auto init_pins [[maybe_unused]] = []() {
-        OUT_WRITE(UVC_ENABLE_PIN, LOW);
+        OUT_WRITE(UVC_RELAY_PIN, LOW);
         OUT_WRITE(UVC_PWM_PIN, LOW);
-        SET_INPUT_PULLDOWN(UVC_ALARM_PIN);
+        SET_INPUT_PULLDOWN(UVC_TFAULT_PIN);
         return true;
     }();
     
@@ -20,7 +20,7 @@ void GcodeSuite::M806()
     const auto frequency = parser.ulongval('F', 1000);
     const auto end_time = millis() + (exposure_seconds * 1000);
 
-    WRITE(UVC_ENABLE_PIN, HIGH);
+    WRITE(UVC_RELAY_PIN, HIGH);
     analogWrite(UVC_PWM_PIN, intensity);
     while (/*(READ(UVC_ALARM_PIN) == LOW) &&*/ millis() < end_time)
     {
@@ -28,7 +28,7 @@ void GcodeSuite::M806()
         idle();
     }
     analogWrite(UVC_PWM_PIN, 0);
-    WRITE(UVC_ENABLE_PIN, LOW);
+    WRITE(UVC_RELAY_PIN, LOW);
 }
 
-#endif //UVC_STERILIZATION
+#endif // UVC_STERILIZATION
