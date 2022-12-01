@@ -644,6 +644,15 @@
 //#define BED_LIMIT_SWITCHING
 
 /**
+ * support using a hardware PWM for bed heater control instead of the soft PWM
+ * 
+ */
+#define HEATER_HARD_PWM
+#ifdef HEATER_HARD_PWM
+  #define HEATER_HARD_PWM_FREQUENCY 10'000
+#endif
+
+/**
  * Max Bed Power
  * Applies to all forms of bed control (PID, bang-bang, and bang-bang with hysteresis).
  * When set to any value below 255, enables a form of PWM to the bed that acts like a divider

@@ -3065,11 +3065,15 @@ void Temperature::isr() {
   #if DISABLED(SLOW_PWM_HEATERS)
 
     #if ANY(HAS_HOTEND, HAS_HEATED_BED, HAS_HEATED_CHAMBER, HAS_COOLER, FAN_SOFT_PWM)
+      #if ENABLED(HEATER_HARD_PWM)
+      #define _PWM_MOD(N,S,T) do {WRITE_HEATER_##N(T.soft_pwm_amount);} while(0)
+      #else
       constexpr uint8_t pwm_mask = TERN0(SOFT_PWM_DITHER, _BV(SOFT_PWM_SCALE) - 1);
       #define _PWM_MOD(N,S,T) do{                           \
         const bool on = S.add(pwm_mask, T.soft_pwm_amount); \
         WRITE_HEATER_##N(on);                               \
       }while(0)
+      #endif
     #endif
 
     /**

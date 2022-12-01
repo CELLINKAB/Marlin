@@ -3043,7 +3043,11 @@
   #ifndef HEATER_BED_INVERTING
     #define HEATER_BED_INVERTING false
   #endif
-  #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
+  #if ENABLED(HEATER_HARD_PWM)
+    #define WRITE_HEATER_BED(v) analogWriteFrequency(HEATER_HARD_PWM_FREQUENCY); analogWrite(HEATER_BED_PIN, TERN_(HEATER_BED_INVERTING, 255 -) constrain(v, 0, MAX_BED_POWER))
+  #else
+    #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
+  #endif
 #endif
 
 /**
