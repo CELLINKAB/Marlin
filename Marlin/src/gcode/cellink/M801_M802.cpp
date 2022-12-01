@@ -2,7 +2,7 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+#if ALL(/*TEMP_SENSOR_BED_IS_TMP117,*/ CELLINK_REPORTING)
 #    include "../gcode.h"
 #    include "../../feature/tmp117/TMP117.h"
 
