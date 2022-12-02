@@ -1483,8 +1483,9 @@ void Temperature::manage_heater() {
             #else
               constexpr bool active_cooling = false;
             #endif
-              bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
-              temp_bed.soft_pwm_amount = needs_power ? MAX_BED_POWER >> 1 : 0;
+              const bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
+              const uint8_t bed_pwm_value = needs_power * TERN(HEATER_HARD_PWM, MAX_BED_POWER, MAX_BED_POWER >> 1);
+              temp_bed.soft_pwm_amount = bed_pwm_value;
             #endif
           }
           else {
@@ -3136,7 +3137,11 @@ void Temperature::isr() {
       #endif
     }
     else {
-      #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)
+      #if ENABLED(HEATER_HARD_PWM)
+        #define _PWM_LOW(N, S)  // NO OP
+      #else
+        #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)
+      #endif
       #if HAS_HOTEND
         #define _PWM_LOW_E(N) _PWM_LOW(N, soft_pwm_hotend[N]);
         REPEAT(HOTENDS, _PWM_LOW_E);
