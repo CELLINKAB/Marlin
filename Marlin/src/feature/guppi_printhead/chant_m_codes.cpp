@@ -226,7 +226,7 @@ void GcodeSuite::M807() {}
 //SetAirValves
 void GcodeSuite::M808() {}
 //ControlRGBLED
-void GcodeSuite::M810() {}
+void GcodeSuite::M810() {M150();}
 //ControlPHVerticalMove
 void GcodeSuite::M811() {}
 //GetZ3EndstopStatus
@@ -256,7 +256,7 @@ void GcodeSuite::M830() {}
 //SetMotorCurrent
 void GcodeSuite::M842() {}
 //ControlPin
-void GcodeSuite::M848() {}
+void GcodeSuite::M848() {M42();}
 //GetSystemTime
 void GcodeSuite::M849() {}
 //GetToolMachineOffset
@@ -286,16 +286,7 @@ void GcodeSuite::M1005() {}
 //SendCustomCommandToPH
 void GcodeSuite::M1006()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const uint16_t cmd_arg = parser.ushortval('C');
-    // The following is dangerous and may lead to undefined behavior due to unconstrained enum variants.
-    const printhead::Command command = static_cast<printhead::Command>(cmd_arg);
-    if (!parser.string_arg)
-        return;
-
-    const uint16_t msg_len = strlen(parser.string_arg);
-    printhead::Packet(index, command, parser.string_arg, msg_len);
-    // gotta do something about private variables or whatever
+   M1069();
 }
 //ResetAwaitingResponse
 void GcodeSuite::M1008() {}
