@@ -444,6 +444,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
   raw_adc_t Temperature::mintemp_raw_BED = TEMP_SENSOR_BED_RAW_LO_TEMP,
             Temperature::maxtemp_raw_BED = TEMP_SENSOR_BED_RAW_HI_TEMP;
   TERN_(WATCH_BED, bed_watch_t Temperature::watch_bed); // = { 0 }
+  TERN_(MYCO_HEATER_DEBUG, bool bed_debug_control_active = false);
   IF_DISABLED(PIDTEMPBED, millis_t Temperature::next_bed_check_ms);
 #endif
 
@@ -1485,10 +1486,10 @@ void Temperature::manage_heater() {
             #endif
               const int needs_power = active_cooling ? isCoolingBed() * -1 : isHeatingBed();
               const int16_t bed_pwm_value = needs_power * TERN(HEATER_HARD_PWM, MAX_BED_POWER, MAX_BED_POWER >> 1);
-              temp_bed.soft_pwm_amount = bed_pwm_value;
+              TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active)) temp_bed.soft_pwm_amount = bed_pwm_value;
             #endif
           }
-          else {
+          else TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active)) {
             temp_bed.soft_pwm_amount = 0;
             WRITE_HEATER_BED(LOW);
           }
@@ -3137,7 +3138,7 @@ void Temperature::isr() {
       #endif
     }
     else {
-      #if ENABLED(HEATER_HARD_PWM)
+      #if ENABLED(MYCO_HEATER)
         #define _PWM_LOW(N, S)  // NO OP
       #else
         #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)

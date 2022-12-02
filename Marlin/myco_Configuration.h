@@ -510,7 +510,7 @@
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#define TEMP_SENSOR_BED 998
+#define TEMP_SENSOR_BED -10
 #define TEMP_SENSOR_PROBE 0
 #define TEMP_SENSOR_CHAMBER 0
 #define TEMP_SENSOR_COOLER 0
@@ -643,14 +643,8 @@
 
 //#define BED_LIMIT_SWITCHING
 
-/**
- * support using a hardware PWM for bed heater control instead of the soft PWM
- * 
- */
-#define HEATER_HARD_PWM
-#ifdef HEATER_HARD_PWM
-  #define HEATER_HARD_PWM_FREQUENCY 10'000
-#endif
+#define MYCO_HEATER_DEBUG
+
 
 /**
  * Max Bed Power

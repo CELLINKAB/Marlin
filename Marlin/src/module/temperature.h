@@ -94,6 +94,9 @@ hotend_pid_t;
   #define _PID_Kf(H) 0
 #endif
 
+// used to allow debug PWM control
+TERN_(MYCO_HEATER_DEBUG, extern bool bed_debug_control_active);
+
 /**
  * States for ADC reading in the ISR
  */
