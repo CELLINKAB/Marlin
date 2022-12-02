@@ -213,7 +213,7 @@ public:
 
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo {
-  celsius_t target;
+  celsius_t target = 25;
   int16_t soft_pwm_amount;
 } heater_info_t;
 

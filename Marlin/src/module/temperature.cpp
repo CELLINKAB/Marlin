@@ -1479,7 +1479,7 @@ void Temperature::manage_heater() {
             #ifdef HEATER_BED_DIR_1_PIN
               bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
             #elif ENABLED(MYCO_HEATER)
-              const bool active_cooling = isCoolingBed() && degTargetBed() < 25;
+              const bool active_cooling = isCoolingBed() && degTargetBed() < 25; // TODO: detect ambient temperature at boot
             #else
               constexpr bool active_cooling = false;
             #endif
