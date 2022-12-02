@@ -1479,12 +1479,12 @@ void Temperature::manage_heater() {
             #ifdef HEATER_BED_DIR_1_PIN
               bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
             #elif ENABLED(MYCO_HEATER)
-              constexpr bool active_cooling = true;
+              const bool active_cooling = isCoolingBed() && degTargetBed() < 25;
             #else
               constexpr bool active_cooling = false;
             #endif
-              const bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
-              const uint8_t bed_pwm_value = needs_power * TERN(HEATER_HARD_PWM, MAX_BED_POWER, MAX_BED_POWER >> 1);
+              const int needs_power = active_cooling ? isCoolingBed() * -1 : isHeatingBed();
+              const int16_t bed_pwm_value = needs_power * TERN(HEATER_HARD_PWM, MAX_BED_POWER, MAX_BED_POWER >> 1);
               temp_bed.soft_pwm_amount = bed_pwm_value;
             #endif
           }
@@ -3066,8 +3066,8 @@ void Temperature::isr() {
   #if DISABLED(SLOW_PWM_HEATERS)
 
     #if ANY(HAS_HOTEND, HAS_HEATED_BED, HAS_HEATED_CHAMBER, HAS_COOLER, FAN_SOFT_PWM)
-      #if ENABLED(HEATER_HARD_PWM)
-      #define _PWM_MOD(N,S,T) do {WRITE_HEATER_##N(T.soft_pwm_amount);} while(0)
+      #if ENABLED(MYCO_HEATER)
+        #define _PWM_MOD(N,S,T) WRITE_HEATER_##N(T.soft_pwm_amount)
       #else
       constexpr uint8_t pwm_mask = TERN0(SOFT_PWM_DITHER, _BV(SOFT_PWM_SCALE) - 1);
       #define _PWM_MOD(N,S,T) do{                           \

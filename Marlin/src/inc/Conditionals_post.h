@@ -3044,7 +3044,7 @@
     #define HEATER_BED_INVERTING false
   #endif
   #if ENABLED(MYCO_HEATER)
-    #define WRITE_HEATER_BED(v) do { unsigned pwm_1_val = TERN_(HEATER_BED_INVERTING, 255 -) ((v > 0) ? constrain(v, 0, MAX_BED_POWER) : 0); unsigned pwm_2_val = TERN_(HEATER_BED_INVERTING, 255 -) ((v < 0) ? constrain(-v, 0, MAX_BED_POWER) : 0); analogWrite(HEATER_BED_PIN, pwm_1_val); analogWrite(HEATER_BED_2_PIN, pwm_2_val) } while (0)
+    #define WRITE_HEATER_BED(v) do { unsigned pwm_1_val = TERN_(HEATER_BED_INVERTING, 255 -) ((v > 0) ? constrain(v, 0, MAX_BED_POWER) : 0); unsigned pwm_2_val = TERN_(HEATER_BED_INVERTING, 255 -) ((v < 0) ? constrain(-v, 0, MAX_BED_POWER) : 0); analogWrite(HEATER_BED_PIN, pwm_1_val); analogWrite(HEATER_BED_2_PIN, pwm_2_val); } while (0)
   #else
     #define WRITE_HEATER_BED(v) WRITE(HEATER_BED_PIN, (v) ^ HEATER_BED_INVERTING)
   #endif

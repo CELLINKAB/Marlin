@@ -214,7 +214,7 @@ public:
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo {
   celsius_t target;
-  uint8_t soft_pwm_amount;
+  int16_t soft_pwm_amount;
 } heater_info_t;
 
 // A heater with PID stabilization
@@ -804,8 +804,6 @@ class Temperature {
           }();  
           WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
           WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
-        #elif ENABLED(MYCO_HEATER)
-          static bool init_other_pins = []{OUT_WRITE(HEATER_BED_2_PIN, HEATER_BED_INVERTING); return true;}();
         #endif
         start_watching_bed();
       }
