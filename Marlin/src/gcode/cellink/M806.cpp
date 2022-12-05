@@ -16,7 +16,7 @@ void GcodeSuite::M806()
     }();
 
     const uint8_t intensity = parser.byteval('I', 255);
-    const auto exposure_seconds = min(parser.ulongval('S', 600), 1200UL);
+    const auto exposure_seconds = min(parser.ulongval('S', 300), 1200UL);
     const auto frequency = min(parser.ulongval('F', 1000), 2000UL);
     const bool safety_override = parser.boolval('O');
 
