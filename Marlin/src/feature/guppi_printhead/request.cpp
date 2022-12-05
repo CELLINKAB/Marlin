@@ -2,7 +2,7 @@
 
 #include "request.h"
 
-#include "../../inc/MarlinConfig.h"
+#include "../../MarlinCore.h"
 
 using namespace printhead;
 
@@ -38,14 +38,18 @@ Result printhead::send(const Packet& request, HardwareSerial& serial)
 Response printhead::receive(HardwareSerial& serial)
 {
     // this seems bug-prone...
-    static uint8_t packet_buffer[128];
+    static uint8_t packet_buffer[128]{};
 
     Packet incoming;
-
-    if (serial.available() < 6)
-        return Response{incoming, Result::PACKET_TOO_SHORT};
+    int timeout_counter = 0;
+    while (serial.available() < 6 && ++timeout_counter < 10)
+        idle();
 
     auto bytes_received = serial.readBytes(packet_buffer, 128);
+
+    if (bytes_received <= 6)
+        return Response{incoming, Result::PACKET_TOO_SHORT};
+
     memcpy(&incoming.ph_index, &packet_buffer[0], 2);
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
@@ -104,9 +108,11 @@ void Packet::print() const
     SERIAL_PRINT(uint16_t(payload_size), PrintBase::Hex);
     SERIAL_CHAR(' ');
 
-    for (size_t i = 0; i < payload_size; ++i)
-        SERIAL_PRINT(uint8_t(payload[i]), PrintBase::Hex);
-    SERIAL_CHAR(' ');
+    if (payload) {
+        for (size_t i = 0; i < payload_size; ++i)
+            SERIAL_PRINT(uint8_t(payload[i]), PrintBase::Hex);
+        SERIAL_CHAR(' ');
+    }
 
     SERIAL_PRINTLN(crc, PrintBase::Hex);
 }

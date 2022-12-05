@@ -114,12 +114,18 @@ void GcodeSuite::M1069()
     static uint8_t cmd_buf[128]{};
     const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
     const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
-    const char* payload = parser.stringval('P', "");
+    const char* payload = parser.string_arg;
     uint8_t cmd_size = 0;
-    while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
-        cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
-        ++cmd_size;
-        payload += 2;
+    if (payload != nullptr) {
+        if (payload[0] == 'P')
+            payload += 1;
+        if (payload[0] == '0' && payload[1] == 'x')
+            payload += 2;
+        while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
+            cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+            ++cmd_size;
+            payload += 2;
+        }
     }
     printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
     const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
@@ -226,7 +232,10 @@ void GcodeSuite::M807() {}
 //SetAirValves
 void GcodeSuite::M808() {}
 //ControlRGBLED
-void GcodeSuite::M810() {M150();}
+void GcodeSuite::M810()
+{
+    M150();
+}
 //ControlPHVerticalMove
 void GcodeSuite::M811() {}
 //GetZ3EndstopStatus
@@ -256,7 +265,10 @@ void GcodeSuite::M830() {}
 //SetMotorCurrent
 void GcodeSuite::M842() {}
 //ControlPin
-void GcodeSuite::M848() {M42();}
+void GcodeSuite::M848()
+{
+    M42();
+}
 //GetSystemTime
 void GcodeSuite::M849() {}
 //GetToolMachineOffset
@@ -286,7 +298,7 @@ void GcodeSuite::M1005() {}
 //SendCustomCommandToPH
 void GcodeSuite::M1006()
 {
-   M1069();
+    M1069();
 }
 //ResetAwaitingResponse
 void GcodeSuite::M1008() {}
@@ -388,7 +400,8 @@ void GcodeSuite::M2037() {}
 void GcodeSuite::M2038()
 {
     BIND_INDEX_OR_RETURN(index);
-        if (!parser.seen('S')) return;
+    if (!parser.seen('S'))
+        return;
     const uint8_t microsteps = parser.value_byte();
     ph_controller.set_extruder_microsteps(index, microsteps);
 }
@@ -404,7 +417,8 @@ void GcodeSuite::M2040() {}
 void GcodeSuite::M2041()
 {
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seen('S')) return;
+    if (!parser.seen('S'))
+        return;
     const uint8_t sg_threshold = parser.value_byte();
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
 }
