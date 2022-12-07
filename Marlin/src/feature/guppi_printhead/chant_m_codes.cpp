@@ -117,15 +117,18 @@ void GcodeSuite::M1069()
     const char* payload = parser.string_arg;
     uint8_t cmd_size = 0;
     if (payload != nullptr) {
+        if (DEBUGGING(INFO)) SERIAL_ECHOPGM("input: ", payload, " parsed: ");
         if (payload[0] == 'P')
             payload += 1;
         if (payload[0] == '0' && payload[1] == 'x')
             payload += 2;
         while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
             cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+            if (DEBUGGING(INFO)) {SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex); SERIAL_CHAR(' ');}
             ++cmd_size;
             payload += 2;
         }
+        if (DEBUGGING(INFO)) SERIAL_EOL();
     }
     printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
     const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
