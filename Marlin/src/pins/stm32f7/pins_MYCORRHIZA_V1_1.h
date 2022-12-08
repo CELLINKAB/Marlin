@@ -35,20 +35,30 @@
 #define STEP_TIMER 4
 #define TEMP_TIMER 14
 
-// #define CUSTOM_MSERIAL2_PINS
-#define MSERIAL2_TX_PIN PA2
-#define MSERIAL2_RX_PIN PA3
+//
+// UART
+//
 
-// #define CUSTOM_MSERIAL3_PINS
-#define MSERIAL3_TX_PIN PC10_ALT1
-#define MSERIAL3_RX_PIN PC11_ALT1
-#define TMC_UART1 MSerial3
+#define MYCO_TMC_SOFT_SERIAL
+#ifdef MYCO_TMC_SOFT_SERIAL
+  #define X_SERIAL_TX_PIN PC10
+  #define X_SERIAL_RX_PIN PC11
+  #define Y_SERIAL_TX_PIN PC10
+  #define Y_SERIAL_RX_PIN PC11
+  #define Y2_SERIAL_TX_PIN PC10
+  #define Y2_SERIAL_RX_PIN PC11
+  #define Z_SERIAL_TX_PIN PC10
+  #define Z_SERIAL_RX_PIN PC11
 
-// #define CUSTOM_MSERIAL5_PINS
-#define MSERIAL5_TX_PIN PB12
-#define MSERIAL5_RX_PIN PB13
-#define TMC_UART2 MSerial5
-
+  #define TMC_BAUD_RATE 19200
+  
+  #undef MYCO_TMC_SOFT_SERIAL
+#else
+  #define X_HARDWARE_SERIAL  MSerial3
+  #define Y_HARDWARE_SERIAL  MSerial3
+  #define Y2_HARDWARE_SERIAL MSerial3
+  #define Z_HARDWARE_SERIAL  MSerial3
+#endif
 //
 // Steppers
 //
@@ -57,36 +67,27 @@
 #define X_DIR_PIN PD10
 #define X_ENABLE_PIN PB15
 #define X_STOP_PIN PD9
-#define X_SERIAL_TX_PIN PC10
-#define X_SERIAL_RX_PIN PC11
-// #define X_HARDWARE_SERIAL  TMC_UART1
+
 #define X_SLAVE_ADDRESS  0
 
 #define Y_STEP_PIN PD13
 #define Y_DIR_PIN PD12
 #define Y_ENABLE_PIN PD11
 #define Y_STOP_PIN PD14
-#define Y_SERIAL_TX_PIN PC10
-#define Y_SERIAL_RX_PIN PC11
-// #define Y_HARDWARE_SERIAL  TMC_UART1
 #define Y_SLAVE_ADDRESS  2
 
 #define Y2_STEP_PIN PD15
 #define Y2_DIR_PIN PG3
 #define Y2_ENABLE_PIN PG2
 #define Y2_STOP_PIN PG4
-#define Y2_SERIAL_TX_PIN PC10
-#define Y2_SERIAL_RX_PIN PC11
-// #define Y2_HARDWARE_SERIAL TMC_UART1
+
 #define Y2_SLAVE_ADDRESS 1
 
 #define Z_STEP_PIN PG8
 #define Z_DIR_PIN PG6
 #define Z_ENABLE_PIN PG5
 #define Z_STOP_PIN PG7
-#define Z_SERIAL_TX_PIN PC10
-#define Z_SERIAL_RX_PIN PC11
-// #define Z_HARDWARE_SERIAL  TMC_UART1
+
 #define Z_SLAVE_ADDRESS  3
 
 #define PROBE_EN_PIN PE0
