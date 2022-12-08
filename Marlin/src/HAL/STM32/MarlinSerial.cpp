@@ -77,7 +77,7 @@
 #endif
 #if USING_HW_SERIAL4
     #ifdef CUSTOM_MSERIAL4_PINS
-    HardwareSerial MSerial3;
+    HardwareSerial MSerial4(MSERIAL4_RX_PIN, MSERIAL4_TX_PIN);
   #else
     DECLARE_SERIAL_PORT(4)
   #endif
