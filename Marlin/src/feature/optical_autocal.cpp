@@ -31,7 +31,7 @@ bool OpticalAutocal::full_autocal_routine(float feedrate)
 
     const bool success = full_sensor_sweep(feedrate);
     if (!success) {
-        do_blocking_move_to(START_POSITION);
+        do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
         SERIAL_ERROR_MSG("autocalibration failed!");
     } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("Nozzle offset: ", tool_offset);
