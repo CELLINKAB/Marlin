@@ -1122,11 +1122,13 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #endif
 
-      //TODO: Move or elaborate these functions
-      // slider valve control
-      // case 1112: M1112(); break;
-      // easy mixing
-      // case 1113: M1113(); break;
+      #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+        case 805: M805(); break;
+      #endif
+
+      #if ENABLED(UVC_STERILIZATION)
+        case 806: M806(); break;
+      #endif
 
       #if ENABLED(CHANTARELLE_SUPPORT)
       // TODO: check for conflicts
@@ -1166,8 +1168,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         // case 802: M802(); break;
         case 803: M803(); break;
         case 804: M804(); break;
-        case 805: M805(); break; // UV crosslinking
-        case 806: M806(); break;
+        // case 805: M805(); break; // UV crosslinking
+        // case 806: M806(); break; // UVC sterilization
         case 807: M807(); break;
         case 808: M808(); break;
         case 810: M810(); break;

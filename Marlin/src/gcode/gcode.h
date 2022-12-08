@@ -1286,6 +1286,14 @@ private:
     static void M1062(); // get pressure sensors
     static void M1100(); // pressure regulator offset
   #endif
+
+  #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+    static void M805();
+  #endif
+
+  #if ENABLED(UVC_STERILIZATION)
+    static void M806();
+  #endif
     
   #if ENABLED(CHANTARELLE_SUPPORT)
     static void M750();
@@ -1324,8 +1332,8 @@ private:
     // static void M802();
     static void M803();
     static void M804();
-    static void M805(); // UV crosslinking
-    static void M806();
+    // static void M805(); // UV crosslinking
+    // static void M806(); // UVC sterilization
     static void M807();
     static void M808();
     static void M810();
