@@ -140,10 +140,12 @@ void gripper_release()
 #    endif
     auto _ = use_pressure();
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     static constexpr millis_t MIN_LID_RELEASE_DURATION = 1000; // ms
     millis_t gripper_rengage_time = millis() + MIN_LID_RELEASE_DURATION;
     while (PENDING(millis(), gripper_rengage_time))
         idle();
+    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 
