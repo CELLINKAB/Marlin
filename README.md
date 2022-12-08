@@ -1,5 +1,8 @@
 # AnglerFish
-Marlin based firmware to control DLP-based printers (Lumen X2)
+Marlin based firmware to control DLP-based printers (Lumen X2).
+
+The **btt-master** branch follows the **master** branch at the [BTT SKR-2 repository](https://github.com/bigtreetech/SKR-2).
+
 ## SKR-2
 
 ### review
