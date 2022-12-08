@@ -2,6 +2,7 @@
 
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
+#include "../../module/planner.h"
 
 #include "request.h"
 
@@ -17,11 +18,11 @@ inline printhead::Index get_ph_index()
 {
     uint8_t tool = GcodeSuite::get_target_extruder_from_command();
     switch (tool) {
+    case 0:
+        [[fallthrough]];
     case 1:
         [[fallthrough]];
     case 2:
-        [[fallthrough]];
-    case 3:
         [[fallthrough]];
     case 0xff:
         return static_cast<printhead::Index>(tool);
@@ -35,19 +36,104 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
 }
 
+void ph_debug_print(printhead::Response response)
+{
+    if (DEBUGGING(INFO))
+        printhead::print_response(response);
+}
+
+void ph_debug_print(printhead::Result result)
+{
+    if (DEBUGGING(INFO))
+        SERIAL_ECHOLN(printhead::string_from_result_code(result));
+}
+
 //
 // Helper Macros
 //
 
 // this will declare a variable in scope, be careful!
-#define BIND_INDEX_OR_RETURN(index_var_name) \
-    const printhead::Index index_var_name = get_ph_index(); \
-    if (index_var_name == printhead::Index::None) \
-    return
+#    define BIND_INDEX_OR_RETURN(index_var_name) \
+        const printhead::Index index_var_name = get_ph_index(); \
+        if (index_var_name == printhead::Index::None) \
+        return
+
+//
+// extruder bottomout
+//
+
+//
+// extruder bottomout
+//
+
+/**
+ * @brief Home extruder
+ * 
+ */
+void GcodeSuite::G511()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.home_extruder(index, printhead::ExtruderDirection::Extrude);
+    ph_debug_print(res);
+}
+
+/**
+ * @brief Home slider valve
+ * 
+ */
+void GcodeSuite::G512()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
+    ph_debug_print(res);
+}
+
+/**
+ * @brief Slider valve move
+ * 
+ */
+void GcodeSuite::G513()
+{
+    static constexpr float sv_steps_per_mm = 1000.0f;
+    BIND_INDEX_OR_RETURN(index);
+    if (!parser.seen('P'))
+        return;
+    float position = parser.value_float();
+    uint16_t steps = static_cast<uint16_t>(position * sv_steps_per_mm);
+    auto res = ph_controller.move_slider_valve(index, steps);
+    ph_debug_print(res);
+}
 
 //
 // Common printhead commands
 //
+
+// debug arbitrary command, super unsafe
+void GcodeSuite::M1069()
+{
+    static uint8_t cmd_buf[128]{};
+    const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
+    const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
+    const char* payload = parser.string_arg;
+    uint8_t cmd_size = 0;
+    if (payload != nullptr) {
+        if (DEBUGGING(INFO)) SERIAL_ECHOPGM("input: ", payload, " parsed: ");
+        if (payload[0] == 'P')
+            payload += 1;
+        if (payload[0] == '0' && payload[1] == 'x')
+            payload += 2;
+        while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
+            cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+            if (DEBUGGING(INFO)) {SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex); SERIAL_CHAR(' ');}
+            ++cmd_size;
+            payload += 2;
+        }
+        if (DEBUGGING(INFO)) SERIAL_EOL();
+    }
+    printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
+    const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
+    ph_debug_print(response);
+}
 
 //StartActuatingPrinthead
 void GcodeSuite::M750() {}
@@ -64,7 +150,8 @@ void GcodeSuite::M771()
 {
     BIND_INDEX_OR_RETURN(index);
     const float temperature = parser.floatval('C');
-    ph_controller.set_temperature(index, temperature);
+    auto res = ph_controller.set_temperature(index, temperature);
+    ph_debug_print(res);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -79,7 +166,8 @@ void GcodeSuite::M777()
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
-    ph_controller.set_pid(index, p, i, d);
+    auto res = ph_controller.set_pid(index, p, i, d);
+    ph_debug_print(res);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -96,7 +184,12 @@ void GcodeSuite::M783() {}
 //GetPrintheadMounted
 void GcodeSuite::M784() {}
 //GetPrintheadUUID
-void GcodeSuite::M785() {}
+void GcodeSuite::M785()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_uuid(index);
+    ph_debug_print(res);
+}
 //SetPrintheadLED
 void GcodeSuite::M786() {}
 //GetPrintheadLEDDetails
@@ -134,15 +227,18 @@ void GcodeSuite::M803() {}
 //SetThermistorUnifiedParams
 void GcodeSuite::M804() {}
 //SetUVCrosslinkingLEDs
-void GcodeSuite::M805() {}
+// void GcodeSuite::M805() {}
 //SetUVSterilization
-void GcodeSuite::M806() {}
+//void GcodeSuite::M806() {}
 //SetCleanchamberFan
 void GcodeSuite::M807() {}
 //SetAirValves
 void GcodeSuite::M808() {}
 //ControlRGBLED
-void GcodeSuite::M810() {}
+void GcodeSuite::M810()
+{
+    M150();
+}
 //ControlPHVerticalMove
 void GcodeSuite::M811() {}
 //GetZ3EndstopStatus
@@ -172,7 +268,10 @@ void GcodeSuite::M830() {}
 //SetMotorCurrent
 void GcodeSuite::M842() {}
 //ControlPin
-void GcodeSuite::M848() {}
+void GcodeSuite::M848()
+{
+    M42();
+}
 //GetSystemTime
 void GcodeSuite::M849() {}
 //GetToolMachineOffset
@@ -202,15 +301,7 @@ void GcodeSuite::M1005() {}
 //SendCustomCommandToPH
 void GcodeSuite::M1006()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const uint16_t cmd_arg = parser.ushortval('C');
-    // The following is dangerous and may lead to undefined behavior due to unconstrained enum variants.
-    const printhead::Command command = static_cast<printhead::Command>(cmd_arg);
-    if (!parser.string_arg)
-        return;
-
-    const uint16_t msg_len = strlen(parser.string_arg);
-    printhead::Packet(index, command, parser.string_arg, msg_len);
+    M1069();
 }
 //ResetAwaitingResponse
 void GcodeSuite::M1008() {}
@@ -285,13 +376,16 @@ void GcodeSuite::M2030()
     const feedRate_t feedrate = parser.feedrateval('F');
     if (feedrate == 0.0f)
         return;
-    ph_controller.set_extrusion_speed(index, feedrate);
+    // TODO: maybe need to convert from uL/s to mm/m
+    auto res = ph_controller.set_extrusion_speed(index, feedrate);
+    ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
 void GcodeSuite::M2031()
 {
     BIND_INDEX_OR_RETURN(index);
-    ph_controller.get_extrusion_speed(index);
+    auto res = ph_controller.get_extrusion_speed(index);
+    ph_debug_print(res);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
@@ -309,9 +403,9 @@ void GcodeSuite::M2037() {}
 void GcodeSuite::M2038()
 {
     BIND_INDEX_OR_RETURN(index);
-    const uint8_t microsteps = parser.byteval('M');
-    if (microsteps == 0)
+    if (!parser.seen('S'))
         return;
+    const uint8_t microsteps = parser.value_byte();
     ph_controller.set_extruder_microsteps(index, microsteps);
 }
 //GetPHMicrostep
@@ -326,9 +420,9 @@ void GcodeSuite::M2040() {}
 void GcodeSuite::M2041()
 {
     BIND_INDEX_OR_RETURN(index);
-    const uint8_t sg_threshold = parser.byteval('S');
-    if (sg_threshold == 0)
+    if (!parser.seen('S'))
         return;
+    const uint8_t sg_threshold = parser.value_byte();
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
 }
 //GetPHEndStopThreshold

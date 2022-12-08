@@ -94,6 +94,9 @@ hotend_pid_t;
   #define _PID_Kf(H) 0
 #endif
 
+// used to allow debug PWM control
+TERN_(MYCO_HEATER_DEBUG, extern bool bed_debug_control_active);
+
 /**
  * States for ADC reading in the ISR
  */
@@ -213,8 +216,8 @@ public:
 
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo {
-  celsius_t target;
-  uint8_t soft_pwm_amount;
+  celsius_t target = 25;
+  int16_t soft_pwm_amount;
 } heater_info_t;
 
 // A heater with PID stabilization
@@ -360,8 +363,8 @@ class Temperature {
   public:
 
     #if HAS_HOTEND
-      static hotend_info_t temp_hotend[HOTENDS];
-      static const celsius_t hotend_maxtemp[HOTENDS];
+      static hotend_info_t temp_hotend[3];
+      static const celsius_t hotend_maxtemp[3];
       static celsius_t hotend_max_target(const uint8_t e) { return hotend_maxtemp[e] - (HOTEND_OVERSHOOT); }
     #endif
     #if HAS_HEATED_BED
@@ -804,8 +807,6 @@ class Temperature {
           }();  
           WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
           WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
-        #elif ENABLED(MYCORRHIZA_V1)
-          static bool init_other_pins = []{OUT_WRITE(HEATER_BED_2_PIN, LOW); return true;}();
         #endif
         start_watching_bed();
       }

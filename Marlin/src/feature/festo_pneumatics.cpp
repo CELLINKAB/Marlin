@@ -6,12 +6,8 @@
 
 #    include "festo_pneumatics.h"
 
-#ifndef PRESSURE_VALVE_CLOSE_LEVEL
-  #define PRESSURE_VALVE_CLOSE_LEVEL LOW
-#endif
-#ifndef PRESSURE_VALVE_OPEN_LEVEL
-  #define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
-#endif
+static constexpr float TANK_PRESSURE_TARGET = 100.0f;
+static constexpr float TANK_PRESSURE_MAX = 200.0f;
 
 namespace pneumatics {
 
@@ -25,7 +21,7 @@ void init()
     OUT_WRITE(PRESSURE_VALVE_C2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_C3_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-    OUT_WRITE(PRESSURE_VALVE_PUMP_IN_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
 
@@ -33,7 +29,7 @@ void init()
     SET_INPUT(PRESSURE_TANK_PIN);
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
-    set_regulator(30.0f);
+    set_regulator(3.0f);
 }
 
 //
@@ -48,18 +44,51 @@ void set_regulator(float kPa)
     analogWrite(PRESSURE_REGULATOR_PIN, value);
 }
 
+inline void pump_enable(bool enable)
+{
+    WRITE(PRESSURE_PUMP_EN_PIN, enable ? HIGH : LOW);
+}
+
 void pressurize_tank(millis_t timeout_after_ms)
 {
-    static constexpr float TANK_PRESSURE_TARGET = 100.0f;
-    static constexpr float TANK_PRESSURE_MAX = 200.0f;
-    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) return;
-    WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
+    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) {
+        pump_enable(false);
+        return;
+    }
+    pump_enable(true);
     millis_t timeout = millis() + timeout_after_ms;
-    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET || millis() < timeout) {
+    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET && millis() < timeout) {
         idle();
         delay(100);
     }
-    WRITE(PRESSURE_PUMP_EN_PIN, LOW);
+    pump_enable(false);
+}
+
+PressureToken::~PressureToken()
+{
+    --users;
+    if (has_users())
+        return;
+    pressure_valves(false);
+}
+
+/**
+ * @brief tell the pressure system you will be using pressure
+ * 
+ * @return a pressure token that will guarantee pressure is turned on until it goes out of scope
+*/
+[[nodiscard]] PressureToken use_pressure()
+{
+    if (!PressureToken::has_users())
+        PressureToken::pressure_valves(true);
+    return PressureToken{};
+}
+
+void update_tank()
+{
+    const bool needs_pressure = PressureToken::has_users()
+                                && tank_pressure.read_avg() < TANK_PRESSURE_TARGET;
+    pump_enable(needs_pressure);
 }
 
 //
@@ -109,8 +138,14 @@ void gripper_release()
         return;
     }
 #    endif
+    auto _ = use_pressure();
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-    delay(100);
+    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    static constexpr millis_t MIN_LID_RELEASE_DURATION = 1000; // ms
+    millis_t gripper_rengage_time = millis() + MIN_LID_RELEASE_DURATION;
+    while (PENDING(millis(), gripper_rengage_time))
+        idle();
+    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 

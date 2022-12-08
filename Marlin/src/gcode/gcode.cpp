@@ -462,7 +462,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 510: G510(); break;                                  // Perform autocalibration routine
       #endif
 
-      #if HAS_E_BOTTOMOUT
+      #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
         case 511: G511(); break; // G511 home extruder
         case 512: G512(); break; // G512 home slider valve
         case 513: G513(); break; // G513 move slider valve
@@ -583,7 +583,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 100: M100(); break;                                  // M100: Free Memory Report
       #endif
 
-      #if HAS_EXTRUDERS
+      #if HAS_HOTEND
         case 104: M104(); break;                                  // M104: Set hot end temperature
         case 109: M109(); break;                                  // M109: Wait for hotend temperature to reach target
       #endif
@@ -1122,11 +1122,13 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #endif
 
-      //TODO: Move or elaborate these functions
-      // slider valve control
-      // case 1112: M1112(); break;
-      // easy mixing
-      // case 1113: M1113(); break;
+      #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+        case 805: M805(); break;
+      #endif
+
+      #if ENABLED(UVC_STERILIZATION)
+        case 806: M806(); break;
+      #endif
 
       #if ENABLED(CHANTARELLE_SUPPORT)
       // TODO: check for conflicts
@@ -1166,8 +1168,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         // case 802: M802(); break;
         case 803: M803(); break;
         case 804: M804(); break;
-        case 805: M805(); break;
-        case 806: M806(); break;
+        // case 805: M805(); break; // UV crosslinking
+        // case 806: M806(); break; // UVC sterilization
         case 807: M807(); break;
         case 808: M808(); break;
         case 810: M810(); break;

@@ -1047,6 +1047,15 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #endif
 
 /**
+ * chantarelle checks
+ */
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #if EXTRUDERS != 3
+    #error "Chantarelle uses 3 extruders!"
+    #endif
+#endif
+
+/**
  * Sanity checking for all Průša MMU
  */
 #ifdef SNMM
@@ -2187,9 +2196,9 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * Test Sensor & Heater pin combos.
  * Pins and Sensor IDs must be set for each heater
  */
-#if HAS_EXTRUDERS && !ANY_PIN(TEMP_0, TEMP_0_CS)
+#if HAS_HOTEND && !ANY_PIN(TEMP_0, TEMP_0_CS)
   #error "TEMP_0_PIN or TEMP_0_CS_PIN not defined for this board."
-#elif HAS_EXTRUDERS && !HAS_HEATER_0
+#elif HAS_HOTEND && !HAS_HEATER_0
   #error "HEATER_0_PIN not defined for this board."
 #elif TEMP_SENSOR_0_IS_MAX_TC && !PIN_EXISTS(TEMP_0_CS)
   #error "TEMP_SENSOR_0 MAX thermocouple requires TEMP_0_CS_PIN."
@@ -2400,14 +2409,14 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
 #if HAS_EXTRUDERS
   #if ((defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && !PINS_EXIST(E0_STEP, E0_DIR))
     #error "E0_STEP_PIN or E0_DIR_PIN not defined for this board."
-  #elif ( !(defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && (!PINS_EXIST(E0_STEP, E0_DIR) || !HAS_E0_ENABLE))
+  #elif ( !(defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && (!PINS_EXIST(E0_STEP, E0_DIR) || !HAS_E0_ENABLE)) && DISABLED(CHANTARELLE_SUPPORT)
     #error "E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board."
   #elif EXTRUDERS && TEMP_SENSOR_0 == 0
     #error "TEMP_SENSOR_0 is required if there are any extruders."
   #endif
 #endif
 
-#if E_STEPPERS > 0 && !(PINS_EXIST(E0_STEP, E0_DIR) && HAS_E0_ENABLE)
+#if E_STEPPERS > 0 && !(PINS_EXIST(E0_STEP, E0_DIR) && HAS_E0_ENABLE) && DISABLED(CHANTARELLE_SUPPORT)
   #error "E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board."
 #endif
 #if E_STEPPERS > 1 && !(PINS_EXIST(E1_STEP, E1_DIR) && HAS_E1_ENABLE)

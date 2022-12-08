@@ -622,18 +622,18 @@
  *
  * NOTE: Only works with fans up to 7000 RPM.
  */
-//#define FOURWIRES_FANS      // Needed with AUTO_FAN when 4-wire PWM fans are installed
+#define FOURWIRES_FANS      // Needed with AUTO_FAN when 4-wire PWM fans are installed
 //#define E0_FAN_TACHO_PIN -1
-//#define E0_FAN_TACHO_PULLUP
+#define E0_FAN_TACHO_PULLUP
 //#define E0_FAN_TACHO_PULLDOWN
 //#define E1_FAN_TACHO_PIN -1
-//#define E1_FAN_TACHO_PULLUP
+#define E1_FAN_TACHO_PULLUP
 //#define E1_FAN_TACHO_PULLDOWN
 //#define E2_FAN_TACHO_PIN -1
-//#define E2_FAN_TACHO_PULLUP
+#define E2_FAN_TACHO_PULLUP
 //#define E2_FAN_TACHO_PULLDOWN
 //#define E3_FAN_TACHO_PIN -1
-//#define E3_FAN_TACHO_PULLUP
+#define E3_FAN_TACHO_PULLUP
 //#define E3_FAN_TACHO_PULLDOWN
 //#define E4_FAN_TACHO_PIN -1
 //#define E4_FAN_TACHO_PULLUP
@@ -726,7 +726,7 @@
 
 #define Y_DUAL_STEPPER_DRIVERS
 #if ENABLED(Y_DUAL_STEPPER_DRIVERS)
-  #define INVERT_Y2_VS_Y_DIR   // Enable if Y2 direction signal is opposite to Y
+  //#define INVERT_Y2_VS_Y_DIR   // Enable if Y2 direction signal is opposite to Y
   //#define Y_DUAL_ENDSTOPS
   #if ENABLED(Y_DUAL_ENDSTOPS)
     #define Y2_USE_ENDSTOP _YMIN_
@@ -828,12 +828,12 @@
  * the position of the toolhead relative to the workspace.
  */
 
-#define SENSORLESS_BACKOFF_MM  { 10, 5, 2 }  // (mm) Backoff from endstops before sensorless homing
+#define SENSORLESS_BACKOFF_MM  { 10, 5, 0 }  // (mm) Backoff from endstops before sensorless homing
 
 #define HOMING_BUMP_MM      { 0, 0, 0 }       // (mm) Backoff from endstops after first bump
 #define HOMING_BUMP_DIVISOR { 1, 1, 1 }       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
-//#define HOMING_BACKOFF_POST_MM { 2, 2, 2 }  // (mm) Backoff from endstops after homing
+#define HOMING_BACKOFF_POST_MM { 2, 2, 2 }  // (mm) Backoff from endstops after homing
 
 //#define QUICK_HOME                          // If G28 contains XY do a diagonal move first
 #define HOME_Y_BEFORE_X                     // If G28 contains XY home Y before X
@@ -1007,7 +1007,7 @@
 
 // @section motion
 
-#define AXIS_RELATIVE_MODES { false, false, false}
+#define AXIS_RELATIVE_MODES { false, false, false, true}
 
 // Add a Duplicate option for well-separated conjoined nozzles
 //#define MULTI_NOZZLE_DUPLICATION
@@ -2002,12 +2002,12 @@
  * Override if the automatically selected points are inadequate.
  */
 #if EITHER(AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_UBL)
-  #define PROBE_PT_1_X -50
-  #define PROBE_PT_1_Y -30
-  #define PROBE_PT_2_X -50
-  #define PROBE_PT_2_Y 30
-  #define PROBE_PT_3_X 30
-  #define PROBE_PT_3_Y 0
+  #define PROBE_PT_1_X -40
+  #define PROBE_PT_1_Y -20
+  #define PROBE_PT_2_X -40
+  #define PROBE_PT_2_Y 20
+  #define PROBE_PT_3_X 0
+  #define PROBE_PT_3_Y 20
 #endif
 
 /**
@@ -2694,7 +2694,7 @@
     #define X_CURRENT       600        // (mA) RMS current. Multiply by 1.414 for peak current.
     #define X_CURRENT_HOME  350        // (mA) RMS current for sensorless homing
     #define X_MICROSTEPS     16        // 0..256
-    #define X_RSENSE          0.11
+    #define X_RSENSE          .15
     #define X_CHAIN_POS      -1        // -1..0: Not chained. 1: MCU MOSI connected. 2: Next in chain, ...
     //#define X_INTERPOLATE  true      // Enable to override 'INTERPOLATE' for the X axis
     //#define X_HOLD_MULTIPLIER 0.5    // Enable to override 'HOLD_MULTIPLIER' for the X axis
@@ -2714,7 +2714,7 @@
     #define Y_CURRENT       600
     #define Y_CURRENT_HOME  450
     #define Y_MICROSTEPS     16
-    #define Y_RSENSE          0.11
+    #define Y_RSENSE          .15
     #define Y_CHAIN_POS      -1
     //#define Y_INTERPOLATE  true
     //#define Y_HOLD_MULTIPLIER 0.5
@@ -2723,8 +2723,8 @@
   #if AXIS_IS_TMC(Y2)
     #define Y2_CURRENT      600
     #define Y2_CURRENT_HOME 450
-    #define Y2_MICROSTEPS    Y_MICROSTEPS
-    #define Y2_RSENSE         0.11
+    #define Y2_MICROSTEPS    16
+    #define Y2_RSENSE         .15
     #define Y2_CHAIN_POS     -1
     //#define Y2_INTERPOLATE true
     //#define Y2_HOLD_MULTIPLIER 0.5
@@ -2734,7 +2734,7 @@
     #define Z_CURRENT       600
     #define Z_CURRENT_HOME  450
     #define Z_MICROSTEPS     32
-    #define Z_RSENSE          0.11
+    #define Z_RSENSE          .15
     #define Z_CHAIN_POS      -1
     //#define Z_INTERPOLATE  true
     //#define Z_HOLD_MULTIPLIER 0.5
@@ -3761,7 +3761,7 @@
  * Auto-report fan speed with M123 S<seconds>
  * Requires fans with tachometer pins
  */
-//#define AUTO_REPORT_FANS
+#define AUTO_REPORT_FANS
 
 /**
  * Auto-report temperatures with M155 S<seconds>
@@ -4361,7 +4361,7 @@
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 20.0
 #endif
 
-#define GLOBAL_INTERVAL_REPORTER
+//#define GLOBAL_INTERVAL_REPORTER
 #if ENABLED(GLOBAL_INTERVAL_REPORTER)
   #define INTERVAL_REPORTER_TIMER TIM12
   #define NUM_INTERVAL_REPORTER_SLOTS 4

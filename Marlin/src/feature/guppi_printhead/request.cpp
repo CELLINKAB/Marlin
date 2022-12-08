@@ -1,17 +1,34 @@
 
 
-#include "../../inc/MarlinConfig.h"
 #include "request.h"
+
+#include "../../MarlinCore.h"
 
 using namespace printhead;
 
+void printhead::print_response(Response response)
+{
+    if (response.result != Result::OK) {
+        SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));
+    }
+
+    response.packet.print();
+}
+
 Result printhead::send(const Packet& request, HardwareSerial& serial)
 {
+    static auto init [[maybe_unused]] = [] {
+        OUT_WRITE(CHANT_RTS_PIN, LOW);
+        return 0;
+    }();
     const auto header = request.header_bytes();
     const auto crc = request.crc_bytes();
+    WRITE(CHANT_RTS_PIN, HIGH);
     serial.write(header.data(), header.size());
     serial.write(request.payload, request.payload_size);
     serial.write(crc.data(), crc.size());
+    serial.flush();
+    WRITE(CHANT_RTS_PIN, LOW);
 
     // should read an ACK after this write to assure complete transaction
 
@@ -21,14 +38,18 @@ Result printhead::send(const Packet& request, HardwareSerial& serial)
 Response printhead::receive(HardwareSerial& serial)
 {
     // this seems bug-prone...
-    static uint8_t packet_buffer[64];
+    static uint8_t packet_buffer[128]{};
 
     Packet incoming;
+    int timeout_counter = 0;
+    while (serial.available() < 6 && ++timeout_counter < 10)
+        idle();
 
-    auto bytes_received = serial.readBytes(packet_buffer, 64);
+    auto bytes_received = serial.readBytes(packet_buffer, 128);
 
-    if (bytes_received < 6)
+    if (bytes_received <= 6)
         return Response{incoming, Result::PACKET_TOO_SHORT};
+
     memcpy(&incoming.ph_index, &packet_buffer[0], 2);
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
@@ -46,10 +67,12 @@ Response printhead::receive(HardwareSerial& serial)
     // ACK would go here
 }
 
-Response printhead::send_and_receive(Packet packet, HardwareSerial& serial) {
+Response printhead::send_and_receive(Packet packet, HardwareSerial& serial)
+{
     Response response;
     response.result = send(packet, serial);
-    if (response.result != Result::OK) return response;
+    if (response.result != Result::OK)
+        return response;
     return receive(serial);
 }
 
@@ -72,6 +95,51 @@ Packet::CrcBytes Packet::crc_bytes() const
     CrcBytes bytes;
     memcpy(bytes.data(), &crc, 2);
     return bytes;
+}
+
+void Packet::print() const
+{
+    SERIAL_PRINT(uint16_t(ph_index), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINT(uint16_t(command), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINT(uint16_t(payload_size), PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    if (payload) {
+        for (size_t i = 0; i < payload_size; ++i)
+            SERIAL_PRINT(uint8_t(payload[i]), PrintBase::Hex);
+        SERIAL_CHAR(' ');
+    }
+
+    SERIAL_PRINTLN(crc, PrintBase::Hex);
+}
+
+void Controller::set_extruder_state(printhead::Index index, bool state)
+{
+    switch (index) {
+    case printhead::Index::One:
+        [[fallthrough]];
+    case printhead::Index::Two:
+        [[fallthrough]];
+    case printhead::Index::Three:
+        ph_states[static_cast<size_t>(index)].is_currently_extruding = state;
+        break;
+    case printhead::Index::All:
+        for (auto& ph_state : ph_states)
+            ph_state.is_currently_extruding = state;
+        break;
+    default:
+        return;
+    }
+}
+
+void Controller::init()
+{
+    constexpr static unsigned CHANT_BAUDRATE = 115200;
+    bus.begin(CHANT_BAUDRATE);
 }
 
 Result Controller::set_temperature(Index index, float temperature)
@@ -120,24 +188,34 @@ Response Controller::get_pid(Index index)
     return send_and_receive(packet, bus); // TODO: parse incoming response and return payload values
 }
 
-Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate) {}
-Response Controller::get_extrusion_speed(Index index) {
+Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate)
+{
+    const uint32_t feedrate_pl_s = static_cast<uint32_t>((feedrate / (4.6 * 4.6 * 3.14159265)) * 1000);
+    Packet packet(index, Command::SET_EXTRUSION_SPEED, &feedrate_pl_s, sizeof(feedrate_pl_s));
+    return send(packet, bus);
+}
+Response Controller::get_extrusion_speed(Index index)
+{
     Packet packet(index, Command::GET_EXTRUSION_SPEED);
     return send_and_receive(packet, bus);
 }
-Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold) {
+Result Controller::set_extruder_stallguard_threshold(Index index, uint8_t threshold)
+{
     Packet packet(index, Command::SYRINGEPUMP_SET_ESTOP_THRESH, &threshold, 1);
     return send(packet, bus);
 }
-Response Controller::get_extruder_stallguard_threshold(Index index) {
+Response Controller::get_extruder_stallguard_threshold(Index index)
+{
     Packet packet(index, Command::SYRINGEPUMP_GET_ESTOP_THRESH);
     return send_and_receive(packet, bus);
 }
-Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps) {
+Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps)
+{
     Packet packet(index, Command::SET_MICROSTEP, &microsteps, 1);
     return send(packet, bus);
 }
-Response Controller::get_extruder_microsteps(Index index) {
+Response Controller::get_extruder_microsteps(Index index)
+{
     Packet packet(index, Command::GET_MICROSTEP);
     return send_and_receive(packet, bus);
 }
@@ -145,14 +223,33 @@ Result Controller::set_extruder_rms_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_rms_current(Index index) {}
 Result Controller::set_extruder_hold_current(Index index, uint16_t mA) {}
 Response Controller::get_extruder_hold_current(Index index) {}
-Result Controller::home_extruder(Index index, ExtruderDirection direction) {
-    Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, 1);
+Result Controller::home_extruder(Index index, ExtruderDirection direction)
+{
+    Packet packet(index, Command::MOVE_TO_HOME_POSITION, &direction, sizeof(direction));
+    auto res = send(packet, bus);
+
+    if (res == Result::OK)
+        ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
+    return res;
+}
+Result Controller::start_extruding(Index index)
+{
+    Packet packet(index, Command::SYRINGEPUMP_START);
+    const auto result = send(packet, bus);
+    if (result == Result::OK)
+        set_extruder_state(index, true);
+    return result;
+}
+Result Controller::stop_extruding(Index index)
+{
+    set_extruder_state(index, false);
+    return Result::OK;
+}
+Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
+{
+    Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, &steps, sizeof(steps));
     return send(packet, bus);
 }
-Result Controller::start_extruding(Index index) {
-    Packet packet(index, Command::SYRINGEPUMP_START);
-}
-Result Controller::stop_extruding(Index index) {}
 
 Result Controller::set_valve_speed(Index index, feedRate_t feedrate) {}
 Response Controller::get_valve_speed(Index index) {}
@@ -160,7 +257,56 @@ Result Controller::set_valve_stallguard_threshold(Index index, uint8_t threshold
 Response Controller::get_valve_stallguard_threshold(Index index) {}
 Result Controller::set_valve_microsteps(Index index, uint8_t microsteps) {}
 Response Controller::get_valve_microsteps(Index index) {}
-Result Controller::set_valve_rms_current(Index index, uint16_t mA) {}
-Response Controller::get_valve_rms_current(Index index) {}
-Result Controller::set_valve_hold_current(Index index, uint16_t mA) {}
-Result Controller::move_slider_valve(Index index, uint16_t steps) {}
+Result Controller::set_valve_rms_current(Index index, uint16_t mA)
+{
+    Packet packet(index, Command::ERROR, &mA, sizeof(mA));
+    return send(packet, bus);
+}
+Response Controller::get_valve_rms_current(Index index)
+{ // TODO: UNIMPLEMENTED
+    Packet packet(index, Command::ERROR);
+    return send_and_receive(packet, bus);
+}
+Result Controller::set_valve_hold_current(Index index, uint16_t mA)
+{ // TODO: UNIMPLEMENTED
+    Packet packet(index, Command::ERROR, &mA, sizeof(mA));
+    return send(packet, bus);
+}
+Result Controller::home_slider_valve(Index index, SliderDirection dir)
+{
+    Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, &dir, sizeof(dir));
+    auto res = send(packet, bus);
+    if (res == Result::OK) {
+        ph_states[static_cast<uint8_t>(index)].slider_is_homed = true;
+    }
+    return res;
+}
+Result Controller::move_slider_valve(Index index, int32_t abs_steps)
+{
+    auto& state = ph_states[static_cast<uint8_t>(index)];
+    int32_t rel_steps = abs_steps - state.slider_pos;
+    Packet packet(index, Command::DEBUG_ADD_SLIDER_STEPS, &rel_steps, sizeof(rel_steps));
+    auto result = send(packet, bus);
+    if (result == Result::OK) {
+        state.slider_pos = abs_steps;
+    }
+    return result;
+}
+Response Controller::get_uuid(Index index)
+{
+    Packet packet(index, Command::GET_UNIQUE_ID);
+    return send_and_receive(packet, bus);
+}
+Response Controller::get_status(Index index)
+{
+    Packet packet(index, Command::GET_STATUS);
+    return send_and_receive(packet, bus);
+}
+
+void Controller::stop_active_extrudes()
+{
+    for (size_t i = 0; i < EXTRUDERS; ++i) {
+        if (ph_states[i].is_currently_extruding)
+            stop_extruding(static_cast<printhead::Index>(i));
+    }
+}

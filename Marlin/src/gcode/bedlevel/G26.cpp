@@ -345,11 +345,14 @@ typedef struct {
       ui.set_status(GET_TEXT_F(MSG_G26_HEATING_NOZZLE), 99);
       ui.quick_feedback();
     #endif
-    thermalManager.setTargetHotend(hotend_temp, active_extruder);
+    #if HAS_HOTEND
+      thermalManager.setTargetHotend(hotend_temp, active_extruder);
 
-    // Wait for the temperature to stabilize
-    if (!thermalManager.wait_for_hotend(active_extruder, true OPTARG(G26_CLICK_CAN_CANCEL, true)))
-      return G26_ERR;
+      // Wait for the temperature to stabilize
+      if (!thermalManager.wait_for_hotend(active_extruder, true OPTARG(G26_CLICK_CAN_CANCEL, true)))
+        return G26_ERR;
+    #endif
+
 
     #if HAS_WIRED_LCD
       ui.reset_status();
@@ -870,7 +873,7 @@ void GcodeSuite::G26() {
 
   if (!g26.keep_heaters_on) {
     TERN_(HAS_HEATED_BED, thermalManager.setTargetBed(0));
-    thermalManager.setTargetHotend(active_extruder, 0);
+    TERN_(HAS_HOTEND, thermalManager.setTargetHotend(active_extruder, 0));
   }
 }
 

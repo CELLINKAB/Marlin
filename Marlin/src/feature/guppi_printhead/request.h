@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "../../inc/MarlinConfigPre.h"
+#include "../../inc/MarlinConfig.h"
 
 #include "crc.h"
 
@@ -138,14 +138,22 @@ enum class Command : uint16_t {
     CURING_GET_LED_SELFTEST_RESULT = 808,
     CURING_GET_LED_VOLTAGE = 809,
     TYPE_PNEUMATIC_10ML_START = 900,
+    SLIDER_MOVE_TO_HOME_POSITION = 1001,
+    DEBUG_ADD_SLIDER_STEPS = 1006,
+    DEBUG_SET_FAN_PWM = 1007,
+    DEBUG_SET_TEM_PWM = 1008,
+    DEBUG_GET_FAN_PWM = 1009,
+    DEBUG_GET_TEM_PWM = 1010,
+    DEBUG_GET_TEMPERATURE = 1011,
+
     NOF_CMDS
 };
 
 enum class Index : uint16_t {
-    None,
     One,
     Two,
     Three,
+    None = 0xAA,
     All = 0xff, // max value for Marlin tool
 };
 
@@ -191,6 +199,8 @@ struct Packet
     HeaderBytes header_bytes() const;
 
     CrcBytes crc_bytes() const;
+
+    void print() const;
 };
 
 enum class Result {
@@ -201,6 +211,17 @@ enum class Result {
     BAD_PAYLOAD_SIZE,
 };
 
+constexpr const char * string_from_result_code(Result result)
+{
+    switch (result) {
+        case Result::BAD_CRC: return "BAD_CRC";
+        case Result::BAD_PAYLOAD_SIZE: return "BAD_PAYLOAD_SIZE";
+        case Result::OK: return "OK";
+        case Result::PACKET_TOO_SHORT: return "PACKET_TOO_SHORT";
+        case Result::BUSY: return "BUSY";
+    }
+    __unreachable();
+}
 enum class ErrorPayload {
     OK,
     INVALID_CRC,
@@ -227,6 +248,7 @@ enum class ErrorPayload {
     PARAM_LOAD,
 };
 
+
 Result send(const Packet& request, HardwareSerial& serial);
 
 struct Response
@@ -234,6 +256,8 @@ struct Response
     Packet packet;
     Result result;
 };
+
+void print_response(Response response);
 
 Response receive(HardwareSerial& serial);
 
@@ -244,17 +268,41 @@ enum class ExtruderDirection : uint8_t {
     Retract
 };
 
+enum class SliderDirection : uint8_t {
+    Push,
+    Pull
+};
+
+struct PrintheadState
+{
+    int32_t extruder_pos;
+    int32_t slider_pos;
+    uint16_t fan_set_speed;
+    uint16_t tem_set_temp;
+    bool extruder_is_homed;
+    bool slider_is_homed;
+    bool is_currently_extruding;
+};
+
 class Controller
 {
     HardwareSerial& bus;
+    std::array<PrintheadState, EXTRUDERS> ph_states;
+
+    void set_extruder_state(Index index, bool state);
 
 public:
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
+    void init();
+
     // Metadata methods
     Response get_info(Index index);
     Response get_fw_version(Index index);
+    Response get_all(Index index);
+    Response get_uuid(Index index);
+    Response get_status(Index index);
     // Temperature methods
     Result set_temperature(Index index, float temperature);
     Response get_temperature(Index index);
@@ -274,6 +322,7 @@ public:
     Result home_extruder(Index index, ExtruderDirection direction);
     Result start_extruding(Index index);
     Result stop_extruding(Index index);
+    Result add_raw_extruder_steps(Index index, int32_t steps);
     // Slider Valve driver methods
     Result set_valve_speed(Index index, feedRate_t feedrate);
     Response get_valve_speed(Index index);
@@ -284,8 +333,9 @@ public:
     Result set_valve_rms_current(Index index, uint16_t mA);
     Response get_valve_rms_current(Index index);
     Result set_valve_hold_current(Index index, uint16_t mA);
-    Result home_slider_valve(Index index);
-    Result move_slider_valve(Index index, uint16_t steps);
+    Result home_slider_valve(Index index, SliderDirection dir);
+    Result move_slider_valve(Index index, int32_t steps);
+    void stop_active_extrudes();
 
 
 };

@@ -107,6 +107,10 @@
   #include "../feature/spindle_laser.h"
 #endif
 
+#if ENABLED(CHATARELLE_SUPPORT)
+  #include "../feature/guppi_printhead/chantarelle.h"
+#endif
+
 // Delay for delivery of first block to the stepper ISR, if the queue contains 2 or
 // fewer movements. The delay is measured in milliseconds, and must be less than 250ms
 #define BLOCK_DELAY_FOR_1ST_MOVE 100
@@ -1439,6 +1443,7 @@ void Planner::check_axes_activity() {
     autotemp_enabled = autotemp_factor != 0;
   }
 
+  #if HAS_HOTEND
   /**
    * Called every so often to adjust the hotend target temperature
    * based on the extrusion speed, which is calculated from the blocks
@@ -1465,6 +1470,9 @@ void Planner::check_axes_activity() {
     oldt = t;
     thermalManager.setTargetHotend(t, active_extruder);
   }
+  #else
+    void Planner::autotemp_task() {}
+  #endif // HAS_HOTEND
 
 #endif
 
@@ -2972,7 +2980,10 @@ bool Planner::buffer_segment(const abce_pos_t &abce
       OPTARG(HAS_DIST_MM_ARG, cart_dist_mm)
       , fr_mm_s, extruder, millimeters)
   ) return false;
-
+  #if ENABLED(CHANTARELLE_SUPPORT)
+    if (target.e)
+      ph_controller.start_extruding(static_cast<printhead::Index>(extruder));
+  #endif
   stepper.wake_up();
   return true;
 } // buffer_segment()

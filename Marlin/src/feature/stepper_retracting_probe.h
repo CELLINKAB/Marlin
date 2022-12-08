@@ -34,35 +34,35 @@ struct StepperRetractingProbe
                  SRP_STOW_VELOCITY,
                  SRP_STALL_THRESHOLD,
                  SRP_STEPPER_CURRENT,
-                 SRP_RETRACT_TIME}
-        , stepper{STMC::init(
-              SimpleTMCConfig(PROBE_SERIAL_ADDRESS, config.stall_threshold, config.stepper_current))}
+                 SRP_RETRACT_TIME}, stepper{nullptr}
     {}
 
     void deploy()
     {
+        if (stepper == nullptr) stepper_init();
         switch (state) {
         case ProbeState::Deployed:
             [[fallthrough]];
         case ProbeState::Unknown:
-            stepper.raw_move(config.stow_velocity);
+            stepper->raw_move(config.stow_velocity);
             delay(200);
-            stepper.stop();
+            stepper->stop();
             [[fallthrough]];
         case ProbeState::Stowed:
-            stepper.blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
+            stepper->blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
             state = ProbeState::Deployed;
         }
     }
 
     void stow()
     {
+        if (stepper == nullptr) stepper_init();
         if (state != ProbeState::Deployed) {
             deploy();
         }
-        stepper.raw_move(config.stow_velocity);
+        stepper->raw_move(config.stow_velocity);
         delay(config.minimum_retract_time);
-        stepper.stop();
+        stepper->stop();
         state = ProbeState::Stowed;
     }
 
@@ -71,8 +71,8 @@ struct StepperRetractingProbe
     void set_config(const Config& conf)
     {
         // load config from flash
-        stepper.rms_current(conf.stepper_current);
-        stepper.stall_threshold(conf.stall_threshold);
+        stepper->rms_current(conf.stepper_current);
+        stepper->stall_threshold(conf.stall_threshold);
         config = conf;
     }
 
@@ -116,7 +116,15 @@ private:
         Deployed
     } state = ProbeState::Unknown;
 
-    STMC::type stepper;
+    STMC::type *stepper;
+
+        void stepper_init() {
+        stepper = [this]{
+            static auto s_driver{STMC::init(
+              SimpleTMCConfig(PROBE_SERIAL_ADDRESS, config.stall_threshold, config.stepper_current))};
+              return &s_driver;
+        }(); 
+    }
 };
 
 extern StepperRetractingProbe stepper_probe;

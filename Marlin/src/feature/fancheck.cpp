@@ -167,7 +167,7 @@ void FanCheck::report_speed_error(uint8_t fan) {
     }
   }
   else if (!printingIsPaused()) {
-    thermalManager.setTargetHotend(0, fan); // Always disable heating
+    //thermalManager.setTargetHotend(0, fan); // Always disable heating // TODO: seriously fix this by adding PB and CC fan tach support
     if (error == TachoError::NONE) error = TachoError::REPORTED;
   }
 

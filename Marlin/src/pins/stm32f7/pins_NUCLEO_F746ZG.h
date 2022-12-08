@@ -91,7 +91,7 @@
  *    (E_DIR) PF2 | · · | PE5 (E_STEP)       (RDP_STOP) PD12 | · · | GND
  *   (Y_STEP) PF1 | · · | PE6 (Y_EN)           (Z_STEP) PD11 | · · | PE10 (Z_EN)
  *    (Y_DIR) PF0 | · · | PE3 (Y_DIAG)           (Z_DIR) PE2 | · · | PE12 (Z_DIAG)
- *            GND | · · | PF8 (calibration)              GND | · · | PE14 (NEOPIXEL)
+ *            GND | · · | PF8 CHANT_CTS                  GND | · · | PE14 (NEOPIXEL)
  * (optical1) PD0 | · · | PF7 (X _STOP)        (E1_STEP) PA0 | · · | PE15 (NEOPIXEL2)
  * (optical2) PD1 | · · | PF9 (E1_STOP)         (E1_DIR) PB0 | · · | PB10 (FAN(PB))
  *  (Y2_STOP) PG0 | · · | PG1 (E0_STOP)        (Z_PROBE) PE0 | · · | PB11 (FAN1(CC))
@@ -109,14 +109,7 @@
 //#define MSERIAL7_RX_PIN
 //#define MSERIAL7_TX_PIN
 
-#if DISABLED(SENSORLESS_HOMING)
-    #define X_MIN_PIN PF7
-    #define X_MAX_PIN PD0
-    #define Y_MIN_PIN PF9
-    #define Y_MAX_PIN PD1
-    #define Z_MIN_PIN PG1
-    #define Z_MAX_PIN PG0
-#else
+
     #define X_STOP_PIN PF7
     #define Y_STOP_PIN PE3
     #define Y2_STOP_PIN PG0
@@ -124,7 +117,6 @@
     #define E0_STOP_PIN PG1
     #define E1_STOP_PIN PF9
     //#define E2_STOP_PIN PF7
-#endif
 
 //
 // Steppers
@@ -145,9 +137,9 @@
 #define Z_DIR_PIN PE2
 #define Z_ENABLE_PIN PE10
 
-#define E0_STEP_PIN PE5
-#define E0_DIR_PIN PF2
-#define E0_ENABLE_PIN PE4
+#define CHANT_IRQ1_PIN PE5
+#define CHANT_IRQ2_PIN PF2
+// #define E0_ENABLE_PIN PE4
 
 #define E1_STEP_PIN PA0
 #define E1_DIR_PIN PB0
@@ -192,7 +184,7 @@
 // Pressure valves
 #define PRESSURE_VALVE_LID_PIN PE9
 #define PRESSURE_PUMP_EN_PIN PF13
-#define PRESSURE_VALVE_PUMP_IN_PIN PE11 
+#define PRESSURE_VALVE_LID2_PIN PE11 
 #define PRESSURE_VALVE_PUMP_OUT_PIN PE14
 #define PRESSURE_VALVE_C1_PIN PD14
 #define PRESSURE_VALVE_C2_PIN PD15
@@ -221,7 +213,7 @@
 #if ENABLED(CHANTRELLE_SUPPORT)
   #define CHANT_SERIAL MSerial7
   #define USING_HW_SERIAL7 1
-  #define CHANT_RTS_PIN PE9
+  #define CHANT_RTS_PIN PF9
 #endif
 
 //
@@ -248,8 +240,8 @@
 #define FAN_PIN PB10
 #define FAN1_PIN PB11
 
-#define CALIBRATION_PIN PF8
-#define CALIBRATION_PIN_PULLUP
+//#define CALIBRATION_PIN PF8
+//#define CALIBRATION_PIN_PULLUP
 
 #define Z_MIN_PROBE_PIN PE0
 

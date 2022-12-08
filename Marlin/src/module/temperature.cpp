@@ -444,6 +444,7 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
   raw_adc_t Temperature::mintemp_raw_BED = TEMP_SENSOR_BED_RAW_LO_TEMP,
             Temperature::maxtemp_raw_BED = TEMP_SENSOR_BED_RAW_HI_TEMP;
   TERN_(WATCH_BED, bed_watch_t Temperature::watch_bed); // = { 0 }
+  TERN_(MYCO_HEATER_DEBUG, bool bed_debug_control_active = false);
   IF_DISABLED(PIDTEMPBED, millis_t Temperature::next_bed_check_ms);
 #endif
 
@@ -1478,16 +1479,17 @@ void Temperature::manage_heater() {
             // TODO: this code is too specific to the driver used
             #ifdef HEATER_BED_DIR_1_PIN
               bool active_cooling = READ(HEATER_BED_DIR_1_PIN);
-            #elif ENABLED(MYCORRHIZA_V1)
-              constexpr bool active_cooling = true;
+            #elif ENABLED(MYCO_HEATER)
+              const bool active_cooling = isCoolingBed() && degTargetBed() < 25; // TODO: detect ambient temperature at boot
             #else
               constexpr bool active_cooling = false;
             #endif
-              bool needs_power = active_cooling ? isCoolingBed() : isHeatingBed();
-              temp_bed.soft_pwm_amount = needs_power ? MAX_BED_POWER >> 1 : 0;
+              const int needs_power = active_cooling ? isCoolingBed() * -1 : isHeatingBed();
+              const int16_t bed_pwm_value = needs_power * TERN(HEATER_HARD_PWM, MAX_BED_POWER, MAX_BED_POWER >> 1);
+              TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active)) temp_bed.soft_pwm_amount = bed_pwm_value;
             #endif
           }
-          else {
+          else TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active)) {
             temp_bed.soft_pwm_amount = 0;
             WRITE_HEATER_BED(LOW);
           }
@@ -3065,11 +3067,15 @@ void Temperature::isr() {
   #if DISABLED(SLOW_PWM_HEATERS)
 
     #if ANY(HAS_HOTEND, HAS_HEATED_BED, HAS_HEATED_CHAMBER, HAS_COOLER, FAN_SOFT_PWM)
+      #if ENABLED(MYCO_HEATER)
+        #define _PWM_MOD(N,S,T) WRITE_HEATER_##N(T.soft_pwm_amount)
+      #else
       constexpr uint8_t pwm_mask = TERN0(SOFT_PWM_DITHER, _BV(SOFT_PWM_SCALE) - 1);
       #define _PWM_MOD(N,S,T) do{                           \
         const bool on = S.add(pwm_mask, T.soft_pwm_amount); \
         WRITE_HEATER_##N(on);                               \
       }while(0)
+      #endif
     #endif
 
     /**
@@ -3132,7 +3138,11 @@ void Temperature::isr() {
       #endif
     }
     else {
-      #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)
+      #if ENABLED(MYCO_HEATER)
+        #define _PWM_LOW(N, S)  // NO OP
+      #else
+        #define _PWM_LOW(N,S) do{ if (S.count <= pwm_count_tmp) WRITE_HEATER_##N(LOW); }while(0)
+      #endif
       #if HAS_HOTEND
         #define _PWM_LOW_E(N) _PWM_LOW(N, soft_pwm_hotend[N]);
         REPEAT(HOTENDS, _PWM_LOW_E);

@@ -610,7 +610,7 @@ private:
     static void G510();
   #endif
 
-  #if HAS_E_BOTTOMOUT
+  #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
     static void G511();
     static void G512();
     static void G513();
@@ -732,7 +732,7 @@ private:
     static void M100();
   #endif
 
-  #if HAS_EXTRUDERS
+  #if HAS_HOTEND
     static void M104_M109(const bool isM109);
     FORCE_INLINE static void M104() { M104_M109(false); }
     FORCE_INLINE static void M109() { M104_M109(true); }
@@ -1286,6 +1286,14 @@ private:
     static void M1062(); // get pressure sensors
     static void M1100(); // pressure regulator offset
   #endif
+
+  #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+    static void M805();
+  #endif
+
+  #if ENABLED(UVC_STERILIZATION)
+    static void M806();
+  #endif
     
   #if ENABLED(CHANTARELLE_SUPPORT)
     static void M750();
@@ -1324,8 +1332,8 @@ private:
     // static void M802();
     static void M803();
     static void M804();
-    static void M805();
-    static void M806();
+    // static void M805(); // UV crosslinking
+    // static void M806(); // UVC sterilization
     static void M807();
     static void M808();
     static void M810();

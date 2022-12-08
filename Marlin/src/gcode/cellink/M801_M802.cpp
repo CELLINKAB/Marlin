@@ -3,13 +3,13 @@
 #include "../../inc/MarlinConfig.h"
 
 #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-#    include "../gcode.h"
 #    include "../../feature/tmp117/TMP117.h"
+#    include "../../feature/tmp117_printbed.h"
+#    include "../../module/temperature.h"
+#    include "../gcode.h"
 
 #    include <array>
 #    include <numeric>
-
-#    include "../../feature/tmp117_printbed.h"
 
 static std::array<TMP117<TwoWire>, 4>& bed_sensors()
 {
@@ -53,7 +53,28 @@ void GcodeSuite::M802()
     SERIAL_EOL();
 }
 
-void GcodeSuite::M801() {
+void GcodeSuite::M801()
+{
+#    if ENABLED(MYCO_HEATER_DEBUG)
+    if (parser.seen('D')) {
+        const bool debugging = parser.value_bool();
+        bed_debug_control_active = debugging;
+        if (!debugging)
+        {
+            Temperature::temp_bed.soft_pwm_amount = 0;
+            WRITE_HEATER_BED(0);
+            return;
+        }
+
+        const auto pwm_val = constrain(parser.intval('P', 0), -255, 255);
+        const auto frequency = parser.ulongval('F', 10'000);
+
+        analogWriteFrequency(frequency);
+        Temperature::temp_bed.soft_pwm_amount = pwm_val;
+        WRITE_HEATER_BED(pwm_val);
+        return;
+    }
+#    endif
     M140();
 }
 

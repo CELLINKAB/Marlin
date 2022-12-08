@@ -166,6 +166,10 @@
   #include "feature/festo_pneumatics.h"
 #endif
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #include "feature/guppi_printhead/chantarelle.h"
+#endif
+
 #if ENABLED(DELTA)
   #include "module/delta.h"
 #elif ENABLED(POLARGRAPH)
@@ -737,6 +741,8 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   TERN_(MONITOR_DRIVER_STATUS, monitor_tmc_drivers());
 
   TERN_(MONITOR_L6470_DRIVER_STATUS, L64xxManager.monitor_driver());
+
+  TERN_(FESTO_PNEUMATICS, pneumatics::update_tank(););
 
   // Limit check_axes_activity frequency to 10Hz
   static millis_t next_check_axes_ms = 0;
@@ -1553,6 +1559,10 @@ void setup() {
     SETUP_RUN(swt_init());
   #elif ENABLED(ELECTROMAGNETIC_SWITCHING_TOOLHEAD)
     SETUP_RUN(est_init());
+  #endif
+
+  #if ENABLED(CHANTARELLE_SUPPORT)
+    ph_controller.init();
   #endif
 
   #if ENABLED(USE_WATCHDOG)

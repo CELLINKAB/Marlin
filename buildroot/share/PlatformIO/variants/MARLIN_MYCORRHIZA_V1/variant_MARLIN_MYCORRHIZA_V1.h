@@ -237,26 +237,41 @@
 #endif
 
 // UART Definitions
-#ifndef SERIAL_UART_INSTANCE
-  #define SERIAL_UART_INSTANCE  4
-#endif
+// #ifndef SERIAL_UART_INSTANCE
+//   #define SERIAL_UART_INSTANCE  4
+// #endif
 
 // Default pin used for generic 'Serial' instance
 // Mandatory for Firmata
-#ifndef PIN_SERIAL_RX
-  #define PIN_SERIAL_RX         PA11
-#endif
-#ifndef PIN_SERIAL_TX
-  #define PIN_SERIAL_TX         PA12
-#endif
+// #ifndef PIN_SERIAL_RX
+//   #define PIN_SERIAL_RX         PA11
+// #endif
+// #ifndef PIN_SERIAL_TX
+//   #define PIN_SERIAL_TX         PA12
+// #endif
 
 // Value of the External oscillator in Hz
 #define HSE_VALUE               16000000U
 
 // Extra HAL modules
-#if !defined(HAL_DAC_MODULE_DISABLED)
-  #define HAL_DAC_MODULE_ENABLED
-#endif
+#define HAL_DAC_MODULE_ENABLED
+
+// Below ADC, DAC and PWM definitions already done in the core
+// Could be redefined here if needed
+// ADC resolution is 12bits
+#define ADC_RESOLUTION          12
+//#define DACC_RESOLUTION         12
+
+// PWM resolution
+/*
+ * BEWARE:
+ * Changing this value from the default (1000) will affect the PWM output value of analogWrite (to a PWM pin)
+ * Since the pin is toggled on capture, if you change the frequency of the timer you have to adapt the compare value (analogWrite thinks you did)
+ */
+#define PWM_FREQUENCY           10000
+//The bottom values are the default and don't need to be redefined
+//#define PWM_RESOLUTION          8
+//#define PWM_MAX_DUTY_CYCLE      255
 
 
 /*----------------------------------------------------------------------------
