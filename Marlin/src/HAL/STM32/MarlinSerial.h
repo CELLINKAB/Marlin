@@ -45,7 +45,7 @@ protected:
   usart_rx_callback_t _rx_callback;
 };
 
-#define I_DONT_TRUST_MSERIAL
+//#define I_DONT_TRUST_MSERIAL
 
 typedef Serial1Class<MarlinSerial> MSerialT;
 extern MSerialT MSerial1;
