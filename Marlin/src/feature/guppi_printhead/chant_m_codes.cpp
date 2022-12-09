@@ -117,18 +117,23 @@ void GcodeSuite::M1069()
     const char* payload = parser.string_arg;
     uint8_t cmd_size = 0;
     if (payload != nullptr) {
-        if (DEBUGGING(INFO)) SERIAL_ECHOPGM("input: ", payload, " parsed: ");
+        if (DEBUGGING(INFO))
+            SERIAL_ECHOPGM("input: ", payload, " parsed: ");
         if (payload[0] == 'P')
             payload += 1;
         if (payload[0] == '0' && payload[1] == 'x')
             payload += 2;
         while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
             cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
-            if (DEBUGGING(INFO)) {SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex); SERIAL_CHAR(' ');}
+            if (DEBUGGING(INFO)) {
+                SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
+                SERIAL_CHAR(' ');
+            }
             ++cmd_size;
             payload += 2;
         }
-        if (DEBUGGING(INFO)) SERIAL_EOL();
+        if (DEBUGGING(INFO))
+            SERIAL_EOL();
     }
     printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
     const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
@@ -149,6 +154,21 @@ void GcodeSuite::M770() {}
 void GcodeSuite::M771()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (parser.seen('D'))
+    { // debug, set PWM directly
+       printhead::TemTemps both_tems_pwm;
+    const uint16_t tem_pwm = constrain(parser.ulongval('S'), 0, 4096);
+    if (parser.seen('I')) {
+        const uint8_t tem_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
+        both_tems_pwm[tem_index] = tem_pwm;
+    } else {
+        for (auto & tem : both_tems_pwm) tem = tem_pwm;
+    }
+    auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
+    ph_debug_print(res);
+    return;
+    }
+    
     const float temperature = parser.floatval('C');
     auto res = ph_controller.set_temperature(index, temperature);
     ph_debug_print(res);
@@ -200,10 +220,34 @@ void GcodeSuite::M788() {}
 void GcodeSuite::M790() {}
 //GetPrintheadFeedrateMultiplier
 void GcodeSuite::M791() {}
-//SetPrintheadFanSpeed
-void GcodeSuite::M792() {}
-//GetPrintheadFanSpeed
-void GcodeSuite::M793() {}
+/**
+ * @brief SetFanSpeed sets fan PWM on one or both fans on an extruder
+ * 
+*/
+void GcodeSuite::M792()
+{
+    BIND_INDEX_OR_RETURN(index);
+    printhead::FanSpeeds both_fans_pwm;
+    const uint16_t fan_pwm = constrain(parser.ulongval('S'), 0, 4096);
+    if (parser.seen('I')) {
+        const uint8_t fan_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
+        both_fans_pwm[fan_index] = fan_pwm;
+    } else {
+        for (auto & fan : both_fans_pwm) fan = fan_pwm;
+    }
+
+    auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
+    ph_debug_print(res);
+}
+/**
+ * @brief GetFanSpeed returns set speed and tech output for com-module
+ * 
+*/
+void GcodeSuite::M793() {
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_fan_speed(index);
+    ph_debug_print(res); // TODO: custom print format
+}
 //SetPHAmpCorrParams
 void GcodeSuite::M794() {}
 //GetPHAmpCorrParams
@@ -231,7 +275,10 @@ void GcodeSuite::M804() {}
 //SetUVSterilization
 //void GcodeSuite::M806() {}
 //SetCleanchamberFan
-void GcodeSuite::M807() {}
+void GcodeSuite::M807()
+{
+    //TODO: alias marlin command
+}
 //SetAirValves
 void GcodeSuite::M808() {}
 //ControlRGBLED
@@ -250,7 +297,10 @@ void GcodeSuite::M817() {}
 //ReadDoorStatus
 void GcodeSuite::M818() {}
 //SetBedCoolingFans
-void GcodeSuite::M819() {}
+void GcodeSuite::M819()
+{
+    //TODO: alias marlin command
+}
 //PrinterHomingStatus
 // void GcodeSuite::M821() {}
 //ControlAirPumpStatus

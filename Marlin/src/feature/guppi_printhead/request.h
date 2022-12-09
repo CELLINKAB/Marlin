@@ -273,16 +273,29 @@ enum class SliderDirection : uint8_t {
     Pull
 };
 
+namespace constants
+{
+    static constexpr size_t CS_FANS = 2;
+    static constexpr size_t CS_TEMS = 2;
+}
+
+namespace
+{
+    using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
+    using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
+}
+
 struct PrintheadState
 {
     int32_t extruder_pos;
     int32_t slider_pos;
-    uint16_t fan_set_speed;
-    uint16_t tem_set_temp;
+    FanSpeeds fan_set_speeds;
+    TemTemps tem_set_temps;
     bool extruder_is_homed;
     bool slider_is_homed;
     bool is_currently_extruding;
 };
+
 
 class Controller
 {
@@ -292,6 +305,8 @@ class Controller
     void set_extruder_state(Index index, bool state);
 
 public:
+
+    // initialization
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
@@ -308,6 +323,10 @@ public:
     Response get_temperature(Index index);
     Result set_pid(Index index, float p, float i, float d);
     Response get_pid(Index index);
+    Result set_fan_speed(Index index, FanSpeeds fan_speeds);
+    Response get_fan_speed(Index index);
+    auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
+    auto get_tem_debug(Index index) -> Response;
     // Extruder Stepper driver methods
     Result set_extrusion_speed(Index index, feedRate_t feedrate);
     Response get_extrusion_speed(Index index);
