@@ -30,7 +30,7 @@ struct OpticalAutocal
 
 private:
     static constexpr float SHORT_Y_RANGE = 12.0f;
-    static constexpr float FULL_Y_RANGE = 30.0f;
+    static constexpr float FULL_Y_RANGE = 24.0f;
     static constexpr float COARSE_Z_INCREMENT = 4.0f;
     static constexpr float MEDIUM_Z_INCREMENT = 1.0f;
     static constexpr float FINE_Z_INCREMENT = 0.125f;
