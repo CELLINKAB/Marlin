@@ -211,21 +211,17 @@ void GcodeSuite::M791() {}
 */
 void GcodeSuite::M792()
 {
-    constexpr static size_t NUM_CS_FANS = 2;
     BIND_INDEX_OR_RETURN(index);
-    uint16_t both_fans_pwm[NUM_CS_FANS]{};
+    printhead::FanSpeeds both_fans_pwm;
     const uint16_t fan_pwm = constrain(parser.ulongval('S'), 0, 4096);
     if (parser.seen('I')) {
-        const uint8_t fan_index = constrain(parser.value_byte(), 0, NUM_CS_FANS - 1);
+        const uint8_t fan_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
         both_fans_pwm[fan_index] = fan_pwm;
     } else {
         for (auto & fan : both_fans_pwm) fan = fan_pwm;
     }
 
-    uint32_t combined_fan_speed;
-    memcpy(&combined_fan_speed, both_fans_pwm, sizeof(combined_fan_speed));
-
-    auto res = ph_controller.set_fan_speed(index, combined_fan_speed);
+    auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
     ph_debug_print(res);
 }
 /**
