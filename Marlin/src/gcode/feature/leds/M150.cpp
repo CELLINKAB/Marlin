@@ -69,11 +69,11 @@ void GcodeSuite::M150() {
   #endif
 
   const LEDColor color = LEDColor(
-    parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : 0,
-    parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : 0,
-    parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : 0
-    OPTARG(HAS_WHITE_LED, parser.seen('W') ? (parser.has_value() ? parser.value_byte() : 255) : 0)
-    OPTARG(NEOPIXEL_LED, parser.seen('P') ? (parser.has_value() ? parser.value_byte() : 255) : brightness)
+    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : 0,
+    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : 0,
+    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : 0
+    OPTARG(HAS_WHITE_LED, TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('W') ? (parser.has_value() ? parser.value_byte() : 255) : 0)
+    OPTARG(NEOPIXEL_LED, TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('P') ? (parser.has_value() ? parser.value_byte() : 255) : brightness)
   );
 
   #if ENABLED(NEOPIXEL2_SEPARATE)
