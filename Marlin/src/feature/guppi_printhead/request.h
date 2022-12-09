@@ -325,6 +325,8 @@ public:
     Response get_pid(Index index);
     Result set_fan_speed(Index index, FanSpeeds fan_speeds);
     Response get_fan_speed(Index index);
+    auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
+    auto get_tem_debug(Index index) -> Response;
     // Extruder Stepper driver methods
     Result set_extrusion_speed(Index index, feedRate_t feedrate);
     Response get_extrusion_speed(Index index);

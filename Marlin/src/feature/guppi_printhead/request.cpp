@@ -188,6 +188,29 @@ Response Controller::get_pid(Index index)
     return send_and_receive(packet, bus); // TODO: parse incoming response and return payload values
 }
 
+auto Controller::set_fan_speed(Index index, FanSpeeds fan_speeds) -> Result
+{
+    Packet packet(index, Command::DEBUG_SET_FAN_PWM, fan_speeds.data(), sizeof(fan_speeds));
+    auto res = send(packet, bus);
+    // if (res == Result::OK) // TODO: handle printhead state
+    return res;
+}
+
+auto Controller::get_fan_speed(Index index) -> Response
+{
+    Packet packet(index, Command::DEBUG_GET_FAN_PWM);
+    return send_and_receive(packet, bus); // TODO: handle printhead state, get TACH from chant
+}
+
+auto Controller::set_tem_debug(Index index, TemTemps tem_pwms) -> Result {
+    Packet packet(index, Command::DEBUG_SET_TEM_PWM, tem_pwms.data(), sizeof(tem_pwms));
+    return send(packet, bus);
+}
+auto Controller::get_tem_debug(Index index) -> Response {
+    Packet packet(index, Command::DEBUG_GET_TEM_PWM);
+    return send_and_receive(packet, bus);
+}
+
 Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate)
 {
     const uint32_t feedrate_pl_s = static_cast<uint32_t>((feedrate / (4.6 * 4.6 * 3.14159265)) * 1000);
