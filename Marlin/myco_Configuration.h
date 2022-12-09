@@ -2977,6 +2977,9 @@
   //#define NEOPIXEL_BKGD_ALWAYS_ON       // Keep the backlight on when other NeoPixels are off
 #endif
 
+// inverts the parameters for RGB control, in case you're using an inverting level-shift
+#define INVERTED_RGB_CONTROL
+
 /**
  * Printer Event LEDs
  *
