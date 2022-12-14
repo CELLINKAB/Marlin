@@ -249,7 +249,7 @@ enum class ErrorPayload {
 };
 
 
-Result send(const Packet& request, HardwareSerial& serial);
+Result send(const Packet& request, HardwareSerial& serial, bool expect_ack = true);
 
 struct Response
 {

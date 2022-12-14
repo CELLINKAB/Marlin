@@ -15,7 +15,7 @@ void printhead::print_response(Response response)
     response.packet.print();
 }
 
-Result printhead::send(const Packet& request, HardwareSerial& serial)
+Result printhead::send(const Packet& request, HardwareSerial& serial, bool expect_ack)
 {
     static auto init [[maybe_unused]] = [] {
         OUT_WRITE(CHANT_RTS_PIN, LOW);
@@ -31,7 +31,7 @@ Result printhead::send(const Packet& request, HardwareSerial& serial)
     WRITE(CHANT_RTS_PIN, LOW);
 
     // should read an ACK after this write to assure complete transaction
-
+    if (expect_ack) auto _ = receive(serial);
     return Result::OK;
 }
 
@@ -70,7 +70,7 @@ Response printhead::receive(HardwareSerial& serial)
 Response printhead::send_and_receive(Packet packet, HardwareSerial& serial)
 {
     Response response;
-    response.result = send(packet, serial);
+    response.result = send(packet, serial, false);
     if (response.result != Result::OK)
         return response;
     return receive(serial);
