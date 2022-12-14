@@ -29,19 +29,27 @@ void init()
     SET_INPUT(PRESSURE_TANK_PIN);
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
-    set_regulator(3.0f);
+    set_regulator_pressure(3.0f);
 }
 
 //
 // Pressure Regulation
 //
 
-void set_regulator(float kPa)
+static float regulator_set_pressure = 0;
+
+void set_regulator_pressure(float kPa)
 {
     // 500kPa regulator 5V analog input, 12 bit DAC
     static constexpr float pressure_factor = 20.4f;
     uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
     analogWrite(PRESSURE_REGULATOR_PIN, value);
+    regulator_set_pressure = kPa;
+}
+
+float get_regulator_set_pressure()
+{
+    return regulator_set_pressure;
 }
 
 inline void pump_enable(bool enable)

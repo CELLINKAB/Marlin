@@ -118,11 +118,13 @@ public:
     void setAveraging(TMP117_AVE ave);
     void setOffsetTemperature(double offset);
     void setTargetTemperature(double target);
+    void setGain(double gain);
 
     double getTemperature(void);
     uint16_t getDeviceID(void);
     uint16_t getDeviceRev(void);
     double getOffsetTemperature(void);
+    double getGain(void);
     TMP117_ALERT getAlertType(void);
 
     void writeEEPROM(uint16_t data, uint8_t eeprom_nr);
@@ -136,6 +138,7 @@ private:
     uint8_t address;
     int8_t alert_pin;
     TMP117_ALERT alert_type;
+    double scale_factor;
 
     void i2cWrite2B(uint8_t reg, uint16_t data);
     uint16_t i2cRead2B(uint8_t reg);

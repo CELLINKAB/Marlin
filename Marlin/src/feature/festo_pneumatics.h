@@ -17,7 +17,8 @@ namespace pneumatics {
 
 void init();
 
-void set_regulator(float kPa);
+void set_regulator_pressure(float kPa);
+float get_regulator_set_pressure();
 void pressurize_tank(millis_t timeout_after_ms = 10'000);
 
 void gripper_release();

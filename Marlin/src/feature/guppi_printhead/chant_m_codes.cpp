@@ -1,5 +1,6 @@
 // copyright Cellink 2022 GPLv3
 
+#include "../../feature/tmp117_printbed.h"
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
@@ -155,21 +156,23 @@ void GcodeSuite::M770() {}
 void GcodeSuite::M771()
 {
     BIND_INDEX_OR_RETURN(index);
-    if (parser.seen('D'))
-    { // debug, set PWM directly
-       printhead::TemTemps both_tems_pwm;
-    const uint16_t tem_pwm = constrain(parser.ulongval('S'), 0, 4096);
-    if (parser.seen('I')) {
-        const uint8_t tem_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
-        both_tems_pwm[tem_index] = tem_pwm;
-    } else {
-        for (auto & tem : both_tems_pwm) tem = tem_pwm;
+    if (parser.seen('D')) { // debug, set PWM directly
+        printhead::TemTemps both_tems_pwm;
+        const uint16_t tem_pwm = constrain(parser.ulongval('S'), 0, 4096);
+        if (parser.seen('I')) {
+            const uint8_t tem_index = constrain(parser.value_byte(),
+                                                0,
+                                                printhead::constants::CS_FANS - 1);
+            both_tems_pwm[tem_index] = tem_pwm;
+        } else {
+            for (auto& tem : both_tems_pwm)
+                tem = tem_pwm;
+        }
+        auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
+        ph_debug_print(res);
+        return;
     }
-    auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
-    ph_debug_print(res);
-    return;
-    }
-    
+   
     const int16_t temperature = parser.celsiusval('C');
     auto res = ph_controller.set_temperature(index, temperature);
     ph_debug_print(res);
@@ -234,7 +237,8 @@ void GcodeSuite::M792()
         const uint8_t fan_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
         both_fans_pwm[fan_index] = fan_pwm;
     } else {
-        for (auto & fan : both_fans_pwm) fan = fan_pwm;
+        for (auto& fan : both_fans_pwm)
+            fan = fan_pwm;
     }
 
     auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
@@ -244,7 +248,8 @@ void GcodeSuite::M792()
  * @brief GetFanSpeed returns set speed and tech output for com-module
  * 
 */
-void GcodeSuite::M793() {
+void GcodeSuite::M793()
+{
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_fan_speed(index);
     ph_debug_print(res); // TODO: custom print format
@@ -373,13 +378,44 @@ void GcodeSuite::M1023() {}
 //ActivateToolDBG
 void GcodeSuite::M1024() {}
 //BedTempDebug
-void GcodeSuite::M1025() {}
+void GcodeSuite::M1025()
+{
+    M801();
+}
 //SetPeltierValue
 void GcodeSuite::M1028() {}
 //SetBedTempContrlParams
 void GcodeSuite::M1034() {}
 //SetBedThermisterParams
-void GcodeSuite::M1035() {}
+void GcodeSuite::M1035()
+{
+    int16_t sensor_index = parser.intval('I', -1);
+    float gain = parser.floatval('S', 1.0f);
+    float offset = parser.floatval('O');
+
+    auto handle_sensor = [=](auto& sensor) {
+        if (offset == 0.0f && gain == 1.0f)
+            SERIAL_ECHOLNPGM("SENSOR_ID:",
+                             sensor.getDeviceID(),
+                             ",OFFSET:",
+                             sensor.getOffsetTemperature(),
+                             ",GAIN:",
+                             sensor.getGain());
+        if (offset != 0.0f)
+            sensor.setOffsetTemperature(offset);
+        if (gain != 1.0f)
+            sensor.setGain(gain);
+    };
+    if (sensor_index == -1) {
+        auto sensors = bed_sensors();
+        for (auto& sensor : sensors) {
+            handle_sensor(sensor);
+        }
+    } else {
+        auto& sensor = bed_sensors()[constrain(sensor_index, 0, bed_sensors().size() - 1)];
+        handle_sensor(sensor);
+    }
+}
 //SetRegulatorPressure
 //void GcodeSuite::M1036() {} - MOVED
 //GetAllAxesMotorCurrent

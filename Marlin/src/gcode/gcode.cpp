@@ -1145,8 +1145,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 770: M770(); break;
         case 771: M771(); break;
         case 772: M772(); break;
-        case 773: M773(); break;
-        case 774: M774(); break;
         case 777: M777(); break;
         case 778: M778(); break;
         case 779: M779(); break;
