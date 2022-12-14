@@ -41,22 +41,22 @@ Response printhead::receive(HardwareSerial& serial)
     static uint8_t packet_buffer[128]{};
 
     Packet incoming;
-    int timeout_counter = 0;
-    while (serial.available() < 6 && ++timeout_counter < 10)
-        idle();
 
-    auto bytes_received = serial.readBytes(packet_buffer, 128);
+    auto bytes_received = serial.readBytes(packet_buffer, 6);
 
-    if (bytes_received <= 6)
+    if (bytes_received < 6)
         return Response{incoming, Result::PACKET_TOO_SHORT};
 
     memcpy(&incoming.ph_index, &packet_buffer[0], 2);
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
-    if (incoming.payload_size != bytes_received - 8)
+
+    bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
+    if (incoming.payload_size != bytes_received - 2)
         return Response{incoming, Result::BAD_PAYLOAD_SIZE};
-    incoming.payload = &packet_buffer[6];
-    memcpy(&incoming.crc, &packet_buffer[6 + incoming.payload_size], 2);
+
+    incoming.payload = packet_buffer;
+    memcpy(&incoming.crc, &packet_buffer[incoming.payload_size], 2);
     uint16_t crc = crc16_from_bytes(incoming.payload, incoming.payload_size);
 
     if (crc != incoming.crc)
