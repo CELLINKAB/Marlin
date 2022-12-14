@@ -259,7 +259,18 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
         ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
     return res;
 }
-Result Controller::extruder_move(Index index, )
+Result Controller::set_extruder_direction(Index index, bool direction)
+{
+    return send(Packet(index, Command::SET_EXTRUSION_DIRECTION), bus);
+}
+Result Controller::extruder_move(Index index, float uL)
+{
+    static constexpr float steps_per_unit[] = DEFAULT_AXIS_STEPS_PER_UNIT;
+    static constexpr float filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
+    static constexpr float step_multiplier = steps_per_unit[3] / (filament_radius * filament_radius * PI);
+    uint32_t steps = uL * step_multiplier;
+    return add_raw_extruder_steps(index, steps);
+}
 Result Controller::start_extruding(Index index)
 {
     Packet packet(index, Command::SYRINGEPUMP_START);

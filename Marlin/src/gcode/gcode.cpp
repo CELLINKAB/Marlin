@@ -65,6 +65,10 @@ GcodeSuite gcode;
   #include "../feature/password/password.h"
 #endif
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+#include "../feature/guppi_printhead/chantarelle.h"
+#endif
+
 #if HAS_FANCHECK
   #include "../feature/fancheck.h"
 #endif
@@ -193,6 +197,7 @@ void GcodeSuite::get_destination_from_command() {
     if ( (seen.e = parser.seenval('E')) ) {
       const float v = parser.value_axis_units(E_AXIS);
       destination.e = axis_is_relative(E_AXIS) ? current_position.e + v : v;
+      TERN_(CHANTARELLE_SUPPORT, ph_controller.set_extruder_direction(static_cast<printhead::Index>(active_extruder), v < 0);ph_controller.extruder_move(static_cast<printhead::Index>(active_extruder), v));
     }
     else
       destination.e = current_position.e;
@@ -205,7 +210,8 @@ void GcodeSuite::get_destination_from_command() {
   #endif
 
   if (parser.floatval('F') > 0)
-    feedrate_mm_s = parser.value_feedrate();
+    {feedrate_mm_s = parser.value_feedrate();
+    TERN_(CHANTARELLE_SUPPORT, ph_controller.set_extrusion_speed(static_cast<printhead::Index>(active_extruder), feedrate_mm_s));}
 
   #if BOTH(PRINTCOUNTER, HAS_EXTRUDERS)
     if (!DEBUGGING(DRYRUN) && !skip_move)
