@@ -149,13 +149,13 @@ Result Controller::set_temperature(Index index, celsius_t temperature)
     return send(request, bus);
 }
 
-celsius_t Controller::get_temperature(Index index) {
+celsius_float_t Controller::get_temperature(Index index) {
     Packet request(index, Command::GET_MEASURED_TEMP);
     auto res = send_and_receive(request, bus);
-    if (res.result != Result::OK || res.packet.payload_size < 2) return -30000;
+    if (res.result != Result::OK || res.packet.payload_size < 2) return 0.0f;
     uint16_t chant_temp;
     memcpy(&chant_temp, res.packet.payload, sizeof(chant_temp));
-    return static_cast<int16_t>(chant_temp - 30'000);
+    return (chant_temp - 30'000) / 100.0f;
 }
 
 Response Controller::get_info(Index index)

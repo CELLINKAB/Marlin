@@ -2096,7 +2096,7 @@ void Temperature::updateTemperaturesFromRawValues() {
   TERN_(TEMP_SENSOR_REDUNDANT_IS_MAX_TC, temp_redundant.setraw(READ_MAX_TC(HEATER_ID(TEMP_SENSOR_REDUNDANT_SOURCE))));
 
   #if HAS_HOTEND
-    HOTEND_LOOP() temp_hotend[e].celsius = TERN(CHANTARELLE_SUPPORT, ph_controller.get_temperature(static_cast<printhead::Index>(e)), (temp_hotend[e].getraw(), e));
+    HOTEND_LOOP() temp_hotend[e].celsius = TERN(CHANTARELLE_SUPPORT, ph_controller.get_temperature(static_cast<printhead::Index>(e)), analog_to_celsius_hotend(temp_hotend[e].getraw(), e));
   #endif
 
   TERN_(HAS_HEATED_BED,     temp_bed.celsius       = TERN(TEMP_SENSOR_BED_IS_TMP117, get_tmp117_bed_temp(), analog_to_celsius_bed(temp_bed.getraw())));

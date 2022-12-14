@@ -320,7 +320,7 @@ public:
     Response get_status(Index index);
     // Temperature methods
     Result set_temperature(Index index, celsius_t temperature);
-    celsius_t get_temperature(Index index);
+    celsius_float_t get_temperature(Index index);
     Result set_pid(Index index, float p, float i, float d);
     Response get_pid(Index index);
     Result set_fan_speed(Index index, FanSpeeds fan_speeds);
