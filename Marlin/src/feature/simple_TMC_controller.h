@@ -147,6 +147,37 @@ struct SimpleTMC
         return count;
     }
 
+    template<bool STEPS = (STEP > -1), class = std::enable_if_t<STEPS>>
+    void single_step()
+    {
+        WRITE(STEP, HIGH);
+        delayMicroseconds(1);
+        WRITE(STEP, LOW);
+    }
+
+    template<bool STEPS = (STEP > -1), class = std::enable_if_t<STEPS>>
+    void move_steps(
+        int32_t steps, uint32_t velocity, std::function<bool(void)> stop_condition = []() {
+            return false;
+        })
+    {
+        if constexpr (DIR > -1)
+            (WRITE(DIR, steps >= 0));
+
+        millis_t next_idle = millis() + 100;
+        uint32_t low_microseconds = 1'000'000 / velocity;
+        steps = abs(steps);
+        while (!stop_condition() && (steps-- > 0)) {
+            single_step();
+            if (millis() > next_idle) {
+                next_idle += 100;
+                idle();
+            } else
+                delayMicroseconds(low_microseconds);
+        }
+        WRITE(STEP, LOW);
+    }
+
     void rms_current(uint16_t current) { driver.rms_current(current); }
 
     void stall_threshold(int16_t threshold) { driver.homing_threshold(threshold); }
