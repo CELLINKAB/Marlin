@@ -47,7 +47,6 @@ struct SimpleTMCConfig
 template<pin_t EN, pin_t STOP, pin_t STEP = -1, pin_t DIR = -1, pin_t INDEX = -1>
 struct SimpleTMC
 {
-    
     SimpleTMC(SimpleTMCConfig config_, Stream* serial)
         : config(config_)
         , driver(serial, config_.rsense, config_.hw_address)
@@ -61,7 +60,7 @@ struct SimpleTMC
     {
         init_driver();
     }
-    
+
     /**
      * @brief Move the motor at a velocity with no checking or feedback
      *
@@ -162,8 +161,12 @@ private:
     {
         OUT_WRITE(EN, HIGH);
         SET_INPUT_PULLUP(STOP);
-        if constexpr (INDEX != 0)
+        if constexpr (INDEX > -1)
             SET_INPUT(INDEX);
+        if constexpr (STEP > -1)
+            SET_OUTPUT(STEP);
+        if constexpr (DIR > -1)
+            SET_OUTPUT(DIR);
 
         TMC2208_n::GCONF_t gconf{};
         gconf.pdn_disable = true;      // Use UART
@@ -198,5 +201,4 @@ private:
         if (status == 0xFFFF'FFFF)
             SERIAL_ERROR_MSG("driver bad status");
     }
-
 };
