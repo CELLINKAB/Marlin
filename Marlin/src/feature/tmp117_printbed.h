@@ -7,11 +7,6 @@
 
 double get_tmp117_bed_temp();
 
-struct BedSensor : public TMP117<TwoWire>
-{
-    float scalar = 1.0f;
-}
-
-using BedSensors = std::array<BedSensor, 4>;
+using BedSensors = std::array<TMP117<TwoWire>, 4>;
 
 BedSensors& bed_sensors();

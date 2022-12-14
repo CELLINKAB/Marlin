@@ -28,6 +28,7 @@ TMP117<Bus>::TMP117(TMPAddr addr, Bus& alt_bus)
     , alert_pin(-1)
     , alert_type(TMP117_ALERT::NOALERT)
     , newDataCallback(nullptr)
+    , scale_factor(1.0)
 {
     bus.begin();
 }
@@ -46,6 +47,7 @@ TMP117<Bus>::TMP117(uint8_t addr, Bus& alt_bus)
     , alert_pin(-1)
     , alert_type(TMP117_ALERT::NOALERT)
     , newDataCallback(nullptr)
+    , scale_factor(1.0)
 {
     bus.begin();
 }
@@ -62,6 +64,7 @@ void TMP117<Bus>::init(void (*_newDataCallback)(void))
     setAveraging(TMP117_AVE::AVE8);
     setAlertMode(TMP117_PMODE::DATA);
     setOffsetTemperature(0);
+    scale_factor = 1.0;
 
     newDataCallback = _newDataCallback;
 }
@@ -195,6 +198,12 @@ void TMP117<Bus>::setOffsetTemperature(double offset)
     i2cWrite2B(TMP117_REG_TEMPERATURE_OFFSET, offset_temp_value);
 }
 
+template<typename Bus>
+void TMP117<Bus>::setGain(double gain)
+{
+    scale_factor = gain;
+}
+
 /*!
     @brief    Set target temperature for calibration purpose
     
@@ -250,7 +259,7 @@ template<typename Bus>
 double TMP117<Bus>::getTemperature(void)
 {
     int16_t temp = i2cRead2B(TMP117_REG_TEMPERATURE);
-    return (temp * TMP117_RESOLUTION);
+    return (temp * TMP117_RESOLUTION) * scale_factor;
 }
 /*!
     @brief    Get Device Revision 
@@ -300,6 +309,17 @@ double TMP117<Bus>::getOffsetTemperature(void)
 {
     int16_t temp = i2cRead2B(TMP117_REG_TEMPERATURE_OFFSET);
     return (temp * TMP117_RESOLUTION);
+}
+
+/*!
+    @brief    Returns the current scale factor
+    
+    @return   double  scaling factor
+*/
+template<typename Bus>
+double TMP117<Bus>::getGain(void)
+{
+    return scale_factor;
 }
 
 /*!

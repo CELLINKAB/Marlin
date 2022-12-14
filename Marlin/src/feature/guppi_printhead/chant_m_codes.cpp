@@ -389,22 +389,30 @@ void GcodeSuite::M1034() {}
 void GcodeSuite::M1035()
 {
     int16_t sensor_index = parser.intval('I', -1);
-    float scale_factor = parser.floatval('S', 1.0f);
+    float gain = parser.floatval('S', 1.0f);
     float offset = parser.floatval('O');
+
+    auto handle_sensor = [=](auto& sensor) {
+        if (offset == 0.0f && gain == 1.0f)
+            SERIAL_ECHOLNPGM("SENSOR_ID:",
+                             sensor.getDeviceID(),
+                             ",OFFSET:",
+                             sensor.getOffsetTemperature(),
+                             ",GAIN:",
+                             sensor.getGain());
+        if (offset != 0.0f)
+            sensor.setOffsetTemperature(offset);
+        if (gain != 1.0f)
+            sensor.setGain(gain);
+    };
     if (sensor_index == -1) {
         auto sensors = bed_sensors();
         for (auto& sensor : sensors) {
-            if (offset != 0.0f)
-                sensor.setOffsetTemperature(offset);
-            if (scale_factor != 1.0f)
-                sensor.scalar = scale_factor;
+            handle_sensor(sensor);
         }
     } else {
         auto& sensor = bed_sensors()[constrain(sensor_index, 0, bed_sensors().size() - 1)];
-        if (offset != 0.0f)
-            sensor.setOffsetTemperature(offset);
-        if (scale_factor != 1.0f)
-            sensor.scalar = scale_factor
+        handle_sensor(sensor);
     }
 }
 //SetRegulatorPressure
