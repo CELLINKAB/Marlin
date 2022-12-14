@@ -8,14 +8,13 @@
 
 #include "tmc_util.h"
 
-#define SIMPLE_TMC_BAUDRATE 115200
-
 /**
  * @brief configuration parameters for TMC2209 steppers
  *
  * @param hw_address serial address of TMC2209 to control, 0-3
  * @param stall_sensitivity stallguard threshold value, higher sensitivity stalls easier, 0 is impossible to stall
  * @param rms_current maximum RMS current draw allowed by the driver in milliamps
+ * @param rsense current sense resistor value
  *
  */
 struct SimpleTMCConfig
@@ -24,37 +23,45 @@ struct SimpleTMCConfig
         : hw_address(address)
         , stall_sensitivity(sensitivity)
         , rms_current(600)
+        , rsense(0.11f)
     {}
-    constexpr SimpleTMCConfig(uint8_t address, uint8_t sensitivity, uint32_t current)
+    constexpr SimpleTMCConfig(uint8_t address, uint8_t sensitivity, uint32_t current, float sense_resistor)
         : hw_address(address)
         , stall_sensitivity(sensitivity)
         , rms_current(current)
+        , rsense(sense_resistor)
     {}
     uint8_t hw_address;
     uint8_t stall_sensitivity;
     uint32_t rms_current;
+    float rsense;
 };
 
-static auto* SIMPLE_TMC_SERIAL = [] {
-    //SIMPLE_TMC_HW_SERIAL.begin(SIMPLE_TMC_BAUDRATE);
-    return &SIMPLE_TMC_HW_SERIAL;
-}();
-
 /**
- * @brief base template, all definitions reside in specializations
+ * @brief TMC controller for quickly integrating a stepper with high level movement methods
  *
  * @tparam EN TMC2209 ENABLE pin number
  * @tparam STOP TMC2209 DIAG pin number
  * @tparam INDEX (optional) TMC2209 index pin number
- * @tparam INIT internal typestate parameter
  */
-template<pin_t EN, pin_t STOP, pin_t INDEX = 0, bool INIT = false>
-struct SimpleTMC;
-
-// real method implementations are in INIT=true specialization
-template<pin_t EN, pin_t STOP, pin_t INDEX>
-struct SimpleTMC<EN, STOP, INDEX, true>
+template<pin_t EN, pin_t STOP, pin_t STEP = -1, pin_t DIR = -1, pin_t INDEX = -1>
+struct SimpleTMC
 {
+    
+    SimpleTMC(SimpleTMCConfig config_, Stream* serial)
+        : config(config_)
+        , driver(serial, config_.rsense, config_.hw_address)
+    {
+        init_driver();
+    }
+
+    SimpleTMC(SimpleTMCConfig config_, pin_t rx_pin, pin_t tx_pin)
+        : config(config_)
+        , driver(rx_pin, tx_pin, config_.rsense, config_.hw_address)
+    {
+        init_driver();
+    }
+    
     /**
      * @brief Move the motor at a velocity with no checking or feedback
      *
@@ -63,7 +70,7 @@ struct SimpleTMC<EN, STOP, INDEX, true>
     void raw_move(const int32_t velocity)
     {
         WRITE(EN, LOW);
-        driver->VACTUAL(velocity);
+        driver.VACTUAL(velocity);
     }
 
     /**
@@ -78,7 +85,7 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         auto done = [this, callback] {
             stop();
             if DEBUGGING (INFO)
-                SERIAL_ECHOLNPGM("Stepper stalled, SG:", driver->SG_RESULT());
+                SERIAL_ECHOLNPGM("Stepper stalled, SG:", driver.SG_RESULT());
             callback();
         };
         attachInterrupt(STOP, done, RISING);
@@ -97,10 +104,10 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         if (timeout > 0)
             end_time = millis() + timeout;
         move_until_stall(velocity);
-        while (driver->VACTUAL() != 0) {
+        while (driver.VACTUAL() != 0) {
             delay(1000);
             if DEBUGGING (INFO)
-                SERIAL_ECHOLNPGM("Stepper moving, SG:", driver->SG_RESULT());
+                SERIAL_ECHOLNPGM("Stepper moving, SG:", driver.SG_RESULT());
             idle();
             if (timeout > 0 && millis() > end_time)
                 stop();
@@ -113,7 +120,7 @@ struct SimpleTMC<EN, STOP, INDEX, true>
      */
     void stop()
     {
-        driver->VACTUAL(0);
+        driver.VACTUAL(0);
         WRITE(EN, HIGH);
     }
 
@@ -124,7 +131,7 @@ struct SimpleTMC<EN, STOP, INDEX, true>
      * @param max_steps (optional) threshold value to stop motor regardless of stall state
      * @return uint32_t actual number of steps generated
      */
-    template<bool COUNTS = INDEX, class = std::enable_if_t<COUNTS>>
+    template<bool COUNTS = (INDEX > -1), class = std::enable_if_t<COUNTS>>
     uint32_t blocking_move_until_count_or_stall(const int32_t velocity, const uint32_t max_steps = ~0)
     {
         uint32_t count = 0;
@@ -141,45 +148,18 @@ struct SimpleTMC<EN, STOP, INDEX, true>
         return count;
     }
 
-    void rms_current(uint16_t current) { driver->rms_current(current); }
+    void rms_current(uint16_t current) { driver.rms_current(current); }
 
-    void stall_threshold(int16_t threshold) { driver->homing_threshold(threshold); }
+    void stall_threshold(int16_t threshold) { driver.homing_threshold(threshold); }
+
+    void reinit_driver() { init_driver(); }
 
 private:
-    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>* driver;
+    SimpleTMCConfig config;
+    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver;
 
-    /**
-     * @brief  private constructor enforces all instances being constructed from INIT=false template type
-     *
-     * @param driver_ pointer to a TMCMarlin driver controller
-     */
-    SimpleTMC(TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>* driver_)
-        : driver(driver_)
-    {}
-
-    friend SimpleTMC<EN, STOP, INDEX, false>;
-};
-
-/**
- * @brief INIT=false specialization is only capable of initializing and constructing INIT=true variant
- *
- */
-template<pin_t EN, pin_t STOP, pin_t INDEX>
-struct SimpleTMC<EN, STOP, INDEX, false>
-{
-    using type = SimpleTMC<EN, STOP, INDEX, true>;
-
-    /**
-     * @brief initialize TMC2209 with valid parameters and return a usable SimpleTMC variant
-     *
-     * @param config TMC configuration parameters
-     * @return SimpleTMC<EN, STOP, INDEX, true>
-     */
-    [[nodiscard]] static SimpleTMC<EN, STOP, INDEX, true> init(const SimpleTMCConfig& config)
+    void init_driver()
     {
-        static TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver(SIMPLE_TMC_SERIAL,
-                                                                                  0.11f,
-                                                                                  config.hw_address);
         OUT_WRITE(EN, HIGH);
         SET_INPUT_PULLUP(STOP);
         if constexpr (INDEX != 0)
@@ -217,7 +197,6 @@ struct SimpleTMC<EN, STOP, INDEX, false>
         uint32_t status = driver.DRV_STATUS();
         if (status == 0xFFFF'FFFF)
             SERIAL_ERROR_MSG("driver bad status");
-
-        return type{&driver};
     }
+
 };
