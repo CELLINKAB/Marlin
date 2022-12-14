@@ -647,13 +647,15 @@
 #elif ENABLED(CHANTARELLE_SUPPORT)
   #define E_STEPPERS 1
   #define E_MANUAL 1
-  #define HOTENDS 0
   #ifndef E0_STEP_PIN
     #define E0_STEP_PIN CHANT_IRQ1_PIN
   #endif
   #ifndef E0_DIR_PIN
     #define E0_DIR_PIN CHANT_IRQ2_PIN
   #endif
+  #define HAS_HEATER_0 1
+  #define HAS_HEATER_1 1
+  #define HAS_HEATER_2 1
 #endif
 
 // No inactive extruders with SWITCHING_NOZZLE or Průša MMU1

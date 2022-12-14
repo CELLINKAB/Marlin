@@ -16,7 +16,7 @@
   {
     parser.subcode = 1;
     G92();
-    optical_autocal.reset();
+    optical_autocal.reset_all();
   }
 
   /**
@@ -28,7 +28,7 @@
     const auto tool = get_target_extruder_from_command();
     // TODO: add multiple tool support
     SERIAL_ECHO_CELLINK_KV("AT", tool);
-    SERIAL_ECHOLN_CELLINK_KV("AUTOCAL", optical_autocal.is_calibrated());
+    SERIAL_ECHOLN_CELLINK_KV("AUTOCAL", optical_autocal.is_calibrated(tool));
   }
 
   /**
@@ -39,7 +39,7 @@
   {
     const auto tool = get_target_extruder_from_command();
     // TODO: add multiple tool support
-    const auto &offset = optical_autocal.offset();
+    const auto &offset = optical_autocal.offset(tool);
     SERIAL_ECHO_CELLINK_KV("AT", tool);
     SERIAL_ECHO_CELLINK_KV("AUTOCAL_XOFF", offset.x);
     SERIAL_ECHO_CELLINK_KV("AUTOCAL_YOFF", offset.y);
