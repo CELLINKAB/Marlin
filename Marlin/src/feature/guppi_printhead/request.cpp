@@ -142,17 +142,20 @@ void Controller::init()
     bus.begin(CHANT_BAUDRATE);
 }
 
-Result Controller::set_temperature(Index index, float temperature)
+Result Controller::set_temperature(Index index, celsius_t temperature)
 {
-    static constexpr size_t PAYLOAD_SIZE = sizeof(uint16_t);
-    uint16_t converted_temp = static_cast<uint16_t>((temperature * 100.0f) + 30000.0f);
-    uint8_t payload[PAYLOAD_SIZE]{};
-    memcpy(payload, &converted_temp, PAYLOAD_SIZE);
-    Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
+    Packet request(index, Command::SET_TEMP, &temperature, sizeof(temperature));
     return send(request, bus);
 }
 
-Response Controller::get_temperature(Index index) {}
+celsius_t Controller::get_temperature(Index index) {
+    Packet request(index, Command::GET_MEASURED_TEMP);
+    auto res = send_and_receive(request, bus);
+    if (res.result != Result::OK || res.packet.payload_size < 2) return -30000;
+    celsius_t temp;
+    memcpy(&temp, res.packet.payload, sizeof(temp));
+    return temp;
+}
 
 Response Controller::get_info(Index index)
 {
