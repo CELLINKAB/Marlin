@@ -217,7 +217,9 @@ auto Controller::get_tem_debug(Index index) -> Response {
 
 Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate)
 {
-    const uint32_t feedrate_pl_s = static_cast<uint32_t>((feedrate / (4.6 * 4.6 * 3.14159265)) * 1000);
+    constexpr double filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2.0;
+    constexpr double mm_to_pl_factor = (filament_radius * filament_radius * PI) * 1000.0;
+    const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate * mm_to_pl_factor);
     Packet packet(index, Command::SET_EXTRUSION_SPEED, &feedrate_pl_s, sizeof(feedrate_pl_s));
     return send(packet, bus);
 }
