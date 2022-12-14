@@ -38,7 +38,8 @@ Result printhead::send(const Packet& request, HardwareSerial& serial, bool expec
 Response printhead::receive(HardwareSerial& serial)
 {
     // this seems bug-prone...
-    static uint8_t packet_buffer[128]{};
+    static constexpr size_t MAX_PACKET = 128
+    static uint8_t packet_buffer[MAX_PACKET]{};
 
     Packet incoming;
 
@@ -51,6 +52,9 @@ Response printhead::receive(HardwareSerial& serial)
     memcpy(&incoming.command, &packet_buffer[2], 2);
     memcpy(&incoming.payload_size, &packet_buffer[4], 2);
 
+    if ((incoming.payload_size + 2) > MAX_PACKET)
+        return Response{incoming, Result::BAD_PAYLOAD_SIZE};
+        
     bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
     if (incoming.payload_size != bytes_received - 2)
         return Response{incoming, Result::BAD_PAYLOAD_SIZE};
