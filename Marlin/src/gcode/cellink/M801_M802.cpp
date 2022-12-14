@@ -11,9 +11,9 @@
 #    include <array>
 #    include <numeric>
 
-std::array<TMP117<TwoWire>, 4>& bed_sensors()
+BedSensors& bed_sensors()
 {
-    static std::array<TMP117<TwoWire>, 4> sensors{[]() {
+    static std::array<BedSensor, 4> sensors{[]() {
         static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
         pb_i2c.begin();
         TMP117 sensor_1(TMPAddr::GND, pb_i2c);
@@ -33,7 +33,7 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     for (auto& sensor : bed_sensors()) {
-        total_temps += sensor.getTemperature();
+        total_temps += (sensor.getTemperature() * sensor.scalar);
     }
     const double avg = total_temps / bed_sensors().size();
     return avg;
@@ -47,7 +47,7 @@ void GcodeSuite::M802()
         SERIAL_ECHO("PBT");
         SERIAL_ECHO(sensor_num++);
         SERIAL_CHAR(':');
-        SERIAL_ECHO_F(sensor.getTemperature());
+        SERIAL_ECHO_F(sensor.getTemperature() * sensor.scalar);
         SERIAL_CHAR(',');
     }
     SERIAL_EOL();

@@ -396,11 +396,15 @@ void GcodeSuite::M1035()
         for (auto& sensor : sensors) {
             if (offset != 0.0f)
                 sensor.setOffsetTemperature(offset);
+            if (scale_factor != 1.0f)
+                sensor.scalar = scale_factor;
         }
     } else {
         auto& sensor = bed_sensors()[constrain(sensor_index, 0, bed_sensors().size() - 1)];
         if (offset != 0.0f)
             sensor.setOffsetTemperature(offset);
+        if (scale_factor != 1.0f)
+            sensor.scalar = scale_factor
     }
 }
 //SetRegulatorPressure
