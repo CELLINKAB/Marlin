@@ -77,21 +77,26 @@ void move_rainbow(CuringLed led)
 
 void GcodeSuite::M805()
 {
-    static const bool init_pins [[maybe_unused]] = []{
+    static auto stepper = [] {
         OUT_WRITE(PC_365_PIN, LOW);
         OUT_WRITE(PC_400_PIN, LOW);
         OUT_WRITE(PC_480_PIN, LOW);
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
-        return true;
+
+        return SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN>(SimpleTMCConfig(PC_SLAVE_ADDRESS, 100, 400, 0.15f),
+                                                     PC_SERIAL_RX_PIN,
+                                                     PC_SERIAL_TX_PIN);
     }();
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
-    const millis_t duration = ((parser.ushortval('S') * 1000) + parser.ushortval('P'));
+    const millis_t duration = ((parser.ulongval('S') * 1000) + parser.ushortval('P'));
 
     const CuringLed led = led_for_wavelength(wavelength);
 
-    if (led.pin == -1) SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:", wavelength);
+    if (led.pin == -1)
+        SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:",
+                         wavelength);
 
     move_rainbow(led);
     const millis_t end_time = millis() + duration;
@@ -101,7 +106,8 @@ void GcodeSuite::M805()
         idle();
         delay(100);
     } while (static_cast<int32_t>(end_time - millis()) > 200);
-    if (millis_t now = millis(); end_time > now) delay(end_time - now);
+    if (millis_t now = millis(); end_time > now)
+        delay(end_time - now);
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
 }
