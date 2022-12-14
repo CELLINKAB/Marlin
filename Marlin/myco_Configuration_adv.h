@@ -2400,17 +2400,15 @@
  */
 #if HAS_MULTI_EXTRUDER
   // Z raise distance for tool-change, as needed for some extruders
-  #define TOOLCHANGE_ZRAISE                 2 // (mm)
+  #define TOOLCHANGE_ZRAISE                 20 // (mm)
   //#define TOOLCHANGE_ZRAISE_BEFORE_RETRACT  // Apply raise before swap retraction (if enabled)
   //#define TOOLCHANGE_NO_RETURN              // Never return to previous position on tool-change
-  #if ENABLED(TOOLCHANGE_NO_RETURN)
-    //#define EVENT_GCODE_AFTER_TOOLCHANGE "G12X"   // Extra G-code to run after tool-change
-  #endif
 
   /**
    * Extra G-code to run while executing tool-change commands. Can be used to use an additional
    * stepper motor (I axis, see option LINEAR_AXES in Configuration.h) to drive the tool-changer.
    */
+  #define EVENT_GCODE_AFTER_TOOLCHANGE "G510 L"   // Extra G-code to run after tool-change
   //#define EVENT_GCODE_TOOLCHANGE_T0 "G28 A\nG1 A0" // Extra G-code to run while executing tool-change command T0
   //#define EVENT_GCODE_TOOLCHANGE_T1 "G1 A10"       // Extra G-code to run while executing tool-change command T1
   //#define EVENT_GCODE_TOOLCHANGE_ALWAYS_RUN        // Always execute above G-code sequences. Use with caution!
@@ -3755,7 +3753,7 @@
  * Enables G53 and G54-G59.3 commands to select coordinate systems
  * and G92.1 to reset the workspace to native machine space.
  */
-//#define CNC_COORDINATE_SYSTEMS
+#define CNC_COORDINATE_SYSTEMS
 
 /**
  * Auto-report fan speed with M123 S<seconds>
@@ -4355,8 +4353,8 @@
 // enable optical autocalibration routines
 #define OPTICAL_AUTOCAL
 #if ENABLED(OPTICAL_AUTOCAL)
-  #define AUTOCAL_START_POSITION {56, 60, 15}
-  #define AUTOCAL_DEFAULT_FEEDRATE 500.0
+  #define AUTOCAL_START_POSITION {56, 63, 15}
+  #define AUTOCAL_DEFAULT_FEEDRATE 1500.0
   #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.5, -84.4, -9.0}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 25.0
 #endif

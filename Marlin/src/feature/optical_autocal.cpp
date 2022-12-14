@@ -7,13 +7,13 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-bool OpticalAutocal::full_autocal_routine(float feedrate)
+bool OpticalAutocal::full_autocal_routine(const uint8_t tool, float feedrate)
 {
     home_if_needed();
     do_blocking_move_to(START_POSITION);
     planner.synchronize();
 
-    static auto set_polarity [[maybe_unused]] = []{
+    static auto set_polarity [[maybe_unused]] = [] {
         SET_INPUT(SENSOR_1);
         SET_INPUT(SENSOR_2);
 
@@ -29,33 +29,50 @@ bool OpticalAutocal::full_autocal_routine(float feedrate)
         return true;
     }();
 
-    const bool success = full_sensor_sweep(feedrate);
+    const bool success = full_sensor_sweep(active_extruder, feedrate);
     if (!success) {
         do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
         SERIAL_ERROR_MSG("autocalibration failed!");
     } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
-        SERIAL_ECHOLNPGM("Nozzle offset: ", tool_offset);
+        SERIAL_ECHOLNPGM("Nozzle offset: ", offsets[tool]);
 
     return success;
 }
 
-bool OpticalAutocal::is_calibrated() const
+[[nodiscard]] bool OpticalAutocal::is_calibrated(const uint8_t tool) const
 {
     static constexpr xyz_pos_t default_pos{};
-    return tool_offset != default_pos;
+    return offsets[tool] != default_pos;
 }
 
-const xyz_pos_t& OpticalAutocal::offset() const
+[[nodiscard]] const xyz_pos_t& OpticalAutocal::offset(const uint8_t tool) const
 {
-    return tool_offset;
+    return offsets[tool];
 }
 
-void OpticalAutocal::reset()
+void OpticalAutocal::reset(const uint8_t tool)
 {
-  tool_offset = xyz_pos_t{};
+    offsets[tool] = xyz_pos_t{};
 }
 
-bool OpticalAutocal::full_sensor_sweep(const float feedrate)
+void OpticalAutocal::reset_all()
+{
+    offsets.fill(xyz_pos_t{});
+}
+
+xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
+{
+    xyz_pos_t new_offset{};
+
+    if (is_calibrated(tool)) {
+        new_offset = offsets[tool] - active_offset;
+        active_offset = offsets[tool];
+    }
+
+    return new_offset;
+}
+
+bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
 {
     const float z_offset = find_z_offset(feedrate);
     if (z_offset == Z_OFFSET_ERR)
@@ -83,19 +100,19 @@ bool OpticalAutocal::full_sensor_sweep(const float feedrate)
         //return false;
     }
 
-    tool_offset.set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
-                    xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
-                    z_offset + END_POSITION_PRINTBED_DELTA.z);
+    offsets[tool].set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
+                      xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
+                      z_offset + END_POSITION_PRINTBED_DELTA.z);
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-        print_pos(tool_offset, F("Calibrated tool offset:"));
-    do_blocking_move_to_z(tool_offset.z + POST_AUTOCAL_SAFE_Z_HEIGHT);
-    do_blocking_move_to_xy(tool_offset);
+        print_pos(offsets[tool], F("Calibrated tool offset:"));
+    do_blocking_move_to_z(offsets[tool].z + POST_AUTOCAL_SAFE_Z_HEIGHT);
+    do_blocking_move_to_xy(offsets[tool]);
     // planner.set_position_mm({0.0,0.0,0.0});
 
     return true;
 }
 
-xy_pos_t OpticalAutocal::find_xy_offset(const float feedrate) const
+[[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const float feedrate) const
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
     volatile float sensor_2_trigger_y_pos{0.0f};
@@ -199,7 +216,10 @@ xy_pos_t OpticalAutocal::find_xy_offset(const float feedrate) const
     return {x, y};
 }
 
-float OpticalAutocal::scan_for_tip(float z, const float inc, bool& condition, const float feedrate) const
+[[nodiscard]] float OpticalAutocal::scan_for_tip(float z,
+                                                 const float inc,
+                                                 bool& condition,
+                                                 const float feedrate) const
 {
     while (!condition && z > soft_endstop.min.z) {
         do_blocking_move_to_z(z, feedrate);
@@ -217,7 +237,7 @@ float OpticalAutocal::scan_for_tip(float z, const float inc, bool& condition, co
     return (z + inc) + inc; // report position before interrupt triggered
 }
 
-float OpticalAutocal::find_z_offset(const float feedrate) const
+[[nodiscard]] float OpticalAutocal::find_z_offset(const float feedrate) const
 {
     float z = START_POSITION.z;
     bool triggered = false;

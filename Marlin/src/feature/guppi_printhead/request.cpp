@@ -142,17 +142,21 @@ void Controller::init()
     bus.begin(CHANT_BAUDRATE);
 }
 
-Result Controller::set_temperature(Index index, float temperature)
+Result Controller::set_temperature(Index index, celsius_t temperature)
 {
-    static constexpr size_t PAYLOAD_SIZE = sizeof(uint16_t);
-    uint16_t converted_temp = static_cast<uint16_t>((temperature * 100.0f) + 30000.0f);
-    uint8_t payload[PAYLOAD_SIZE]{};
-    memcpy(payload, &converted_temp, PAYLOAD_SIZE);
-    Packet request(index, Command::SET_TEMP, payload, PAYLOAD_SIZE);
+    uint16_t chant_temp = temperature + 30'000;
+    Packet request(index, Command::SET_TEMP, &temperature, sizeof(temperature));
     return send(request, bus);
 }
 
-Response Controller::get_temperature(Index index) {}
+celsius_t Controller::get_temperature(Index index) {
+    Packet request(index, Command::GET_MEASURED_TEMP);
+    auto res = send_and_receive(request, bus);
+    if (res.result != Result::OK || res.packet.payload_size < 2) return -30000;
+    uint16_t chant_temp;
+    memcpy(&chant_temp, res.packet.payload, sizeof(chant_temp));
+    return static_cast<int16_t>(chant_temp - 30'000);
+}
 
 Response Controller::get_info(Index index)
 {
@@ -254,6 +258,18 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
     if (res == Result::OK)
         ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
     return res;
+}
+Result Controller::set_extruder_direction(Index index, bool direction)
+{
+    return send(Packet(index, Command::SET_EXTRUSION_DIRECTION), bus);
+}
+Result Controller::extruder_move(Index index, float uL)
+{
+    static constexpr float steps_per_unit[] = DEFAULT_AXIS_STEPS_PER_UNIT;
+    static constexpr float filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
+    static constexpr float step_multiplier = steps_per_unit[3] / (filament_radius * filament_radius * PI);
+    uint32_t steps = uL * step_multiplier;
+    return add_raw_extruder_steps(index, steps);
 }
 Result Controller::start_extruding(Index index)
 {

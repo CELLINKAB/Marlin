@@ -74,7 +74,8 @@ void ph_debug_print(printhead::Result result)
 void GcodeSuite::G511()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.home_extruder(index, printhead::ExtruderDirection::Extrude);
+    printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
+    auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
 }
 
@@ -171,8 +172,8 @@ void GcodeSuite::M771()
         ph_debug_print(res);
         return;
     }
-
-    const float temperature = parser.floatval('C');
+   
+    const int16_t temperature = parser.celsiusval('C');
     auto res = ph_controller.set_temperature(index, temperature);
     ph_debug_print(res);
 }
