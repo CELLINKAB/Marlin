@@ -11,7 +11,7 @@
 #    include <array>
 #    include <numeric>
 
-static std::array<TMP117<TwoWire>, 4>& bed_sensors()
+std::array<TMP117<TwoWire>, 4>& bed_sensors()
 {
     static std::array<TMP117<TwoWire>, 4> sensors{[]() {
         static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
