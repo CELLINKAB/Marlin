@@ -9,7 +9,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BOARD'
-                        values 'MYCORRHIZA_V1'
+                        values 'MYCORRHIZA_V1','MYCORRHIZA_V1_1'
                     }
                 }
             stages {
