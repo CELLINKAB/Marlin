@@ -227,7 +227,7 @@ template<typename T, class = std::enable_if<std::is_integral_v<T>>>
     std::array<uint8_t, sizeof(T)> a{};
     size_t i = 0;
     for (size_t i = 0; i < sizeof(t); ++i) {
-        a[i] = (t >> (i++ * sizeof(uint8_t))) & 0xff;
+        a[i] = (t >> (i * 8)) & 0xff;
     }
     return a;
     }
@@ -241,7 +241,7 @@ template<typename T, size_t N>
     for (size_t i = 0; i < sizeof(t); ++i) {
         size_t byte_number = i % sizeof(T);
         size_t arr_element = i / sizeof(T);
-        a[i] = (t[arr_element] >> (byte_number * sizeof(uint8_t))) & 0xff;
+        a[i] = (t[arr_element] >> (byte_number * 8)) & 0xff;
     }
     return a;
 }
