@@ -195,8 +195,8 @@ enum class ExtruderDirection : uint8_t {
 };
 
 enum class SliderDirection : uint8_t {
-    Push,
-    Pull
+    Pull,
+    Push
 };
 
 namespace constants {
