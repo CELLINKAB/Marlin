@@ -147,7 +147,8 @@ Response<T> receive(HardwareSerial& serial)
     }
     uint16_t crc = calculate_crc16(incoming.bytes());
 
-    if (crc != incoming.crc)
+    constexpr static bool allow_bad_crc = true;
+    if (!allow_bad_crc && crc != incoming.crc)
         return Response<T>{incoming, Result::BAD_CRC};
 
     return Response<T>{incoming, Result::OK};
