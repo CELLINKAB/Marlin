@@ -197,7 +197,6 @@ void GcodeSuite::get_destination_from_command() {
     if ( (seen.e = parser.seenval('E')) ) {
       const float v = parser.value_axis_units(E_AXIS);
       destination.e = axis_is_relative(E_AXIS) ? current_position.e + v : v;
-      TERN_(CHANTARELLE_SUPPORT, ph_controller.set_extruder_direction(static_cast<printhead::Index>(active_extruder), v < 0);ph_controller.extruder_move(static_cast<printhead::Index>(active_extruder), v));
     }
     else
       destination.e = current_position.e;
