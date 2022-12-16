@@ -37,7 +37,8 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
 }
 
-void ph_debug_print(printhead::Response response)
+template<typename T>
+void ph_debug_print(printhead::Response<T> response)
 {
     if (DEBUGGING(INFO))
         printhead::print_response(response);
@@ -113,33 +114,33 @@ void GcodeSuite::G513()
 // debug arbitrary command, super unsafe
 void GcodeSuite::M1069()
 {
-    static uint8_t cmd_buf[128]{};
-    const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
-    const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
-    const char* payload = parser.string_arg;
-    uint8_t cmd_size = 0;
-    if (payload != nullptr) {
-        if (DEBUGGING(INFO))
-            SERIAL_ECHOPGM("input: ", payload, " parsed: ");
-        if (payload[0] == 'P')
-            payload += 1;
-        if (payload[0] == '0' && payload[1] == 'x')
-            payload += 2;
-        while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
-            cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
-            if (DEBUGGING(INFO)) {
-                SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
-                SERIAL_CHAR(' ');
-            }
-            ++cmd_size;
-            payload += 2;
-        }
-        if (DEBUGGING(INFO))
-            SERIAL_EOL();
-    }
-    printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
-    const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
-    ph_debug_print(response);
+    // static uint8_t cmd_buf[128]{};
+    // const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
+    // const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
+    // const char* payload = parser.string_arg;
+    // uint8_t cmd_size = 0;
+    // if (payload != nullptr) {
+    //     if (DEBUGGING(INFO))
+    //         SERIAL_ECHOPGM("input: ", payload, " parsed: ");
+    //     if (payload[0] == 'P')
+    //         payload += 1;
+    //     if (payload[0] == '0' && payload[1] == 'x')
+    //         payload += 2;
+    //     while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
+    //         cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+    //         if (DEBUGGING(INFO)) {
+    //             SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
+    //             SERIAL_CHAR(' ');
+    //         }
+    //         ++cmd_size;
+    //         payload += 2;
+    //     }
+    //     if (DEBUGGING(INFO))
+    //         SERIAL_EOL();
+    // }
+    // printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
+    // const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
+    // ph_debug_print(response);
 }
 
 //StartActuatingPrinthead
@@ -587,9 +588,7 @@ void GcodeSuite::M2070()
     const auto response = ph_controller.get_extruder_rms_current(index);
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
-    uint16_t current;
-    memcpy(&current, response.packet.payload, 2);
-    SERIAL_ECHOLNPGM_P("Printhead ", static_cast<uint8_t>(response.packet.ph_index), " current:", current);
+    SERIAL_ECHOLNPGM_P("Printhead ", static_cast<uint8_t>(response.packet.ph_index), " current:", response.packet.payload);
 }
 //SetPHHoldCurrent
 void GcodeSuite::M2071()
@@ -605,12 +604,10 @@ void GcodeSuite::M2072()
     const auto response = ph_controller.get_extruder_hold_current(index);
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
-    uint16_t current;
-    memcpy(&current, response.packet.payload, 2);
     SERIAL_ECHOLNPGM_P("Printhead ",
                        static_cast<uint8_t>(response.packet.ph_index),
                        " hold current:",
-                       current);
+                       response.packet.payload);
 }
 //ControlPHAirSupply
 void GcodeSuite::M2073() {}
