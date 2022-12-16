@@ -14,8 +14,8 @@ bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t st
     planner.synchronize();
 
     static auto set_polarity [[maybe_unused]] = [] {
-        SET_INPUT(SENSOR_1);
-        SET_INPUT(SENSOR_2);
+        SET_INPUT_PULLUP(SENSOR_1);
+        SET_INPUT_PULLUP(SENSOR_2);
 
         const auto sensor_1_polarity = READ(SENSOR_1);
         const auto sensor_2_polarity = READ(SENSOR_2);
