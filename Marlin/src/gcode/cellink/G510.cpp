@@ -29,8 +29,14 @@ void GcodeSuite::G510()
         return;
     }
 
+    static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
+    xyz_pos_t start_pos;
+    start_pos.x = parser.axisunitsval('X', AxisEnum::X_AXIS, DEFAULT_START_POS.x);
+    start_pos.y = parser.axisunitsval('Y', AxisEnum::Y_AXIS, DEFAULT_START_POS.y);
+    start_pos.z = parser.axisunitsval('Z', AxisEnum::Z_AXIS, DEFAULT_START_POS.z);
+
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
-    if (optical_autocal.full_autocal_routine(active_extruder, feedrate)) {
+    if (optical_autocal.full_autocal_routine(active_extruder, start_pos, feedrate)) {
         update_offset(optical_autocal.offset(active_extruder));
     }
 }

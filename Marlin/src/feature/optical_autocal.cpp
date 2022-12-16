@@ -7,15 +7,15 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-bool OpticalAutocal::full_autocal_routine(const uint8_t tool, float feedrate)
+bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate)
 {
     home_if_needed();
-    do_blocking_move_to(START_POSITION);
+    do_blocking_move_to(start_pos);
     planner.synchronize();
 
     static auto set_polarity [[maybe_unused]] = [] {
-        SET_INPUT(SENSOR_1);
-        SET_INPUT(SENSOR_2);
+        SET_INPUT_PULLUP(SENSOR_1);
+        SET_INPUT_PULLUP(SENSOR_2);
 
         const auto sensor_1_polarity = READ(SENSOR_1);
         const auto sensor_2_polarity = READ(SENSOR_2);
@@ -29,7 +29,7 @@ bool OpticalAutocal::full_autocal_routine(const uint8_t tool, float feedrate)
         return true;
     }();
 
-    const bool success = full_sensor_sweep(active_extruder, feedrate);
+    const bool success = full_sensor_sweep(active_extruder, start_pos, feedrate);
     if (!success) {
         do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
         SERIAL_ERROR_MSG("autocalibration failed!");
@@ -72,9 +72,9 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return new_offset;
 }
 
-bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
+bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start_pos, const float feedrate)
 {
-    const float z_offset = find_z_offset(feedrate);
+    const float z_offset = find_z_offset(start_pos.z, feedrate);
     if (z_offset == Z_OFFSET_ERR)
         return false;
     else if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
@@ -82,7 +82,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
 
     do_blocking_move_to_z(z_offset - MEDIUM_Z_INCREMENT); // ensure nozzle is visible to both sensors
 
-    const xy_pos_t xy_offset = find_xy_offset(feedrate);
+    const xy_pos_t xy_offset = find_xy_offset(start_pos, feedrate);
     if (xy_offset == XY_OFFSET_ERR)
         return false;
 
@@ -112,7 +112,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
     return true;
 }
 
-[[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const float feedrate) const
+[[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos, const float feedrate) const
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
     volatile float sensor_2_trigger_y_pos{0.0f};
@@ -159,14 +159,14 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
         read_sensor_1 = true;
         read_sensor_2 = false;
 
-        do_blocking_move_to_y(START_POSITION.y + FULL_Y_RANGE, feedrate);
+        do_blocking_move_to_y(start_pos.y + FULL_Y_RANGE, feedrate);
         y1[i] = sensor_1_trigger_y_pos;
         y2[i] = sensor_2_trigger_y_pos;
 
         read_sensor_1 = false;
         read_sensor_2 = true;
 
-        do_blocking_move_to_y(START_POSITION.y, feedrate);
+        do_blocking_move_to_y(start_pos.y, feedrate);
         y3[i] = sensor_2_trigger_y_pos;
         y4[i] = sensor_1_trigger_y_pos;
 
@@ -210,7 +210,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
         SERIAL_ECHOLNPGM("XY offset: ", xy_offset);
 
-    const float x = START_POSITION.x - xy_offset;
+    const float x = start_pos.x - xy_offset;
     const float y = nozzle_y1 + xy_offset;
 
     return {x, y};
@@ -223,8 +223,8 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
 {
     while (!condition && z > soft_endstop.min.z) {
         do_blocking_move_to_z(z, feedrate);
-        do_blocking_move_to_y(START_POSITION.y + SHORT_Y_RANGE, feedrate);
-        do_blocking_move_to_y(START_POSITION.y, feedrate);
+        do_blocking_move_to_y(current_position.y + SHORT_Y_RANGE, feedrate);
+        do_blocking_move_to_y(current_position.y - SHORT_Y_RANGE, feedrate);
         z -= inc;
     }
 
@@ -237,9 +237,8 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const float feedrate)
     return (z + inc) + inc; // report position before interrupt triggered
 }
 
-[[nodiscard]] float OpticalAutocal::find_z_offset(const float feedrate) const
+[[nodiscard]] float OpticalAutocal::find_z_offset(float z, const float feedrate) const
 {
-    float z = START_POSITION.z;
     bool triggered = false;
 
     attachInterrupt(
