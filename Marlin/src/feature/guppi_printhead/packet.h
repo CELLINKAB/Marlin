@@ -219,15 +219,15 @@ constexpr auto concatenate(const std::array<Type, sizes>&... arrays)
                       std::tuple_cat(std::tuple_cat(arrays)...));
 }
 
-template<typename T, class = std::enable_if<std::is_integral_v<T> || std::is_aggregate_v<T>>>
+template<typename T, class = std::enable_if<std::is_integral_v<T>>>
 [[nodiscard]] constexpr auto byte_array(T t) noexcept -> std::array<uint8_t, sizeof(T)>
 {
     if constexpr (sizeof(T) == 1) return std::array{static_cast<uint8_t>(t)};
     else {
-    std::array<uint8_t, sizeof(T)> a;
+    std::array<uint8_t, sizeof(T)> a{};
     size_t i = 0;
-    for (auto& b : a) {
-        b = (t >> (i * sizeof(uint8_t))) & 0xff;
+    for (size_t i = 0; i < sizeof(t); ++i) {
+        a[i] = (t >> (i++ * sizeof(uint8_t))) & 0xff;
     }
     return a;
     }
@@ -237,7 +237,7 @@ template<typename T, size_t N>
 [[nodiscard]] constexpr auto byte_array(std::array<T, N> t) noexcept
     -> std::array<uint8_t, sizeof(T) * N>
 {
-    std::array<uint8_t, sizeof(T) * N> a;
+    std::array<uint8_t, sizeof(T) * N> a{};
     for (size_t i = 0; i < sizeof(t); ++i) {
         size_t byte_number = i % sizeof(T);
         size_t arr_element = i / sizeof(T);
@@ -275,7 +275,7 @@ struct EmptyPacket
         : ph_index(index)
         , command(_command)
         , payload_size(0)
-        , crc(0)
+        , crc(calculate_crc16(header_bytes()))
     {}
 
     [[nodiscard]] auto bytes() const noexcept
@@ -335,7 +335,7 @@ struct Packet<void> final : public EmptyPacket
     {}
 };
 
-constexpr uint16_t crc16_from_bytes(const uint8_t* data,
+[[nodiscard]] constexpr uint16_t crc16_from_bytes(const uint8_t* data,
                                     size_t len,
                                     uint16_t init_data = CRC_INIT_BYTE16)
 {

@@ -36,6 +36,12 @@ Result printhead::unsafe_send(const void * data, const size_t size, HardwareSeri
     return Result::OK;
 }
 
+void printhead::flush_rx(HardwareSerial& serial)
+{
+    while (serial.available())
+        auto _ = serial.read();
+}
+
 void Controller::init()
 {
     constexpr static unsigned CHANT_BAUDRATE = 115200;
@@ -53,9 +59,9 @@ celsius_float_t Controller::get_temperature(Index index)
 {
     Packet request(index, Command::GET_MEASURED_TEMP);
     auto res = send_and_receive<celsius_t>(request, bus);
+    if (DEBUGGING(INFO)) print_response(res);
     if (res.result != Result::OK || res.packet.payload_size < 2)
         return 0.0f;
-
     return (res.packet.payload - 30'000) / 100.0f;
 }
 

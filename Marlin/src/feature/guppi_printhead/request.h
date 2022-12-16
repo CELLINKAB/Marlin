@@ -73,68 +73,7 @@ struct Response
 };
 
 template<typename T>
-Response<T> receive(HardwareSerial& serial)
-{
-    // this seems bug-prone...
-    static constexpr size_t MAX_PACKET = 128;
-    static uint8_t packet_buffer[MAX_PACKET]{};
-
-    Packet<T> incoming;
-
-    auto bytes_received = serial.readBytes(packet_buffer, 6);
-
-    if (bytes_received < 6)
-        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
-
-    memcpy(&incoming.ph_index, &packet_buffer[0], 2);
-    memcpy(&incoming.command, &packet_buffer[2], 2);
-    memcpy(&incoming.payload_size, &packet_buffer[4], 2);
-
-    if ((incoming.payload_size + 2) > MAX_PACKET)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
-
-    bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
-    if (incoming.payload_size != bytes_received - 2)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
-
-    if constexpr (!std::is_void_v<T>) {
-        memcpy(&incoming.payload, packet_buffer, sizeof(incoming.payload));
-        memcpy(&incoming.crc, &packet_buffer[incoming.payload_size], 2);
-    }
-    uint16_t crc = calculate_crc16(incoming.bytes());
-
-    if (crc != incoming.crc)
-        return Response<T>{incoming, Result::BAD_CRC};
-
-    return Response<T>{incoming, Result::OK};
-
-    // ACK would go here
-}
-
-template<typename T>
-Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true)
-{
-    static auto init [[maybe_unused]] = [] {
-        OUT_WRITE(CHANT_RTS_PIN, LOW);
-        return 0;
-    }();
-    const auto packet_bytes = request.bytes();
-    WRITE(CHANT_RTS_PIN, HIGH);
-    for (const auto byte : packet_bytes)
-        serial.write(byte);
-    serial.flush();
-    WRITE(CHANT_RTS_PIN, LOW);
-
-    // should read an ACK after this write to assure complete transaction
-    if (expect_ack)
-        auto _ = receive<void>(serial);
-    return Result::OK;
-}
-
-Result unsafe_send(const void * data, const size_t size, HardwareSerial& serial);
-
-template<typename T>
-void print_packet(const Packet<T> & packet)
+void print_packet(const Packet<T>& packet)
 {
     SERIAL_PRINT(static_cast<uint16_t>(packet.ph_index), PrintBase::Hex);
     SERIAL_CHAR(' ');
@@ -165,8 +104,82 @@ void print_response(Response<T> response)
     print_packet(response.packet);
 }
 
+void flush_rx(HardwareSerial& serial);
+
+template<typename T>
+Response<T> receive(HardwareSerial& serial)
+{
+    // this seems bug-prone...
+    static constexpr size_t MAX_PACKET = 128;
+    static uint8_t packet_buffer[MAX_PACKET]{};
+
+    Packet<T> incoming;
+
+    auto bytes_received = serial.readBytes(packet_buffer, 6);
+
+    if (bytes_received < 6)
+        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
+
+    memcpy(&incoming.ph_index, &packet_buffer[0], 2);
+    memcpy(&incoming.command, &packet_buffer[2], 2);
+    memcpy(&incoming.payload_size, &packet_buffer[4], 2);
+
+    if (incoming.command == Command::ERROR) {
+        const uint8_t e = static_cast<uint8_t>(serial.read());
+        if (DEBUGGING(ERRORS)) {
+            SERIAL_ECHO("RECD_CHANT_ERROR: ");
+            SERIAL_PRINTLN(e, PrintBase::Dec);
+        }
+        flush_rx(serial);
+        return Response<T>{incoming, Result::UNIMPLEMENTED};
+    }
+
+    if ((incoming.payload_size + 2) > MAX_PACKET)
+        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
+
+    bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
+    if (incoming.payload_size != bytes_received - 2)
+        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
+
+    if constexpr (!std::is_void_v<T>) {
+        memcpy(&incoming.payload, packet_buffer, sizeof(incoming.payload));
+        memcpy(&incoming.crc, &packet_buffer[incoming.payload_size], 2);
+    }
+    uint16_t crc = calculate_crc16(incoming.bytes());
+
+    if (crc != incoming.crc)
+        return Response<T>{incoming, Result::BAD_CRC};
+
+    return Response<T>{incoming, Result::OK};
+
+    // ACK would go here
+}
+
+template<typename T>
+Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true)
+{
+    static auto init [[maybe_unused]] = [] {
+        OUT_WRITE(CHANT_RTS_PIN, LOW);
+        return 0;
+    }();
+    const auto packet_bytes = request.bytes();
+    flush_rx(serial);
+    WRITE(CHANT_RTS_PIN, HIGH);
+    for (const auto byte : packet_bytes)
+        serial.write(byte);
+    serial.flush();
+    WRITE(CHANT_RTS_PIN, LOW);
+
+    // should read an ACK after this write to assure complete transaction
+    if (expect_ack)
+        auto _ = receive<void>(serial);
+    return Result::OK;
+}
+
+Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
+
 template<typename OUT, typename IN = void>
-Response<OUT> send_and_receive(const Packet<IN> & packet, HardwareSerial& serial)
+Response<OUT> send_and_receive(const Packet<IN>& packet, HardwareSerial& serial)
 {
     Response<OUT> response;
     response.result = send<IN>(packet, serial, false);
