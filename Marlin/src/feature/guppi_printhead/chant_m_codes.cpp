@@ -5,7 +5,7 @@
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
 
-#include "request.h"
+#include "chantarelle.h"
 
 #if ENABLED(CHANTARELLE_SUPPORT)
 
@@ -75,7 +75,8 @@ void ph_debug_print(printhead::Result result)
 void GcodeSuite::G511()
 {
     BIND_INDEX_OR_RETURN(index);
-    printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
+    printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract
+                                                        : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
 }
@@ -114,33 +115,49 @@ void GcodeSuite::G513()
 // debug arbitrary command, super unsafe
 void GcodeSuite::M1069()
 {
-    // static uint8_t cmd_buf[128]{};
-    // const printhead::Index index = static_cast<printhead::Index>(get_target_extruder_from_command());
-    // const printhead::Command command = static_cast<printhead::Command>(parser.ushortval('C'));
-    // const char* payload = parser.string_arg;
-    // uint8_t cmd_size = 0;
-    // if (payload != nullptr) {
-    //     if (DEBUGGING(INFO))
-    //         SERIAL_ECHOPGM("input: ", payload, " parsed: ");
-    //     if (payload[0] == 'P')
-    //         payload += 1;
-    //     if (payload[0] == '0' && payload[1] == 'x')
-    //         payload += 2;
-    //     while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 128) {
-    //         cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
-    //         if (DEBUGGING(INFO)) {
-    //             SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
-    //             SERIAL_CHAR(' ');
-    //         }
-    //         ++cmd_size;
-    //         payload += 2;
-    //     }
-    //     if (DEBUGGING(INFO))
-    //         SERIAL_EOL();
-    // }
-    // printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
-    // const auto response = printhead::send_and_receive(debug_cmd, CHANT_SERIAL);
-    // ph_debug_print(response);
+    static uint8_t cmd_buf[128]{};
+    const uint16_t index = (get_target_extruder_from_command());
+    const uint16_t command = (parser.ushortval('C'));
+    memcpy(cmd_buf, &index, 2);
+    memcpy(cmd_buf + 2, &command, 2);
+    const char* payload = parser.string_arg;
+    size_t cmd_size = 4;
+    if (payload != nullptr) {
+        if (DEBUGGING(INFO))
+            SERIAL_ECHOPGM("input: ", payload, " parsed: ");
+        if (payload[0] == 'P')
+            payload += 1;
+        if (payload[0] == '0' && payload[1] == 'x')
+            payload += 2;
+        while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 125) {
+            cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+            if (DEBUGGING(INFO)) {
+                SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
+                SERIAL_CHAR(' ');
+            }
+            ++cmd_size;
+            payload += 2;
+        }
+        if (DEBUGGING(INFO))
+            SERIAL_EOL();
+    }
+    uint16_t crc = printhead::crc16_from_bytes(cmd_buf, cmd_size);
+    memcpy(cmd_buf, &crc, 2);
+    cmd_size += 2;
+    //printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
+    auto send_success = printhead::unsafe_send(cmd_buf, cmd_size, CHANT_SERIAL);
+    if (send_success != printhead::Result::OK) {
+        ph_debug_print(send_success);
+        return;
+    }
+    size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 128);
+    for (size_t i = 0; i < read_bytes; ++i)
+    {
+        SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
+        SERIAL_CHAR(' ');
+    }
+    SERIAL_EOL();
+    //ph_debug_print(response);
 }
 
 //StartActuatingPrinthead
@@ -173,7 +190,7 @@ void GcodeSuite::M771()
         ph_debug_print(res);
         return;
     }
-   
+
     const int16_t temperature = parser.celsiusval('C');
     auto res = ph_controller.set_temperature(index, temperature);
     ph_debug_print(res);
@@ -588,7 +605,10 @@ void GcodeSuite::M2070()
     const auto response = ph_controller.get_extruder_rms_current(index);
     if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
         return;
-    SERIAL_ECHOLNPGM_P("Printhead ", static_cast<uint8_t>(response.packet.ph_index), " current:", response.packet.payload);
+    SERIAL_ECHOLNPGM_P("Printhead ",
+                       static_cast<uint8_t>(response.packet.ph_index),
+                       " current:",
+                       response.packet.payload);
 }
 //SetPHHoldCurrent
 void GcodeSuite::M2071()

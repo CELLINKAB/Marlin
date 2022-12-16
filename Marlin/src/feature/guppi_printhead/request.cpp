@@ -25,6 +25,17 @@ void Controller::set_extruder_state(printhead::Index index, bool state)
     }
 }
 
+Result printhead::unsafe_send(const void * data, const size_t size, HardwareSerial& serial)
+{
+
+    OUT_WRITE(CHANT_RTS_PIN, HIGH);
+    size_t sent = serial.write(static_cast<const uint8_t *>(data), size);
+    WRITE(CHANT_RTS_PIN, LOW);
+    if (sent != size)
+        return Result::BUSY;
+    return Result::OK;
+}
+
 void Controller::init()
 {
     constexpr static unsigned CHANT_BAUDRATE = 115200;

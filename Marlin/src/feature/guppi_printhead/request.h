@@ -131,6 +131,8 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
     return Result::OK;
 }
 
+Result unsafe_send(const void * data, const size_t size, HardwareSerial& serial);
+
 template<typename T>
 void print_packet(const Packet<T> & packet)
 {
