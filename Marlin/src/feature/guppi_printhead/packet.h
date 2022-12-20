@@ -212,6 +212,33 @@ static constexpr uint16_t crcTable16[256]
     return crc_state;
 }
 
+[[nodiscard]] constexpr uint16_t crc16_from_bytes(const uint8_t* data,
+                                    size_t len,
+                                    uint16_t init_data = CRC_INIT_BYTE16)
+{
+    uint16_t crc = init_data;
+
+    while (len--) {
+        crc = crc16_iteration(crc, *data++);
+    }
+
+    return crc;
+}
+
+/**
+ * @brief Calculate the CRC of a provided memory region, optionally extending from a previous calculation
+ * 
+ * @param c_ptr data to be checksummed
+ * @param len number of bytes to read
+ * @param initData if extending from a previous CRC calculation, use the CRC previously calculated here, otherwise the default init value is used
+ * @return constexpr uint16_t 
+ */
+constexpr uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_INIT_BYTE16)
+{
+    const uint8_t* c = static_cast<const uint8_t*>(c_ptr);
+    return crc16_from_bytes(c, len, initData);
+}
+
 template<typename Type, std::size_t... sizes>
 constexpr auto concatenate(const std::array<Type, sizes>&... arrays)
 {
@@ -278,7 +305,7 @@ struct EmptyPacket
         , crc(calculate_crc16(header_bytes()))
     {}
 
-    [[nodiscard]] auto bytes() const noexcept
+    [[nodiscard]] constexpr auto bytes() const noexcept
     {
         return concatenate(header_bytes(), byte_array(crc));
     }
@@ -335,32 +362,7 @@ struct Packet<void> final : public EmptyPacket
     {}
 };
 
-[[nodiscard]] constexpr uint16_t crc16_from_bytes(const uint8_t* data,
-                                    size_t len,
-                                    uint16_t init_data = CRC_INIT_BYTE16)
-{
-    uint16_t crc = init_data;
 
-    while (len--) {
-        crc = crc16_iteration(crc, *data++);
-    }
-
-    return crc;
-}
-
-/**
- * @brief Calculate the CRC of a provided memory region, optionally extending from a previous calculation
- * 
- * @param c_ptr data to be checksummed
- * @param len number of bytes to read
- * @param initData if extending from a previous CRC calculation, use the CRC previously calculated here, otherwise the default init value is used
- * @return constexpr uint16_t 
- */
-constexpr uint16_t crc16_from_data(const void* c_ptr, size_t len, uint16_t initData = CRC_INIT_BYTE16)
-{
-    const uint8_t* c = static_cast<const uint8_t*>(c_ptr);
-    return crc16_from_bytes(c, len, initData);
-}
 
 } // namespace printhead
 
