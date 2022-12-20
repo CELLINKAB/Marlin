@@ -159,13 +159,10 @@ Response<T> receive(HardwareSerial& serial)
 template<typename T>
 Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true)
 {
-    static auto init [[maybe_unused]] = [] {
-        OUT_WRITE(CHANT_RTS_PIN, LOW);
-        return 0;
-    }();
+    serial.setTimeout(10);
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
-    WRITE(CHANT_RTS_PIN, HIGH);
+    OUT_WRITE(CHANT_RTS_PIN, HIGH);
     for (const auto byte : packet_bytes)
         serial.write(byte);
     serial.flush();
