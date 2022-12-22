@@ -51,6 +51,7 @@ struct SimpleTMC
         : config(config_)
         , driver(serial, config_.rsense, config_.hw_address)
     {
+        driver.begin();
         init_driver();
     }
 
@@ -58,6 +59,8 @@ struct SimpleTMC
         : config(config_)
         , driver(rx_pin, tx_pin, config_.rsense, config_.hw_address)
     {
+        driver.begin();
+        driver.beginSerial(19200);
         init_driver();
     }
 
@@ -198,6 +201,7 @@ private:
             SET_OUTPUT(STEP);
         if constexpr (DIR > -1)
             SET_OUTPUT(DIR);
+
 
         TMC2208_n::GCONF_t gconf{};
         gconf.pdn_disable = true;      // Use UART
