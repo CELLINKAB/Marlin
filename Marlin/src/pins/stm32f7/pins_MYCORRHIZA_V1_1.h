@@ -199,6 +199,10 @@
 #define CHANT_IRQ1_PIN PC13
 #define CHANT_IRQ2_PIN PC14
 
+#define E0_ENABLE_INIT() ()
+#define E0_DIR_INIT() pinMode(PC14, OUTPUT)
+#define E0_STEP_INIT() pinMode(PC13, OUTPUT)
+
 //
 // UVC sterilization
 //
