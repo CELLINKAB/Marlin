@@ -2133,6 +2133,13 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
 
   TERN_(HAS_EXTRUDERS, block->steps.e = esteps);
 
+  #if ENABLED(CHANTARELLE_SUPPORT)
+  {
+  printhead::Index ph_index = static_cast<printhead::Index>(extruder);
+  ph_controller.set_extruder_direction(ph_index, (de < 0));
+  }
+  #endif
+
   block->step_event_count = _MAX(LOGICAL_AXIS_LIST(
     esteps, block->steps.a, block->steps.b, block->steps.c, block->steps.i, block->steps.j, block->steps.k
   ));
