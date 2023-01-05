@@ -474,11 +474,20 @@ void GcodeSuite::M1070() {}
 //
 // Syringe pump codes
 //
+
+//DebugAddSteps
+void GcodeSuite::M2020()
+{
+    BIND_INDEX_OR_RETURN(index);
+    const int32_t steps = parser.longval('S');
+    auto res = ph_controller.add_raw_extruder_steps(index, steps);
+    ph_debug_print(res);
+}
 //SetPHExtrusionSpeed
 void GcodeSuite::M2030()
 {
     BIND_INDEX_OR_RETURN(index);
-    const feedRate_t feedrate = parser.feedrateval('F');
+    const uint32_t feedrate = static_cast<uint32_t>(parser.floatval('F') / 1000);
     if (feedrate == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
@@ -501,7 +510,12 @@ void GcodeSuite::M2034() {}
 //GetPHExtrusionStepVol
 void GcodeSuite::M2035() {}
 //SetPHFullstepExtrusionVol
-void GcodeSuite::M2036() {}
+void GcodeSuite::M2036() {
+    BIND_INDEX_OR_RETURN(index);
+    const uint32_t pL_volume = parser.ulongval('V');
+    auto res = ph_controller.set_fullstep_volume(index, pL_volume);
+    ph_debug_print(res);
+}
 //GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
 //SetPHMicrostep

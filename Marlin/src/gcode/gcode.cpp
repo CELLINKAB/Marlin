@@ -210,7 +210,7 @@ void GcodeSuite::get_destination_from_command() {
 
   if (parser.floatval('F') > 0)
     {feedrate_mm_s = parser.value_feedrate();
-    TERN_(CHANTARELLE_SUPPORT, ph_controller.set_extrusion_speed(static_cast<printhead::Index>(active_extruder), feedrate_mm_s));}
+    }
 
   #if BOTH(PRINTCOUNTER, HAS_EXTRUDERS)
     if (!DEBUGGING(DRYRUN) && !skip_move)
@@ -1239,6 +1239,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1069: M1069(); break;
 
         //syringe pump commands
+        case 2020: M2020(); break;
         case 2030: M2030(); break;
         case 2031: M2031(); break;
         case 2032: M2032(); break;

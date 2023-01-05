@@ -1399,6 +1399,7 @@ private:
     static void M1069();
 
     // syringe pump commands
+    static void M2020();
     static void M2030();
     static void M2031();
     static void M2032();
