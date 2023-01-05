@@ -122,11 +122,8 @@ auto Controller::get_tem_debug(Index index) -> Response<TemTemps>
     return send_and_receive<TemTemps>(packet, bus);
 }
 
-Result Controller::set_extrusion_speed(Index index, feedRate_t feedrate_mm_s)
+Result Controller::set_extrusion_speed(Index index, uint32_t feedrate_pl_s)
 {
-    constexpr double filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2.0;
-    constexpr double mm_to_pl_factor = (filament_radius * filament_radius * PI) * 1000.0;
-    const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_mm_s * mm_to_pl_factor);
     Packet packet(index, Command::SET_EXTRUSION_SPEED, feedrate_pl_s);
     return send(packet, bus);
 }

@@ -210,7 +210,7 @@ void GcodeSuite::get_destination_from_command() {
 
   if (parser.floatval('F') > 0)
     {feedrate_mm_s = parser.value_feedrate();
-    TERN_(CHANTARELLE_SUPPORT, ph_controller.set_extrusion_speed(static_cast<printhead::Index>(active_extruder), feedrate_mm_s));}
+    }
 
   #if BOTH(PRINTCOUNTER, HAS_EXTRUDERS)
     if (!DEBUGGING(DRYRUN) && !skip_move)

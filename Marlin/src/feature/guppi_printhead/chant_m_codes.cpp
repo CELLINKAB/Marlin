@@ -487,7 +487,7 @@ void GcodeSuite::M2020()
 void GcodeSuite::M2030()
 {
     BIND_INDEX_OR_RETURN(index);
-    const feedRate_t feedrate = parser.feedrateval('F');
+    const uint32_t feedrate = static_cast<uint32_t>(parser.floatval('F') / 1000);
     if (feedrate == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m

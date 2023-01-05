@@ -247,7 +247,7 @@ public:
     auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
     auto get_tem_debug(Index index) -> Response<TemTemps>;
     // Extruder Stepper driver methods
-    Result set_extrusion_speed(Index index, feedRate_t feedrate);
+    Result set_extrusion_speed(Index index, uint32_t feedrate);
     Response<uint32_t> get_extrusion_speed(Index index);
     Result set_extruder_stallguard_threshold(Index index, uint8_t threshold);
     Response<uint8_t> get_extruder_stallguard_threshold(Index index);

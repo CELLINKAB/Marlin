@@ -2135,8 +2135,9 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
 
   #if ENABLED(CHANTARELLE_SUPPORT)
   {
-  printhead::Index ph_index = static_cast<printhead::Index>(extruder);
-  ph_controller.set_extruder_direction(ph_index, (de < 0));
+    printhead::Index ph_index = static_cast<printhead::Index>(extruder);
+    ph_controller.set_extruder_direction(ph_index, (de < 0));
+    ph_controller.add_raw_extruder_steps(ph_index, static_cast<int32_t>(esteps));
   }
   #endif
 
