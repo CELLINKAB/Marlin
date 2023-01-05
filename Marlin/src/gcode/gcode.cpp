@@ -1239,6 +1239,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1069: M1069(); break;
 
         //syringe pump commands
+        case 2020: M2020(); break;
         case 2030: M2030(); break;
         case 2031: M2031(); break;
         case 2032: M2032(); break;
