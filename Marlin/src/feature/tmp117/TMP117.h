@@ -138,6 +138,7 @@ private:
     uint8_t address;
     int8_t alert_pin;
     TMP117_ALERT alert_type;
+    void (*newDataCallback)(void);
     double scale_factor;
 
     void i2cWrite2B(uint8_t reg, uint16_t data);
@@ -147,7 +148,6 @@ private:
     void unlockEEPROM(void);
     bool EEPROMisBusy(void);
 
-    void (*newDataCallback)(void);
 };
 
 #endif

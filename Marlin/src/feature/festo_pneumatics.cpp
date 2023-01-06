@@ -113,7 +113,7 @@ constexpr static pin_t get_valve(uint8_t tool)
     case 2:
         return PRESSURE_VALVE_C3_PIN;
     default:
-        return NC;
+        return -1;
     }
 }
 

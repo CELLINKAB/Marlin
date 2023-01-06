@@ -134,7 +134,7 @@ Response<T> receive(HardwareSerial& serial)
         return Response<T>{incoming, Result::UNIMPLEMENTED};
     }
 
-    if ((incoming.payload_size + 2) > MAX_PACKET)
+    if (static_cast<size_t>(incoming.payload_size + 2) > MAX_PACKET)
         return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
 
     bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
@@ -170,7 +170,7 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
 
     // should read an ACK after this write to assure complete transaction
     if (expect_ack)
-        auto _ = receive<void>(serial);
+        auto res [[maybe_unused]] = receive<void>(serial);
     return Result::OK;
 }
 

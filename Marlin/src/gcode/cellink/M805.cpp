@@ -11,7 +11,7 @@
 struct CuringLed
 {
     pin_t pin;
-    uint32_t steps;
+    int32_t steps;
 };
 
 constexpr CuringLed led_for_wavelength(uint16_t wavelength)

@@ -2196,7 +2196,9 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
  * Test Sensor & Heater pin combos.
  * Pins and Sensor IDs must be set for each heater
  */
-#if HAS_HOTEND && !ANY_PIN(TEMP_0, TEMP_0_CS) && DISABLED(CHANTARELLE_SUPPORT)
+#if ENABLED(CHANTARELLE_SUPPORT)
+  // no more checks required
+#elif HAS_HOTEND && !ANY_PIN(TEMP_0, TEMP_0_CS)
   #error "TEMP_0_PIN or TEMP_0_CS_PIN not defined for this board."
 #elif HAS_HOTEND && !HAS_HEATER_0
   #error "HEATER_0_PIN not defined for this board."
@@ -2208,7 +2210,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
   #error "HEATER_1_PIN is not defined. TEMP_SENSOR_1 might not be set, or the board (not EEB / EEF?) doesn't define a pin."
 #endif
 
-#if HAS_MULTI_HOTEND
+#if HAS_MULTI_HOTEND && DISABLED(CHANTARELLE_SUPPORT)
   #if TEMP_SENSOR_1_IS_MAX_TC && !PIN_EXISTS(TEMP_1_CS)
     #error "TEMP_SENSOR_1 MAX thermocouple requires TEMP_1_CS_PIN."
   #elif TEMP_SENSOR_1 == 0
@@ -2411,7 +2413,7 @@ static_assert(Y_MAX_LENGTH >= Y_BED_SIZE, "Movement bounds (Y_MIN_POS, Y_MAX_POS
     #error "E0_STEP_PIN or E0_DIR_PIN not defined for this board."
   #elif ( !(defined(__AVR_ATmega644P__) || defined(__AVR_ATmega1284P__)) && (!PINS_EXIST(E0_STEP, E0_DIR) || !HAS_E0_ENABLE)) && DISABLED(CHANTARELLE_SUPPORT)
     #error "E0_STEP_PIN, E0_DIR_PIN, or E0_ENABLE_PIN not defined for this board."
-  #elif EXTRUDERS && TEMP_SENSOR_0 == 0
+  #elif EXTRUDERS && TEMP_SENSOR_0 == 0 && DISABLED(CHANTARELLE_SUPPORT)
     #error "TEMP_SENSOR_0 is required if there are any extruders."
   #endif
 #endif

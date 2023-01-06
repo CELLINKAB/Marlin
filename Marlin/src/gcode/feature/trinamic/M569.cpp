@@ -44,7 +44,7 @@ void tmc_set_stealthChop(TMC &st, const bool enable) {
   st.refresh_stepping_mode();
 }
 
-static void set_stealth_status(const bool enable, const int8_t eindex) {
+static void set_stealth_status(const bool enable, [[maybe_unused]] const int8_t eindex) {
   #define TMC_SET_STEALTH(Q) tmc_set_stealthChop(stepper##Q, enable)
 
   #if X2_HAS_STEALTHCHOP || Y2_HAS_STEALTHCHOP || Z2_HAS_STEALTHCHOP || Z3_HAS_STEALTHCHOP || Z4_HAS_STEALTHCHOP
@@ -96,7 +96,8 @@ static void set_stealth_status(const bool enable, const int8_t eindex) {
           TERN_(E5_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 5) TMC_SET_STEALTH(E5));
           TERN_(E6_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 6) TMC_SET_STEALTH(E6));
           TERN_(E7_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 7) TMC_SET_STEALTH(E7));
-        } break;
+        } 
+        break;
       #endif
     }
   }

@@ -1842,7 +1842,7 @@ void Temperature::manage_heater() {
 #if HAS_HOTEND
   // Derived from RepRap FiveD extruder::getTemperature()
   // For hot end temperature measurement.
-  celsius_float_t Temperature::analog_to_celsius_hotend(const raw_adc_t raw, const uint8_t e) {
+  celsius_float_t Temperature::analog_to_celsius_hotend([[maybe_unused]] const raw_adc_t raw, const uint8_t e) {
     if (e >= HOTENDS) {
       SERIAL_ERROR_START();
       SERIAL_ECHO(e);
@@ -1958,6 +1958,7 @@ void Temperature::manage_heater() {
       const temp_entry_t(*tt)[] = (temp_entry_t(*)[])(heater_ttbl_map[e]);
       SCAN_THERMISTOR_TABLE((*tt), heater_ttbllen_map[e]);
     #endif
+
 
     return 0;
   }
@@ -2579,6 +2580,7 @@ void Temperature::init() {
       case TRFirstHeating:
         if (current < running_temp) break;
         state = TRStable;
+        [[fallthrough]];
 
       // While the temperature is stable watch for a bad temperature
       case TRStable: {
@@ -3042,11 +3044,11 @@ void Temperature::isr() {
     static bool ADCKey_pressed = false;
   #endif
 
-  #if HAS_HOTEND
+  #if HAS_HOTEND && DISABLED(CHANTARELLE_SUPPORT)
     static SoftPWM soft_pwm_hotend[HOTENDS];
   #endif
 
-  #if HAS_HEATED_BED
+  #if HAS_HEATED_BED && DISABLED(MYCO_HEATER)
     static SoftPWM soft_pwm_bed;
   #endif
 

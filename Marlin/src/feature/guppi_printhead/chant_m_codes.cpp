@@ -180,7 +180,7 @@ void GcodeSuite::M771()
     BIND_INDEX_OR_RETURN(index);
     if (parser.seen('D')) { // debug, set PWM directly
         printhead::TemTemps both_tems_pwm;
-        const uint16_t tem_pwm = constrain(parser.ulongval('S'), 0, 4096);
+        const uint16_t tem_pwm = min(parser.ulongval('S'), 4096UL);
         if (parser.seen('I')) {
             const uint8_t tem_index = constrain(parser.value_byte(),
                                                 0,
@@ -254,7 +254,7 @@ void GcodeSuite::M792()
 {
     BIND_INDEX_OR_RETURN(index);
     printhead::FanSpeeds both_fans_pwm;
-    const uint16_t fan_pwm = constrain(parser.ulongval('S'), 0, 4096);
+    const uint16_t fan_pwm = min(parser.ulongval('S'), 4096UL);
     if (parser.seen('I')) {
         const uint8_t fan_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
         both_fans_pwm[fan_index] = fan_pwm;
@@ -434,7 +434,7 @@ void GcodeSuite::M1035()
             handle_sensor(sensor);
         }
     } else {
-        auto& sensor = bed_sensors()[constrain(sensor_index, 0, bed_sensors().size() - 1)];
+        auto& sensor = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
         handle_sensor(sensor);
     }
 }
@@ -629,33 +629,16 @@ void GcodeSuite::M2069()
 //GetPHPeakCurrent
 void GcodeSuite::M2070()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const auto response = ph_controller.get_extruder_rms_current(index);
-    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
-        return;
-    SERIAL_ECHOLNPGM_P("Printhead ",
-                       static_cast<uint8_t>(response.packet.ph_index),
-                       " current:",
-                       response.packet.payload);
+
 }
 //SetPHHoldCurrent
 void GcodeSuite::M2071()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const uint16_t current = parser.ushortval('C');
-    ph_controller.set_extruder_hold_current(index, current);
+
 }
 //GetPHHoldCurrent
 void GcodeSuite::M2072()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const auto response = ph_controller.get_extruder_hold_current(index);
-    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
-        return;
-    SERIAL_ECHOLNPGM_P("Printhead ",
-                       static_cast<uint8_t>(response.packet.ph_index),
-                       " hold current:",
-                       response.packet.payload);
 }
 //ControlPHAirSupply
 void GcodeSuite::M2073() {}

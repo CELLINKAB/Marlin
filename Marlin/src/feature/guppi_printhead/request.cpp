@@ -39,7 +39,7 @@ Result printhead::unsafe_send(const void * data, const size_t size, HardwareSeri
 void printhead::flush_rx(HardwareSerial& serial)
 {
     while (serial.available())
-        auto _ = serial.read();
+        auto _ [[maybe_unused]] = serial.read();
 }
 
 void Controller::init()
@@ -51,7 +51,7 @@ void Controller::init()
 Result Controller::set_temperature(Index index, celsius_t temperature)
 {
     uint16_t chant_temp = temperature + 30'000;
-    Packet request(index, Command::SET_TEMP, temperature);
+    Packet request(index, Command::SET_TEMP, chant_temp);
     return send(request, bus);
 }
 
@@ -78,7 +78,6 @@ Response<void> Controller::get_fw_version(Index index)
 
 Result Controller::set_pid(Index index, float p, float i, float d)
 {
-    static constexpr uint8_t PAYLOAD_SIZE = 6;
     uint16_t p_ = static_cast<uint16_t>(p * 100);
     uint16_t i_ = static_cast<uint16_t>(i * 100);
     uint16_t d_ = static_cast<uint16_t>(d * 100);
@@ -160,21 +159,6 @@ Result Controller::set_extruder_rms_current(Index index, uint16_t mA)
     return send(Packet{index, Command::DEBUG_SET_MOTOR_CURRENT, mA}, bus);
 }
 
-Response<uint16_t> Controller::get_extruder_rms_current(Index index)
-{
-    return Response<uint16_t>{Packet<uint16_t>{}, Result::UNIMPLEMENTED};
-}
-
-Result Controller::set_extruder_hold_current(Index index, uint16_t mA)
-{
-    return Result::UNIMPLEMENTED;
-}
-
-Response<uint16_t> Controller::get_extruder_hold_current(Index index)
-{
-    return Response<uint16_t>{Packet<uint16_t>{}, Result::UNIMPLEMENTED};
-}
-
 Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
@@ -221,50 +205,9 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
     return send(packet, bus);
 }
 
-Result Controller::set_valve_speed(Index index, feedRate_t feedrate)
-{
-    return Result::UNIMPLEMENTED;
-}
 
-Response<uint32_t> Controller::get_valve_speed(Index index)
-{
-    return Response<uint32_t>{Packet<uint32_t>{}, Result::UNIMPLEMENTED};
-}
 
-Result Controller::set_valve_stallguard_threshold(Index index, uint8_t threshold)
-{
-    return Result::UNIMPLEMENTED;
-}
 
-Response<uint8_t> Controller::get_valve_stallguard_threshold(Index index)
-{
-    return Response<uint8_t>{Packet<uint8_t>{}, Result::UNIMPLEMENTED};
-}
-
-Result Controller::set_valve_microsteps(Index index, uint8_t microsteps)
-{
-    return Result::UNIMPLEMENTED;
-}
-
-Response<uint8_t> Controller::get_valve_microsteps(Index index)
-{
-    return Response<uint8_t>{Packet<uint8_t>{}, Result::UNIMPLEMENTED};
-}
-
-Result Controller::set_valve_rms_current(Index index, uint16_t mA)
-{
-    return Result::UNIMPLEMENTED;
-}
-
-Response<uint16_t> Controller::get_valve_rms_current(Index index)
-{ // TODO: UNIMPLEMENTED
-    return Response<uint16_t>{Packet<uint16_t>{}, Result::UNIMPLEMENTED};
-}
-
-Result Controller::set_valve_hold_current(Index index, uint16_t mA)
-{ // TODO: UNIMPLEMENTED
-    return Result::UNIMPLEMENTED;
-}
 
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
 {

@@ -67,7 +67,7 @@
   #define DIGITAL_PIN_TO_ANALOG_PIN(P) int(analogInputToDigitalPin(0) - (P))
   #define IS_ANALOG(P) ((P) >= analogInputToDigitalPin(7) && (P) <= analogInputToDigitalPin(0))
 #else
-  #define DIGITAL_PIN_TO_ANALOG_PIN(P) int((P) - analogInputToDigitalPin(0))
+  #define DIGITAL_PIN_TO_ANALOG_PIN(P) pin_t((P) - analogInputToDigitalPin(0))
   #define IS_ANALOG(P) ((P) >= analogInputToDigitalPin(0) && ((P) <= analogInputToDigitalPin(15) || (P) <= analogInputToDigitalPin(7)))
 #endif
 #define GET_ARRAY_PIN(p) pgm_read_byte(&pin_array[p].pin)
