@@ -159,11 +159,6 @@ Result Controller::set_extruder_rms_current(Index index, uint16_t mA)
     return send(Packet{index, Command::DEBUG_SET_MOTOR_CURRENT, mA}, bus);
 }
 
-Response<uint16_t> Controller::get_extruder_hold_current(Index index)
-{
-    return Response<uint16_t>{Packet<uint16_t>{}, Result::UNIMPLEMENTED};
-}
-
 Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
@@ -210,22 +205,8 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
     return send(packet, bus);
 }
 
-Response<uint8_t> Controller::get_valve_stallguard_threshold(Index index)
-{
-    return Response<uint8_t>{Packet<uint8_t>{}, Result::UNIMPLEMENTED};
-}
 
 
-Response<uint8_t> Controller::get_valve_microsteps(Index index)
-{
-    return Response<uint8_t>{Packet<uint8_t>{}, Result::UNIMPLEMENTED};
-}
-
-
-Response<uint16_t> Controller::get_valve_rms_current(Index index)
-{ // TODO: UNIMPLEMENTED
-    return Response<uint16_t>{Packet<uint16_t>{}, Result::UNIMPLEMENTED};
-}
 
 
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
