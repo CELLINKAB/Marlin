@@ -434,7 +434,7 @@ void GcodeSuite::M1035()
             handle_sensor(sensor);
         }
     } else {
-        auto& sensor = bed_sensors()[constrain(sensor_index, 0, bed_sensors().size() - 1)];
+        auto& sensor = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
         handle_sensor(sensor);
     }
 }

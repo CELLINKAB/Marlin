@@ -39,7 +39,7 @@ Result printhead::unsafe_send(const void * data, const size_t size, HardwareSeri
 void printhead::flush_rx(HardwareSerial& serial)
 {
     while (serial.available())
-        auto _ = serial.read();
+        auto _ [[maybe_unused]] = serial.read();
 }
 
 void Controller::init()
@@ -51,7 +51,7 @@ void Controller::init()
 Result Controller::set_temperature(Index index, celsius_t temperature)
 {
     uint16_t chant_temp = temperature + 30'000;
-    Packet request(index, Command::SET_TEMP, temperature);
+    Packet request(index, Command::SET_TEMP, chant_temp);
     return send(request, bus);
 }
 
@@ -78,7 +78,6 @@ Response<void> Controller::get_fw_version(Index index)
 
 Result Controller::set_pid(Index index, float p, float i, float d)
 {
-    static constexpr uint8_t PAYLOAD_SIZE = 6;
     uint16_t p_ = static_cast<uint16_t>(p * 100);
     uint16_t i_ = static_cast<uint16_t>(i * 100);
     uint16_t d_ = static_cast<uint16_t>(d * 100);
