@@ -276,7 +276,9 @@ public:
     Result home_slider_valve(Index index, SliderDirection dir);
     Result move_slider_valve(Index index, int32_t steps);
     void stop_active_extrudes();
-    Result set_fullstep_volume(Index index, uint32_t picoliters);
+    Result set_volume_per_fullstep(Index index, uint32_t picoliters);
+    Result set_step_volume(Index index, uint32_t picoliters);
+    Response<uint32_t> get_step_volume(Index index);
 };
 
 } // namespace printhead

@@ -186,12 +186,12 @@
 #define USING_HW_SERIAL2 1
 #define CHANT_RTS_PIN PA1
 
-#define CHANT_IRQ1_PIN NC //PA4
+#define CHANT_IRQ1_PIN PA4
 #define CHANT_IRQ2_PIN NC
 
 #define E0_ENABLE_INIT() NOOP
 #define E0_DIR_INIT() NOOP
-#define E0_STEP_INIT() NOOP /*pinMode(CHANT_IRQ1_PIN, OUTPUT)*/
+#define E0_STEP_INIT() pinMode(CHANT_IRQ1_PIN, OUTPUT)
 
 //
 // UVC sterilization

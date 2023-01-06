@@ -46,9 +46,6 @@ void Controller::init()
 {
     constexpr static unsigned CHANT_BAUDRATE = 115200;
     bus.begin(CHANT_BAUDRATE);
-    set_fullstep_volume(Index::One, 25);
-    set_fullstep_volume(Index::Two, 25);
-    set_fullstep_volume(Index::Three, 25);
 }
 
 Result Controller::set_temperature(Index index, celsius_t temperature)
@@ -311,8 +308,19 @@ void Controller::stop_active_extrudes()
     }
 }
 
-Result Controller::set_fullstep_volume(Index index, uint32_t picoliters)
+Result Controller::set_volume_per_fullstep(Index index, uint32_t picoliters)
 {
     Packet packet(index, Command::SYRINGEPUMP_SET_FULLSTEP_VOLUME, picoliters);
     return send(packet, bus);
+}
+
+Result Controller::set_step_volume(Index index, uint32_t picoliters)
+{
+    Packet packet(index, Command::SET_STEP_VOLUME, picoliters);
+    return send(packet, bus);
+}
+
+Response<uint32_t> Controller::get_step_volume(Index index) {
+    Packet packet(index, Command::GET_STEP_VOLUME);
+    return send_and_receive<uint32_t>(packet, bus);
 }
