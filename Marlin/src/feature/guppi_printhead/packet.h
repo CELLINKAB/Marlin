@@ -252,7 +252,6 @@ template<typename T, class = std::enable_if<std::is_integral_v<T>>>
     if constexpr (sizeof(T) == 1) return std::array{static_cast<uint8_t>(t)};
     else {
     std::array<uint8_t, sizeof(T)> a{};
-    size_t i = 0;
     for (size_t i = 0; i < sizeof(t); ++i) {
         a[i] = (t >> (i * 8)) & 0xff;
     }
@@ -315,7 +314,7 @@ protected:
         : ph_index(index)
         , command(_command)
         , payload_size(size)
-        , crc(crc)
+        , crc(payload_crc)
     {}
 };
 
