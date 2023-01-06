@@ -98,13 +98,16 @@ void GcodeSuite::G512()
  */
 void GcodeSuite::G513()
 {
-    static constexpr float sv_steps_per_mm = 1000.0f;
+    static constexpr auto steps_per_rev = 400;
+    static constexpr auto thread_pitch_mm = 0.15f;
+    static auto steps_from_mm = [](float mm) {
+        return static_cast<int32_t>(mm * (steps_per_rev / thread_pitch_mm));
+    };
     BIND_INDEX_OR_RETURN(index);
     if (!parser.seen('P'))
         return;
     float position = parser.value_float();
-    uint16_t steps = static_cast<uint16_t>(position * sv_steps_per_mm);
-    auto res = ph_controller.move_slider_valve(index, steps);
+    auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
 }
 
@@ -506,14 +509,24 @@ void GcodeSuite::M2032() {}
 //GetPHIntExtrusionSpeed
 void GcodeSuite::M2033() {}
 //SetPHExtrusionStepVol
-void GcodeSuite::M2034() {}
+void GcodeSuite::M2034() {
+    BIND_INDEX_OR_RETURN(index);
+    if (!parser.seenval('V')) return;
+    const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
+    auto res = ph_controller.set_step_volume(index, picoliters);
+    ph_debug_print(res);
+}
 //GetPHExtrusionStepVol
-void GcodeSuite::M2035() {}
+void GcodeSuite::M2035() {
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_step_volume(index);
+    ph_debug_print(res);
+}
 //SetPHFullstepExtrusionVol
 void GcodeSuite::M2036() {
     BIND_INDEX_OR_RETURN(index);
     const uint32_t pL_volume = parser.ulongval('V');
-    auto res = ph_controller.set_fullstep_volume(index, pL_volume);
+    auto res = ph_controller.set_volume_per_fullstep(index, pL_volume);
     ph_debug_print(res);
 }
 //GetPHFullstepExtrusionVol
