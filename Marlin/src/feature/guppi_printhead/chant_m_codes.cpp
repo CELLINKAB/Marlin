@@ -100,8 +100,9 @@ void GcodeSuite::G513()
 {
     static constexpr auto steps_per_rev = 400;
     static constexpr auto thread_pitch_mm = 0.15f;
+    static constexpr auto microsteps = 4;
     static auto steps_from_mm = [](float mm) {
-        return static_cast<int32_t>(mm * (steps_per_rev / thread_pitch_mm));
+        return static_cast<int32_t>(mm * ((steps_per_rev * microsteps) / thread_pitch_mm));
     };
     BIND_INDEX_OR_RETURN(index);
     if (!parser.seen('P'))
