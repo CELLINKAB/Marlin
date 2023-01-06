@@ -629,33 +629,16 @@ void GcodeSuite::M2069()
 //GetPHPeakCurrent
 void GcodeSuite::M2070()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const auto response = ph_controller.get_extruder_rms_current(index);
-    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
-        return;
-    SERIAL_ECHOLNPGM_P("Printhead ",
-                       static_cast<uint8_t>(response.packet.ph_index),
-                       " current:",
-                       response.packet.payload);
+
 }
 //SetPHHoldCurrent
 void GcodeSuite::M2071()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const uint16_t current = parser.ushortval('C');
-    ph_controller.set_extruder_hold_current(index, current);
+
 }
 //GetPHHoldCurrent
 void GcodeSuite::M2072()
 {
-    BIND_INDEX_OR_RETURN(index);
-    const auto response = ph_controller.get_extruder_hold_current(index);
-    if (response.result != printhead::Result::OK || response.packet.payload_size != 2)
-        return;
-    SERIAL_ECHOLNPGM_P("Printhead ",
-                       static_cast<uint8_t>(response.packet.ph_index),
-                       " hold current:",
-                       response.packet.payload);
 }
 //ControlPHAirSupply
 void GcodeSuite::M2073() {}
