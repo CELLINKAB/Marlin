@@ -656,6 +656,10 @@
   #define HAS_HEATER_0 1
   #define HAS_HEATER_1 1
   #define HAS_HEATER_2 1
+  #undef TEMP_SENSOR_0
+  #undef TEMP_SENSOR_1
+  #undef TEMP_SENSOR_2
+
 #endif
 
 // No inactive extruders with SWITCHING_NOZZLE or Průša MMU1
