@@ -3042,11 +3042,11 @@ void Temperature::isr() {
     static bool ADCKey_pressed = false;
   #endif
 
-  #if HAS_HOTEND
+  #if HAS_HOTEND && DISABLED(CHANTARELLE_SUPPORT)
     static SoftPWM soft_pwm_hotend[HOTENDS];
   #endif
 
-  #if HAS_HEATED_BED
+  #if HAS_HEATED_BED && DISABLED(MYCO_HEATER)
     static SoftPWM soft_pwm_bed;
   #endif
 
