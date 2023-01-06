@@ -182,7 +182,7 @@
   #elif TEMP_SENSOR_0 == 998 || TEMP_SENSOR_0 == 999
     #define TEMP_SENSOR_0_IS_DUMMY 1
   #endif
-#else
+#elif DISABLED(CHANTARELLE_SUPPORT)
   #undef HEATER_0_MINTEMP
   #undef HEATER_0_MAXTEMP
 #endif
@@ -229,7 +229,7 @@
   #elif TEMP_SENSOR_1 == 998 || TEMP_SENSOR_1 == 999
     #define TEMP_SENSOR_1_IS_DUMMY 1
   #endif
-#else
+#elif DISABLED(CHANTARELLE_SUPPORT)
   #undef HEATER_1_MINTEMP
   #undef HEATER_1_MAXTEMP
 #endif
@@ -328,7 +328,7 @@
   #elif TEMP_SENSOR_2 == 998 || TEMP_SENSOR_2 == 999
     #define TEMP_SENSOR_2_IS_DUMMY 1
   #endif
-#else
+#elif DISABLED(CHANTARELLE_SUPPORT)
   #undef HEATER_2_MINTEMP
   #undef HEATER_2_MAXTEMP
 #endif
