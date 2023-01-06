@@ -96,7 +96,9 @@ static void set_stealth_status(const bool enable, const int8_t eindex) {
           TERN_(E5_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 5) TMC_SET_STEALTH(E5));
           TERN_(E6_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 6) TMC_SET_STEALTH(E6));
           TERN_(E7_HAS_STEALTHCHOP, if (eindex < 0 || eindex == 7) TMC_SET_STEALTH(E7));
-        } break;
+        } 
+        (void)eindex; // in case none have stealthchop, compiler won't flag as unused
+        break;
       #endif
     }
   }
