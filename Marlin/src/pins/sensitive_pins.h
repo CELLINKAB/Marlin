@@ -592,7 +592,7 @@
 #define _H6_PINS
 #define _H7_PINS
 
-#define DIO_PIN(P) TERN(TARGET_LPC1768, P, analogInputToDigitalPin(P))
+#define DIO_PIN(P) TERN(TARGET_LPC1768, P, (pin_t)analogInputToDigitalPin(P))
 
 #if HAS_HOTEND
   #undef _H0_PINS

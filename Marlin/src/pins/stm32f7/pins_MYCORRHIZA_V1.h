@@ -187,7 +187,7 @@
 #define CHANT_RTS_PIN PA1
 
 #define CHANT_IRQ1_PIN PA4
-#define CHANT_IRQ2_PIN NC
+#define CHANT_IRQ2_PIN -1
 
 #define E0_ENABLE_INIT() NOOP
 #define E0_DIR_INIT() NOOP
