@@ -244,6 +244,10 @@
   #include "feature/power.h"
 #endif
 
+#if ENABLED(HX711_WSCALE)
+  #include "feature/hx_711.h"
+#endif
+
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
 MarlinState marlin_state = MF_INITIALIZING;
@@ -377,6 +381,9 @@ void startOrResumeJob() {
 
 #endif // SDSUPPORT
 
+#if ENABLED(HX711_WSCALE)
+  HX_711 wScale;
+#endif
 /**
  * Minimal management of Marlin's core activities:
  *  - Keep the command buffer full
@@ -846,6 +853,10 @@ void idle(bool no_stepper_sleep/*=false*/) {
 
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
+
+  // Manage Scale
+  TERN_(HX711_WSCALE, wScale.manage_hx_711());
+
 
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
@@ -1597,6 +1608,10 @@ void setup() {
 
   #if BOTH(HAS_LCD_MENU, TOUCH_SCREEN_CALIBRATION) && EITHER(TFT_CLASSIC_UI, TFT_COLOR_UI)
     SETUP_RUN(ui.check_touch_calibration());
+  #endif
+
+  #if ENABLED(HX711_WSCALE)
+    wScale.begin(HX711_DATA_PIN,HX711_CLCK_PIN,HX711_INDICATION_PIN);
   #endif
 
   marlin_state = MF_RUNNING;
