@@ -491,11 +491,13 @@ void GcodeSuite::M2020()
 void GcodeSuite::M2030()
 {
     BIND_INDEX_OR_RETURN(index);
-    const uint32_t feedrate = static_cast<uint32_t>(parser.floatval('F') * 1000);
+    const float feedrate_ul_s = parser.floatval('F');
+    const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_ul_s * 1000);
     if (feedrate == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
-    auto res = ph_controller.set_extrusion_speed(index, feedrate);
+    auto res = ph_controller.set_extrusion_speed(index, feedrate_pl_s);
+    feedrate_mm_s = feedrate_ul_s / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * PI);
     ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
