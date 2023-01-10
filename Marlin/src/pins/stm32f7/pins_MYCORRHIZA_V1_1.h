@@ -225,7 +225,7 @@
 #define UVC_SH_CS_4_PIN PA7
 #define UVC_SH_CS_5_PIN PC4
 
-#define UVC_RELAY_PIN PF4
+#define UVC_RELAY_PIN PC12
 
 #define UVC_STERILIZATION
 
