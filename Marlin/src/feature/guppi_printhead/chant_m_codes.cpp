@@ -493,7 +493,7 @@ void GcodeSuite::M2030()
     BIND_INDEX_OR_RETURN(index);
     const float feedrate_ul_s = parser.floatval('F');
     const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_ul_s * 1000);
-    if (feedrate == 0.0f)
+    if (feedrate_ul_s == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
     auto res = ph_controller.set_extrusion_speed(index, feedrate_pl_s);
