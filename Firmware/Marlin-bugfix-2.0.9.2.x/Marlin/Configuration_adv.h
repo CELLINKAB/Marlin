@@ -173,18 +173,18 @@
 // Heated Chamber options
 //
 #if DISABLED(PIDTEMPCHAMBER)
-  #define CHAMBER_CHECK_INTERVAL 5000   // (ms) Interval between checks in bang-bang control
+  #define CHAMBER_CHECK_INTERVAL 1000   // (ms) Interval between checks in bang-bang control - changed from 3000ms to 1000ms - BEJ 12/28/22
   #if ENABLED(CHAMBER_LIMIT_SWITCHING)
     #define CHAMBER_HYSTERESIS 2        // (°C) Only set the relevant heater state when ABS(T-target) > CHAMBER_HYSTERESIS
   #endif
 #endif
 
 #if TEMP_SENSOR_CHAMBER
-  //#define HEATER_CHAMBER_PIN      P2_04   // Required heater on/off pin (example: SKR 1.4 Turbo HE1 plug)
-  //#define HEATER_CHAMBER_INVERTING false
-  //#define FAN1_PIN                   -1   // Remove the fan signal on pin P2_04 (example: SKR 1.4 Turbo HE1 plug)
+  #define HEATER_CHAMBER_PIN      HEATER_1_PIN   // Required heater on/off pin (example: SKR 1.4 Turbo HE1 plug)
+  #define HEATER_CHAMBER_INVERTING false
+ ///#define FAN1_PIN                   -1   // Remove the fan signal on pin P2_04 (example: SKR 1.4 Turbo HE1 plug)
 
-  //#define CHAMBER_FAN               // Enable a fan on the chamber
+  #define CHAMBER_FAN               // Enable a fan on the chamber
   #if ENABLED(CHAMBER_FAN)
     #define CHAMBER_FAN_MODE 2        // Fan control mode: 0=Static; 1=Linear increase when temp is higher than target; 2=V-shaped curve; 3=similar to 1 but fan is always on.
     #if CHAMBER_FAN_MODE == 0
@@ -273,7 +273,7 @@
  * THERMAL_PROTECTION_HYSTERESIS and/or THERMAL_PROTECTION_PERIOD
  */
 #if ENABLED(THERMAL_PROTECTION_HOTENDS)
-  #define THERMAL_PROTECTION_PERIOD 40        // Seconds
+  #define THERMAL_PROTECTION_PERIOD 240        // Seconds - Increased from 40 to 240 seconds due to false "Heating failed" errors. - BEJ 12/27/22
   #define THERMAL_PROTECTION_HYSTERESIS 4     // Degrees Celsius
 
   //#define ADAPTIVE_FAN_SLOWING              // Slow part cooling fan if temperature drops
@@ -293,7 +293,7 @@
    * and/or decrease WATCH_TEMP_INCREASE. WATCH_TEMP_INCREASE should not be set
    * below 2.
    */
-  #define WATCH_TEMP_PERIOD  20               // Seconds
+  #define WATCH_TEMP_PERIOD  360               // Seconds - Increased from 20 to 360 seconds due to false "Heating failed" errors. - BEJ 12/28/22
   #define WATCH_TEMP_INCREASE 2               // Degrees Celsius
 #endif
 
@@ -315,14 +315,14 @@
  * Thermal Protection parameters for the heated chamber.
  */
 #if ENABLED(THERMAL_PROTECTION_CHAMBER)
-  #define THERMAL_PROTECTION_CHAMBER_PERIOD    20 // Seconds
-  #define THERMAL_PROTECTION_CHAMBER_HYSTERESIS 2 // Degrees Celsius
+  #define THERMAL_PROTECTION_CHAMBER_PERIOD    60 // Seconds
+  #define THERMAL_PROTECTION_CHAMBER_HYSTERESIS 1 // Degrees Celsius
 
   /**
    * Heated chamber watch settings (M141/M191).
    */
-  #define WATCH_CHAMBER_TEMP_PERIOD            60 // Seconds
-  #define WATCH_CHAMBER_TEMP_INCREASE           2 // Degrees Celsius
+  #define WATCH_CHAMBER_TEMP_PERIOD            240 // Seconds - Changed from 60 to 240 due to "Heating Failed" false positives - BEJ 12/28/22
+  #define WATCH_CHAMBER_TEMP_INCREASE          1 // Degrees Celsius
 #endif
 
 /**
@@ -592,7 +592,7 @@
 #define E5_AUTO_FAN_PIN -1
 #define E6_AUTO_FAN_PIN -1
 #define E7_AUTO_FAN_PIN -1
-#define CHAMBER_AUTO_FAN_PIN -1
+#define CHAMBER_AUTO_FAN_PIN FAN1_PIN
 #define COOLER_AUTO_FAN_PIN -1
 #define COOLER_FAN_PIN -1
 
@@ -2800,7 +2800,7 @@
   //#define TMC_SW_SCK        -1
 
   /**
-   * Four TMC2209 drivers can use the same HW/SW serial port with hardware configured addresses.
+   * Four TMC drivers can use the same HW/SW serial port with hardware configured addresses.
    * Set the address using jumpers on pins MS1 and MS2.
    * Address | MS1  | MS2
    *       0 | LOW  | LOW
@@ -4195,7 +4195,7 @@
 //
 // M42 - Set pin states
 //
-//#define DIRECT_PIN_CONTROL
+#define DIRECT_PIN_CONTROL 1
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe

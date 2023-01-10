@@ -502,9 +502,9 @@
 #define TEMP_SENSOR_5 0
 #define TEMP_SENSOR_6 0
 #define TEMP_SENSOR_7 0
-#define TEMP_SENSOR_BED 1
+#define TEMP_SENSOR_BED 4
 #define TEMP_SENSOR_PROBE 0
-#define TEMP_SENSOR_CHAMBER 0
+#define TEMP_SENSOR_CHAMBER 4
 #define TEMP_SENSOR_COOLER 0
 #define TEMP_SENSOR_BOARD 0
 #define TEMP_SENSOR_REDUNDANT 0
@@ -572,7 +572,7 @@
 #define HEATER_6_MAXTEMP 275
 #define HEATER_7_MAXTEMP 275
 #define BED_MAXTEMP      150
-#define CHAMBER_MAXTEMP  60
+#define CHAMBER_MAXTEMP  85 // changed from 65 to 85 to allow for 70C setpoint - BEJ 12/27/22
 
 /**
  * Thermal Overshoot
@@ -674,8 +674,8 @@
  * heater. If your configuration is significantly different than this and you don't understand
  * the issues involved, don't use chamber PID until someone else verifies that your hardware works.
  */
-//#define PIDTEMPCHAMBER
-//#define CHAMBER_LIMIT_SWITCHING
+//#define PIDTEMPCHAMBER 1
+#define CHAMBER_LIMIT_SWITCHING
 
 /**
  * Max Chamber Power
@@ -745,7 +745,7 @@
  */
 
 #define THERMAL_PROTECTION_HOTENDS // Enable thermal protection for all extruders
-#define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
+//#define THERMAL_PROTECTION_BED     // Enable thermal protection for the heated bed
 #define THERMAL_PROTECTION_CHAMBER // Enable thermal protection for the heated chamber
 #define THERMAL_PROTECTION_COOLER  // Enable thermal protection for the laser cooling
 
@@ -934,7 +934,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 400, 96 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 100, 100, 100, 100 }
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -1377,7 +1377,7 @@
 // :[-1,1]
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
+#define Z_HOME_DIR 1
 //#define I_HOME_DIR -1
 //#define J_HOME_DIR -1
 //#define K_HOME_DIR -1
@@ -1391,7 +1391,7 @@
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS 0
 #define Y_MIN_POS 0
-#define Z_MIN_POS 0
+#define Z_MIN_POS -270
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
 #define Z_MAX_POS 270
@@ -1412,7 +1412,7 @@
  */
 
 // Min software endstops constrain movement within minimum coordinate bounds
-#define MIN_SOFTWARE_ENDSTOPS
+//#define MIN_SOFTWARE_ENDSTOPS
 #if ENABLED(MIN_SOFTWARE_ENDSTOPS)
   #define MIN_SOFTWARE_ENDSTOP_X
   #define MIN_SOFTWARE_ENDSTOP_Y
@@ -1423,7 +1423,7 @@
 #endif
 
 // Max software endstops constrain movement within maximum coordinate bounds
-#define MAX_SOFTWARE_ENDSTOPS
+//#define MAX_SOFTWARE_ENDSTOPS
 #if ENABLED(MAX_SOFTWARE_ENDSTOPS)
   #define MAX_SOFTWARE_ENDSTOP_X
   #define MAX_SOFTWARE_ENDSTOP_Y
