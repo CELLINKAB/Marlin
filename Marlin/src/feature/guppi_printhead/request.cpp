@@ -25,11 +25,10 @@ void Controller::set_extruder_state(printhead::Index index, bool state)
     }
 }
 
-Result printhead::unsafe_send(const void * data, const size_t size, HardwareSerial& serial)
+Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
-
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
-    size_t sent = serial.write(static_cast<const uint8_t *>(data), size);
+    size_t sent = serial.write(static_cast<const uint8_t*>(data), size);
     WRITE(CHANT_RTS_PIN, LOW);
     if (sent != size)
         return Result::BUSY;
@@ -57,11 +56,19 @@ Result Controller::set_temperature(Index index, celsius_t temperature)
 
 celsius_float_t Controller::get_temperature(Index index)
 {
+    static std::array<millis_t, EXTRUDERS> last_check_times;
+    static std::array<celsius_float_t, EXTRUDERS> last_temps;
+    if (index == Index::All || index == Index::None)
+        return 0.0f;
+    size_t index_num = static_cast<size_t>(index);
+    if (millis() < last_check_times[index_num] + 1000)
+        return last_temps[index_num];
     Packet request(index, Command::GET_MEASURED_TEMP);
     auto res = send_and_receive<celsius_t>(request, bus);
+    last_check_times[index_num] = millis();
     if (res.result != Result::OK || res.packet.payload_size < 2)
         return 0.0f;
-    return (res.packet.payload - 30'000) / 100.0f;
+    return last_temps[index_num] = (res.packet.payload - 30'000) / 100.0f;
 }
 
 Response<void> Controller::get_info(Index index)
@@ -205,10 +212,6 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
     return send(packet, bus);
 }
 
-
-
-
-
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
 {
     Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, dir);
@@ -263,7 +266,8 @@ Result Controller::set_step_volume(Index index, uint32_t picoliters)
     return send(packet, bus);
 }
 
-Response<uint32_t> Controller::get_step_volume(Index index) {
+Response<uint32_t> Controller::get_step_volume(Index index)
+{
     Packet packet(index, Command::GET_STEP_VOLUME);
     return send_and_receive<uint32_t>(packet, bus);
 }
