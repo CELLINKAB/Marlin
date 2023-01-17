@@ -128,7 +128,7 @@ auto Controller::get_tem_debug(Index index) -> Response<TemTemps>
 Result Controller::set_extrusion_speed(Index index, uint32_t feedrate_pl_s)
 {
     Packet packet(index, Command::SET_EXTRUSION_SPEED, feedrate_pl_s);
-    return send(packet, bus);
+    return send_and_receive<uint32_t>(packet, bus).result;
 }
 
 Response<uint32_t> Controller::get_extrusion_speed(Index index)
@@ -152,7 +152,7 @@ Response<uint8_t> Controller::get_extruder_stallguard_threshold(Index index)
 Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps)
 {
     Packet packet(index, Command::SET_MICROSTEP, microsteps);
-    return send(packet, bus);
+    return send_and_receive<uint8_t>(packet, bus).result;
 }
 
 Response<uint8_t> Controller::get_extruder_microsteps(Index index)
@@ -178,7 +178,7 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 
 Result Controller::set_extruder_direction(Index index, bool direction)
 {
-    return send(Packet(index, Command::SET_EXTRUSION_DIRECTION, direction), bus);
+    return send_and_receive<uint8_t>(Packet(index, Command::SET_EXTRUSION_DIRECTION, static_cast<uint8_t>(direction)), bus).result;
 }
 
 Result Controller::extruder_move(Index index, float uL)
@@ -257,13 +257,13 @@ void Controller::stop_active_extrudes()
 Result Controller::set_volume_per_fullstep(Index index, uint32_t picoliters)
 {
     Packet packet(index, Command::SYRINGEPUMP_SET_FULLSTEP_VOLUME, picoliters);
-    return send(packet, bus);
+    return send_and_receive<uint32_t>(packet, bus).result;
 }
 
 Result Controller::set_step_volume(Index index, uint32_t picoliters)
 {
     Packet packet(index, Command::SET_STEP_VOLUME, picoliters);
-    return send(packet, bus);
+    return send_and_receive<uint32_t>(packet, bus).result;
 }
 
 Response<uint32_t> Controller::get_step_volume(Index index)

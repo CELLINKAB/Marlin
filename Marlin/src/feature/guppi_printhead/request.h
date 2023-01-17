@@ -16,7 +16,8 @@ enum class Result {
     BUSY,
     PACKET_TOO_SHORT,
     BAD_PAYLOAD_SIZE,
-    UNIMPLEMENTED
+    UNIMPLEMENTED,
+    WRITE_ERROR
 };
 
 constexpr const char* string_from_result_code(Result result)
@@ -34,6 +35,8 @@ constexpr const char* string_from_result_code(Result result)
         return "BUSY";
     case Result::UNIMPLEMENTED:
         return "UNIMPLEMENTED";
+    case Result::WRITE_ERROR:
+        return "WRITE_ERROR";
     }
     __unreachable();
 }
@@ -159,18 +162,23 @@ Response<T> receive(HardwareSerial& serial)
 template<typename T>
 Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true)
 {
-    serial.setTimeout(10);
+    serial.setTimeout(50);
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
+    delayMicroseconds(10);
     for (const auto byte : packet_bytes)
         serial.write(byte);
     serial.flush();
+    delayMicroseconds(10);
     WRITE(CHANT_RTS_PIN, LOW);
 
+    if (serial.getWriteError())
+        return Result::WRITE_ERROR;
     // should read an ACK after this write to assure complete transaction
     if (expect_ack)
-        auto res [[maybe_unused]] = receive<void>(serial);
+        return receive<void>(serial).result;
+
     return Result::OK;
 }
 
