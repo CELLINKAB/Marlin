@@ -94,7 +94,7 @@ void print_packet(const Packet<T>& packet)
         SERIAL_CHAR(' ');
     }
 
-    SERIAL_PRINTLN(packet.crc, PrintBase::Hex);
+    SERIAL_PRINTLN(packet.crc(), PrintBase::Hex);
 }
 
 template<typename T>
@@ -116,7 +116,7 @@ Response<T> receive(HardwareSerial& serial)
     static constexpr size_t MAX_PACKET = 128;
     static uint8_t packet_buffer[MAX_PACKET]{};
 
-    Packet<T> incoming;
+    Packet<T> incoming{};
 
     auto bytes_received = serial.readBytes(packet_buffer, 6);
 
@@ -144,14 +144,14 @@ Response<T> receive(HardwareSerial& serial)
     if (incoming.payload_size != bytes_received - 2)
         return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
 
+    uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
         memcpy(&incoming.payload, packet_buffer, sizeof(incoming.payload));
-        memcpy(&incoming.crc, &packet_buffer[incoming.payload_size], 2);
+        memcpy(&crc, &packet_buffer[incoming.payload_size], 2);
     }
-    uint16_t crc = calculate_crc16(incoming.bytes());
 
     constexpr static bool allow_bad_crc = true;
-    if (!allow_bad_crc && crc != incoming.crc)
+    if (!allow_bad_crc && crc != incoming.crc())
         return Response<T>{incoming, Result::BAD_CRC};
 
     return Response<T>{incoming, Result::OK};

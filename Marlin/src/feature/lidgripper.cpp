@@ -52,7 +52,7 @@ void LidGripper::init_pins()
     tmc_enable_stallguard(driver);
 
     driver.GSTAT(0b111); // Clear
-    delay(200);
+    safe_delay(200);
 
     uint32_t status = driver.DRV_STATUS();
     if (status == 0xFFFF'FFFF)
@@ -163,8 +163,7 @@ const uint32_t LidGripper::move_gripper_until_stall(Dir direction)
     // wait until stall, passed threshold, or timeout
     auto timeout = millis() + 5000;
     while (!stall_triggered && steps < LID_GRIPPER_DETECTION_THRESHOLD && millis() < timeout) {
-        delay(500);
-        idle();
+        safe_delay(250);
     }
 
     if (!stall_triggered) {

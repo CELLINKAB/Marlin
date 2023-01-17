@@ -128,7 +128,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
             return;
         sensor_1_trigger_y_pos = y;
         read_sensor_1 = false;
-        delay(delay_5mm);
+        safe_delay(delay_5mm);
         read_sensor_2 = true;
         if DEBUGGING (LEVELING)
             SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
@@ -139,7 +139,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
             return;
         sensor_2_trigger_y_pos = y;
         read_sensor_2 = false;
-        delay(delay_5mm);
+        safe_delay(delay_5mm);
         read_sensor_1 = true;
         if DEBUGGING (LEVELING)
             SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);

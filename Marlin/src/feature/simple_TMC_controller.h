@@ -107,10 +107,9 @@ struct SimpleTMC
             end_time = millis() + timeout;
         move_until_stall(velocity);
         while (driver.VACTUAL() != 0) {
-            delay(1000);
+            safe_delay(1000);
             if DEBUGGING (INFO)
                 SERIAL_ECHOLNPGM("Stepper moving, SG:", driver.SG_RESULT());
-            idle();
             if (timeout > 0 && millis() > end_time)
                 stop();
         }
@@ -230,7 +229,7 @@ private:
         tmc_enable_stallguard(driver);
 
         driver.GSTAT(0b111); // Clear
-        delay(200);          // ensures serial transfers finish
+        safe_delay(200);          // ensures serial transfers finish
 
         uint32_t status = driver.DRV_STATUS();
         if (status == 0xFFFF'FFFF)

@@ -49,7 +49,7 @@ struct RetractingDisplacementProbe : AnalogProbe<RetractingDisplacementProbe, PR
         do_blocking_move_to_z(Z_CLEARANCE_DEPLOY_PROBE);
         do_blocking_move_to_xy(x, y);
         do_blocking_move_to_z(0.0f);
-        delay(50); // allow signal to stabilize
+        safe_delay(50); // allow signal to stabilize
         const auto probe_val = analogRead(PROBE_READ_PIN);
         do_blocking_move_to_z(Z_CLEARANCE_DEPLOY_PROBE);
         return probe_val;
@@ -87,7 +87,7 @@ private:
     {
         static constexpr uint32_t BACKOFF_DELAY = 100;
         stepper.raw_move(-velocity);
-        delay(BACKOFF_DELAY);
+        safe_delay(BACKOFF_DELAY);
         stepper.stop();
     }
 

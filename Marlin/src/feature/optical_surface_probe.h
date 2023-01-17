@@ -39,7 +39,7 @@ struct OpticalSurfaceProbe
         float distances[5]{};
 
         for (float& distance : distances) {
-            delay(20);
+            safe_delay(20);
             distance = get_distance_mm();
         }
         return std::accumulate(std::cbegin(distances), std::cend(distances), 0.0f) / 5;

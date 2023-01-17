@@ -66,8 +66,7 @@ void pressurize_tank(millis_t timeout_after_ms)
     pump_enable(true);
     millis_t timeout = millis() + timeout_after_ms;
     while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET && millis() < timeout) {
-        idle();
-        delay(100);
+        safe_delay(100);
     }
     pump_enable(false);
 }
@@ -122,7 +121,7 @@ void apply_mixing_pressure(uint8_t tool)
     const pin_t pin = get_valve(tool);
     planner.synchronize();
     WRITE(pin, PRESSURE_VALVE_OPEN_LEVEL);
-    delay(100);
+    safe_delay(200);
 }
 
 void release_mixing_pressure(uint8_t tool)
@@ -130,7 +129,7 @@ void release_mixing_pressure(uint8_t tool)
     const pin_t pin = get_valve(tool);
     planner.synchronize();
     WRITE(pin, PRESSURE_VALVE_CLOSE_LEVEL);
-    delay(100);
+    safe_delay(200);
 }
 
 //
@@ -150,9 +149,7 @@ void gripper_release()
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     static constexpr millis_t MIN_LID_RELEASE_DURATION = 1000; // ms
-    millis_t gripper_rengage_time = millis() + MIN_LID_RELEASE_DURATION;
-    while (PENDING(millis(), gripper_rengage_time))
-        idle();
+    safe_delay(MIN_LID_RELEASE_DURATION);
     WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
