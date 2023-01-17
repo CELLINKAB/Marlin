@@ -47,7 +47,7 @@ struct StepperRetractingProbe
             [[fallthrough]];
         case ProbeState::Unknown:
             stepper->raw_move(config.stow_velocity);
-            delay(200);
+            safe_delay(200);
             stepper->stop();
             [[fallthrough]];
         case ProbeState::Stowed:
@@ -65,7 +65,7 @@ struct StepperRetractingProbe
             deploy();
         }
         stepper->raw_move(config.stow_velocity);
-        delay(config.minimum_retract_time);
+        safe_delay(config.minimum_retract_time);
         stepper->stop();
         state = ProbeState::Stowed;
     }
