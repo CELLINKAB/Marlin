@@ -2145,9 +2145,14 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
       }; 
     printhead::Index ph_index = static_cast<printhead::Index>(extruder);
     ph_controller.set_volume_per_fullstep(ph_index, VOLUME_PER_FULLSTEP);
+    delay(1);
     ph_controller.set_step_volume(ph_index, STEP_VOLUME);
+    delay(1);
     ph_controller.set_extrusion_speed(ph_index, fr_mm_s_to_pl_s(feedrate_mm_s));
+    delay(1);
     ph_controller.set_extruder_direction(ph_index, (de < 0));
+    delay(1);
+    ph_controller.add_raw_extruder_steps(ph_index, de);
   }
   #endif
 
