@@ -73,15 +73,9 @@ void GcodeSuite::M805()
                          wavelength);
 
     move_rainbow(stepper, led);
-    const millis_t end_time = millis() + duration;
     WRITE(led.pin, HIGH);
     analogWrite(PC_PWM_PIN, intensity);
-    do {
-        idle();
-        delay(100);
-    } while (static_cast<int32_t>(end_time - millis()) > 200);
-    if (millis_t now = millis(); end_time > now)
-        delay(end_time - now);
+    safe_delay(duration);
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
 }
