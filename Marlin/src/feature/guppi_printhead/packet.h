@@ -213,8 +213,8 @@ static constexpr uint16_t crcTable16[256]
 }
 
 [[nodiscard]] constexpr uint16_t crc16_from_bytes(const uint8_t* data,
-                                    size_t len,
-                                    uint16_t init_data = CRC_INIT_BYTE16)
+                                                  size_t len,
+                                                  uint16_t init_data = CRC_INIT_BYTE16)
 {
     uint16_t crc = init_data;
 
@@ -249,13 +249,14 @@ constexpr auto concatenate(const std::array<Type, sizes>&... arrays)
 template<typename T, class = std::enable_if<std::is_integral_v<T>>>
 [[nodiscard]] constexpr auto byte_array(T t) noexcept -> std::array<uint8_t, sizeof(T)>
 {
-    if constexpr (sizeof(T) == 1) return std::array{static_cast<uint8_t>(t)};
+    if constexpr (sizeof(T) == 1)
+        return std::array{static_cast<uint8_t>(t)};
     else {
-    std::array<uint8_t, sizeof(T)> a{};
-    for (size_t i = 0; i < sizeof(t); ++i) {
-        a[i] = (t >> (i * 8)) & 0xff;
-    }
-    return a;
+        std::array<uint8_t, sizeof(T)> a{};
+        for (size_t i = 0; i < sizeof(t); ++i) {
+            a[i] = (t >> (i * 8)) & 0xff;
+        }
+        return a;
     }
 }
 
@@ -287,7 +288,6 @@ struct EmptyPacket
     Index ph_index;
     Command command;
     uint16_t payload_size;
-    uint16_t crc;
 
     [[nodiscard]] constexpr auto header_bytes() const noexcept
     {
@@ -296,25 +296,28 @@ struct EmptyPacket
                            byte_array(payload_size));
     }
 
+    [[nodiscard]] inline constexpr auto crc() const noexcept -> uint16_t
+    {
+        return calculate_crc16(header_bytes());
+    }
+
     EmptyPacket() = default;
     constexpr EmptyPacket(Index index, Command _command)
         : ph_index(index)
         , command(_command)
         , payload_size(0)
-        , crc(calculate_crc16(header_bytes()))
     {}
 
     [[nodiscard]] constexpr auto bytes() const noexcept
     {
-        return concatenate(header_bytes(), byte_array(crc));
+        return concatenate(header_bytes(), byte_array(crc()));
     }
 
 protected:
-    constexpr EmptyPacket(Index index, Command _command, uint16_t size, uint16_t payload_crc)
+    constexpr EmptyPacket(Index index, Command _command, uint16_t size)
         : ph_index(index)
         , command(_command)
         , payload_size(size)
-        , crc(payload_crc)
     {}
 };
 
@@ -325,13 +328,17 @@ struct Packet final : public EmptyPacket
 
     [[nodiscard]] constexpr auto payload_bytes() const noexcept { return byte_array(payload); }
 
+    [[nodiscard]] constexpr auto crc() const noexcept -> uint16_t
+    {
+        return calculate_crc16(concatenate(header_bytes(), payload_bytes()));
+    }
+
     Packet() = default;
     Packet(Index, Command) = delete;
     constexpr Packet(Index index, Command cmd, PAYLOAD message_payload)
         : EmptyPacket(index,
                       cmd,
-                      sizeof(message_payload),
-                      (calculate_crc16(concatenate(header_bytes(), payload_bytes()))))
+                      sizeof(message_payload))
         , payload(message_payload)
     {}
 
@@ -347,9 +354,8 @@ struct Packet final : public EmptyPacket
 
     [[nodiscard]] constexpr auto bytes() const noexcept
     {
-        return concatenate(header_bytes(), payload_bytes(), byte_array(crc));
+        return concatenate(header_bytes(), payload_bytes(), byte_array(crc()));
     }
-
 };
 
 template<>
@@ -360,8 +366,6 @@ struct Packet<void> final : public EmptyPacket
         : EmptyPacket(index, cmd)
     {}
 };
-
-
 
 } // namespace printhead
 
