@@ -644,6 +644,9 @@
 
 //#define BED_LIMIT_SWITCHING
 
+// stops any action happening with printbed heater until a temperature is set
+#define NO_TEMP_BED_UNTIL_SET
+
 #define MYCO_HEATER_DEBUG
 
 
