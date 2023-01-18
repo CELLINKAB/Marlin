@@ -67,7 +67,7 @@ public:
     EXTRUDER_LOOP() retracted[e] = false;
   }
 
-  static void enable_autoretract(const bool enable) {
+  static void enable_autoretract([[maybe_unused]] const bool enable) {
     #if ENABLED(FWRETRACT_AUTORETRACT)
       autoretract_enabled = enable;
       refresh_autoretract();
