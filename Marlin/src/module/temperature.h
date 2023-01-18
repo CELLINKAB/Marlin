@@ -266,7 +266,7 @@ typedef struct RedundantTempInfo : public TempInfo
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo
 {
-    celsius_t target = 25;
+    celsius_t target = -999;
     int16_t soft_pwm_amount;
 } heater_info_t;
 

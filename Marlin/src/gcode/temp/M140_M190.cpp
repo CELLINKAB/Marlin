@@ -80,9 +80,7 @@ void GcodeSuite::M140_M190(const bool isM190) {
   }
 
   if (!got_temp) return;
-
-  TERN_(NO_TEMP_BED_UNTIL_SET, no_bed_temp_set = false);
-
+  
   thermalManager.setTargetBed(temp);
   thermalManager.isHeatingBed() ? LCD_MESSAGE(MSG_BED_HEATING) : LCD_MESSAGE(MSG_BED_COOLING);
 
