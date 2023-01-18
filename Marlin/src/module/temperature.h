@@ -48,6 +48,10 @@
 #    define SOFT_PWM_SCALE 0
 #endif
 
+#if ENABLED(NO_TEMP_BED_UNTIL_SET)
+  extern bool no_bed_temp_set;
+#endif
+
 #define HOTEND_INDEX TERN(HAS_MULTI_HOTEND, e, 0)
 #define E_NAME TERN_(HAS_MULTI_HOTEND, e)
 

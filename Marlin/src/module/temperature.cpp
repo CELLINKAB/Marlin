@@ -71,6 +71,10 @@
   #include "../libs/nozzle.h"
 #endif
 
+#if ENABLED(NO_TEMP_BED_UNTIL_SET)
+  bool no_bed_temp_set = true;
+#endif
+
 // MAX TC related macros
 #define TEMP_SENSOR_IS_MAX(n, M) (ENABLED(TEMP_SENSOR_##n##_IS_MAX##M) || (ENABLED(TEMP_SENSOR_REDUNDANT_IS_MAX##M) && REDUNDANT_TEMP_MATCH(SOURCE, E##n)))
 #define TEMP_SENSOR_IS_ANY_MAX_TC(n) (ENABLED(TEMP_SENSOR_##n##_IS_MAX_TC) || (ENABLED(TEMP_SENSOR_REDUNDANT_IS_MAX_TC) && REDUNDANT_TEMP_MATCH(SOURCE, E##n)))
@@ -1465,7 +1469,9 @@ void Temperature::manage_heater() {
         else
       #endif
       {
+        TERN_(NO_TEMP_BED_UNTIL_SET, if (no_bed_temp_set) break);
         #if ENABLED(PIDTEMPBED)
+          TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active))
           temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? (int)get_pid_output_bed() >> 1 : 0;
         #else
           // Check if temperature is within the correct band
