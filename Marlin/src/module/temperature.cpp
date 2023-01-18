@@ -739,7 +739,7 @@ volatile bool Temperature::raw_temps_ready = false;
       // Report heater states every 2 seconds
       if (ELAPSED(ms, next_temp_ms)) {
         #if HAS_TEMP_SENSOR
-          print_heater_states(ischamber ? active_extruder : (isbed ? active_extruder : heater_id));
+          print_heater_states(ischamber ? active_extruder : (isbed ? active_extruder : static_cast<int8_t>(heater_id)));
           SERIAL_EOL();
         #endif
         next_temp_ms = ms + 2000UL;
@@ -1204,13 +1204,21 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
       static float temp_iState = 0, temp_dState = 0;
       static bool pid_reset = true;
       float pid_output = 0;
-      const float max_power_over_i_gain = float(MAX_BED_POWER) / temp_bed.pid.Ki - float(MIN_BED_POWER),
-                  pid_error = temp_bed.target - temp_bed.celsius;
+      const float max_power_over_i_gain = float(MAX_BED_POWER) / temp_bed.pid.Ki - float(MIN_BED_POWER);
+      const float pid_error = temp_bed.target - temp_bed.celsius;
 
+      #if ENABLED(MYCO_HEATER)
+        if (pid_error < -(PID_FUNCTIONAL_RANGE))
+        {
+          pid_output = -(MAX_BED_POWER);
+          pid_reset = true;
+        }
+      #else
       if (!temp_bed.target || pid_error < -(PID_FUNCTIONAL_RANGE)) {
         pid_output = 0;
         pid_reset = true;
       }
+      #endif
       else if (pid_error > PID_FUNCTIONAL_RANGE) {
         pid_output = MAX_BED_POWER;
         pid_reset = true;
@@ -1230,7 +1238,7 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
 
         temp_dState = temp_bed.celsius;
 
-        pid_output = constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_BED_POWER), 0, MAX_BED_POWER);
+        pid_output = constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_BED_POWER), TERN(MYCO_HEATER, -(MAX_BED_POWER), 0), MAX_BED_POWER);
       }
 
     #else // PID_OPENLOOP
@@ -1466,7 +1474,8 @@ void Temperature::manage_heater() {
       #endif
       {
         #if ENABLED(PIDTEMPBED)
-          temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? (int)get_pid_output_bed() >> 1 : 0;
+          TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active))
+          temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? static_cast<int16_t>(get_pid_output_bed()) : 0;
         #else
           // Check if temperature is within the correct band
           if (WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP)) {

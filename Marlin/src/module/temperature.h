@@ -48,6 +48,10 @@
 #    define SOFT_PWM_SCALE 0
 #endif
 
+#if ENABLED(NO_TEMP_BED_UNTIL_SET)
+  extern bool no_bed_temp_set;
+#endif
+
 #define HOTEND_INDEX TERN(HAS_MULTI_HOTEND, e, 0)
 #define E_NAME TERN_(HAS_MULTI_HOTEND, e)
 
@@ -262,7 +266,7 @@ typedef struct RedundantTempInfo : public TempInfo
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo
 {
-    celsius_t target = 25;
+    celsius_t target = -999;
     int16_t soft_pwm_amount;
 } heater_info_t;
 
