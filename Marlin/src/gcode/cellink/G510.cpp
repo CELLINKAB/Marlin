@@ -29,7 +29,7 @@ void GcodeSuite::G510()
         return;
     }
     if (parser.seen('S')) {
-        optical_autocal.sensor_output();
+        optical_autocal.report_sensors();
         return;
     }
 
