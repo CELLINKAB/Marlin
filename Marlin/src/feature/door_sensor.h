@@ -6,13 +6,14 @@ struct DoorSensor
     DoorSensor()
     {
         SET_INPUT_PULLUP(SENSOR);
-        attachInterrupt(
-            SENSOR,
-            []() {
+        static auto report = []() {
                 delayMicroseconds(100); // allow signal to settle
                 const bool door_state = READ(SENSOR);
                 SERIAL_ECHOLNPGM("DO:", door_state);
-            },
+            };
+        attachInterrupt(
+            SENSOR,
+            static_cast<void (*)()>(report),
             CHANGE);
     }
 
