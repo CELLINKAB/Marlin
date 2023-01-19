@@ -79,7 +79,7 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
-    millis_t timeout = millis() + 180'000; // should home within 100 seconds
+    millis_t timeout = millis() + SEC_TO_MS(parser.ulongval('S',180)); // should home within 100 seconds
     while(ph_controller.get_status(index).is_homing && millis() < timeout){
         safe_delay(1000);
         idle_no_sleep();
