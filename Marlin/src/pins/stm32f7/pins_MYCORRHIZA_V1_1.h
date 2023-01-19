@@ -237,8 +237,8 @@
 
 #define CS_24V_PIN PF9
 
+#define DOOR_PIN UVC_INTERLOCK_PIN
 #define FREEZE_PIN PA10
-#define FREEZE_MSG "DO:"
 
 #define LED_RED PE3
 #define LED_GREEN PE2
