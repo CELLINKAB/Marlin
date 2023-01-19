@@ -22,6 +22,7 @@ struct OpticalAutocal
     bool full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate);
     [[nodiscard]] bool is_calibrated(const uint8_t tool) const;
     [[nodiscard]] const xyz_pos_t &offset(const uint8_t tool) const;
+    void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
 
@@ -64,3 +65,4 @@ private:
 };
 
 extern OpticalAutocal optical_autocal;
+// 
