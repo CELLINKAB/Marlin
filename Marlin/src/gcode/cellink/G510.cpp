@@ -28,6 +28,10 @@ void GcodeSuite::G510()
         }
         return;
     }
+    if (parser.seen('S')) {
+        optical_autocal.sensor_output();
+        return;
+    }
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;

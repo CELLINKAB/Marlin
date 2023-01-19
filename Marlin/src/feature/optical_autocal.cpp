@@ -112,6 +112,17 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
     return true;
 }
 
+bool OpticalAutocal::sensor_output() const
+{
+    const bool sensor_1_check = READ(SENSOR_1);
+    const bool sensor_2_check = READ(SENSOR_2);
+    SERIAL_ECHOLNPGM("sensor 1: ",
+                    sensor_1_check,
+                    "\nsensor 2: ",
+                    sensor_2_check);
+
+    return true;
+}
 [[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos, const float feedrate) const
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
@@ -257,6 +268,7 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
 
     return z;
 }
+
 
 OpticalAutocal optical_autocal;
 
