@@ -260,7 +260,9 @@
   #include "feature/easythreed_ui.h"
 #endif
 
-
+#if PIN_EXISTS(DOOR)
+  #include "feature/door_sensor.h"
+#endif
 
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
@@ -1202,6 +1204,10 @@ void setup() {
   #if HAS_SUICIDE
     SETUP_LOG("SUICIDE_PIN");
     OUT_WRITE(SUICIDE_PIN, !SUICIDE_PIN_STATE);
+  #endif
+
+  #if PIN_EXISTS(DOOR)
+    static DoorSensor<DOOR_PIN> door_sensor;
   #endif
 
   #ifdef JTAGSWD_RESET
