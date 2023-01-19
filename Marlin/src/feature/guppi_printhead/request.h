@@ -67,6 +67,55 @@ enum class ErrorPayload {
     PARAM_LOAD,
 };
 
+struct Status
+{
+    bool estop_top : 1;
+    bool estop_bottom : 1;
+    bool is_homing : 1;
+    bool dir : 1;
+    bool enable : 1;
+    bool is_stepping : 1;
+    bool heater_active : 1;
+    bool fan_active : 1;
+    bool is_calibrated : 1;
+
+    Status() = default;
+    constexpr Status(uint16_t raw) noexcept
+        : estop_top(TEST(raw, ESTOP_TOP))
+        , estop_bottom(TEST(raw, ESTOP_BOTTOM))
+        , is_homing(TEST(raw, HOMING))
+        , dir(TEST(raw, MOTOR_DIR))
+        , enable(TEST(raw, MOTOR_ENABLE))
+        , is_stepping(TEST(raw, MOTOR_IS_STEPPING))
+        , heater_active(TEST(raw, HEATER_ACTIVE))
+        , fan_active(TEST(raw, FAN_ACTIVE))
+        , is_calibrated(TEST(raw, IS_CALIBRATED))
+    {}
+
+    constexpr auto to_raw() const noexcept -> uint16_t
+    {
+        uint16_t raw = (estop_top << ESTOP_TOP) | (estop_bottom << ESTOP_BOTTOM)
+                       | (is_homing << HOMING) | (dir << MOTOR_DIR) | (enable << MOTOR_ENABLE)
+                       | (is_stepping << MOTOR_IS_STEPPING) | (heater_active << HEATER_ACTIVE)
+                       | (fan_active << FAN_ACTIVE) | (is_calibrated << IS_CALIBRATED);
+        return raw;
+    }
+
+private:
+    enum Bits {
+        ESTOP_TOP = 0,
+        ESTOP_BOTTOM = 1,
+        HOMING = 2,
+        MOTOR_DIR = 3,
+        MOTOR_ENABLE = 4,
+        MOTOR_IS_STEPPING = 5,
+        HEATER_ACTIVE = 6,
+        FAN_ACTIVE = 7,
+        IS_CALIBRATED = 8,
+        NUM_STATUS_BITS
+    };
+};
+
 template<typename T>
 struct Response
 {
@@ -244,7 +293,7 @@ public:
     Response<void> get_fw_version(Index index);
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
-    Response<void> get_status(Index index);
+    Status get_status(Index index);
     // Temperature methods
     Result set_temperature(Index index, celsius_t temperature);
     celsius_float_t get_temperature(Index index);
