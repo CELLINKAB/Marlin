@@ -79,6 +79,14 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
+    millis_t timeout = millis() + 100'000; // should home within 100 seconds
+    while(ph_controller.get_status(index).is_homing && millis() < timeout){
+        safe_delay(1000);
+        idle_no_sleep();
+    }
+
+    if (millis() > timeout)
+        SERIAL_ERROR_MSG("Extruder homing timeout exceeded");
 }
 
 /**
