@@ -1207,7 +1207,7 @@ void setup() {
   #endif
 
   #if PIN_EXISTS(DOOR)
-    static DoorSensor door_sensor(DOOR_PIN);
+    static DoorSensor<DOOR_PIN> door_sensor;
   #endif
 
   #ifdef JTAGSWD_RESET
