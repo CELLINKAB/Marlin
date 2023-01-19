@@ -178,7 +178,11 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 
 Result Controller::set_extruder_direction(Index index, bool direction)
 {
-    return send_and_receive<uint8_t>(Packet(index, Command::SET_EXTRUSION_DIRECTION, static_cast<uint8_t>(direction)), bus).result;
+    return send_and_receive<uint8_t>(Packet(index,
+                                            Command::SET_EXTRUSION_DIRECTION,
+                                            static_cast<uint8_t>(direction)),
+                                     bus)
+        .result;
 }
 
 Result Controller::extruder_move(Index index, float uL)
@@ -240,10 +244,15 @@ Response<std::array<uint8_t, 12>> Controller::get_uuid(Index index)
     return send_and_receive<std::array<uint8_t, 12>>(packet, bus);
 }
 
-Response<void> Controller::get_status(Index index)
+Status Controller::get_status(Index index)
 {
     Packet packet(index, Command::GET_STATUS);
-    return send_and_receive<void>(packet, bus);
+    auto response = send_and_receive<uint16_t>(packet, bus);
+
+    if (response.result != Result::OK)
+        return Status{};
+
+    return Status{response.packet.payload};
 }
 
 void Controller::stop_active_extrudes()
