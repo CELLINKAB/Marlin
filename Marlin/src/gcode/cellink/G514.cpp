@@ -38,8 +38,8 @@ void GcodeSuite::G515()
         return;
 
     planner.synchronize();
-    auto starting_pos = current_position.copy();
     xy_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
+    do_blocking_move_to_z(Z_AFTER_PROBING);
     do_blocking_move_to(gripper_xy);
 
     bool is_releasing = parser.seen('R');
@@ -52,7 +52,7 @@ void GcodeSuite::G515()
             idle();
             safe_delay(1000);
         }
-        if (float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+        if (float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
             vacuum_delta < DETECTION_THRESHOLD)
             SERIAL_ERROR_MSG("gripper likely failed to release\nvacuum_delta:", vacuum_delta);
     } else {
@@ -60,14 +60,13 @@ void GcodeSuite::G515()
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to_z(GRIP_Z_HEIGHT);
         set_gripper_valves(GripperState::Grip);
-        do_blocking_move_to_z(starting_pos.z);
+        do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
-        if (float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+        if (float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
             vacuum_delta > -DETECTION_THRESHOLD)
             SERIAL_ERROR_MSG("gripper likely failed to grip\nvacuum_delta:", vacuum_delta);
-        else
-            do_blocking_move_to(starting_pos);
     }
+    do_blocking_move_to_z(Z_AFTER_PROBING);
 }
 
 #endif // FESTO_PNEUMATICS
