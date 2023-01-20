@@ -48,6 +48,7 @@ void GcodeSuite::G515()
     if (is_releasing) {set_gripper_valves(GripperState::Release); }
     else set_gripper_valves(GripperState::Grip);
     do_blocking_move_to_z(starting_pos.z);
+    SET_SOFT_ENDSTOP_LOOSE(false);
 
     float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
 
