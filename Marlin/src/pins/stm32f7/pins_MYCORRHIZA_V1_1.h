@@ -233,9 +233,11 @@
 // misc
 //
 
+#define CS_24V_PIN PF9
+#define CS_BED_24V_CS_PIN PF10
+
 #define PSU_FAULT_PIN PG10
 
-#define CS_24V_PIN PF9
 
 #define DOOR_PIN UVC_INTERLOCK_PIN
 #define FREEZE_PIN PA10

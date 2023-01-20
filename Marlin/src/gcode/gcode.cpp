@@ -1108,6 +1108,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1100: M1100(); break; // set pressure regulator offset
       #endif
 
+      #if PINS_EXIST(LOAD_24_CS, CS_BED_24V_CS)
+        case 1130: M1130(); break;// report load switch current
+      #endif
+
       #if ENABLED(CELLINK_REPORTING)
         case 797: M797(); break; // reset nozzle calibration
         case 798: M798(); break; // get nozzle calibration status

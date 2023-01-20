@@ -1287,6 +1287,10 @@ private:
     static void M1100(); // pressure regulator offset
   #endif
 
+  #if PINS_EXIST(CS_24V, CS_BED_24V_CS)
+    static void M1130(); // report load switch current
+  #endif
+
   #if ENABLED(EXOCYTE_UV_CROSSLINKING)
     static void M805();
   #endif
