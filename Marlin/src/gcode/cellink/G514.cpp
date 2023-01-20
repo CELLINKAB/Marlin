@@ -32,6 +32,9 @@ void GcodeSuite::G515()
     static constexpr float GRIPPER_Z_HEIGHT = -5.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
 
+    if (homing_needed_error())
+        return;
+
     planner.synchronize();
     auto starting_pos = current_position.copy();
     xy_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
@@ -45,24 +48,24 @@ void GcodeSuite::G515()
         set_gripper_valves(GripperState::Open);
     }
     do_blocking_move_to_z(GRIPPER_Z_HEIGHT);
-    if (is_releasing) {set_gripper_valves(GripperState::Release); }
-    else set_gripper_valves(GripperState::Grip);
+    if (is_releasing) {
+        set_gripper_valves(GripperState::Release);
+    } else
+        set_gripper_valves(GripperState::Grip);
     do_blocking_move_to_z(starting_pos.z);
     SET_SOFT_ENDSTOP_LOOSE(false);
 
     float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
 
-    if (DEBUGGING(INFO)) SERIAL_ECHOLNPGM("vacuum_delta:", vacuum_delta);
-    if(is_releasing && vacuum_delta < DETECTION_THRESHOLD)
+    if (DEBUGGING(INFO))
+        SERIAL_ECHOLNPGM("vacuum_delta:", vacuum_delta);
+    if (is_releasing && vacuum_delta < DETECTION_THRESHOLD)
         SERIAL_ERROR_MSG("gripper likely failed to release");
-    else if (vacuum_delta > -DETECTION_THRESHOLD)
-    {
+    else if (vacuum_delta > -DETECTION_THRESHOLD) {
         SERIAL_ERROR_MSG("gripper likely failed to grip");
     }
-    
+
     do_blocking_move_to(starting_pos);
-    
-    
 }
 
 #endif // FESTO_PNEUMATICS
