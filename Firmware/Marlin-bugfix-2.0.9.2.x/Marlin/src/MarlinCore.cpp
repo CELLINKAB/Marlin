@@ -381,9 +381,6 @@ void startOrResumeJob() {
 
 #endif // SDSUPPORT
 
-#if ENABLED(HX711_WSCALE)
-  HX_711 wScale;
-#endif
 /**
  * Minimal management of Marlin's core activities:
  *  - Keep the command buffer full

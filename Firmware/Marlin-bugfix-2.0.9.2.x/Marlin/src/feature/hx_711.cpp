@@ -1,15 +1,29 @@
-//
-//    FILE: hx_711.cpp
-//  AUTHOR: Borislav Cvejic
-// VERSION: 0.0.1
-// PURPOSE: 
-//     URL:
-//
-// HISTORY:
+/*******************************************************************************
+FILE
+    hx_711.cpp
 
+ORIGINAL AUTHOR
+    Borislav Cvejic
+
+DESCRIPTION
+    This module implements non blocking communication driver for HX711,
+    management function and interfaces. The communication is custom type
+    for hx711 and is implemented in software.
+
+VERSION
+    1.0.0
+
+REFERENCES
+    None
+
+*******************************************************************************/
+#include "../inc/MarlinConfigPre.h"
+
+#if ENABLED(HX711_WSCALE)
 
 #include "hx_711.h"
 
+HX_711 wScale;
 
 HX_711::HX_711()
 {
@@ -18,6 +32,13 @@ HX_711::HX_711()
 
 HX_711::~HX_711() {}
 
+/**
+ * @brief Assigns and initiate physical pin states for HX711 communication.
+ * 
+ * @param pinDta Data in pin
+ * @param pinClk Clock out pin
+ * @param pinInd Indication out pin
+ */
 void HX_711::begin(const uint8_t pinDta, const uint8_t pinClk, const uint8_t pinInd)
 {
   _pin_dta = pinDta;
@@ -30,18 +51,23 @@ void HX_711::begin(const uint8_t pinDta, const uint8_t pinClk, const uint8_t pin
   digitalWrite(_pin_clk, LOW);
 }
 
+/**
+ * @brief Initializes internal variables.
+ * 
+ */
 void HX_711::init()
 {
   _new_val  = false;
-  _gain     = 128;     // default channel A
-  _offset   = 0;
-  _mode     = 0;
   _channel  = 1;
 }
 
-// Non blocking READ function that will update _new_val status and 
-// return 32bit signed value that is read from ADC as 24bit val.
-// If data is not ready it will return 0, and update _new_val to false.
+/**
+ * @brief Non blocking READ function that will update _new_val status and 
+ *        return 32bit signed value that is read from ADC as 24bit val. 
+ *        If data is not ready it will return 0, and update _new_val to false.
+ * 
+ * @return int32_t 
+ */
 int32_t HX_711::read()
 {
   union
@@ -93,15 +119,17 @@ int32_t HX_711::read()
   return v.value;
 }
 
-// This function is non blocking management function for HX771 base scale wight.
-// This function can be called in management loop.
-// It manages all functionality related to weight scale.
-#define HX_711_WEIGHT_TRESHOLD 40000
+/**
+ * @brief This function is non blocking management function for
+ *        HX771 base scale wight. This function can be called in 
+ *        management loop. It manages all functionality related 
+ *        to weight scale.
+ */ 
 void HX_711::manage_hx_711()
 {
+  _last_read = read();          //shift in data from ADC
 
-  _last_read = read();
-  if(_new_val)
+  if(_new_val)                  //if there are data available, process it.
   {
     #ifdef HX_711_ENABLE_FILTER
       #define FILTER_DEPTH (uint8_t)(1u << HX_711_ENABLE_FILTER)
@@ -122,7 +150,7 @@ void HX_711::manage_hx_711()
       _f_val = (float)_last_read;
     #endif
 
-  if(_f_val > HX_711_WEIGHT_TRESHOLD) 
+  if(_f_val > _threshold)      //if threshold reached set-up output pin.
   { 
     // Drive the pin low that is logic 0
     pinMode(_pin_ind, OUTPUT);
@@ -135,8 +163,11 @@ void HX_711::manage_hx_711()
 
   }
 }
-
-//  Shift In 8 bits function MSB_FIRST
+/**
+ * @brief Shift In 8 bits function MSB_FIRST
+ * 
+ * @return uint8_t 
+ */
 uint8_t HX_711::_shiftIn()
 {
   uint8_t shiftValue = 0;
@@ -167,6 +198,7 @@ uint8_t HX_711::_shiftIn()
   return shiftValue;
 }
 
+#endif
 
 // -- END OF FILE --
 
