@@ -29,8 +29,10 @@ void GcodeSuite::G515()
 {
     using namespace pneumatics;
     static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{27, -45};
-    static constexpr float GRIPPER_Z_HEIGHT = -5.0f;
+    static constexpr float GRIP_Z_HEIGHT = -5.0f;
+    static constexpr float RELEASE_Z_HEIGHT = 5.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
+    static constexpr size_t RELEASE_SECONDS = 5;
 
     if (homing_needed_error())
         return;
@@ -43,29 +45,29 @@ void GcodeSuite::G515()
     bool is_releasing = parser.seen('R');
 
     float vacuum_baseline = gripper_vacuum.read_avg();
-    SET_SOFT_ENDSTOP_LOOSE(true);
     if (is_releasing) {
-        set_gripper_valves(GripperState::Open);
-    }
-    do_blocking_move_to_z(GRIPPER_Z_HEIGHT);
-    if (is_releasing) {
+        do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         set_gripper_valves(GripperState::Release);
-    } else
+        for (size_t seconds = RELEASE_SECONDS; seconds > 0; --seconds) {
+            idle();
+            safe_delay(1000);
+        }
+        if (float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+            vacuum_delta < DETECTION_THRESHOLD)
+            SERIAL_ERROR_MSG("gripper likely failed to release\nvacuum_delta:", vacuum_delta);
+    } else {
+        set_gripper_valves(GripperState::Open);
+        SET_SOFT_ENDSTOP_LOOSE(true);
+        do_blocking_move_to_z(GRIP_Z_HEIGHT);
         set_gripper_valves(GripperState::Grip);
-    do_blocking_move_to_z(starting_pos.z);
-    SET_SOFT_ENDSTOP_LOOSE(false);
-
-    float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
-
-    if (DEBUGGING(INFO))
-        SERIAL_ECHOLNPGM("vacuum_delta:", vacuum_delta);
-    if (is_releasing && vacuum_delta < DETECTION_THRESHOLD)
-        SERIAL_ERROR_MSG("gripper likely failed to release");
-    else if (vacuum_delta > -DETECTION_THRESHOLD) {
-        SERIAL_ERROR_MSG("gripper likely failed to grip");
+        do_blocking_move_to_z(starting_pos.z);
+        SET_SOFT_ENDSTOP_LOOSE(false);
+        if (float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+            vacuum_delta > -DETECTION_THRESHOLD)
+            SERIAL_ERROR_MSG("gripper likely failed to grip\nvacuum_delta:", vacuum_delta);
+        else
+            do_blocking_move_to(starting_pos);
     }
-
-    do_blocking_move_to(starting_pos);
 }
 
 #endif // FESTO_PNEUMATICS
