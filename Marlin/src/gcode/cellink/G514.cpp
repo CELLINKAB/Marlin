@@ -51,6 +51,7 @@ void GcodeSuite::G515()
 
     float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
 
+    if (DEBUGGING(INFO)) SERIAL_ECHOLNPGM("vacuum_delta:", vacuum_delta);
     if(is_releasing && vacuum_delta < DETECTION_THRESHOLD)
         SERIAL_ERROR_MSG("gripper likely failed to release");
     else if (vacuum_delta > -DETECTION_THRESHOLD)
