@@ -21,7 +21,7 @@ void init()
     OUT_WRITE(PRESSURE_VALVE_C2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_C3_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-    OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
     OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
 
@@ -136,22 +136,28 @@ void release_mixing_pressure(uint8_t tool)
 // Lid Gripper
 //
 
-void gripper_release()
+void set_gripper_valves(GripperState state)
 {
-#    if ENABLED(CHECK_LID_GRIPPER_LOCATION_BEFORE_RELEASE)
-    static constexpr xyz_pos_t safe_lid_drop_pos = LID_GRIPPER_RELEASE_LOCATION;
-    if (current_position != safe_lid_drop_pos) {
-        SERIAL_ERROR_MSG("printbed in wrong location for release!");
-        return;
+    static auto set_valves = [](bool open) {
+        auto level = open ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL;
+        WRITE(PRESSURE_VALVE_LID2_PIN, level);
+        WRITE(PRESSURE_VALVE_LID_PIN, level);
+        safe_delay(1000);
+    };
+    
+    switch(state) {
+        case GripperState::Release: {
+            [[maybe_unused]] auto _using_pressure = use_pressure();
+            set_valves(true);
+            break;
+        }
+        case GripperState::Open:
+            set_valves(true);
+            break;
+        case GripperState::Grip:
+            set_valves(false);
+            break;
     }
-#    endif
-    auto _ = use_pressure();
-    WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-    static constexpr millis_t MIN_LID_RELEASE_DURATION = 1000; // ms
-    safe_delay(MIN_LID_RELEASE_DURATION);
-    WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-    WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 }
 
 //
