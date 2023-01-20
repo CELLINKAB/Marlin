@@ -138,22 +138,24 @@ void release_mixing_pressure(uint8_t tool)
 
 void set_gripper_valves(GripperState state)
 {
+    static auto set_valves = [](bool open) {
+        auto level = open ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL;
+        WRITE(PRESSURE_VALVE_LID2_PIN, level);
+        WRITE(PRESSURE_VALVE_LID_PIN, level);
+        safe_delay(1000);
+    };
     
     switch(state) {
         case GripperState::Release: {
             [[maybe_unused]] auto _using_pressure = use_pressure();
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            safe_delay(500);
+            set_valves(true);
             break;
         }
         case GripperState::Open:
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+            set_valves(true);
             break;
         case GripperState::Grip:
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            set_valves(false);
             break;
     }
 }
