@@ -21,7 +21,13 @@ void set_regulator_pressure(float kPa);
 float get_regulator_set_pressure();
 void pressurize_tank(millis_t timeout_after_ms = 10'000);
 
-void gripper_release();
+enum class GripperState{
+    Open,
+    Release,
+    Grip,
+};
+
+void set_gripper_valves(GripperState state);
 
 void apply_mixing_pressure(uint8_t tool);
 void release_mixing_pressure(uint8_t tool);
