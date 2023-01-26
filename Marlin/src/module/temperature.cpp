@@ -1207,6 +1207,11 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
       const float max_power_over_i_gain = float(MAX_BED_POWER) / temp_bed.pid.Ki - float(MIN_BED_POWER);
       const float pid_error = temp_bed.target - temp_bed.celsius;
 
+      if (!temp_bed.is_set)
+      {
+        pid_reset = true;
+        return 0;
+      }
       #if ENABLED(MYCO_HEATER)
         if (pid_error < -(PID_FUNCTIONAL_RANGE))
         {
@@ -1474,7 +1479,6 @@ void Temperature::manage_heater() {
       #endif
       {
         #if ENABLED(PIDTEMPBED)
-          TERN_(MYCO_HEATER_DEBUG, if (!bed_debug_control_active))
           temp_bed.soft_pwm_amount = WITHIN(temp_bed.celsius, BED_MINTEMP, BED_MAXTEMP) ? static_cast<int16_t>(get_pid_output_bed()) : 0;
         #else
           // Check if temperature is within the correct band
@@ -2660,6 +2664,7 @@ void Temperature::disable_all_heaters() {
   #if HAS_HOTEND
     HOTEND_LOOP() {
       setTargetHotend(0, e);
+      temp_bed.is_set = false;
       temp_hotend[e].soft_pwm_amount = 0;
     }
   #endif
@@ -2671,6 +2676,7 @@ void Temperature::disable_all_heaters() {
 
   #if HAS_HEATED_BED
     setTargetBed(0);
+    temp_bed.is_set = false;
     temp_bed.soft_pwm_amount = 0;
     WRITE_HEATER_BED(LOW);
   #endif
