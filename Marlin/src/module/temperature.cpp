@@ -1212,18 +1212,10 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
         pid_reset = true;
         return 0;
       }
-      #if ENABLED(MYCO_HEATER)
-        if (pid_error < -(PID_FUNCTIONAL_RANGE))
-        {
-          pid_output = -(MAX_BED_POWER);
-          pid_reset = true;
-        }
-      #else
-      if (!temp_bed.target || pid_error < -(PID_FUNCTIONAL_RANGE)) {
-        pid_output = 0;
+      if (pid_error < -(PID_FUNCTIONAL_RANGE)) {
+        pid_output = TERN(MYCO_HEATER, -(PID_FUNCTIONAL_RANGE), 0);
         pid_reset = true;
       }
-      #endif
       else if (pid_error > PID_FUNCTIONAL_RANGE) {
         pid_output = MAX_BED_POWER;
         pid_reset = true;
