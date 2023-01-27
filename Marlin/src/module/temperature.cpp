@@ -444,7 +444,6 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
   raw_adc_t Temperature::mintemp_raw_BED = TEMP_SENSOR_BED_RAW_LO_TEMP,
             Temperature::maxtemp_raw_BED = TEMP_SENSOR_BED_RAW_HI_TEMP;
   TERN_(WATCH_BED, bed_watch_t Temperature::watch_bed); // = { 0 }
-  TERN_(MYCO_HEATER_DEBUG, bool bed_debug_control_active = false);
   IF_DISABLED(PIDTEMPBED, millis_t Temperature::next_bed_check_ms);
 #endif
 
