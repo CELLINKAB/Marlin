@@ -58,7 +58,7 @@ void GcodeSuite::M801()
 #    if ENABLED(MYCO_HEATER_DEBUG)
     if (parser.seen('D')) {
         const bool debugging = parser.value_bool();
-        bed_debug_control_active = debugging;
+        Temperature::temp_bed.is_set = !debugging;
         if (!debugging)
         {
             Temperature::temp_bed.soft_pwm_amount = 0;

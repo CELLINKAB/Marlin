@@ -266,8 +266,9 @@ typedef struct RedundantTempInfo : public TempInfo
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo
 {
-    celsius_t target = -999;
+    celsius_t target;
     int16_t soft_pwm_amount;
+    bool is_set;
 } heater_info_t;
 
 // A heater with PID stabilization
@@ -873,6 +874,7 @@ public:
               ph_controller.set_temperature(static_cast<printhead::Index>(ee), celsius));
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_hotend[ee].target = _MIN(celsius, hotend_max_target(ee));
+        temp_hotend[ee].is_set = true;
         start_watching_hotend(ee);
     }
 
@@ -957,6 +959,7 @@ public:
     {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
+        temp_bed.is_set = true;
 // TODO: this code is too specific to the driver used
 #    if ENABLED(STM_MOTOR_DRIVER_HEATER)
         static const auto init_other_pins [[maybe_unused]] = [] {
