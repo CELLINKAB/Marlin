@@ -7,6 +7,8 @@
 
 double get_tmp117_bed_temp();
 
-using BedSensors = std::array<TMP117<TwoWire>, 4>;
+constexpr size_t NUM_BED_TEMP_SENSORS = 4;
+
+using BedSensors = std::array<TMP117<TwoWire>, NUM_BED_TEMP_SENSORS>;
 
 BedSensors& bed_sensors();
