@@ -7,6 +7,8 @@
 
 #include "simple_TMC_controller.h"
 
+#include <optional>
+
 // fully generic probe interface idea
 // crtp class with a stow/deploy impl and a read impl
 // read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
@@ -35,23 +37,21 @@ struct StepperRetractingProbe
                  SRP_STALL_THRESHOLD,
                  SRP_STEPPER_CURRENT,
                  SRP_RETRACT_TIME}
-        , stepper{nullptr}
+        , _stepper{}
     {}
 
     void deploy()
     {
-        if (stepper == nullptr)
-            stepper_init();
         switch (state) {
         case ProbeState::Deployed:
             [[fallthrough]];
         case ProbeState::Unknown:
-            stepper->raw_move(config.stow_velocity);
+            stepper().raw_move(config.stow_velocity);
             safe_delay(200);
-            stepper->stop();
+            stepper().stop();
             [[fallthrough]];
         case ProbeState::Stowed:
-            stepper->blocking_move_until_stall(config.deploy_velocity,
+            stepper().blocking_move_until_stall(config.deploy_velocity,
                                                config.minimum_retract_time * 2);
             state = ProbeState::Deployed;
         }
@@ -59,14 +59,12 @@ struct StepperRetractingProbe
 
     void stow()
     {
-        if (stepper == nullptr)
-            stepper_init();
         if (state != ProbeState::Deployed) {
             deploy();
         }
-        stepper->raw_move(config.stow_velocity);
+        stepper().raw_move(config.stow_velocity);
         safe_delay(config.minimum_retract_time);
-        stepper->stop();
+        stepper().stop();
         state = ProbeState::Stowed;
     }
 
@@ -75,8 +73,8 @@ struct StepperRetractingProbe
     void set_config(const Config& conf)
     {
         // load config from flash
-        stepper->rms_current(conf.stepper_current);
-        stepper->stall_threshold(conf.stall_threshold);
+        stepper().rms_current(conf.stepper_current);
+        stepper().stall_threshold(conf.stall_threshold);
         config = conf;
     }
 
@@ -120,27 +118,33 @@ private:
         Deployed
     } state = ProbeState::Unknown;
 
-    STMC* stepper;
+    std::optional<STMC> _stepper;
 
     void stepper_init()
     {
 #if PINS_EXIST(SP_SERIAL_TX, SP_SERIAL_RX)
-        static auto s_driver{STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
+        _stepper.emplace(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
                                                         config.stall_threshold,
                                                         config.stepper_current,
                                                         0.15f),
                                         SP_SERIAL_RX_PIN,
-                                        SP_SERIAL_TX_PIN)};
+                                        SP_SERIAL_TX_PIN);
 #elif ENABLED(SP_HARDWARE_SERIAL)
-        static auto s_driver{STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
+        _stepper.emplace(STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
                                                         config.stall_threshold,
                                                         config.stepper_current,
                                                         0.15f),
-                                        &SP_HARDWARE_SERIAL)};
+                                        &SP_HARDWARE_SERIAL));
 #else
 #    error "need to define SP_SERIAL_TX/RX_PIN or SP_HARDWARE_SERIAL for stepper retracting probe"
 #endif
-    stepper = &s_driver;
+    }
+
+    STMC & stepper() {
+        if (!_stepper.has_value()) 
+            stepper_init();
+        return *_stepper;
+
     }
 };
 
