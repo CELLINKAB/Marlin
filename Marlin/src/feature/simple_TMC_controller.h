@@ -85,6 +85,7 @@ struct SimpleTMC
         const int32_t velocity, callback_function_t callback = [] {})
     {
         auto done = [this, callback] {
+            detachInterrupt(STOP);
             stop();
             if DEBUGGING (INFO)
                 SERIAL_ECHOLNPGM("Stepper stalled, SG:", driver.SG_RESULT());

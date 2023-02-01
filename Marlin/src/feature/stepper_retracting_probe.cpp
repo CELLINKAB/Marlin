@@ -22,6 +22,7 @@ void StepperRetractingProbe::deploy()
         stepper().stop();
         [[fallthrough]];
     case ProbeState::Stowed:
+    // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
         stepper().raw_move(config.deploy_velocity);
         safe_delay(config.minimum_retract_time * 2);
