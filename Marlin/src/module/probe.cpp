@@ -115,6 +115,10 @@ Probe probe;
 
 xyz_pos_t Probe::offset; // Initialized by settings.load()
 
+#if ENABLED(DYNAMIC_3POINT_LEVELING)
+  xy_pos_t Probe::dynamic_three_point_points[3]{xy_pos_t(PROBE_PT_1_X, PROBE_PT_1_Y), xy_pos_t(PROBE_PT_2_X, PROBE_PT_2_Y), xy_pos_t(PROBE_PT_3_X, PROBE_PT_3_Y)};
+#endif
+
 #if HAS_PROBE_XY_OFFSET
   const xy_pos_t &Probe::offset_xy = Probe::offset;
 #endif
