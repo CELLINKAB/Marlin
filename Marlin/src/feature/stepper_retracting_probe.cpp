@@ -22,7 +22,10 @@ void StepperRetractingProbe::deploy()
         stepper().stop();
         [[fallthrough]];
     case ProbeState::Stowed:
-        stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
+        // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
+        stepper().raw_move(config.deploy_velocity);
+        safe_delay(config.minimum_retract_time * 2);
+        stepper().stop();
         state = ProbeState::Deployed;
     }
 }
@@ -74,7 +77,7 @@ void StepperRetractingProbe::stepper_init()
                                      SRP_STEPPER_RSENSE),
                      SP_SERIAL_RX_PIN,
                      SP_SERIAL_TX_PIN);
-#    elif ENABLED(SP_HARDWARE_SERIAL)
+#    elif defined(SP_HARDWARE_SERIAL)
     _stepper.emplace(STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
                                           config.stall_threshold,
                                           config.stepper_current,
