@@ -9,6 +9,82 @@
 
 #    include "stepper_retracting_probe.h"
 
+
+
+void StepperRetractingProbe::deploy()
+{
+    switch (state) {
+    case ProbeState::Deployed:
+        [[fallthrough]];
+    case ProbeState::Unknown:
+        stepper().raw_move(config.stow_velocity);
+        safe_delay(200);
+        stepper().stop();
+        [[fallthrough]];
+    case ProbeState::Stowed:
+        stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
+        state = ProbeState::Deployed;
+    }
+}
+
+void StepperRetractingProbe::stow()
+{
+    if (state != ProbeState::Deployed) {
+        deploy();
+    }
+    stepper().raw_move(config.stow_velocity);
+    safe_delay(config.minimum_retract_time);
+    stepper().stop();
+    state = ProbeState::Stowed;
+}
+
+void StepperRetractingProbe::report_config(bool for_replay) const
+{
+    if (for_replay) {
+        SERIAL_ECHOLNPGM_P("M1029 T",
+                           config.stall_threshold,
+                           " C",
+                           config.stepper_current,
+                           " S",
+                           config.stow_velocity,
+                           " D",
+                           config.deploy_velocity,
+                           " M",
+                           config.minimum_retract_time);
+    } else {
+        SERIAL_ECHOLNPGM_P("Stall threshold: ",
+                           config.stall_threshold,
+                           "\nStepper current: ",
+                           config.stepper_current,
+                           "\nStow velocity: ",
+                           config.stow_velocity,
+                           "\nDeploy velocity: ",
+                           config.deploy_velocity,
+                           "\nBackoff time: ",
+                           config.minimum_retract_time);
+    }
+}
+
+void StepperRetractingProbe::stepper_init()
+{
+#    if PINS_EXIST(SP_SERIAL_TX, SP_SERIAL_RX)
+    _stepper.emplace(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
+                                     config.stall_threshold,
+                                     config.stepper_current,
+                                     SRP_STEPPER_RSENSE),
+                     SP_SERIAL_RX_PIN,
+                     SP_SERIAL_TX_PIN);
+#    elif ENABLED(SP_HARDWARE_SERIAL)
+    _stepper.emplace(STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
+                                          config.stall_threshold,
+                                          config.stepper_current,
+                                          SRP_STEPPER_RSENSE),
+                          &SP_HARDWARE_SERIAL));
+#    else
+#        error "need to define SP_SERIAL_TX/RX_PIN or SP_HARDWARE_SERIAL for stepper retracting probe"
+#    endif
+}
+
 StepperRetractingProbe stepper_probe;
 
 void GcodeSuite::M1029()
@@ -17,7 +93,8 @@ void GcodeSuite::M1029()
         stepper_probe.report_config(false);
         return;
     }
-    if (parser.seen('R')) stepper_probe.reset_position();
+    if (parser.seen('R'))
+        stepper_probe.reset_position();
     StepperRetractingProbe::Config new_conf = stepper_probe.get_config();
     if (parser.seen('T'))
         new_conf.stall_threshold = parser.value_int();
