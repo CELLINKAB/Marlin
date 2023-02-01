@@ -1281,6 +1281,10 @@ private:
     static void M1029();
   #endif
 
+  #if ENABLED(DYNAMIC_3POINT_LEVELING)
+    static void M1030();
+  #endif
+
   #if ENABLED(FESTO_PNEUMATICS)
     static void M1036(); // set pressure regulator
     static void M1062(); // get pressure sensors

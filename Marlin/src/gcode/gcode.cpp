@@ -1097,6 +1097,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ENABLED(STEPPER_RETRACTING_PROBE)
         case 1029: M1029(); break;
       #endif
+
+      #if ENABLED(DYNAMIC_3POINT_LEVELING)
+          case 1030: M1030(); break;
+      #endif
                                    
       #if ENABLED(HAS_ANALOG_PROBE)
         case 1100: M1100(); break;
