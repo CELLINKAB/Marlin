@@ -61,18 +61,22 @@ void GcodeSuite::M806()
 
     const uint8_t intensity = parser.byteval('I', 255);
     const auto exposure_seconds = min(parser.ulongval('S', 300), 1200UL);
-    const auto frequency = min(parser.ulongval('F', 1000), 2000UL);
+    const auto frequency = min(parser.ulongval('F', 1000), 5000UL);
     const bool safety_override = parser.boolval('O');
 
     const millis_t end_time = millis() + SEC_TO_MS(exposure_seconds);
 
     const uint32_t us_per_period = 1'000'000 / frequency;
-    const uint32_t us_on_time = us_per_period / 255 * intensity;
+    const uint32_t us_on_time = (us_per_period / 255) * intensity;
     const uint32_t us_off_time = us_per_period - us_on_time;
 
-    const auto time_fixed_idle = [](uint32_t micro_seconds) {
+    static auto time_fixed_idle = [](uint32_t micro_seconds) {
+        static millis_t next_idle_time = millis();
         uint32_t turn_off_time = micros() + micro_seconds;
-        idle();
+        if (millis() > next_idle_time) {
+            idle();
+            next_idle_time += 1000;
+        }
         delayMicroseconds(turn_off_time - micros());
     };
 
