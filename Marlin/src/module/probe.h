@@ -74,6 +74,10 @@ public:
 
     static xyz_pos_t offset;
 
+    #if ENABLED(DYNAMIC_3POINT_LEVELING)
+      static xy_pos_t dynamic_three_point_points[3];
+    #endif
+
     #if EITHER(PREHEAT_BEFORE_PROBING, PREHEAT_BEFORE_LEVELING)
       static void preheat_for_probing(const celsius_t hotend_temp, const celsius_t bed_temp);
     #endif
@@ -255,7 +259,11 @@ public:
       // Retrieve three points to probe the bed. Any type exposing set(X,Y) may be used.
       template <typename T>
       static void get_three_points(T points[3]) {
-        #if HAS_FIXED_3POINT
+        #if ENABLED(DYNAMIC_3POINT_LEVELING)
+        points[0] = dynamic_three_point_points[0].copy();
+        points[1] = dynamic_three_point_points[1].copy();
+        points[2] = dynamic_three_point_points[2].copy();
+        #elif HAS_FIXED_3POINT
           #define VALIDATE_PROBE_PT(N) static_assert(Probe::build_time::can_reach(xy_pos_t{PROBE_PT_##N##_X, PROBE_PT_##N##_Y}), \
             "PROBE_PT_" STRINGIFY(N) "_(X|Y) is unreachable using default NOZZLE_TO_PROBE_OFFSET and PROBING_MARGIN");
           VALIDATE_PROBE_PT(1); VALIDATE_PROBE_PT(2); VALIDATE_PROBE_PT(3);
