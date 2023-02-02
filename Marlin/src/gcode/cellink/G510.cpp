@@ -40,8 +40,10 @@ void GcodeSuite::G510()
     start_pos.z = parser.axisunitsval('Z', AxisEnum::Z_AXIS, DEFAULT_START_POS.z);
 
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
+
+    const xyz_pos_t existing_offset = optical_autocal.offset(active_extruder);
     if (optical_autocal.full_autocal_routine(active_extruder, start_pos, feedrate)) {
-        update_offset(optical_autocal.offset(active_extruder));
+        update_offset(optical_autocal.offset(active_extruder) - existing_offset);
     }
 }
 
