@@ -41,7 +41,7 @@ void GcodeSuite::M1030()
                                        Probe::dynamic_three_point_points[index].y)};
 
     if (!Probe::build_time::can_reach(point)) {
-        SERIAL_ERROR_MSG("Given probe point is unreachable!");
+        SERIAL_ERROR_MSG("POINT_UNREACHABLE");
         return;
     }
 
