@@ -238,8 +238,8 @@
 
 #define PSU_FAULT_PIN PG10
 
-
 #define DOOR_PIN UVC_INTERLOCK_PIN
+#define DOOR_SENSOR_INVERTING true
 #define FREEZE_PIN PA10
 
 #define LED_RED PE3
