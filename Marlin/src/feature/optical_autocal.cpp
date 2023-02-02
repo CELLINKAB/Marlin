@@ -10,6 +10,8 @@ uint32_t OpticalAutocal::sensor_polarity = RISING;
 bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate)
 {
     home_if_needed();
+    const xyz_pos_t existing_offset = offsets[tool].copy();
+    reset(tool);
     do_blocking_move_to(start_pos);
     planner.synchronize();
 
@@ -33,6 +35,7 @@ bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t st
     if (!success) {
         do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
         SERIAL_ERROR_MSG("autocalibration failed!");
+        offsets[tool] = existing_offset;
     } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("Nozzle offset: ", offsets[tool]);
 
