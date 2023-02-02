@@ -1449,7 +1449,7 @@ void unified_bed_leveling::smart_fill_mesh() {
       SERIAL_ECHOLNPGM("Tilting mesh (1/3)");
       TERN_(HAS_STATUS_MESSAGE, ui.status_printf(0, F(S_FMT " 1/3"), GET_TEXT(MSG_LCD_TILTING_MESH)));
 
-      measured_z = probe.probe_at_point(points[0], PROBE_PT_RAISE, param.V_verbosity);
+      measured_z = probe.probe_at_point(points[0], PROBE_PT_STOW, param.V_verbosity);
       if (isnan(measured_z))
         abort_flag = true;
       else {
@@ -1468,7 +1468,7 @@ void unified_bed_leveling::smart_fill_mesh() {
         SERIAL_ECHOLNPGM("Tilting mesh (2/3)");
         TERN_(HAS_STATUS_MESSAGE, ui.status_printf(0, F(S_FMT " 2/3"), GET_TEXT(MSG_LCD_TILTING_MESH)));
 
-        measured_z = probe.probe_at_point(points[1], PROBE_PT_RAISE, param.V_verbosity);
+        measured_z = probe.probe_at_point(points[1], PROBE_PT_STOW, param.V_verbosity);
         #ifdef VALIDATE_MESH_TILT
           z2 = measured_z;
         #endif

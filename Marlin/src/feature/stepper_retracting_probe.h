@@ -5,6 +5,8 @@
 #include "../inc/MarlinConfig.h"
 #include "../module/planner.h"
 
+#include <optional>
+
 #include "simple_TMC_controller.h"
 
 // fully generic probe interface idea
@@ -12,14 +14,15 @@
 // read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
 // probe types inherit from Probe<StowDeploy, ProbeType>
 
-#define SRP_DEPLOY_VELOCITY 36000
-#define SRP_STOW_VELOCITY -64000
-#define SRP_STALL_THRESHOLD 120
-#define SRP_STEPPER_CURRENT 350
-#define SRP_RETRACT_TIME 9000
-
 struct StepperRetractingProbe
 {
+    static constexpr int32_t SRP_DEPLOY_VELOCITY = -36000;
+    static constexpr int32_t SRP_STOW_VELOCITY = 64000;
+    static constexpr uint8_t SRP_STALL_THRESHOLD = 120;
+    static constexpr uint32_t SRP_STEPPER_CURRENT = 350;
+    static constexpr uint32_t SRP_RETRACT_TIME = 9000;
+    static constexpr float SRP_STEPPER_RSENSE = 0.11f;
+
     struct Config
     {
         int32_t deploy_velocity;
@@ -29,83 +32,30 @@ struct StepperRetractingProbe
         uint32_t minimum_retract_time;
     };
 
-    StepperRetractingProbe()
+    constexpr StepperRetractingProbe()
         : config{SRP_DEPLOY_VELOCITY,
                  SRP_STOW_VELOCITY,
                  SRP_STALL_THRESHOLD,
                  SRP_STEPPER_CURRENT,
                  SRP_RETRACT_TIME}
-        , stepper{nullptr}
+        , state{ProbeState::Unknown}
+        , _stepper{}
     {}
 
-    void deploy()
-    {
-        if (stepper == nullptr)
-            stepper_init();
-        switch (state) {
-        case ProbeState::Deployed:
-            [[fallthrough]];
-        case ProbeState::Unknown:
-            stepper->raw_move(config.stow_velocity);
-            safe_delay(200);
-            stepper->stop();
-            [[fallthrough]];
-        case ProbeState::Stowed:
-            stepper->blocking_move_until_stall(config.deploy_velocity,
-                                               config.minimum_retract_time * 2);
-            state = ProbeState::Deployed;
-        }
-    }
+    void deploy();
 
-    void stow()
-    {
-        if (stepper == nullptr)
-            stepper_init();
-        if (state != ProbeState::Deployed) {
-            deploy();
-        }
-        stepper->raw_move(config.stow_velocity);
-        safe_delay(config.minimum_retract_time);
-        stepper->stop();
-        state = ProbeState::Stowed;
-    }
+    void stow();
 
-    const Config& get_config() const { return config; }
+    constexpr const Config& get_config() const { return config; }
 
-    void set_config(const Config& conf)
+    inline void set_config(const Config& conf)
     {
-        // load config from flash
-        stepper->rms_current(conf.stepper_current);
-        stepper->stall_threshold(conf.stall_threshold);
         config = conf;
+        // reset stepper to force reinitialization next use
+        _stepper.reset();
     }
 
-    void report_config(bool for_replay) const
-    {
-        if (for_replay) {
-            SERIAL_ECHOLNPGM_P("M1029 T",
-                               config.stall_threshold,
-                               " C",
-                               config.stepper_current,
-                               " S",
-                               config.stow_velocity,
-                               " D",
-                               config.deploy_velocity,
-                               " M",
-                               config.minimum_retract_time);
-        } else {
-            SERIAL_ECHOLNPGM_P("Stall threshold: ",
-                               config.stall_threshold,
-                               "\nStepper current: ",
-                               config.stepper_current,
-                               "\nStow velocity: ",
-                               config.stow_velocity,
-                               "\nDeploy velocity: ",
-                               config.deploy_velocity,
-                               "\nBackoff time: ",
-                               config.minimum_retract_time);
-        }
-    }
+    void report_config(bool for_replay) const;
 
     inline void reset_position() { state = ProbeState::Unknown; }
 
@@ -118,29 +68,17 @@ private:
         Unknown,
         Stowed,
         Deployed
-    } state = ProbeState::Unknown;
+    } state;
 
-    STMC* stepper;
+    std::optional<STMC> _stepper;
 
-    void stepper_init()
+    void stepper_init();
+
+    inline STMC& stepper()
     {
-#if PINS_EXIST(SP_SERIAL_TX, SP_SERIAL_RX)
-        static auto s_driver{STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
-                                                        config.stall_threshold,
-                                                        config.stepper_current,
-                                                        0.15f),
-                                        SP_SERIAL_RX_PIN,
-                                        SP_SERIAL_TX_PIN)};
-#elif ENABLED(SP_HARDWARE_SERIAL)
-        static auto s_driver{STMC(SimpleTMCConfig(PROBE_SERIAL_ADDRESS,
-                                                        config.stall_threshold,
-                                                        config.stepper_current,
-                                                        0.15f),
-                                        &SP_HARDWARE_SERIAL)};
-#else
-#    error "need to define SP_SERIAL_TX/RX_PIN or SP_HARDWARE_SERIAL for stepper retracting probe"
-#endif
-    stepper = &s_driver;
+        if (!_stepper.has_value())
+            stepper_init();
+        return *_stepper;
     }
 };
 
