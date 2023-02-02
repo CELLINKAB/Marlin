@@ -12,20 +12,22 @@ struct DoorSensor
         }
         static auto report = []() {
             static bool debouncing = false;
-            if (debouncing) return;
+            if (debouncing)
+                return;
             debouncing = true;
-            delay(5);
+            delay(10);
             static bool last_door_state = !READ(SENSOR);
             const bool door_state = READ(SENSOR);
-            if (door_state != last_door_state)
-            {SERIAL_ECHOLNPGM("DO:", door_state);}
+            if (door_state != last_door_state) {
+                SERIAL_ECHOLNPGM("DO:", DOOR_SENSOR_INVERTING != door_state);
+            }
             last_door_state = door_state;
             debouncing = false;
         };
         attachInterrupt(SENSOR, static_cast<void (*)()>(report), CHANGE);
     }
 
-    ~DoorSensor() {detachInterrupt(SENSOR);}
+    ~DoorSensor() { detachInterrupt(SENSOR); }
     DoorSensor(const DoorSensor&) = delete;
     DoorSensor(DoorSensor&&) = delete;
     DoorSensor& operator=(const DoorSensor&) = delete;
