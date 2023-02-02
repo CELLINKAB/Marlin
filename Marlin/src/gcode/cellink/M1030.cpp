@@ -24,17 +24,21 @@ void GcodeSuite::M1030()
                          Probe::dynamic_three_point_points[2].y);
         return;
     }
-    size_t index = constrain(parser.value_ulong(), 1UL, 3UL);
+    size_t index = constrain(parser.value_ulong(), 1UL, 3UL) - 1;
 
-    xy_pos_t point{parser.axisunitsval('X', AxisEnum::X_AXIS),
-                   parser.axisunitsval('Y', AxisEnum::Y_AXIS)};
+    xy_pos_t point{parser.axisunitsval('X',
+                                       AxisEnum::X_AXIS,
+                                       Probe::dynamic_three_point_points[index].x),
+                   parser.axisunitsval('Y',
+                                       AxisEnum::Y_AXIS,
+                                       Probe::dynamic_three_point_points[index].y)};
 
     if (!Probe::build_time::can_reach(point)) {
         SERIAL_ERROR_MSG("Given probe point is unreachable!");
         return;
     }
 
-    Probe::dynamic_three_point_points[index - 1] = point;
+    Probe::dynamic_three_point_points[index] = point;
 }
 
 #endif // DYNAMIC_3POINT_LEVELING
