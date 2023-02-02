@@ -214,4 +214,3 @@
 //
 
 #define FREEZE_PIN PA8
-#define FREEZE_MSG "DO:"
