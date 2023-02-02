@@ -24,7 +24,14 @@ void GcodeSuite::M1030()
                          Probe::dynamic_three_point_points[2].y);
         return;
     }
-    size_t index = constrain(parser.value_ulong(), 1UL, 3UL) - 1;
+    
+    size_t index = parser.value_ulong();
+    if (!WITHIN(index, 1, 3))
+    {
+        SERIAL_ERROR_MSG("INDEX_OUT_OF_BOUNDS");
+        return;
+    }
+    index -= 1;
 
     xy_pos_t point{parser.axisunitsval('X',
                                        AxisEnum::X_AXIS,
