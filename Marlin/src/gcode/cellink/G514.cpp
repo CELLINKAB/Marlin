@@ -28,7 +28,7 @@ void GcodeSuite::G514()
 void GcodeSuite::G515()
 {
     using namespace pneumatics;
-    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{140, -45};
+    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{130, -45};
     static constexpr float GRIP_Z_HEIGHT = -5.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
@@ -37,8 +37,8 @@ void GcodeSuite::G515()
     if (homing_needed_error())
         return;
 
-    planner.synchronize();
-    xy_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
+    xyz_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
+    apply_motion_limits(gripper_xy);
     do_blocking_move_to_z(Z_AFTER_PROBING);
     do_blocking_move_to(gripper_xy);
 
