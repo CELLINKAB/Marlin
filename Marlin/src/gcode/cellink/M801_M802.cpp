@@ -15,6 +15,7 @@ BedSensors& bed_sensors()
 {
     static BedSensors sensors{[]() {
         static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
+        pb_i2c.setClock(50'000);
         pb_i2c.begin();
         TMP117<TwoWire> sensor_1(TMPAddr::GND, pb_i2c);
         sensor_1.init(nullptr);
