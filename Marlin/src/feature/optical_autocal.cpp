@@ -126,27 +126,27 @@ void OpticalAutocal::report_sensors() const
     volatile bool read_sensor_1 = false;
     volatile bool read_sensor_2 = false;
 
-    const unsigned int delay_5mm = static_cast<int>(5000.0f / feedrate ?: feedrate_mm_s);
+    const unsigned int delay_3mm = static_cast<int>(3000.0f / feedrate ?: feedrate_mm_s);
 
     // enable sensors
-    auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_5mm] {
+    auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_3mm] {
         const float y = planner.get_axis_positions_mm().y;
         if (!read_sensor_1)
             return;
         sensor_1_trigger_y_pos = y;
         read_sensor_1 = false;
-        safe_delay(delay_5mm);
+        safe_delay(delay_3mm);
         read_sensor_2 = true;
         if DEBUGGING (LEVELING)
             SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
     };
-    auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_5mm] {
+    auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_3mm] {
         const float y = planner.get_axis_positions_mm().y;
         if (!read_sensor_2)
             return;
         sensor_2_trigger_y_pos = y;
         read_sensor_2 = false;
-        safe_delay(delay_5mm);
+        safe_delay(delay_3mm);
         read_sensor_1 = true;
         if DEBUGGING (LEVELING)
             SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
