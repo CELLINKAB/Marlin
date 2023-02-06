@@ -427,7 +427,6 @@
 #define BOARD_T41U5XBB                5002  // T41U5XBB Teensy 4.1 breakout board
 #define BOARD_NUCLEO_F767ZI           5003  // ST NUCLEO-F767ZI Dev Board
 #define BOARD_BTT_SKR_SE_BX           5004  // BigTreeTech SKR SE BX (STM32H743II)
-#define BOARD_NUCLEO_F746ZG           5005  // ST NUCLEO-F746ZG Dev Board
 #define BOARD_MYCORRHIZA_V1           5006  // Cellink Mycorrhiza control board
 #define BOARD_MYCORRHIZA_V1_1         5007  // Cellink Mycorrhiza control board
 
