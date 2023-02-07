@@ -53,8 +53,10 @@ void GcodeSuite::G515()
             safe_delay(1000);
         }
         if (float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
-            vacuum_delta < DETECTION_THRESHOLD)
-            SERIAL_ERROR_MSG("gripper likely failed to release\nvacuum_delta:", vacuum_delta);
+            vacuum_delta < DETECTION_THRESHOLD) {
+            SERIAL_ECHOLN("GRIP_FAILED");
+            if (DEBUGGING(INFO)) SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
+        }
     } else {
         set_gripper_valves(GripperState::Open);
         SET_SOFT_ENDSTOP_LOOSE(true);
