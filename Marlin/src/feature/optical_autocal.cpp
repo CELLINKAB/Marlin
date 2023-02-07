@@ -188,8 +188,8 @@ void OpticalAutocal::report_sensors() const
     detachInterrupt(SENSOR_1);
     detachInterrupt(SENSOR_2);
 
-    auto check_non_zero = [](const auto containter) -> bool {
-        return std::any_of(containter.cbegin(), containter.cend(), [](const float v) {
+    auto check_non_zero = [](const auto container) -> bool {
+        return std::any_of(container.cbegin(), container.cend(), [](const float v) {
             return v == 0.0f;
         });
     };
@@ -214,7 +214,7 @@ void OpticalAutocal::report_sensors() const
 
     const float dy = ABS(nozzle_y1 - nozzle_y2);
 
-    // sensors cross at a 90 degree angle, which creates two congruent isoscles
+    // sensors cross at a 90 degree angle, which creates two congruent isosceles
     // right triangles with legs in the X and Y directions, both of value dy/2
     const float xy_offset = dy / 2.0f;
 
