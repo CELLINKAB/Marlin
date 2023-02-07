@@ -17,9 +17,15 @@ struct OpticalAutocal
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
     using YSweepArray = std::array<float, NUM_CYCLES>;
 
+    enum class ErrorCode {
+        OK,
+        POLARITY_MISMATCH,
+        CALIBRATION_FAILED,
+    };
+
     OpticalAutocal() = default;
 
-    bool full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate);
+    auto full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
     [[nodiscard]] bool is_calibrated(const uint8_t tool) const;
     [[nodiscard]] const xyz_pos_t &offset(const uint8_t tool) const;
     void report_sensors() const;

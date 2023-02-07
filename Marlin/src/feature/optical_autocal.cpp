@@ -7,13 +7,13 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate)
+auto OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode
 {
     home_if_needed();
     do_blocking_move_to(start_pos);
     planner.synchronize();
 
-    static auto set_polarity [[maybe_unused]] = [] {
+    static auto set_polarity = [] {
         SET_INPUT_PULLUP(SENSOR_1);
         SET_INPUT_PULLUP(SENSOR_2);
 
@@ -21,22 +21,24 @@ bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t st
         const auto sensor_2_polarity = READ(SENSOR_2);
 
         if (sensor_1_polarity != sensor_2_polarity) {
-            SERIAL_ERROR_MSG("optical autocal sensor polarity mismatch!");
             return false;
         }
 
         OpticalAutocal::sensor_polarity = (sensor_1_polarity == LOW) ? RISING : FALLING;
         return true;
-    }();
+    };
+
+    if (!set_polarity())
+        return ErrorCode::POLARITY_MISMATCH;
 
     const bool success = full_sensor_sweep(active_extruder, start_pos, feedrate);
     if (!success) {
         do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
-        SERIAL_ERROR_MSG("autocalibration failed!");
+        return ErrorCode::CALIBRATION_FAILED;
     } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("Nozzle offset: ", offsets[tool]);
 
-    return success;
+    return ErrorCode::OK;
 }
 
 [[nodiscard]] bool OpticalAutocal::is_calibrated(const uint8_t tool) const
