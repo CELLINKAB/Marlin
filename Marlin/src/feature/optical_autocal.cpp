@@ -7,13 +7,15 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate)
+auto OpticalAutocal::full_autocal_routine(const uint8_t tool,
+                                          const xyz_pos_t start_pos,
+                                          const feedRate_t feedrate) -> ErrorCode
 {
     home_if_needed();
     do_blocking_move_to(start_pos);
     planner.synchronize();
 
-    static auto set_polarity [[maybe_unused]] = [] {
+    static auto set_polarity = [] {
         SET_INPUT_PULLUP(SENSOR_1);
         SET_INPUT_PULLUP(SENSOR_2);
 
@@ -21,22 +23,23 @@ bool OpticalAutocal::full_autocal_routine(const uint8_t tool, const xyz_pos_t st
         const auto sensor_2_polarity = READ(SENSOR_2);
 
         if (sensor_1_polarity != sensor_2_polarity) {
-            SERIAL_ERROR_MSG("optical autocal sensor polarity mismatch!");
             return false;
         }
 
         OpticalAutocal::sensor_polarity = (sensor_1_polarity == LOW) ? RISING : FALLING;
         return true;
-    }();
+    };
 
-    const bool success = full_sensor_sweep(active_extruder, start_pos, feedrate);
-    if (!success) {
+    if (!set_polarity())
+        return ErrorCode::POLARITY_MISMATCH;
+
+    const ErrorCode result = full_sensor_sweep(active_extruder, start_pos, feedrate);
+    if (result != ErrorCode::OK && result != ErrorCode::SANITY_CHECK_FAILED) {
         do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
-        SERIAL_ERROR_MSG("autocalibration failed!");
     } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("Nozzle offset: ", offsets[tool]);
 
-    return success;
+    return result;
 }
 
 [[nodiscard]] bool OpticalAutocal::is_calibrated(const uint8_t tool) const
@@ -72,11 +75,13 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return new_offset;
 }
 
-bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start_pos, const float feedrate)
+[[nodiscard]] auto OpticalAutocal::full_sensor_sweep(const uint8_t tool,
+                                                     const xyz_pos_t start_pos,
+                                                     const float feedrate) -> ErrorCode
 {
     const float z_offset = find_z_offset(start_pos.z, feedrate);
     if (z_offset == Z_OFFSET_ERR)
-        return false;
+        return ErrorCode::NO_NOZZLE_DETECTED;
     else if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
         SERIAL_ECHOLNPGM("Z offset: ", z_offset);
 
@@ -84,17 +89,18 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
 
     const xy_pos_t xy_offset = find_xy_offset(start_pos, feedrate);
     if (xy_offset == XY_OFFSET_ERR)
-        return false;
+        return ErrorCode::CALIBRATION_FAILED;
 
     do_blocking_move_to_xy_z(xy_offset, z_offset - MEDIUM_Z_INCREMENT);
 
     const bool sensor_1_check = READ(SENSOR_1);
     const bool sensor_2_check = READ(SENSOR_2);
 
+    ErrorCode retval = ErrorCode::OK;
+
     if (!(sensor_1_check && sensor_2_check)) {
-        SERIAL_ERROR_MSG("Autocalibration succeeded but sanity check failed!");
-        report_sensors();
-        //return false;
+        retval = ErrorCode::SANITY_CHECK_FAILED;
+        if (DEBUGGING(ERRORS)) report_sensors();
     }
 
     offsets[tool].set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
@@ -106,20 +112,18 @@ bool OpticalAutocal::full_sensor_sweep(const uint8_t tool, const xyz_pos_t start
     do_blocking_move_to_xy(offsets[tool]);
     // planner.set_position_mm({0.0,0.0,0.0});
 
-    return true;
+    return retval;
 }
 
 void OpticalAutocal::report_sensors() const
 {
     const bool sensor_1_check = READ(SENSOR_1);
     const bool sensor_2_check = READ(SENSOR_2);
-    SERIAL_ECHOLNPGM("sensor 1: ",
-                    sensor_1_check,
-                    "\nsensor 2: ",
-                    sensor_2_check);
+    SERIAL_ECHOLNPGM("sensor 1: ", sensor_1_check, "\nsensor 2: ", sensor_2_check);
 }
 
-[[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos, const float feedrate) const
+[[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos,
+                                                      const float feedrate) const
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
     volatile float sensor_2_trigger_y_pos{0.0f};
@@ -184,8 +188,8 @@ void OpticalAutocal::report_sensors() const
     detachInterrupt(SENSOR_1);
     detachInterrupt(SENSOR_2);
 
-    auto check_non_zero = [](const auto containter) -> bool {
-        return std::any_of(containter.cbegin(), containter.cend(), [](const float v) {
+    auto check_non_zero = [](const auto container) -> bool {
+        return std::any_of(container.cbegin(), container.cend(), [](const float v) {
             return v == 0.0f;
         });
     };
@@ -210,7 +214,7 @@ void OpticalAutocal::report_sensors() const
 
     const float dy = ABS(nozzle_y1 - nozzle_y2);
 
-    // sensors cross at a 90 degree angle, which creates two congruent isoscles
+    // sensors cross at a 90 degree angle, which creates two congruent isosceles
     // right triangles with legs in the X and Y directions, both of value dy/2
     const float xy_offset = dy / 2.0f;
 
@@ -264,7 +268,6 @@ void OpticalAutocal::report_sensors() const
 
     return z;
 }
-
 
 OpticalAutocal optical_autocal;
 

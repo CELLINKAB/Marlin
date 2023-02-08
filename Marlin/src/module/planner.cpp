@@ -2147,12 +2147,14 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
       if (result != printhead::Result::OK && DEBUGGING(ERRORS)) {
       SERIAL_ECHOLNPGM("extrusion operation '", operation, "' failed with code ", printhead::string_from_result_code(result));}
     };
-    printhead::Index ph_index = static_cast<printhead::Index>(extruder);
-    report_error("set fullstep volume", ph_controller.set_volume_per_fullstep(ph_index, VOLUME_PER_FULLSTEP));
-    report_error("set pulse volume", ph_controller.set_step_volume(ph_index, STEP_VOLUME));
-    report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, fr_mm_s_to_pl_s(feedrate_mm_s)));
-    report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
-    report_error("add raw steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
+    if (esteps != 0) {
+      printhead::Index ph_index = static_cast<printhead::Index>(extruder);
+      report_error("set fullstep volume", ph_controller.set_volume_per_fullstep(ph_index, VOLUME_PER_FULLSTEP));
+      report_error("set pulse volume", ph_controller.set_step_volume(ph_index, STEP_VOLUME));
+      report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, fr_mm_s_to_pl_s(feedrate_mm_s)));
+      report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
+      report_error("add raw steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
+    }
   }
   #endif
 

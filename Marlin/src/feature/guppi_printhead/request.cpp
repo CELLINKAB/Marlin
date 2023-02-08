@@ -38,7 +38,7 @@ Result printhead::unsafe_send(const void* data, const size_t size, HardwareSeria
 void printhead::flush_rx(HardwareSerial& serial)
 {
     while (serial.available())
-        auto _ [[maybe_unused]] = serial.read();
+        std::ignore = serial.read();
 }
 
 void Controller::init()

@@ -42,8 +42,22 @@ void GcodeSuite::G510()
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
 
     const xyz_pos_t existing_offset = optical_autocal.offset(active_extruder);
-    if (optical_autocal.full_autocal_routine(active_extruder, start_pos, feedrate)) {
-        update_offset(optical_autocal.offset(active_extruder) - existing_offset);
+    switch (optical_autocal.full_autocal_routine(active_extruder, start_pos, feedrate)) {
+        case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
+            SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
+            [[fallthrough]];
+        case OpticalAutocal::ErrorCode::OK:
+            update_offset(optical_autocal.offset(active_extruder) - existing_offset);
+            break;
+        case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
+            SERIAL_ECHOLN("NOZZLE_AUTOCALIBRATION_FAIL");
+            break;
+        case OpticalAutocal::ErrorCode::POLARITY_MISMATCH:
+            SERIAL_ECHOLN("AUTOCAL_SENSOR_POLARITY_MISMATCH");
+            break;
+        case OpticalAutocal::ErrorCode::NO_NOZZLE_DETECTED:
+            SERIAL_ECHOLN("AUTOCAL_NO_NOZZLE");
+            break;
     }
 }
 

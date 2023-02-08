@@ -702,8 +702,6 @@
   #include "stm32f7/pins_REMRAM_V1.h"           // STM32F7                                env:REMRAM_V1
 #elif MB(NUCLEO_F767ZI)
   #include "stm32f7/pins_NUCLEO_F767ZI.h"       // STM32F7                                env:NUCLEO_F767ZI
-#elif MB(NUCLEO_F746ZG)
-  #include "stm32f7/pins_NUCLEO_F746ZG.h"       // STM32F7                                env:NUCLEO_F746ZG
 #elif MB(MYCORRHIZA_V1)
   #include "stm32f7/pins_MYCORRHIZA_V1.h"       // STM32F7                                env:MYCORRHIZA_V1
 #elif MB(MYCORRHIZA_V1_1)
