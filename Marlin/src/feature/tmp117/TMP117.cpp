@@ -258,7 +258,9 @@ uint16_t TMP117<Bus>::readConfig(void)
 template<typename Bus>
 double TMP117<Bus>::getTemperature(void)
 {
-    int16_t temp = i2cRead2B(TMP117_REG_TEMPERATURE);
+    const int16_t temp = i2cRead2B(TMP117_REG_TEMPERATURE);
+    if (temp == TEMP_READ_ERR_VAL)
+        return NAN;
     return (temp * TMP117_RESOLUTION) * scale_factor;
 }
 /*!
@@ -417,22 +419,24 @@ void TMP117<Bus>::i2cWrite2B(uint8_t reg, uint16_t data)
 template<typename Bus>
 uint16_t TMP117<Bus>::i2cRead2B(uint8_t reg)
 {
-    uint8_t data[2]{};
-    int16_t datac; // error value
+    static constexpr uint8_t EXPECTED_RETURN_SIZE = 2;
+    static constexpr uint8_t REG_SIZE = 1;
+    static constexpr uint8_t SEND_STOP = 1;
 
+    // ping device with empty transmission to see if it's active first
     bus.beginTransmission(address);
-    bus.write(reg);
-    bus.endTransmission();
-    bus.requestFrom((uint8_t) address, (uint8_t) 2);
+    if (bus.endTransmission(SEND_STOP) != I2C_OK)
+        return TEMP_READ_ERR_VAL;
 
-    // bus byte order is opposite of memcpy byte order
+    const auto read_bytes = bus.requestFrom(address, EXPECTED_RETURN_SIZE, reg, REG_SIZE, SEND_STOP);
+    // bus byte order is BE, so bytes are
     // bus.available() always returns true so don't bother checking
-    data[1] = bus.read();
-    data[0] = bus.read();
-    std::memcpy(&datac, data, 2);
-
-    bus.flush();
-    return datac;
+    if (read_bytes == EXPECTED_RETURN_SIZE) {
+        const auto data1 = bus.read();
+        const auto data2 = bus.read();
+        return static_cast<int16_t>(((data1 << 8) & 0xFF00) | (data2 & 0x00FF));
+    }
+        return TEMP_READ_ERR_VAL;
 }
 
 /*!

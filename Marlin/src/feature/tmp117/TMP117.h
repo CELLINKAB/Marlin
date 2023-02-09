@@ -31,21 +31,22 @@
 
 #include "../../inc/MarlinConfig.h"
 #include <Wire.h>
+#include <limits>
 
-#define TMP117_REG_TEMPERATURE 0x00
-#define TMP117_REG_CONFIGURATION 0x01
-#define TMP117_REG_TEMP_HIGH_LIMIT 0x02
-#define TMP117_REG_TEMP_LOW_LIMIT 0x03
+static constexpr uint8_t TMP117_REG_CONFIGURATION = 0x01;
+static constexpr uint8_t TMP117_REG_TEMP_HIGH_LIMIT = 0x02;
+static constexpr uint8_t TMP117_REG_TEMPERATURE = 0x00;
+static constexpr uint8_t TMP117_REG_TEMP_LOW_LIMIT = 0x03;
 
-#define TMP117_REG_EEPROM_UNLOCK 0x04
-#define TMP117_REG_EEPROM1 0x05
-#define TMP117_REG_EEPROM2 0x06
-#define TMP117_REG_EEPROM3 0x08
+static constexpr uint8_t TMP117_REG_EEPROM_UNLOCK = 0x04;
+static constexpr uint8_t TMP117_REG_EEPROM1 = 0x05;
+static constexpr uint8_t TMP117_REG_EEPROM2 = 0x06;
+static constexpr uint8_t TMP117_REG_EEPROM3 = 0x08;
 
-#define TMP117_REG_TEMPERATURE_OFFSET 0x07
-#define TMP117_REG_DEVICE_ID 0x0F
+static constexpr uint8_t TMP117_REG_TEMPERATURE_OFFSET = 0x07;
+static constexpr uint8_t TMP117_REG_DEVICE_ID = 0x0F;
 
-#define TMP117_RESOLUTION (double) 0.0078125
+static constexpr double TMP117_RESOLUTION = 0.0078125;
 
 typedef void (*alert_callback)(void);
 
@@ -133,6 +134,8 @@ public:
     void printConfig(void);
 
 private:
+    static constexpr int16_t TEMP_READ_ERR_VAL = std::numeric_limits<int16_t>::lowest();
+
     Bus &bus;
 
     uint8_t address;

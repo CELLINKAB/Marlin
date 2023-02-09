@@ -15,6 +15,7 @@ BedSensors& bed_sensors()
 {
     static BedSensors sensors{[]() {
         static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
+        pb_i2c.setClock(50'000);
         pb_i2c.begin();
         TMP117<TwoWire> sensor_1(TMPAddr::GND, pb_i2c);
         sensor_1.init(nullptr);
@@ -32,10 +33,17 @@ BedSensors& bed_sensors()
 double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
+    size_t failed_reads = 0;
     for (auto& sensor : bed_sensors()) {
-        total_temps += (sensor.getTemperature());
+        const auto temperature = sensor.getTemperature();
+        if (!isnan(temperature))
+            total_temps += (temperature);
+        else
+            ++failed_reads;
     }
-    const double avg = total_temps / bed_sensors().size();
+    if (failed_reads >= bed_sensors().size())
+        return -300.0;
+    const double avg = total_temps / (bed_sensors().size() - failed_reads);
     return avg;
 }
 
@@ -44,10 +52,14 @@ void GcodeSuite::M802()
 {
     uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
+        const auto temperature = sensor.getTemperature();
         SERIAL_ECHO("PBT");
         SERIAL_ECHO(sensor_num++);
         SERIAL_CHAR(':');
-        SERIAL_ECHO_F(sensor.getTemperature());
+        if (isnan(temperature))
+            SERIAL_ECHO("NAN");
+        else
+            SERIAL_ECHO_F(temperature);
         SERIAL_CHAR(',');
     }
     SERIAL_EOL();
@@ -59,8 +71,7 @@ void GcodeSuite::M801()
     if (parser.seen('D')) {
         const bool debugging = parser.value_bool();
         Temperature::temp_bed.is_set = !debugging;
-        if (!debugging)
-        {
+        if (!debugging) {
             Temperature::temp_bed.soft_pwm_amount = 0;
             WRITE_HEATER_BED(0);
             return;
