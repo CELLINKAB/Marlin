@@ -1342,11 +1342,11 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
 #if HAS_PID_HEATING
 
-  template<typename TT, int MIN_POW, int MAX_POW>
+  template<typename TT, int MIN_POW, int MAX_POW, bool BIDIRECTIONAL = false>
   class PIDRunner {
   public:
     TT &tempinfo;
-    __typeof__(TT::pid) work_pid{0};
+    decltype(TT::pid) work_pid{0};
     float temp_iState = 0, temp_dState = 0;
     bool pid_reset = true;
 
@@ -1360,12 +1360,22 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
       #else // !PID_OPENLOOP
 
-        const float pid_error = tempinfo.target - tempinfo.celsius;
-        if (!tempinfo.target || pid_error < -(PID_FUNCTIONAL_RANGE)) {
+        if (!tempinfo.is_set) {
           pid_reset = true;
           return 0;
         }
-        else if (pid_error > PID_FUNCTIONAL_RANGE) {
+
+        const float pid_error = tempinfo.target - tempinfo.celsius;
+          
+        if (pid_error < -(PID_FUNCTIONAL_RANGE)) {
+          pid_reset = true;
+          if constexpr (BIDIRECTIONAL) 
+            return -MAX_POW;
+          else 
+            return 0;
+        }
+        
+        if (pid_error > PID_FUNCTIONAL_RANGE) {
           pid_reset = true;
           return MAX_POW;
         }
@@ -1376,6 +1386,9 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           work_pid.Kd = 0.0;
         }
 
+        if constexpr (BIDIRECTIONAL)
+            pid_error = ABS(pid_error);
+
         const float max_power_over_i_gain = float(MAX_POW) / tempinfo.pid.Ki - float(MIN_POW);
         temp_iState = constrain(temp_iState + pid_error, 0, max_power_over_i_gain);
 
@@ -1385,7 +1398,13 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
         temp_dState = tempinfo.celsius;
 
-        return constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_POW), 0, MAX_POW);
+        float out_val = constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_POW), 0, MAX_POW);
+        
+        if (BIDIRECTIONAL && tempinfo.is_above_target()) {
+          out_val = -out_val;
+        }
+
+        return out_val;
 
       #endif // !PID_OPENLOOP
     }
@@ -1525,7 +1544,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 #if ENABLED(PIDTEMPBED)
 
   float Temperature::get_pid_output_bed() {
-    static PIDRunner<bed_info_t, MIN_BED_POWER, MAX_BED_POWER> bed_pid(temp_bed);
+    static PIDRunner<bed_info_t, MIN_BED_POWER, MAX_BED_POWER, BED_TEMP_IS_BIDIRECTIONAL> bed_pid(temp_bed);
     const float pid_output = bed_pid.get_pid_output();
     TERN_(PID_BED_DEBUG, bed_pid.debug(temp_bed.celsius, pid_output, F("(Bed)")));
     return pid_output;
