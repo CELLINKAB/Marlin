@@ -623,9 +623,6 @@ class Stepper {
     static bool suspend() {
       const bool awake = is_awake();
       if (awake) {DISABLE_STEPPER_DRIVER_INTERRUPT();
-      #if ENABLED(CHANTARELLE_SUPPORT)
-        ph_controller.stop_active_extrudes();
-      #endif
       }
       return awake;
     }

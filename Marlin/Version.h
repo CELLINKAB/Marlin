@@ -25,28 +25,32 @@
 // VENDOR VERSION EXAMPLE //
 ////////////////////////////
 
+#define SHORT_CELLINK_VERSION_STRING "1.0.0"
+
+#define SHORT_MARLIN_VERSION_STRING "2.1.2"
+
 /**
  * Marlin release version identifier
  */
-//#define SHORT_BUILD_VERSION "2.1.2"
+#define SHORT_BUILD_VERSION "C-" SHORT_CELLINK_VERSION_STRING
 
 /**
  * Verbose version identifier which should contain a reference to the location
  * from where the binary was downloaded or the source code was compiled.
  */
-//#define DETAILED_BUILD_VERSION SHORT_BUILD_VERSION
+#define DETAILED_BUILD_VERSION "Cellink-Marlin " SHORT_CELLINK_VERSION_STRING " (Marlin " SHORT_MARLIN_VERSION_STRING ")"
 
 /**
  * The STRING_DISTRIBUTION_DATE represents when the binary file was built,
  * here we define this default string as the date where the latest release
  * version was tagged.
  */
-//#define STRING_DISTRIBUTION_DATE "2022-12-17"
+#define STRING_DISTRIBUTION_DATE "2023-02-14"
 
 /**
  * Defines a generic printer name to be output to the LCD after booting Marlin.
  */
-//#define MACHINE_NAME "3D Printer"
+#define MACHINE_NAME "Bio Cell X"
 
 /**
  * The SOURCE_CODE_URL is the location where users will find the Marlin Source
@@ -54,7 +58,7 @@
  * has a distinct Github fork— the Source Code URL should just be the main
  * Marlin repository.
  */
-//#define SOURCE_CODE_URL "github.com/MarlinFirmware/Marlin"
+#define SOURCE_CODE_URL "github.com/CellinkAB/Marlin"
 
 /**
  * Default generic printer UUID.
