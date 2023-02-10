@@ -3005,10 +3005,6 @@ bool Planner::buffer_segment(const abce_pos_t &abce
       OPTARG(HAS_DIST_MM_ARG, cart_dist_mm)
       , fr_mm_s, extruder, millimeters)
   ) return false;
-  #if ENABLED(CHANTARELLE_SUPPORT)
-    if (target.e)
-      ph_controller.start_extruding(static_cast<printhead::Index>(extruder));
-  #endif
   stepper.wake_up();
   return true;
 } // buffer_segment()
