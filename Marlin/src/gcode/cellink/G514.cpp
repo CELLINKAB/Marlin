@@ -55,7 +55,7 @@ void GcodeSuite::G515()
         //Expect pressure down
         float vacuum_delta =   vacuum_baseline -gripper_vacuum.read_avg();
         if (DEBUGGING(INFO)) {
-            SERIAL_ECHOLNPAIR_F("vacuum_baseline", vacuum_baseline);
+            SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
         }
         if (vacuum_delta < DETECTION_THRESHOLD) {
@@ -72,7 +72,7 @@ void GcodeSuite::G515()
         // Expect pressure up
         float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline;
         if (DEBUGGING(INFO)) {
-            SERIAL_ECHOLNPAIR_F("vacuum_baseline", vacuum_baseline);
+            SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
         }
         if (vacuum_delta < DETECTION_THRESHOLD) {
