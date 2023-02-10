@@ -52,11 +52,15 @@ void GcodeSuite::G515()
             idle();
             safe_delay(1000);
         }
-        if (float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
-            vacuum_delta < DETECTION_THRESHOLD) {
+        //Expect pressure down
+        float vacuum_delta =   vacuum_baseline -gripper_vacuum.read_avg();
+        if (DEBUGGING(INFO)) {
+            SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
+            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
+        }
+        if (vacuum_delta < DETECTION_THRESHOLD) {
             SERIAL_ECHOLN("RELEASE_FAILED");
-            if (DEBUGGING(INFO))
-                SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
+
         }
     } else {
         set_gripper_valves(GripperState::Open);
@@ -65,11 +69,14 @@ void GcodeSuite::G515()
         set_gripper_valves(GripperState::Grip);
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
-        if (float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
-            vacuum_delta > -DETECTION_THRESHOLD) {
+        // Expect pressure up
+        float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline;
+        if (DEBUGGING(INFO)) {
+            SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
+            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
+        }
+        if (vacuum_delta < DETECTION_THRESHOLD) {
             SERIAL_ECHOLN("GRIP_FAILED");
-            if (DEBUGGING(INFO))
-                SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
         }
     }
     do_blocking_move_to_z(Z_AFTER_PROBING);
