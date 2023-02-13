@@ -252,10 +252,6 @@
   #include "feature/easythreed_ui.h"
 #endif
 
-#if ENABLED(HX711_WSCALE)
-  #include "feature/hx_711.h"
-#endif
-
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
 MarlinState marlin_state = MF_INITIALIZING;
@@ -864,9 +860,6 @@ void idle(bool no_stepper_sleep/*=false*/) {
 
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
-
-  // Manage Scale
-  TERN_(HX711_WSCALE, wScale.manage_hx_711());
 
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
@@ -1618,10 +1611,6 @@ void setup() {
 
   #if ENABLED(EASYTHREED_UI)
     SETUP_RUN(easythreed_ui.init());
-  #endif
-
-  #if ENABLED(HX711_WSCALE)
-    wScale.begin(HX711_DATA_PIN,HX711_CLCK_PIN,HX711_INDICATION_PIN);
   #endif
 
   marlin_state = MF_RUNNING;
