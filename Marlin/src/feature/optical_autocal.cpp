@@ -7,9 +7,8 @@
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
-auto OpticalAutocal::full_autocal_routine(const uint8_t tool,
-                                          const xyz_pos_t start_pos,
-                                          const feedRate_t feedrate) -> ErrorCode
+auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate)
+    -> ErrorCode
 {
     home_if_needed();
     do_blocking_move_to(start_pos);
@@ -34,10 +33,8 @@ auto OpticalAutocal::full_autocal_routine(const uint8_t tool,
         return ErrorCode::POLARITY_MISMATCH;
 
     const ErrorCode result = full_sensor_sweep(active_extruder, start_pos, feedrate);
-    if (result != ErrorCode::OK && result != ErrorCode::SANITY_CHECK_FAILED) {
-        do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
-    } else if (DEBUGGING(LEVELING) || DEBUGGING(INFO))
-        SERIAL_ECHOLNPGM("Nozzle offset: ", offsets[tool]);
+
+    do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
 
     return result;
 }
@@ -100,17 +97,18 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 
     if (!(sensor_1_check && sensor_2_check)) {
         retval = ErrorCode::SANITY_CHECK_FAILED;
-        if (DEBUGGING(ERRORS)) report_sensors();
+        if (DEBUGGING(ERRORS))
+            report_sensors();
     }
 
     offsets[tool].set(xy_offset.x + END_POSITION_PRINTBED_DELTA.x,
                       xy_offset.y + END_POSITION_PRINTBED_DELTA.y,
                       z_offset + END_POSITION_PRINTBED_DELTA.z);
+
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
         print_pos(offsets[tool], F("Calibrated tool offset:"));
+
     do_blocking_move_to_z(offsets[tool].z + POST_AUTOCAL_SAFE_Z_HEIGHT);
-    do_blocking_move_to_xy(offsets[tool]);
-    // planner.set_position_mm({0.0,0.0,0.0});
 
     return retval;
 }
