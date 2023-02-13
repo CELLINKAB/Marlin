@@ -46,7 +46,7 @@ void GcodeSuite::M1017()
     SERIAL_ECHOLN("ABL correction: ");
     SERIAL_ECHO_CELLINK_KV("X", 0.0);
     SERIAL_ECHO_CELLINK_KV("Y", 0.0);
-    SERIAL_ECHOLN_CELLINK_KV("Z", ubl.get_z_correction(xy_pos_t{})); // Z offset at 0,0
+    SERIAL_ECHOLN_CELLINK_KV("Z", bedlevel.get_z_correction(xy_pos_t{})); // Z offset at 0,0
 }
 
 #endif // CELLINK_REPORTING

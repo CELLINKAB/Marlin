@@ -306,7 +306,7 @@
   #elif TEMP_SENSOR_2 == 998 || TEMP_SENSOR_2 == 999
     #define TEMP_SENSOR_2_IS_DUMMY 1
   #endif
-#else
+#elif DISABLED(CHANTARELLE_SUPPORT)
   #undef HEATER_2_MINTEMP
   #undef HEATER_2_MAXTEMP
 #endif

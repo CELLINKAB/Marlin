@@ -329,10 +329,6 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
   redundant_info_t Temperature::temp_redundant;
 #endif
 
-#if EITHER(AUTO_POWER_E_FANS, HAS_FANCHECK)
-  uint8_t Temperature::autofan_speed[HOTENDS] = ARRAY_N_1(HOTENDS, FAN_OFF_PWM);
-#endif
-
 #if ENABLED(AUTO_POWER_CHAMBER_FAN)
   uint8_t Temperature::chamberfan_speed = FAN_OFF_PWM;
 #endif
@@ -1346,7 +1342,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
   class PIDRunner {
   public:
     TT &tempinfo;
-    decltype(TT::pid) work_pid{0};
+    decltype(TT::pid) work_pid{};
     float temp_iState = 0, temp_dState = 0;
     bool pid_reset = true;
 
@@ -1365,7 +1361,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           return 0;
         }
 
-        const float pid_error = tempinfo.target - tempinfo.celsius;
+        float pid_error = tempinfo.target - tempinfo.celsius;
           
         if (pid_error < -(PID_FUNCTIONAL_RANGE)) {
           pid_reset = true;

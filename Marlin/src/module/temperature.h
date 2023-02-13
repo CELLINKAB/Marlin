@@ -498,43 +498,6 @@ typedef struct
 class Temperature
 {
 public:
-#if HAS_HOTEND
-    static hotend_info_t temp_hotend[HOTENDS];
-    static const celsius_t hotend_maxtemp[HOTENDS];
-    static celsius_t hotend_max_target(const uint8_t e)
-    {
-        return hotend_maxtemp[e] - (HOTEND_OVERSHOOT);
-    }
-#endif
-#if HAS_HEATED_BED
-    static bed_info_t temp_bed;
-#endif
-#if HAS_TEMP_PROBE
-    static probe_info_t temp_probe;
-#endif
-#if HAS_TEMP_CHAMBER
-    static chamber_info_t temp_chamber;
-#endif
-#if HAS_TEMP_COOLER
-    static cooler_info_t temp_cooler;
-#endif
-#if HAS_TEMP_BOARD
-    static board_info_t temp_board;
-#endif
-#if HAS_TEMP_REDUNDANT
-    static redundant_info_t temp_redundant;
-#endif
-
-#if EITHER(AUTO_POWER_E_FANS, HAS_FANCHECK)
-    static uint8_t autofan_speed[HOTENDS];
-#endif
-#if ENABLED(AUTO_POWER_CHAMBER_FAN)
-    static uint8_t chamberfan_speed;
-#endif
-#if ENABLED(AUTO_POWER_COOLER_FAN)
-    static uint8_t coolerfan_speed;
-#endif
-
     #if HAS_HOTEND
       static hotend_info_t temp_hotend[HOTENDS];
       static const celsius_t hotend_maxtemp[HOTENDS];
@@ -689,6 +652,14 @@ public:
 private:
 #if ENABLED(WATCH_HOTENDS)
     static hotend_watch_t watch_hotend[HOTENDS];
+#endif
+
+#if HAS_HEATED_BED
+#    if ENABLED(WATCH_BED)
+    static bed_watch_t watch_bed;
+#    endif
+    IF_DISABLED(PIDTEMPBED, static millis_t next_bed_check_ms);
+    static raw_adc_t mintemp_raw_BED, maxtemp_raw_BED;
 #endif
 
 #if ENABLED(PID_EXTRUSION_SCALING)
