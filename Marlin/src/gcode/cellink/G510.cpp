@@ -3,9 +3,8 @@
 #if ENABLED(OPTICAL_AUTOCAL)
 
 #    include "../../feature/optical_autocal.h"
+#    include "../../module/motion.h"
 #    include "../gcode.h"
-
-#include "../../module/motion.h"
 
 #    include <stdio.h>
 
@@ -40,23 +39,25 @@ void GcodeSuite::G510()
 
     const xyz_pos_t existing_offset = optical_autocal.offset(active_extruder);
     switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
-        case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
-            SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
-            [[fallthrough]];
-        case OpticalAutocal::ErrorCode::OK:
-            update_offset(optical_autocal.offset(active_extruder) - existing_offset);
-            xy_pos_t origin{0,0};
-            do_blocking_move_to_xy(toNative(origin));
-            break;
-        case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
-            SERIAL_ECHOLN("NOZZLE_AUTOCALIBRATION_FAIL");
-            break;
-        case OpticalAutocal::ErrorCode::POLARITY_MISMATCH:
-            SERIAL_ECHOLN("AUTOCAL_SENSOR_POLARITY_MISMATCH");
-            break;
-        case OpticalAutocal::ErrorCode::NO_NOZZLE_DETECTED:
-            SERIAL_ECHOLN("AUTOCAL_NO_NOZZLE");
-            break;
+    case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
+        SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
+        [[fallthrough]];
+    case OpticalAutocal::ErrorCode::OK: {
+        update_offset(optical_autocal.offset(active_extruder) - existing_offset);
+        xy_pos_t origin{0, 0};
+        toNative(origin);
+        do_blocking_move_to_xy(origin);
+        break;
+    }
+    case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
+        SERIAL_ECHOLN("NOZZLE_AUTOCALIBRATION_FAIL");
+        break;
+    case OpticalAutocal::ErrorCode::POLARITY_MISMATCH:
+        SERIAL_ECHOLN("AUTOCAL_SENSOR_POLARITY_MISMATCH");
+        break;
+    case OpticalAutocal::ErrorCode::NO_NOZZLE_DETECTED:
+        SERIAL_ECHOLN("AUTOCAL_NO_NOZZLE");
+        break;
     }
 }
 
