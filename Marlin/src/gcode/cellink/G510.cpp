@@ -11,12 +11,9 @@
 
 static void update_offset(const xyz_pos_t& offset)
 {
-    position_shift -= offset;
-    update_workspace_offset(AxisEnum::X_AXIS);
-    update_workspace_offset(AxisEnum::Y_AXIS);
-    update_workspace_offset(AxisEnum::Z_AXIS);
-    if (WITHIN(GcodeSuite::active_coordinate_system, 0, MAX_COORDINATE_SYSTEMS - 1))
-        GcodeSuite::coordinate_system[GcodeSuite::active_coordinate_system] = position_shift;
+    set_home_offset(AxisEnum::X_AXIS, offset.x);
+    set_home_offset(AxisEnum::Y_AXIS, offset.y);
+    set_home_offset(AxisEnum::Z_AXIS, offset.z);
 }
 
 void GcodeSuite::G510()
@@ -42,12 +39,14 @@ void GcodeSuite::G510()
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
 
     const xyz_pos_t existing_offset = optical_autocal.offset(active_extruder);
-    switch (optical_autocal.full_autocal_routine(active_extruder, start_pos, feedrate)) {
+    switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
         case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
             SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
             [[fallthrough]];
         case OpticalAutocal::ErrorCode::OK:
             update_offset(optical_autocal.offset(active_extruder) - existing_offset);
+            xy_pos_t origin{0,0};
+            do_blocking_move_to_xy(toNative(origin));
             break;
         case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
             SERIAL_ECHOLN("NOZZLE_AUTOCALIBRATION_FAIL");
