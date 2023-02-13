@@ -264,6 +264,10 @@
   #include "feature/door_sensor.h"
 #endif
 
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #include "feature/stepper_retracting_probe.h"
+#endif
+
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
 MarlinState marlin_state = MF_INITIALIZING;
@@ -1653,6 +1657,10 @@ void setup() {
 
   #if ENABLED(FESTO_PNEUMATICS)
     SETUP_RUN(pneumatics::init());
+  #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    SETUP_RUN(stepper_probe.stow());
   #endif
 
 
