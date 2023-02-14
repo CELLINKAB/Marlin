@@ -260,6 +260,10 @@
   #include "feature/door_sensor.h"
 #endif
 
+#if ENABLED(STEPPER_RETRACTING_PROBE)
+  #include "feature/stepper_retracting_probe.h"
+#endif
+
 #if ENABLED(MARLIN_TEST_BUILD)
   #include "tests/marlin_tests.h"
 #endif
@@ -1678,6 +1682,11 @@ void setup() {
   #if ENABLED(BD_SENSOR)
     SETUP_RUN(bdl.init(I2C_BD_SDA_PIN, I2C_BD_SCL_PIN, I2C_BD_DELAY));
   #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    SETUP_RUN(stepper_probe.stow());
+  #endif
+
 
   marlin_state = MF_RUNNING;
 

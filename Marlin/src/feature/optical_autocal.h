@@ -27,7 +27,7 @@ struct OpticalAutocal
 
     OpticalAutocal() = default;
 
-    auto full_autocal_routine(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
+    auto full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
     [[nodiscard]] bool is_calibrated(const uint8_t tool) const;
     [[nodiscard]] const xyz_pos_t &offset(const uint8_t tool) const;
     void report_sensors() const;
@@ -39,8 +39,8 @@ struct OpticalAutocal
 private:
     static constexpr float SHORT_Y_RANGE = 12.0f;
     static constexpr float FULL_Y_RANGE = 24.0f;
-    static constexpr float COARSE_Z_INCREMENT = 4.0f;
-    static constexpr float MEDIUM_Z_INCREMENT = 1.0f;
+    static constexpr float COARSE_Z_INCREMENT = 3.0f;
+    static constexpr float MEDIUM_Z_INCREMENT = 0.75f;
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
