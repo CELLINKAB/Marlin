@@ -9,8 +9,6 @@
 
 #    include "stepper_retracting_probe.h"
 
-
-
 void StepperRetractingProbe::deploy()
 {
     switch (state) {
@@ -22,11 +20,15 @@ void StepperRetractingProbe::deploy()
         stepper().stop();
         [[fallthrough]];
     case ProbeState::Stowed:
-    // FIXME: re-enable stallguard move
+        // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
         stepper().raw_move(config.deploy_velocity);
-        millis_t minimum_deploy_time = config.minimum_retract_time * (config.stow_velocity / config.deploy_velocity) + 1000;
-        safe_delay();
+        millis_t minimum_deploy_time = static_cast<millis_t>(
+            static_cast<float>(config.minimum_retract_time)
+                * ABS(static_cast<float>(config.stow_velocity)
+                      / static_cast<float>(config.deploy_velocity))
+            + 1000.0f);
+        safe_delay(minimum_deploy_time);
         stepper().stop();
         state = ProbeState::Deployed;
     }
@@ -34,10 +36,19 @@ void StepperRetractingProbe::deploy()
 
 void StepperRetractingProbe::stow()
 {
-    stepper().raw_move(config.stow_velocity);
-    safe_delay(config.minimum_retract_time);
-    stepper().stop();
-    state = ProbeState::Stowed;
+    switch (state) {
+    case ProbeState::Stowed:
+        return;
+    case ProbeState::Unknown:
+        deploy();
+        [[fallthrough]];
+    case ProbeState::Deployed:
+        stepper().raw_move(config.stow_velocity);
+        safe_delay(config.minimum_retract_time);
+        stepper().stop();
+        state = ProbeState::Stowed;
+        break;
+    }
 }
 
 void StepperRetractingProbe::report_config(bool for_replay) const
