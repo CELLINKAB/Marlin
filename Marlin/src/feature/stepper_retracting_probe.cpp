@@ -25,7 +25,8 @@ void StepperRetractingProbe::deploy()
     // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
         stepper().raw_move(config.deploy_velocity);
-        safe_delay(config.minimum_retract_time * 2);
+        millis_t minimum_deploy_time = config.minimum_retract_time * (config.stow_velocity / config.deploy_velocity) + 1000;
+        safe_delay();
         stepper().stop();
         state = ProbeState::Deployed;
     }
@@ -33,9 +34,6 @@ void StepperRetractingProbe::deploy()
 
 void StepperRetractingProbe::stow()
 {
-    if (state != ProbeState::Deployed) {
-        deploy();
-    }
     stepper().raw_move(config.stow_velocity);
     safe_delay(config.minimum_retract_time);
     stepper().stop();
