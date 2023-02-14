@@ -13,11 +13,12 @@ void StepperRetractingProbe::deploy()
 {
     switch (state) {
     case ProbeState::Deployed:
-        [[fallthrough]];
+        return;
     case ProbeState::Unknown:
         stepper().raw_move(config.stow_velocity);
         safe_delay(200);
         stepper().stop();
+        delay(10);
         [[fallthrough]];
     case ProbeState::Stowed:
         // FIXME: re-enable stallguard move
@@ -41,6 +42,7 @@ void StepperRetractingProbe::stow()
         return;
     case ProbeState::Unknown:
         deploy();
+        delay(10);
         [[fallthrough]];
     case ProbeState::Deployed:
         stepper().raw_move(config.stow_velocity);
