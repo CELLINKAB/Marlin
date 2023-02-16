@@ -41,7 +41,7 @@ constexpr const char* string_from_result_code(Result result)
     __unreachable();
 }
 
-enum class ErrorPayload {
+enum class ErrorPayload : u_int8_t {
     OK,
     INVALID_CRC,
     INVALID_CMD,
