@@ -157,9 +157,8 @@ void GcodeSuite::M1069()
     memcpy(cmd_buf + 4, &cmd_size, 2);
     uint16_t crc = printhead::crc16_from_bytes(cmd_buf, cmd_size);
     memcpy(cmd_buf + 6 + cmd_size, &crc, 2);
-    cmd_size += 2;
     //printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
-    auto send_success = printhead::unsafe_send(cmd_buf, cmd_size, CHANT_SERIAL);
+    auto send_success = printhead::unsafe_send(cmd_buf, cmd_size + 8, CHANT_SERIAL);
     if (send_success != printhead::Result::OK) {
         ph_debug_print(send_success);
         return;
