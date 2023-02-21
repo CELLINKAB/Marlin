@@ -204,6 +204,7 @@
 #define UVC_TA_3_PIN PD3
 
 #define UVC_TFAULT_PIN PD6
+#define UVC_TFAULT_ACTIVE_STATE LOW
 
 #define UVC_RELAY_PIN PF4
 
