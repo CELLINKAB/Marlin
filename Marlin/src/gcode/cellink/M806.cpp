@@ -59,7 +59,7 @@ void GcodeSuite::M806()
 #    endif
     };
 
-    const uint8_t intensity = parser.byteval('I', 255);
+    const uint8_t intensity = TERN_(UVC_PWM_INVERTING, 255 -) parser.byteval('I', 255);
     const auto exposure_seconds = min(parser.ulongval('S', 300), 1200UL);
     const auto frequency = min(parser.ulongval('F', 1000), 5000UL);
     const bool safety_override = parser.boolval('O');
