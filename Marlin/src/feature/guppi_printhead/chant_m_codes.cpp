@@ -157,18 +157,35 @@ void GcodeSuite::M1069()
     memcpy(cmd_buf + 4, &cmd_size, 2);
     uint16_t crc = printhead::crc16_from_bytes(cmd_buf, cmd_size);
     memcpy(cmd_buf + 6 + cmd_size, &crc, 2);
-    //printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
+    SERIAL_ECHO("Sending: Packet { index: ");
+    SERIAL_PRINT(cmd_buf[0], PrintBase::Hex);
+    SERIAL_PRINT(cmd_buf[1], PrintBase::Hex);
+    SERIAL_ECHO(", command: ");
+    SERIAL_PRINT(cmd_buf[2], PrintBase::Hex);
+    SERIAL_PRINT(cmd_buf[3], PrintBase::Hex);
+    SERIAL_ECHO(", size: ");
+    SERIAL_PRINT(cmd_buf[4], PrintBase::Hex);
+    SERIAL_PRINT(cmd_buf[5], PrintBase::Hex);
+    SERIAL_ECHO(", payload: ");
+    for (size_t i = 0; i < cmd_size; ++i) {
+        SERIAL_PRINT(cmd_buf[6 + i], PrintBase::Hex);
+    }
+    SERIAL_ECHO(", crc: ");
+    SERIAL_PRINT(cmd_buf[6 + cmd_size], PrintBase::Hex);
+    SERIAL_PRINT(cmd_buf[6 + cmd_size + 1], PrintBase::Hex);
+    SERIAL_ECHOLN(" }");
     auto send_success = printhead::unsafe_send(cmd_buf, cmd_size + 8, CHANT_SERIAL);
     if (send_success != printhead::Result::OK) {
         ph_debug_print(send_success);
         return;
     }
     size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 128);
+    SERIAL_ECHO("received: [");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
         SERIAL_CHAR(' ');
     }
-    SERIAL_EOL();
+    SERIAL_ECHOLN("]");
     //ph_debug_print(response);
 }
 
