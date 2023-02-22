@@ -128,8 +128,7 @@ auto Controller::get_tem_debug(Index index) -> Response<TemTemps>
 Result Controller::set_extrusion_speed(Index index, uint32_t feedrate_pl_s)
 {
     Packet packet(index, Command::SET_EXTRUSION_SPEED, feedrate_pl_s);
-    // return send_and_receive<uint32_t>(packet, bus).result;
-    return send(packet, bus);
+    return send_and_receive<uint32_t>(packet, bus).result;
 }
 
 Response<uint32_t> Controller::get_extrusion_speed(Index index)
@@ -179,8 +178,10 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 
 Result Controller::set_extruder_direction(Index index, bool direction)
 {
-    return send(Packet(index, Command::SET_EXTRUSION_DIRECTION, static_cast<uint8_t>(direction)),
-                bus);
+    return send_and_receive<uint8_t>(Packet(index,
+                                            Command::SET_EXTRUSION_DIRECTION,
+                                            static_cast<uint8_t>(direction)),
+                                     bus);
 }
 
 Result Controller::extruder_move(Index index, float uL)
