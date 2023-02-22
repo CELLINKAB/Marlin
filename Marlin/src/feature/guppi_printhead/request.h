@@ -167,6 +167,7 @@ Response<T> receive(HardwareSerial& serial)
 
     Packet<T> incoming{};
 
+    serial.setTimeout(50);
     auto bytes_received = serial.readBytes(packet_buffer, 6);
 
     if (bytes_received < 6)
@@ -215,11 +216,10 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
-    delayMicroseconds(10);
+    delayMicroseconds(100);
     for (const auto byte : packet_bytes)
         serial.write(byte);
     serial.flush();
-    delayMicroseconds(10);
     WRITE(CHANT_RTS_PIN, LOW);
 
     if (serial.getWriteError())
