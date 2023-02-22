@@ -190,7 +190,8 @@ void GcodeSuite::M1069()
     }
     CHANT_SERIAL.setTimeout(500);
     size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 128);
-    SERIAL_ECHO("received: [ ");
+    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes");
+    SERIAL_ECHO("Response: [ ");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
         SERIAL_CHAR(' ');
