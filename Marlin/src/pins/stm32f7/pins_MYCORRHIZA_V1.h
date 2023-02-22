@@ -199,12 +199,14 @@
 //
 
 #define UVC_PWM_PIN PD7
+#define UVC_PWM_INVERTING true
 
 #define UVC_TA_1_PIN PD5
 #define UVC_TA_2_PIN PD4
 #define UVC_TA_3_PIN PD3
 
 #define UVC_TFAULT_PIN PD6
+#define UVC_TFAULT_ACTIVE_STATE LOW
 
 #define UVC_RELAY_PIN PF4
 
