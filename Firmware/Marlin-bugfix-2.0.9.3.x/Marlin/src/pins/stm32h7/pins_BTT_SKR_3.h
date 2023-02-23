@@ -541,6 +541,13 @@
   #define BTN_ENC                    EXP1_09_PIN
 #endif
 
+//HX_711_WEIGHT_SCALE
+#if ENABLED(HX711_WSCALE)
+  #define HX711_INDICATION_PIN       EXP1_07_PIN
+  #define HX711_CLCK_PIN             EXP1_09_PIN
+  #define HX711_DATA_PIN             EXP1_10_PIN
+#endif
+
 //
 // NeoPixel LED
 //

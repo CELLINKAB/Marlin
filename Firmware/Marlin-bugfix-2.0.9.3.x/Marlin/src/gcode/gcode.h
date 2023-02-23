@@ -1225,6 +1225,12 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(HX711_WSCALE)
+    static void M7110();
+    static void M7111();
+    static void M7112();
+  #endif
+
   static void T(const int8_t tool_index);
 
 };
