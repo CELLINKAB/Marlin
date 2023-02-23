@@ -2135,6 +2135,8 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
 
   #if ENABLED(CHANTARELLE_SUPPORT)
   {
+    static constexpr uint32_t VOLUME_PER_FULLSTEP = 25;
+    static constexpr uint32_t STEP_VOLUME = 1;
     static auto fr_mm_s_to_pl_s = [](float feedrate_mm_s){
       static constexpr auto radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f;
       static constexpr auto mm_to_uL_factor = radius * radius * PI;
@@ -2147,8 +2149,14 @@ bool Planner::_populate_block(block_t * const block, bool split_move,
     };
     if (esteps != 0) {
       printhead::Index ph_index = static_cast<printhead::Index>(extruder);
+      report_error("set fullstep volume", ph_controller.set_volume_per_fullstep(ph_index, VOLUME_PER_FULLSTEP));
+      delay(5);
+      report_error("set pulse volume", ph_controller.set_step_volume(ph_index, STEP_VOLUME));
+      delay(5);
       report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, fr_mm_s_to_pl_s(feedrate_mm_s)));
+      delay(5);
       report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
+      delay(5);
       report_error("add raw steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
     }
   }
