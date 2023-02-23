@@ -29,7 +29,7 @@ void GcodeSuite::G515()
 {
     using namespace pneumatics;
     static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{130, -45};
-    static constexpr float GRIP_Z_HEIGHT = -5.0f;
+    static constexpr float GRIP_Z_HEIGHT = -7.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
     static constexpr size_t RELEASE_SECONDS = 5;
