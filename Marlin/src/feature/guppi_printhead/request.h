@@ -216,7 +216,6 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
-    delayMicroseconds(100);
     for (const auto byte : packet_bytes)
         serial.write(byte);
     serial.flush();
