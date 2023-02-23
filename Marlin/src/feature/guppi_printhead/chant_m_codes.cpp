@@ -79,8 +79,9 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
-    millis_t timeout = millis() + SEC_TO_MS(parser.ulongval('S',180)); // should home within 100 seconds
-    while(ph_controller.get_status(index).is_homing && millis() < timeout){
+    millis_t timeout = millis()
+                       + SEC_TO_MS(parser.ulongval('S', 180)); // should home within 100 seconds
+    while (ph_controller.get_status(index).is_homing && millis() < timeout) {
         safe_delay(1000);
         idle_no_sleep();
     }
@@ -133,7 +134,7 @@ void GcodeSuite::M1069()
     memcpy(cmd_buf, &index, 2);
     memcpy(cmd_buf + 2, &command, 2);
     const char* payload = parser.string_arg;
-    size_t cmd_size = 4;
+    uint16_t cmd_size = 0;
     if (payload != nullptr) {
         if (DEBUGGING(INFO))
             SERIAL_ECHOPGM("input: ", payload, " parsed: ");
@@ -142,7 +143,7 @@ void GcodeSuite::M1069()
         if (payload[0] == '0' && payload[1] == 'x')
             payload += 2;
         while (isHexadecimalDigit(payload[0]) && isHexadecimalDigit(payload[1]) && cmd_size < 125) {
-            cmd_buf[cmd_size] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
+            cmd_buf[cmd_size + 6] = (HEXCHR(payload[0]) << 4) + HEXCHR(payload[1]);
             if (DEBUGGING(INFO)) {
                 SERIAL_PRINT(cmd_buf[cmd_size], PrintBase::Hex);
                 SERIAL_CHAR(' ');
@@ -153,22 +154,49 @@ void GcodeSuite::M1069()
         if (DEBUGGING(INFO))
             SERIAL_EOL();
     }
+    memcpy(cmd_buf + 4, &cmd_size, 2);
     uint16_t crc = printhead::crc16_from_bytes(cmd_buf, cmd_size);
-    memcpy(cmd_buf, &crc, 2);
-    cmd_size += 2;
-    //printhead::Packet debug_cmd(index, command, cmd_buf, cmd_size);
-    auto send_success = printhead::unsafe_send(cmd_buf, cmd_size, CHANT_SERIAL);
-    if (send_success != printhead::Result::OK) {
-        ph_debug_print(send_success);
-        return;
+    memcpy(cmd_buf + 6 + cmd_size, &crc, 2);
+    SERIAL_ECHO("Sending: Packet { index: ");
+    SERIAL_PRINT(cmd_buf[0], PrintBase::Hex);
+    SERIAL_CHAR(' ');
+    SERIAL_PRINT(cmd_buf[1], PrintBase::Hex);
+    SERIAL_ECHO(", command: ");
+    SERIAL_PRINT(cmd_buf[2], PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINT(cmd_buf[3], PrintBase::Hex);
+    SERIAL_ECHO(", size: ");
+    SERIAL_PRINT(cmd_buf[4], PrintBase::Hex);
+    SERIAL_CHAR(' ');
+
+    SERIAL_PRINT(cmd_buf[5], PrintBase::Hex);
+    SERIAL_ECHO(", payload: ");
+    for (size_t i = 0; i < cmd_size; ++i) {
+        SERIAL_PRINT(cmd_buf[6 + i], PrintBase::Hex);
+        SERIAL_CHAR(' ');
     }
+    SERIAL_ECHO(", crc: ");
+    SERIAL_PRINT(cmd_buf[6 + cmd_size], PrintBase::Hex);
+    SERIAL_PRINT(cmd_buf[6 + cmd_size + 1], PrintBase::Hex);
+    SERIAL_ECHOLN(" }");
+    WRITE(CHANT_RTS_PIN, HIGH);
+    delay(1);
+    auto written = CHANT_SERIAL.write(cmd_buf, cmd_size + 8);
+    WRITE(CHANT_RTS_PIN, LOW);
+    SERIAL_ECHOLNPGM("Sent ", written, " bytes");
+    if (written != cmd_size + 8U) {
+        SERIAL_ECHOLNPGM("Serial error, code: ", CHANT_SERIAL.getWriteError());
+    }
+    CHANT_SERIAL.setTimeout(500);
     size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 128);
-    for (size_t i = 0; i < read_bytes; ++i)
-    {
+    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes");
+    SERIAL_ECHO("Response: [ ");
+    for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
         SERIAL_CHAR(' ');
     }
-    SERIAL_EOL();
+    SERIAL_ECHOLN("]");
     //ph_debug_print(response);
 }
 
@@ -442,7 +470,8 @@ void GcodeSuite::M1035()
             handle_sensor(sensor);
         }
     } else {
-        auto& sensor = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
+        auto& sensor
+            = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
         handle_sensor(sensor);
     }
 }
@@ -505,7 +534,9 @@ void GcodeSuite::M2030()
         return;
     // TODO: maybe need to convert from uL/s to mm/m
     auto res = ph_controller.set_extrusion_speed(index, feedrate_pl_s);
-    feedrate_mm_s = feedrate_ul_s / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * PI);
+    feedrate_mm_s = feedrate_ul_s
+                    / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f)
+                       * PI);
     ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
@@ -520,21 +551,25 @@ void GcodeSuite::M2032() {}
 //GetPHIntExtrusionSpeed
 void GcodeSuite::M2033() {}
 //SetPHExtrusionStepVol
-void GcodeSuite::M2034() {
+void GcodeSuite::M2034()
+{
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seenval('V')) return;
+    if (!parser.seenval('V'))
+        return;
     const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
     auto res = ph_controller.set_step_volume(index, picoliters);
     ph_debug_print(res);
 }
 //GetPHExtrusionStepVol
-void GcodeSuite::M2035() {
+void GcodeSuite::M2035()
+{
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_step_volume(index);
     ph_debug_print(res);
 }
 //SetPHFullstepExtrusionVol
-void GcodeSuite::M2036() {
+void GcodeSuite::M2036()
+{
     BIND_INDEX_OR_RETURN(index);
     const uint32_t pL_volume = parser.ulongval('V');
     auto res = ph_controller.set_volume_per_fullstep(index, pL_volume);
@@ -637,19 +672,11 @@ void GcodeSuite::M2069()
     ph_controller.set_extruder_rms_current(index, current);
 }
 //GetPHPeakCurrent
-void GcodeSuite::M2070()
-{
-
-}
+void GcodeSuite::M2070() {}
 //SetPHHoldCurrent
-void GcodeSuite::M2071()
-{
-
-}
+void GcodeSuite::M2071() {}
 //GetPHHoldCurrent
-void GcodeSuite::M2072()
-{
-}
+void GcodeSuite::M2072() {}
 //ControlPHAirSupply
 void GcodeSuite::M2073() {}
 //StartInkjetSelfTest
