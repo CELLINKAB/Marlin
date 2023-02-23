@@ -58,17 +58,20 @@ celsius_float_t Controller::get_temperature(Index index)
 {
     static std::array<millis_t, EXTRUDERS> last_check_times;
     static std::array<celsius_float_t, EXTRUDERS> last_temps;
+    const auto [oldest_it, newest_it] = std::minmax_element(last_check_times.cbegin(), last_check_times.cend());
     if (index == Index::All || index == Index::None)
         return 0.0f;
     size_t index_num = static_cast<size_t>(index);
-    if (millis() < last_check_times[index_num] + 1000)
+    if (millis() < *newest_it + 1000)
         return last_temps[index_num];
-    Packet request(index, Command::GET_MEASURED_TEMP);
+    size_t oldest_index_num = oldest_it - last_check_times.cbegin();
+    Packet request(static_cast<Index>(oldest_index_num), Command::GET_MEASURED_TEMP);
     auto res = send_and_receive<celsius_t>(request, bus);
-    last_check_times[index_num] = millis();
+    last_check_times[oldest_index_num] = millis();
     if (res.result != Result::OK || res.packet.payload_size < 2)
         return 0.0f;
-    return last_temps[index_num] = (res.packet.payload - 30'000) / 100.0f;
+    last_temps[oldest_index_num] = (res.packet.payload - 30'000) / 100.0f;
+    return last_temps[index_num];
 }
 
 Response<void> Controller::get_info(Index index)
@@ -181,7 +184,7 @@ Result Controller::set_extruder_direction(Index index, bool direction)
     return send_and_receive<uint8_t>(Packet(index,
                                             Command::SET_EXTRUSION_DIRECTION,
                                             static_cast<uint8_t>(direction)),
-                                     bus);
+                                     bus).result;
 }
 
 Result Controller::extruder_move(Index index, float uL)
