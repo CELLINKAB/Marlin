@@ -1501,7 +1501,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -30 }
+#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -20 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -3325,7 +3325,7 @@
   #define NEOPIXEL2_SEPARATE
   #if ENABLED(NEOPIXEL2_SEPARATE)
     #define NEOPIXEL2_TYPE        NEO_GRB
-    #define NEOPIXEL2_PIXELS           4 // Number of LEDs in the second strip
+    #define NEOPIXEL2_PIXELS           5 // Number of LEDs in the second strip
     #define NEOPIXEL2_BRIGHTNESS      255 // Initial brightness (0-255)
     #define NEOPIXEL2_STARTUP_TEST        // Cycle through colors at startup
     #define NEOPIXEL_M150_DEFAULT      -1 // Default strip for M150 without 'S'. Use -1 to set all by default.
