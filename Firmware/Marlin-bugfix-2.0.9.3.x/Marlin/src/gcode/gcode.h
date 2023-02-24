@@ -1085,6 +1085,10 @@ private:
     static void M702();
   #endif
 
+  #if ENABLED(UV_LED_STERILIZATION)
+    static void M806();
+  #endif
+
   #if ENABLED(GCODE_REPEAT_MARKERS)
     static void M808();
   #endif

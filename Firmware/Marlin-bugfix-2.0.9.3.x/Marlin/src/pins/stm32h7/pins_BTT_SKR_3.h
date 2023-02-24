@@ -548,6 +548,11 @@
   #define HX711_DATA_PIN             EXP1_10_PIN
 #endif
 
+//UV LED control PIN
+#if ENABLED(UV_LED_STERILIZATION)
+  #define UV_LED_OUTPUT_PIN          HEATER_1_PIN
+#endif
+
 //
 // NeoPixel LED
 //

@@ -1,13 +1,12 @@
 /*******************************************************************************
 FILE
-    LM7110.cpp
+    M7110_M7112.cpp
 
 ORIGINAL AUTHOR
     Borislav Cvejic
 
 DESCRIPTION
-    This file implements functionality of M77110 command if the configuration
-    for HX711 is enabled. The functions are used in gcode.cpp file.
+    This file implements M commands used to manipulate HX711
 
 VERSION
     1.0.0

@@ -922,6 +922,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 710: M710(); break;                                  // M710: Set Controller Fan settings
       #endif
 
+      #if ENABLED(UV_LED_STERILIZATION)
+        case 806: M806(); break;
+      #endif
+
       #if ENABLED(GCODE_MACROS)
         case 810: case 811: case 812: case 813: case 814:
         case 815: case 816: case 817: case 818: case 819:
