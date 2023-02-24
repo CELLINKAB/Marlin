@@ -135,27 +135,28 @@ void release_mixing_pressure(uint8_t tool)
 //
 // Lid Gripper
 //
-
+//  For grip
+// V1 Off/close V2 On/Open V3 Off/close
 void set_gripper_valves(GripperState state)
 {
-    static auto set_valves = [](bool open) {
-        auto level = open ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL;
-        WRITE(PRESSURE_VALVE_LID2_PIN, level);
-        WRITE(PRESSURE_VALVE_LID_PIN, level);
-        safe_delay(1000);
-    };
-    
     switch(state) {
         case GripperState::Release: {
             [[maybe_unused]] auto _using_pressure = use_pressure();
-            set_valves(true);
+            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
             break;
         }
         case GripperState::Open:
-            set_valves(true);
+            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
             break;
         case GripperState::Grip:
-            set_valves(false);
+            WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
+            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+            WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
             break;
     }
 }

@@ -1,4 +1,5 @@
 #!/bin/bash
+platformio run
 EXO_HOST=exop4.local
 ping $EXO_HOST -c 1
 pinged=$?
