@@ -1,10 +1,12 @@
-# [切换到中文版](./README_zh_cn.md)
+# AnglerFish
+
+Modified Marlin firmware for the BTT SKR-3 boards. Used for the Lumen X2 printer.
+
+# SKR 3
 
 ### review
 　You can find a complete review with detailed features of our electronics in [Spanish](https://3dwork.io/skr-3-re-evolucion/) and [English](https://3dwork.io/en/skr-3-re-evolucion/) on [3dwork.io](https://3dwork.io/).
 
-
-# SKR 3
 ## Hardware
 * MCU: ARM Cortex-M7 STM32H743VI 480MHz with FDCAN bus
 * DCDC 5V current output rated at 5A max continuous and 6A max instantaneous
