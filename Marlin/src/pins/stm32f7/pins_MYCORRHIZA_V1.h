@@ -125,6 +125,7 @@
 #define HEATER_BED_INVERTING true
 
 #define MYCO_HEATER
+#define BED_TEMP_IS_BIDIRECTIONAL true
 
 #define FAN_PIN PE13
 #define FAN1_PIN PC8

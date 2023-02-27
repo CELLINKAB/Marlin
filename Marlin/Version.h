@@ -27,7 +27,7 @@
 
 #define SHORT_CELLINK_VERSION_STRING "1.0.0"
 
-#define SHORT_MARLIN_VERSION_STRING "2.0.9.3"
+#define SHORT_MARLIN_VERSION_STRING "2.1.2"
 
 /**
  * Marlin release version identifier
