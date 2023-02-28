@@ -334,7 +334,7 @@ typedef struct RedundantTempInfo : public TempInfo
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo {
   celsius_t target;
-  uint8_t soft_pwm_amount;
+  int16_t soft_pwm_amount;
   bool is_set;
   bool is_below_target(const celsius_t offs=0) const { return (target - celsius > offs); } // celsius < target - offs
   bool is_above_target(const celsius_t offs=0) const { return (celsius - target > offs); } // celsius > target + offs
