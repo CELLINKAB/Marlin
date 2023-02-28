@@ -334,7 +334,7 @@ typedef struct RedundantTempInfo : public TempInfo
 // A PWM heater with temperature sensor
 typedef struct HeaterInfo : public TempInfo {
   celsius_t target;
-  uint8_t soft_pwm_amount;
+  int16_t soft_pwm_amount;
   bool is_set;
   bool is_below_target(const celsius_t offs=0) const { return (target - celsius > offs); } // celsius < target - offs
   bool is_above_target(const celsius_t offs=0) const { return (celsius - target > offs); } // celsius > target + offs
@@ -1020,17 +1020,6 @@ public:
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
         temp_bed.is_set = true;
-// TODO: this code is too specific to the driver used
-#    if ENABLED(STM_MOTOR_DRIVER_HEATER)
-        static const auto init_other_pins [[maybe_unused]] = [] {
-            OUT_WRITE(HEATER_BED_DIR_1_PIN, LOW);
-            OUT_WRITE(HEATER_BED_DIR_2_PIN, LOW);
-            OUT_WRITE(HEATER_BED_EN_PIN, HIGH);
-            return true;
-        }();
-        WRITE(HEATER_BED_DIR_1_PIN, celsius < temp_bed.celsius);
-        WRITE(HEATER_BED_DIR_2_PIN, celsius > temp_bed.celsius);
-#    endif
         start_watching_bed();
     }
 
