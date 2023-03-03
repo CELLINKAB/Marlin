@@ -31,6 +31,7 @@
 
 #include "../../inc/MarlinConfig.h"
 #include <Wire.h>
+#include <SoftWire.h>
 #include <limits>
 
 static constexpr uint8_t TMP117_REG_CONFIGURATION = 0x01;
