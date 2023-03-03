@@ -579,7 +579,7 @@
 #define HEATER_5_MINTEMP   5
 #define HEATER_6_MINTEMP   5
 #define HEATER_7_MINTEMP   5
-#define BED_MINTEMP        -10
+#define BED_MINTEMP        -15
 #define CHAMBER_MINTEMP    5
 
 // Above this temperature the heater will be switched off.
@@ -593,7 +593,7 @@
 #define HEATER_5_MAXTEMP 275
 #define HEATER_6_MAXTEMP 275
 #define HEATER_7_MAXTEMP 275
-#define BED_MAXTEMP      60
+#define BED_MAXTEMP      75
 #define CHAMBER_MAXTEMP  60
 
 /**
@@ -721,9 +721,9 @@
 
   // 120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)
   // from FOPDT model - kp=.39 Tp=405 Tdead=66, Tc set to 79.2, aggressive factor of .15 (vs .1, 1, 10)
-  #define DEFAULT_bedKp 260.00
-  #define DEFAULT_bedKi 50.00
-  #define DEFAULT_bedKd 940.00
+  #define DEFAULT_bedKp 75.00
+  #define DEFAULT_bedKi 1.00
+  #define DEFAULT_bedKd 100.00
 
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #endif // PIDTEMPBED
