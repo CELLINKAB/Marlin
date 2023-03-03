@@ -37,13 +37,12 @@ void GcodeSuite::G510()
 
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
 
-    const xyz_pos_t existing_offset = optical_autocal.offset(active_extruder);
     switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
     case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
         SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
         [[fallthrough]];
     case OpticalAutocal::ErrorCode::OK: {
-        update_offset(optical_autocal.offset(active_extruder) - existing_offset);
+        update_offset(optical_autocal.offset(active_extruder));
         xy_pos_t origin{0, 0};
         toNative(origin);
         do_blocking_move_to_xy(origin);
