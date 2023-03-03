@@ -6,10 +6,18 @@
 
 #    include "festo_pneumatics.h"
 
+
+namespace pneumatics {
+
+//
+// constants
+//
 static constexpr float TANK_PRESSURE_TARGET = 100.0f;
 static constexpr float TANK_PRESSURE_MAX = 200.0f;
 
-namespace pneumatics {
+static constexpr float TANK_GAIN = 0.183239119;
+static constexpr float REGULATOR_GAIN = 0.04;
+static constexpr float VACUUM_GAIN = -0.02;
 
 //
 // init
@@ -29,7 +37,7 @@ void init()
     SET_INPUT(PRESSURE_TANK_PIN);
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
-    set_regulator_pressure(3.0f);
+    set_regulator_pressure(5.0f);
 }
 
 //
@@ -41,7 +49,7 @@ static float regulator_set_pressure = 0;
 void set_regulator_pressure(float kPa)
 {
     // 500kPa regulator 5V analog input, 12 bit DAC
-    static constexpr float pressure_factor = 20.4f;
+    static constexpr float pressure_factor = 1.0f / REGULATOR_GAIN;
     uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
     analogWrite(PRESSURE_REGULATOR_PIN, value);
     regulator_set_pressure = kPa;
@@ -187,9 +195,10 @@ float AnalogPressureSensor::apply_scaling_leveling(float reading,
            - (static_cast<float>(with_offset) * offset);
 }
 
-AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN);
-AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN);
-AnalogPressureSensor regulator_feedback(PRESSURE_REGULATOR_SENSE_PIN);
+
+AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN);
+AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN, TANK_GAIN);
+AnalogPressureSensor regulator_feedback(PRESSURE_REGULATOR_SENSE_PIN, REGULATOR_GAIN);
 
 } // namespace pneumatics
 
