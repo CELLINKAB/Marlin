@@ -1289,6 +1289,7 @@ private:
     static void M1036(); // set pressure regulator
     static void M1062(); // get pressure sensors
     static void M1100(); // pressure regulator offset
+    static inline void M1101() {analogWrite(PRESSURE_PUMP_EN_PIN, parser.byteval('I'));}
   #endif
 
   #if PINS_EXIST(CS_24V, CS_BED_24V_CS)
