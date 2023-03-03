@@ -22,7 +22,7 @@ float get_regulator_set_pressure();
 void pressurize_tank(millis_t timeout_after_ms = 10'000);
 
 enum class GripperState{
-    Open,
+    Close,
     Release,
     Grip,
 };

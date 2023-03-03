@@ -25,14 +25,20 @@ void GcodeSuite::G514()
     pneumatics::release_mixing_pressure(tool);
 }
 
+static void pressurize()
+{
+    [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
+    idle();
+    safe_delay(1000);
+}
+
 void GcodeSuite::G515()
 {
     using namespace pneumatics;
     static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{130, -45};
-    static constexpr float GRIP_Z_HEIGHT = -7.0f;
+    static constexpr float GRIP_Z_HEIGHT = -5.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
-    static constexpr size_t RELEASE_SECONDS = 5;
 
     if (homing_needed_error())
         return;
@@ -48,32 +54,30 @@ void GcodeSuite::G515()
     if (is_releasing) {
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         set_gripper_valves(GripperState::Release);
-        for (size_t seconds = RELEASE_SECONDS; seconds > 0; --seconds) {
-            idle();
-            safe_delay(1000);
-        }
+        pressurize();
         //Expect pressure down
-        float vacuum_delta =   vacuum_baseline -gripper_vacuum.read_avg();
+        set_gripper_valves(GripperState::Close);
+        float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
-            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
+            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
         }
         if (vacuum_delta < DETECTION_THRESHOLD) {
             SERIAL_ECHOLN("RELEASE_FAILED");
-
         }
     } else {
-        set_gripper_valves(GripperState::Open);
+        set_gripper_valves(GripperState::Grip);
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to_z(GRIP_Z_HEIGHT);
-        set_gripper_valves(GripperState::Grip);
+        pressurize();
+        set_gripper_valves(GripperState::Close);
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
         // Expect pressure up
-        float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline;
+        float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
-            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta); 
+            SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
         }
         if (vacuum_delta < DETECTION_THRESHOLD) {
             SERIAL_ECHOLN("GRIP_FAILED");
