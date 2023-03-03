@@ -14,16 +14,20 @@
 BedSensors& bed_sensors()
 {
     static BedSensors sensors{[]() {
-        static TwoWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
-        pb_i2c.setClock(50'000);
+        static SoftWire pb_i2c(PRINTBED_TEMP_SDA_PIN, PRINTBED_TEMP_SCL_PIN);
+        static uint8_t tx_buf[4]{};
+        static uint8_t rx_buf[4]{};
+        pb_i2c.setTxBuffer(tx_buf, 4);
+        pb_i2c.setRxBuffer(rx_buf, 4);
+        pb_i2c.setClock(10'000);
         pb_i2c.begin();
-        TMP117<TwoWire> sensor_1(TMPAddr::GND, pb_i2c);
+        TMP117<SoftWire> sensor_1(TMPAddr::GND, pb_i2c);
         sensor_1.init(nullptr);
-        TMP117<TwoWire> sensor_2(TMPAddr::SCL, pb_i2c);
+        TMP117<SoftWire> sensor_2(TMPAddr::SCL, pb_i2c);
         sensor_2.init(nullptr);
-        TMP117<TwoWire> sensor_3(TMPAddr::SDA, pb_i2c);
+        TMP117<SoftWire> sensor_3(TMPAddr::SDA, pb_i2c);
         sensor_3.init(nullptr);
-        TMP117<TwoWire> sensor_4(TMPAddr::VCC, pb_i2c);
+        TMP117<SoftWire> sensor_4(TMPAddr::VCC, pb_i2c);
         sensor_4.init(nullptr);
         return std::array{sensor_1, sensor_2, sensor_3, sensor_4};
     }()};
@@ -41,8 +45,17 @@ double get_tmp117_bed_temp()
         else
             ++failed_reads;
     }
-    if (failed_reads >= bed_sensors().size())
-        return -300.0;
+    static unsigned retry_count = 0;
+    if (failed_reads >= bed_sensors().size()) {
+        if (retry_count < 3) {
+            // i2c_hardware_reset(pb_i2c);
+            ++retry_count;
+            return get_tmp117_bed_temp();
+        } else {
+            return -300.0;
+        }
+    }
+    retry_count = 0;
     const double avg = total_temps / (bed_sensors().size() - failed_reads);
     return avg;
 }
