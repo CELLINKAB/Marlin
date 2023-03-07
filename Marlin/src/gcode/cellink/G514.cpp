@@ -29,7 +29,7 @@ static void pressurize()
 {
     [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
     idle();
-    safe_delay(1000);
+    safe_delay(8000); // FIXME: reduce when pump is working again
 }
 
 void GcodeSuite::G515()
