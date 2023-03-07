@@ -744,8 +744,8 @@ float Probe::run_z_probe(const bool sanity_check/*=true*/) {
       if (DEBUGGING(LEVELING) && (probe_fail || early_fail)) {
         DEBUG_ECHOPGM_P(plbl);
         DEBUG_ECHOPGM(" Probe fail! -");
-        if (probe_fail) DEBUG_ECHOPGM(" No trigger.");
-        if (early_fail) DEBUG_ECHOPGM(" Triggered early.");
+        if (probe_fail) TERN(CELLINK_REPORTING, SERIAL_ECHOLN("ABL_PROBE_NOT_TRIGGERED"),DEBUG_ECHOPGM(" No trigger."));
+        if (early_fail) TERN(CELLINK_REPORTING, SERIAL_ECHOLN("ABL_PROBE_EARLY_TRIGGER"), DEBUG_ECHOPGM(" Triggered early."));
         DEBUG_EOL();
       }
     #else
@@ -946,7 +946,7 @@ float Probe::probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRai
     stow();
     LCD_MESSAGE(MSG_LCD_PROBING_FAILED);
     #if DISABLED(G29_RETRY_AND_RECOVER)
-      SERIAL_ERROR_MSG(STR_ERR_PROBING_FAILED);
+      TERN(CELLINK_REPORTING, SERIAL_ECHOLN("ABL_ABORTED"),SERIAL_ERROR_MSG(STR_ERR_PROBING_FAILED));
     #endif
   }
   DEBUG_ECHOLNPGM("measured_z: ", measured_z);
