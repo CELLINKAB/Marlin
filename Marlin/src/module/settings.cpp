@@ -182,9 +182,9 @@
   #include "../feature/stepper_retracting_probe.h"
 #endif
 
-#if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-  #include "../feature/tmp117_printbed.h"
-#endif
+// #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+//   #include "../feature/tmp117_printbed.h"
+// #endif
 
 #if ENABLED(FESTO_PNEUMATICS)
   #include "../feature/festo_pneumatics.h"
@@ -586,10 +586,10 @@ typedef struct SettingsDataStruct {
     StepperRetractingProbe::Config srp_conf;
   #endif
 
-  #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-    float bed_temp_sensor_offsets[NUM_BED_TEMP_SENSORS];
-    float bed_temp_sensor_gains[NUM_BED_TEMP_SENSORS];
-  #endif
+  // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+  //   double bed_temp_sensor_offsets[NUM_BED_TEMP_SENSORS];
+  //   double bed_temp_sensor_gains[NUM_BED_TEMP_SENSORS];
+  // #endif
 
   #if ENABLED(FESTO_PNEUMATICS)
     float vacuum_sensor_offset;
@@ -1646,12 +1646,17 @@ void MarlinSettings::postprocess() {
 
     TERN_(STEPPER_RETRACTING_PROBE, EEPROM_WRITE(stepper_probe.get_config()));
 
-    #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-      for (auto & sensor : bed_sensors()) {
-        EEPROM_WRITE(sensor.getOffsetTemperature()); 
-        EEPROM_WRITE(sensor.getGain());
-      }
-    #endif
+    // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+    // {  
+    //   auto & sensors = bed_sensors();
+    //   for (auto & sensor : sensors) {
+    //     double offset = sensor.getOffsetTemperature();
+    //     double gain = sensor.getGain();
+    //     EEPROM_WRITE(offset); 
+    //     EEPROM_WRITE(gain);
+    //   }
+    // }
+    // #endif
 
     #if ENABLED(FESTO_PNEUMATICS)
       EEPROM_WRITE(pneumatics::gripper_vacuum.offset);
@@ -2661,16 +2666,16 @@ void MarlinSettings::postprocess() {
         }
       #endif
 
-      #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-        for (auto & sensor : bed_sensors()) {
-          float offset;
-          float gain;
-          EEPROM_READ(offset); 
-          EEPROM_READ(gain);
-          sensor.setOffsetTemperature(offset);
-          sensor.setGain(gain);
-        }
-      #endif
+      // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+      //   for (auto & sensor : bed_sensors()) {
+      //     float offset;
+      //     float gain;
+      //     EEPROM_READ(offset); 
+      //     EEPROM_READ(gain);
+      //     sensor.setOffsetTemperature(offset);
+      //     sensor.setGain(gain);
+      //   }
+      // #endif
 
       #if ENABLED(FESTO_PNEUMATICS)
         EEPROM_READ(pneumatics::gripper_vacuum.offset);

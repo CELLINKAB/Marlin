@@ -310,6 +310,8 @@ template<typename Bus>
 double TMP117<Bus>::getOffsetTemperature(void)
 {
     int16_t temp = i2cRead2B(TMP117_REG_TEMPERATURE_OFFSET);
+    if (temp == TEMP_READ_ERR_VAL)
+        return 0.0;
     return (temp * TMP117_RESOLUTION);
 }
 
