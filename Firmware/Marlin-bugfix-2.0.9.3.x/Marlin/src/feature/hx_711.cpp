@@ -79,7 +79,7 @@ int32_t HX_711::read()
 //       digital output pin DOUT is HIGH.
   if(digitalRead(_pin_dta) == LOW)
   {
-//    noInterrupts();
+    noInterrupts();
 //  When DOUT goes to LOW, it indicates data is ready for retrieval.
 
     //  Pulse the clock pin 24 times to read the data.
@@ -106,7 +106,7 @@ int32_t HX_711::read()
       m--;
     }
 
-//    interrupts();
+    interrupts();
 
     //  Sign extending
     if (v.data[2] & 0x80) v.data[3] = 0xFF;
@@ -150,19 +150,34 @@ void HX_711::manage_hx_711()
       _f_val = (float)_last_read;
     #endif
 
-  if(_f_val > (float)_threshold)      //if threshold reached set-up output pin.
-  { 
-    // Drive the pin low that is logic 0
-    pinMode(_pin_ind, OUTPUT);
-    digitalWrite(_pin_ind, LOW);
-  }
-  else{
-    // Set pin to high impedance with pullup that is logic 1
-    pinMode(_pin_ind, INPUT_PULLUP);
-  }
-
+    static uint8_t ind_pin_state = 0;
+    switch (ind_pin_state) {
+                //if threshold reached set-up output pin.
+      case 0u:  if(_f_val < ((float)_threshold - SW_HYSTERESIS)) ind_pin_state = 1u;
+                break;
+                //if threshold reached set-up output pin.
+      case 1u:  if(_f_val > ((float)_threshold + SW_HYSTERESIS)) ind_pin_state = 0u;
+                break;
+    }
+    
+    if(ind_pin_state == 0u)   //set-up output pin.
+    { 
+      // Drive the pin low that is logic 0
+      pinMode(_pin_ind, OUTPUT);
+      digitalWrite(_pin_ind, LOW);
+    }
+    else{
+      // Set pin to high impedance with pullup that is logic 1
+      pinMode(_pin_ind, INPUT_PULLUP);
+    }
   }
 }
+
+void  HX_711::tare()
+{
+
+}
+
 /**
  * @brief Shift In 8 bits function MSB_FIRST
  * 
