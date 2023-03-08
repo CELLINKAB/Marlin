@@ -248,15 +248,11 @@ Response<std::array<uint8_t, 12>> Controller::get_uuid(Index index)
     return send_and_receive<std::array<uint8_t, 12>>(packet, bus);
 }
 
-Status Controller::get_status(Index index)
+Response<Status> Controller::get_status(Index index)
 {
     Packet packet(index, Command::GET_STATUS);
-    auto response = send_and_receive<uint16_t>(packet, bus);
-
-    if (response.result != Result::OK)
-        return Status{};
-
-    return Status{response.packet.payload};
+    auto res = send_and_receive<uint16_t>(packet, bus);
+    return Response<Status>{Packet<Status>(res.packet.ph_index, res.packet.command, static_cast<Status>(res.packet.payload)), res.result};
 }
 
 void Controller::stop_active_extrudes()

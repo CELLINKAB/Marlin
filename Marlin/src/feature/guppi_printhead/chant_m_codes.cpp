@@ -81,10 +81,12 @@ void GcodeSuite::G511()
     ph_debug_print(res);
     millis_t timeout = millis()
                        + SEC_TO_MS(parser.ulongval('S', 180)); // should home within 100 seconds
-    while (ph_controller.get_status(index).is_homing && millis() < timeout) {
+    printhead::Response<printhead::Status> status_poll;
+    do  {
         safe_delay(1000);
         idle_no_sleep();
-    }
+        status_poll = ph_controller.get_status(index);
+    } while ( status_poll.result == printhead::Result::OK && status_poll.packet.payload.is_homing && millis() < timeout);
 
     if (millis() > timeout)
         SERIAL_ERROR_MSG("Extruder homing timeout exceeded");
