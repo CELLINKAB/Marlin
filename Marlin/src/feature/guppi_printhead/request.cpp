@@ -225,7 +225,7 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
     auto res = send(packet, bus);
     if (res == Result::OK) {
         state.slider_is_homed = true;
-        state.extruder_pos = 0;
+        state.slider_pos = 0;
     }
     return res;
 }
