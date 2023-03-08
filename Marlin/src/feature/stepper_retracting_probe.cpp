@@ -6,6 +6,7 @@
 
 #    include "../gcode/gcode.h"
 #    include "../gcode/parser.h"
+#    include "../module/endstops.h"
 
 #    include "stepper_retracting_probe.h"
 
@@ -13,7 +14,7 @@ void StepperRetractingProbe::deploy()
 {
     switch (state) {
     case ProbeState::Deployed:
-        return;
+        break;
     case ProbeState::Unknown:
         stepper().raw_move(config.stow_velocity);
         safe_delay(200);
@@ -24,14 +25,23 @@ void StepperRetractingProbe::deploy()
         // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
         stepper().raw_move(config.deploy_velocity);
-        millis_t minimum_deploy_time = static_cast<millis_t>(
+        const millis_t minimum_deploy_time = static_cast<millis_t>(
             static_cast<float>(config.minimum_retract_time)
                 * ABS(static_cast<float>(config.stow_velocity)
                       / static_cast<float>(config.deploy_velocity))
             + 1000.0f);
-        safe_delay(minimum_deploy_time);
+        const millis_t timeout = millis() + minimum_deploy_time;
+        static auto probe_hit = []() { return TEST(endstops.trigger_state(), Z_MIN_PROBE); };
+        while (!probe_hit() && millis() < timeout) {
+            safe_delay(200);
+            idle_no_sleep();
+        }
         stepper().stop();
         state = ProbeState::Deployed;
+        if (probe_hit()) {
+            stow();
+        }
+        break;
     }
 }
 
@@ -39,7 +49,7 @@ void StepperRetractingProbe::stow()
 {
     switch (state) {
     case ProbeState::Stowed:
-        return;
+        break;
     case ProbeState::Unknown:
         deploy();
         delay(10);

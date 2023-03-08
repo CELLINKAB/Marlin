@@ -578,6 +578,13 @@ bool Probe::set_deployed(const bool deploy) {
 
     probe_specific_action(deploy);
 
+    #if ENABLED(STEPPER_RETRACTING_PROBE)
+     if ( deploy != stepper_probe.is_deployed()) {
+      SERIAL_ECHOLN("ABL_PROBE_DEPLOY_FAILED");
+      return true;
+      }
+    #endif
+
   #endif
 
   // If preheating is required before any probing...
