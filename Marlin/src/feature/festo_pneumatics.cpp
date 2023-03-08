@@ -19,6 +19,11 @@ static constexpr float TANK_GAIN = 0.183239119;
 static constexpr float REGULATOR_GAIN = 0.04;
 static constexpr float VACUUM_GAIN = -0.02;
 
+
+static constexpr float TANK_OFFSET = 750.0f;
+static constexpr float VACUUM_OFFSET = -16.5f;
+static constexpr float REGULATOR_OFFSET = 0.0f;
+
 //
 // init
 //
@@ -196,9 +201,9 @@ float AnalogPressureSensor::apply_scaling_leveling(float reading,
 }
 
 
-AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN);
-AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN, TANK_GAIN);
-AnalogPressureSensor regulator_feedback(PRESSURE_REGULATOR_SENSE_PIN, REGULATOR_GAIN);
+AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN, VACUUM_OFFSET);
+AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN, TANK_GAIN, TANK_OFFSET);
+AnalogPressureSensor regulator_feedback(PRESSURE_REGULATOR_SENSE_PIN, REGULATOR_GAIN, REGULATOR_OFFSET);
 
 } // namespace pneumatics
 
