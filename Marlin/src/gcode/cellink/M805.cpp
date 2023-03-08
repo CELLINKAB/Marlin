@@ -17,8 +17,9 @@ struct CuringLed
 constexpr static uint8_t PC_MICROSTEPS = 32;
 constexpr static float PC_DEG_PER_STEP = 1.8f;
 
-constexpr int32_t deg_to_steps(float degs) {
-    return static_cast<int32_t>((degs / PC_DEG_PER_STEP) * PC_MICROSTEPS );
+constexpr int32_t deg_to_steps(float degs)
+{
+    return static_cast<int32_t>((degs / PC_DEG_PER_STEP) * PC_MICROSTEPS);
 }
 
 constexpr static float PC_365_DEG = 0.0f;
@@ -52,10 +53,10 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
 
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
-
-inline void move_degs(Stepper& stepper, float degs) {
-        int32_t steps = deg_to_steps(degs);
-    stepper.move_steps(steps, 4000, [](){return READ(PC_STOP_PIN);});
+inline void move_degs(Stepper& stepper, float degs)
+{
+    int32_t steps = deg_to_steps(degs);
+    stepper.move_steps(steps, 4000, []() { return READ(PC_STOP_PIN); });
 }
 
 void move_rainbow(Stepper& stepper, CuringLed led)
@@ -79,7 +80,9 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 100, 400, 0.15f), PC_SERIAL_RX_PIN, PC_SERIAL_TX_PIN);
+        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 100, 400, 0.15f),
+                       PC_SERIAL_RX_PIN,
+                       PC_SERIAL_TX_PIN);
     }();
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
@@ -91,7 +94,10 @@ void GcodeSuite::M805()
         SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:",
                          wavelength);
 
-    move_rainbow(stepper, led);
+    if (parser.seenval('D'))
+        move_degs(parser.value_float());
+    else
+        move_rainbow(stepper, led);
     WRITE(led.pin, HIGH);
     analogWrite(PC_PWM_PIN, intensity);
     safe_delay(duration);
