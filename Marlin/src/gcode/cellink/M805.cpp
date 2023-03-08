@@ -11,8 +11,15 @@
 struct CuringLed
 {
     pin_t pin;
-    int32_t steps;
+    float deg;
 };
+
+constexpr static uint8_t PC_MICROSTEPS = 32;
+constexpr static float PC_DEG_PER_STEP = 1.8f;
+
+constexpr int32_t deg_to_steps(float degs) {
+    return static_cast<int32_t>((degs / PC_DEG_PER_STEP) * PC_MICROSTEPS );
+}
 
 constexpr CuringLed led_for_wavelength(uint16_t wavelength)
 {
