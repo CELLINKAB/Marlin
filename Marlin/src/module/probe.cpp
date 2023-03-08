@@ -578,7 +578,12 @@ bool Probe::set_deployed(const bool deploy) {
 
     probe_specific_action(deploy);
 
-    TERN_(STEPPER_RETRACTING_PROBE, if ( deploy != stepper_probe.is_deployed()) return true);
+    #if ENABLED(STEPPER_RETRACTING_PROBE)
+     if ( deploy != stepper_probe.is_deployed()) {
+      SERIAL_ECHOLN("ABL_PROBE_DEPLOY_FAILED");
+      return true;
+      }
+    #endif
 
   #endif
 
