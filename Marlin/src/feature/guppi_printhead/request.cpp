@@ -220,10 +220,12 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
 
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
 {
+    auto& state = ph_states[static_cast<uint8_t>(index)];
     Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, dir);
     auto res = send(packet, bus);
     if (res == Result::OK) {
-        ph_states[static_cast<uint8_t>(index)].slider_is_homed = true;
+        state.slider_is_homed = true;
+        state.extruder_pos = 0;
     }
     return res;
 }
