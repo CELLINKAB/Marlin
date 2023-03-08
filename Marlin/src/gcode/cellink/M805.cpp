@@ -52,6 +52,12 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
 
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
+
+inline void move_degs(Stepper& stepper, float degs) {
+        int32_t steps = deg_to_steps(degs);
+    stepper.move_steps(steps, 4000, [](){return READ(PC_STOP_PIN);});
+}
+
 void move_rainbow(Stepper& stepper, CuringLed led)
 {
     static float rainbow_position = [&]() {
@@ -60,10 +66,8 @@ void move_rainbow(Stepper& stepper, CuringLed led)
     }();
     if (led.deg == rainbow_position)
         return;
-    int32_t steps = deg_to_steps(led.deg - rainbow_position);
-    stepper.move_steps(steps, 4000, [](){return READ(PC_STOP_PIN);});
 
-    // TODO: some error checking here
+    move_degs(led.deg - rainbow_position);
 }
 
 void GcodeSuite::M805()
