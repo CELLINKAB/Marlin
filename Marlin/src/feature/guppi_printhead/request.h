@@ -292,7 +292,7 @@ public:
     Response<void> get_fw_version(Index index);
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
-    Status get_status(Index index);
+    Response<Status> get_status(Index index);
     // Temperature methods
     Result set_temperature(Index index, celsius_t temperature);
     celsius_float_t get_temperature(Index index);
