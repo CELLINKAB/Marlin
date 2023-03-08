@@ -10,9 +10,8 @@
 
 #    include "stepper_retracting_probe.h"
 
-[[nodiscard]] bool StepperRetractingProbe::deploy()
+void StepperRetractingProbe::deploy()
 {
-    bool failure = false;
     switch (state) {
     case ProbeState::Deployed:
         break;
@@ -41,11 +40,9 @@
         state = ProbeState::Deployed;
         if (probe_hit()) {
             stow();
-            failure = true;
         }
         break;
     }
-    return failure;
 }
 
 void StepperRetractingProbe::stow()
@@ -54,7 +51,8 @@ void StepperRetractingProbe::stow()
     case ProbeState::Stowed:
         break;
     case ProbeState::Unknown:
-        if (deploy()) return;
+        if (deploy())
+            return;
         delay(10);
         [[fallthrough]];
     case ProbeState::Deployed:

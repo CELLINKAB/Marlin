@@ -578,6 +578,8 @@ bool Probe::set_deployed(const bool deploy) {
 
     probe_specific_action(deploy);
 
+    TERN_(STEPPER_RETRACTING_PROBE, if ( deploy != stepper_probe.is_deployed()) return true);
+
   #endif
 
   // If preheating is required before any probing...
