@@ -42,7 +42,7 @@ struct StepperRetractingProbe
         , _stepper{}
     {}
 
-    void deploy();
+    [[nodiscard]] bool deploy();
 
     void stow();
 
