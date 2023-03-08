@@ -123,12 +123,11 @@ void GcodeSuite::G513()
     ph_debug_print(res);
 
     // TODO: this stuff should be polled inside idle instead of duplicated in multiple places
-    const millis_t timeout = millis() + 2000;
-    printhead::Response<printhead::Status> status_poll;
+    const millis_t timeout = millis() + 10000;
     do  {
-        safe_delay(100);
-        status_poll = ph_controller.get_status(index);
-    } while ( (status_poll.result != printhead::Result::OK || status_poll.packet.payload.is_stepping) && millis() < timeout);
+        safe_delay(500);
+        idle_no_sleep();
+    } while ( millis() < timeout);
 }
 
 //
