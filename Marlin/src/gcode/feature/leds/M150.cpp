@@ -79,9 +79,9 @@ void GcodeSuite::M150() {
   #endif
 
   const LEDColor color = LEDColor(
-    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : (old_color >> 16) & 0xFF,
-    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : (old_color >>  8) & 0xFF,
-    TERN_(INVERTED_RGB_CONTROL, 255 -) parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : old_color & 0xFF
+    TERN_(INVERTED_RGB_CONTROL, 255 -) (parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : (old_color >> 16) & 0xFF),
+    TERN_(INVERTED_RGB_CONTROL, 255 -) (parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : (old_color >>  8) & 0xFF),
+    TERN_(INVERTED_RGB_CONTROL, 255 -) (parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : old_color & 0xFF)
     OPTARG(HAS_WHITE_LED, parser.seen('W') ? (parser.has_value() ? parser.value_byte() : 255) : (old_color >> 24) & 0xFF)
     OPTARG(NEOPIXEL_LED, parser.seen('P') ? parser.has_value() ? (TERN_(INVERTED_RGB_CONTROL, 255 -) parser.value_byte()) : TERN(INVERTED_RGB_CONTROL, 0, 255) : brightness)
   );
