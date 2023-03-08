@@ -3341,7 +3341,7 @@
 #endif
 
 // inverts the parameters for RGB control, in case you're using an inverting level-shift
-// #define INVERTED_RGB_CONTROL
+#define INVERTED_RGB_CONTROL
 
 /**
  * Printer Event LEDs
