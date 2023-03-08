@@ -51,8 +51,7 @@ void StepperRetractingProbe::stow()
     case ProbeState::Stowed:
         break;
     case ProbeState::Unknown:
-        if (deploy())
-            return;
+        deploy();
         delay(10);
         [[fallthrough]];
     case ProbeState::Deployed:
