@@ -250,3 +250,8 @@
 
 #define MYCO_ID_PIN PC0 
 #define BAMBOO_ID_PIN PC1
+
+#define CALIBRATION_PIN PD0
+#define CALIBRATION_GROUND_PIN PD1
+#define CALIBRATION_PIN_INVERTING true // Set to true to invert the custom pin
+#define CALIBRATION_PIN_PULLUP
