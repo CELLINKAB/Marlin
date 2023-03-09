@@ -68,7 +68,7 @@ void move_rainbow(Stepper& stepper, CuringLed led)
     if (led.deg == rainbow_position)
         return;
 
-    move_degs(led.deg - rainbow_position);
+    move_degs(stepper, led.deg - rainbow_position);
 }
 
 void GcodeSuite::M805()
@@ -95,7 +95,7 @@ void GcodeSuite::M805()
                          wavelength);
 
     if (parser.seenval('D'))
-        move_degs(parser.value_float());
+        move_degs(stepper, parser.value_float());
     else
         move_rainbow(stepper, led);
     WRITE(led.pin, HIGH);
