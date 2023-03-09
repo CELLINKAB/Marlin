@@ -1233,9 +1233,9 @@
 
   // The true location and dimension the cube/bolt/washer on the bed.
   // If using inside out, this should be the top center
-  #define CALIBRATION_OBJECT_CENTER     { 0.0, 0.0, 0.0 } // mm
+  #define CALIBRATION_OBJECT_CENTER     { 0.0, 0.0, -2.0 } // mm
   // The movable area for inside out calibration
-  #define CALIBRATION_OBJECT_DIMENSIONS {  150.0,  50.0,  2.0 } // mm
+  #define CALIBRATION_OBJECT_DIMENSIONS {  108.0,  72.0,  2.0 } // mm
   
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
