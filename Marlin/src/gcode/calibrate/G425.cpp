@@ -314,8 +314,12 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
   }
 
   if ((AXIS_CAN_CALIBRATE(X) && axis == X_AXIS) || (AXIS_CAN_CALIBRATE(Y) && axis == Y_AXIS)) {
+
     // Move to safe distance to the side of the calibration object
-    current_position[axis] = m.obj_center[axis] + (-dir) * (dimensions[axis] / 2 + m.nozzle_outer_dimension[axis] / 2 + uncertainty);
+    float calibration_probe_offset = m.nozzle_outer_dimension[axis] / 2 + uncertainty;
+    TERN_(CALIBRATION_INSIDE_OUT, calibration_probe_offset = -calibration_probe_offset);
+    const float obj_center_probe_point_offset = dimensions[axis] / 2 + calibration_probe_offset;
+    current_position[axis] = m.obj_center[axis] + (-dir) * obj_center_probe_point_offset;
     calibration_move();
 
     // Plunge below the side of the calibration object and measure
