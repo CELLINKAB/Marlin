@@ -1687,6 +1687,10 @@ void setup() {
     SETUP_RUN(stepper_probe.stow());
   #endif
 
+  #if PIN_EXISTS(PC_ENABLE_PIN)
+    SETUP_RUN(OUT_WRITE(PC_ENABLE_PIN, LOW));
+  #endif
+
 
   marlin_state = MF_RUNNING;
 
