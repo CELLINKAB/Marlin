@@ -1213,27 +1213,34 @@
   //#define CALIBRATION_SCRIPT_PRE  "M117 Starting Auto-Calibration\nT0\nG28\nG12\nM117 Calibrating..."
   //#define CALIBRATION_SCRIPT_POST "M500\nM117 Calibration data saved"
 
-  #define CALIBRATION_MEASUREMENT_RESOLUTION     0.01 // mm
+  #define CALIBRATION_MEASUREMENT_RESOLUTION     0.005 // mm
 
-  #define CALIBRATION_FEEDRATE_SLOW             60    // mm/min
+  #define CALIBRATION_FEEDRATE_SLOW             30    // mm/min
   #define CALIBRATION_FEEDRATE_FAST            900    // mm/min
   #define CALIBRATION_FEEDRATE_TRAVEL         2400    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
-  #define CALIBRATION_NOZZLE_TIP_HEIGHT          1.0  // mm
+  #define CALIBRATION_NOZZLE_TIP_HEIGHT          3.0  // mm
   #define CALIBRATION_NOZZLE_OUTER_DIAMETER      10.0  // mm
 
   // Uncomment to enable reporting (required for "G425 V", but consumes PROGMEM).
   #define CALIBRATION_REPORTING
 
-  // The true location and dimension the cube/bolt/washer on the bed.
-  #define CALIBRATION_OBJECT_CENTER     { 180.0, 80.0, 0.0 } // mm
-  #define CALIBRATION_OBJECT_DIMENSIONS {  50.0,  50.0,  2.0 } // mm
+  // Normally calibration uses a protruding conducting object, and probing moved toward the center.
+  // This flag changes the logic to assume a conductive fence area
+  // So calibration is done by going to the center and traveling outward
+  #define CALIBRATION_INSIDE_OUT
 
+  // The true location and dimension the cube/bolt/washer on the bed.
+  // If using inside out, this should be the top center
+  #define CALIBRATION_OBJECT_CENTER     { 0.0, 0.0, -2.0 } // mm
+  // The movable area for inside out calibration
+  #define CALIBRATION_OBJECT_DIMENSIONS {  108.0,  72.0,  2.0 } // mm
+  
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
-  #define CALIBRATION_MEASURE_RIGHT
-  #define CALIBRATION_MEASURE_FRONT
+  //#define CALIBRATION_MEASURE_RIGHT
+  //#define CALIBRATION_MEASURE_FRONT
   #define CALIBRATION_MEASURE_LEFT
   #define CALIBRATION_MEASURE_BACK
 
@@ -1257,9 +1264,9 @@
   // Define the pin to read during calibration
   #ifndef CALIBRATION_PIN
     //#define CALIBRATION_PIN -1            // Define here to override the default pin
-    #define CALIBRATION_PIN_INVERTING false // Set to true to invert the custom pin
+    //#define CALIBRATION_PIN_INVERTING false // Set to true to invert the custom pin
     //#define CALIBRATION_PIN_PULLDOWN
-    #define CALIBRATION_PIN_PULLUP
+    //#define CALIBRATION_PIN_PULLUP
   #endif
 #endif
 

@@ -399,6 +399,10 @@ void Endstops::init() {
     #endif
   #endif
 
+  #if PIN_EXISTS(CALIBRATION_GROUND)
+    OUT_WRITE(CALIBRATION_GROUND_PIN, LOW);
+  #endif
+
   #if USES_Z_MIN_PROBE_PIN
     #if ENABLED(ENDSTOPPULLUP_ZMIN_PROBE)
       SET_INPUT_PULLUP(Z_MIN_PROBE_PIN);
