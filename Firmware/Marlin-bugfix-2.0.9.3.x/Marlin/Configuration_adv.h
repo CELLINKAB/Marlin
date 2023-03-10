@@ -2343,6 +2343,8 @@
 
 // Some clients will have this feature soon. This could make the NO_TIMEOUTS unnecessary.
 //#define ADVANCED_OK
+// Custom CELLINK responses
+#define CELLINK_REPORTING
 
 // Printrun may have trouble receiving long strings all at once.
 // This option inserts short delays between lines of serial output.
