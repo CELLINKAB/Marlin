@@ -29,13 +29,13 @@ REFERENCES
 
 // The value defined is used for moving average filter depth
 // in a retalion: buffer depth = 2^HX_711_ENABLE_FILTER.
-#define HX_711_ENABLE_FILTER    3
+#define HX_711_ENABLE_FILTER        3
 
-/**
- * @brief 
- * 
- */
-#define SW_HYSTERESIS           5000.0f
+// The threshold hysteresys
+#define HX711_SW_HYSTERESIS         3000.0f
+
+// Endstop threshold
+#define HX711_ENDSTOP_THRESHOLD     10000.0f
 
 /**
  *   HX_711:   Class thet defines object for HX711 ADC functionalities and
@@ -54,9 +54,12 @@ public:
 
   void  begin(const uint8_t pinDta, const uint8_t pinClk, const uint8_t pinInd);
 
-  void  tare();
-
   void  manage_hx_711();
+
+  void  tare_start() { _tare_start = true; _read_counter = 0u; _averaged = 0; };
+
+  bool  tare_ready( float &avg_value );
+  bool  tare_ready() { return ~_tare_start;};
 
   int32_t read();
 
@@ -65,7 +68,7 @@ public:
    * 
    * @param thrIn 
    */
-  void setThreshold( int32_t thrIn ) { _threshold = thrIn; };
+  void setThreshold( int32_t thrIn ) { _th_weigth = (float)thrIn; };
 
   /**
    * @brief Set the HX711 channel/mode.
@@ -81,19 +84,24 @@ public:
    */
   float getCurrentVal() { return _f_val; };
 
+  bool      th_init      = false;
+
 private:
 
-  bool      _new_val;                 // new value indicator
-  float     _f_val        = 0.0f;     // filtered raw value
-  int32_t   _last_read;               // last read raw value (unfiltered)
-  float     _averaged     = 0.0f;     // tare averaged
+  bool      _new_val        = false;    // new value indicator
+  float     _f_val          = 0.0f;     // filtered raw value
+  int32_t   _last_read      = 0;        // last read raw value (unfiltered)
+  float     _averaged       = 0.0f;     // tare averaged
+  uint32_t  _read_counter   = 0u;
+  bool      _tare_start     = false;
+  float     _th_weigth      = HX711_ENDSTOP_THRESHOLD;
 
-  uint8_t   _pin_dta;                 // data pin
-  uint8_t   _pin_clk;                 // clock pin
-  uint8_t   _pin_ind;                 // indicatior pin
+  uint8_t   _pin_dta;                   // data pin
+  uint8_t   _pin_clk;                   // clock pin
+  uint8_t   _pin_ind;                   // indicatior pin
 
-  uint8_t   _channel      = 1;        // default: channel A; gain 128
-  int32_t   _threshold    = 0;        // scale treshold.
+  uint8_t   _channel        = 1;        // default: channel A; gain 128
+  int32_t   _threshold      = 0;        // scale treshold.
 
   uint8_t  _shiftIn();
 };

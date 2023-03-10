@@ -131,6 +131,8 @@ void HX_711::manage_hx_711()
 
   if(_new_val)                  //if there are data available, process it.
   {
+
+    //MOVING AVERAGE MANAGEMENT
     #ifdef HX_711_ENABLE_FILTER
       #define FILTER_DEPTH (uint8_t)(1u << HX_711_ENABLE_FILTER)
       #define FILTER_MASK  (uint8_t)( FILTER_DEPTH - 1u )
@@ -144,22 +146,30 @@ void HX_711::manage_hx_711()
 
       float f_summ = 0;
       for(uint8_t i = 0; i< FILTER_DEPTH; i++) f_summ += (float)fbuff[i];
-      
       _f_val = f_summ / (float)FILTER_DEPTH;
+
     #else
       _f_val = (float)_last_read;
     #endif
 
-    static uint8_t ind_pin_state = 0;
-    switch (ind_pin_state) {
-                //if threshold reached set-up output pin.
-      case 0u:  if(_f_val < ((float)_threshold - SW_HYSTERESIS)) ind_pin_state = 1u;
-                break;
-                //if threshold reached set-up output pin.
-      case 1u:  if(_f_val > ((float)_threshold + SW_HYSTERESIS)) ind_pin_state = 0u;
-                break;
-    }
-    
+    //THRESHOLD HYSTERESIS MANAGEMENT
+    static uint8_t ind_pin_state = 1u;
+    #ifdef HX711_SW_HYSTERESIS
+    float th_hysteresis = _th_weigth * 0.3f;
+      switch (ind_pin_state) {
+                  //if threshold reached set-up output pin.
+        case 0u:  if((_f_val - _averaged) < (_th_weigth - th_hysteresis)) ind_pin_state = 1u;
+                  break;
+                  //if threshold reached set-up output pin.
+        case 1u:  if((_f_val - _averaged) > (_th_weigth + th_hysteresis)) ind_pin_state = 0u;
+                  break;
+      }
+    #else
+      if( f_val > (float)_threshold ) ind_pin_state = 0u;
+        else ind_pin_state = 1u
+    #endif
+
+    //PIN OPERATION MANAGEMENT
     if(ind_pin_state == 0u)   //set-up output pin.
     { 
       // Drive the pin low that is logic 0
@@ -170,12 +180,34 @@ void HX_711::manage_hx_711()
       // Set pin to high impedance with pullup that is logic 1
       pinMode(_pin_ind, INPUT_PULLUP);
     }
+
+    //TARE MANAGEMENT
+    #define TARE_AVG_CNT 200u
+    if( _tare_start == true )
+    {
+      _averaged += _f_val;
+      if(_read_counter >= TARE_AVG_CNT)
+      {
+        _averaged = _averaged / (float)TARE_AVG_CNT;
+        _tare_start = false;
+      }
+    }
+
+  _read_counter++;
   }
 }
 
-void  HX_711::tare()
+bool  HX_711::tare_ready( float &avg_value )
 {
-
+  if( _tare_start == false )
+  {
+    avg_value = _averaged;
+    return true;
+  }
+  else
+    {
+      return false;
+    }
 }
 
 /**
