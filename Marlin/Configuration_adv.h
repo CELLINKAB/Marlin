@@ -1119,7 +1119,7 @@
 #define DEFAULT_STEPPER_DEACTIVE_TIME 300
 #define DISABLE_INACTIVE_X true
 #define DISABLE_INACTIVE_Y true
-#define DISABLE_INACTIVE_Z true  // Set 'false' if the nozzle could fall onto your printed part!
+#define DISABLE_INACTIVE_Z false  // Set 'false' if the nozzle could fall onto your printed part!
 #define DISABLE_INACTIVE_I true
 #define DISABLE_INACTIVE_J true
 #define DISABLE_INACTIVE_K true
@@ -1220,7 +1220,7 @@
   #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
-  #define CALIBRATION_NOZZLE_TIP_HEIGHT          5.0  // mm
+  #define CALIBRATION_NOZZLE_TIP_HEIGHT          2.0  // mm
   #define CALIBRATION_NOZZLE_OUTER_DIAMETER      10.0  // mm
 
   // Uncomment to enable reporting (required for "G425 V", but consumes PROGMEM).
@@ -1233,7 +1233,7 @@
 
   // The true location and dimension the cube/bolt/washer on the bed.
   // If using inside out, this should be the top center
-  #define CALIBRATION_OBJECT_CENTER     { -50.0, 25.0, 10.0 } // mm
+  #define CALIBRATION_OBJECT_CENTER     { -52.0, 26.0, 8.0 } // mm
   // The movable area for inside out calibration
   #define CALIBRATION_OBJECT_DIMENSIONS {  28.0,  32.0,  5.0 } // mm
   
