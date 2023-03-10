@@ -1136,6 +1136,8 @@ void setup() {
       SERIAL_ECHOLNPGM_P(msg);
     };
     #define SETUP_LOG(M) log_current_ms(PSTR(M))
+  #elif ENABLED(CELLINK_REPORTING)
+    #define SETUP_LOG(M) SERIAL_ECHOLNPGM(M)
   #else
     #define SETUP_LOG(...) NOOP
   #endif
