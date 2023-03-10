@@ -1216,11 +1216,11 @@
   #define CALIBRATION_MEASUREMENT_RESOLUTION     0.005 // mm
 
   #define CALIBRATION_FEEDRATE_SLOW             30    // mm/min
-  #define CALIBRATION_FEEDRATE_FAST            900    // mm/min
-  #define CALIBRATION_FEEDRATE_TRAVEL         2400    // mm/min
+  #define CALIBRATION_FEEDRATE_FAST            300    // mm/min
+  #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
-  #define CALIBRATION_NOZZLE_TIP_HEIGHT          3.0  // mm
+  #define CALIBRATION_NOZZLE_TIP_HEIGHT          1.0  // mm
   #define CALIBRATION_NOZZLE_OUTER_DIAMETER      10.0  // mm
 
   // Uncomment to enable reporting (required for "G425 V", but consumes PROGMEM).
@@ -1233,9 +1233,9 @@
 
   // The true location and dimension the cube/bolt/washer on the bed.
   // If using inside out, this should be the top center
-  #define CALIBRATION_OBJECT_CENTER     { 0.0, 0.0, -2.0 } // mm
+  #define CALIBRATION_OBJECT_CENTER     { -40.0, -20.0, -1.0 } // mm
   // The movable area for inside out calibration
-  #define CALIBRATION_OBJECT_DIMENSIONS {  108.0,  72.0,  2.0 } // mm
+  #define CALIBRATION_OBJECT_DIMENSIONS {  28.0,  32.0,  5.0 } // mm
   
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
