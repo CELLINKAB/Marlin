@@ -55,9 +55,10 @@ void GcodeSuite::G515()
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         set_gripper_valves(GripperState::Release);
         pressurize();
-        //Expect pressure down
+        //Expect pressure down (may no change in pressure)
         set_gripper_valves(GripperState::Close);
-        float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
+    
+        float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline ;
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
@@ -73,8 +74,8 @@ void GcodeSuite::G515()
         set_gripper_valves(GripperState::Close);
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
-        // Expect pressure up
-        float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+        // Expect pressure down (with pump working)
+        float vacuum_delta = vacuum_baseline- gripper_vacuum.read_avg();
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
