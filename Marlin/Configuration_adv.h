@@ -1235,7 +1235,7 @@
   // If using inside out, this should be the top center
   #define CALIBRATION_OBJECT_CENTER     { -52.0, 26.0, 8.0 } // mm
   // The movable area for inside out calibration
-  #define CALIBRATION_OBJECT_DIMENSIONS {  28.0,  32.0,  5.0 } // mm
+  #define CALIBRATION_OBJECT_DIMENSIONS {  24.0,  34.0,  5.0 } // mm
   
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
