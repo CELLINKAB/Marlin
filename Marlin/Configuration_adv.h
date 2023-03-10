@@ -1220,7 +1220,7 @@
   #define CALIBRATION_FEEDRATE_TRAVEL         3000    // mm/min
 
   // The following parameters refer to the conical section of the nozzle tip.
-  #define CALIBRATION_NOZZLE_TIP_HEIGHT          1.0  // mm
+  #define CALIBRATION_NOZZLE_TIP_HEIGHT          5.0  // mm
   #define CALIBRATION_NOZZLE_OUTER_DIAMETER      10.0  // mm
 
   // Uncomment to enable reporting (required for "G425 V", but consumes PROGMEM).
@@ -1233,14 +1233,14 @@
 
   // The true location and dimension the cube/bolt/washer on the bed.
   // If using inside out, this should be the top center
-  #define CALIBRATION_OBJECT_CENTER     { -40.0, -20.0, -1.0 } // mm
+  #define CALIBRATION_OBJECT_CENTER     { -50.0, 25.0, 10.0 } // mm
   // The movable area for inside out calibration
   #define CALIBRATION_OBJECT_DIMENSIONS {  28.0,  32.0,  5.0 } // mm
   
   // Comment out any sides which are unreachable by the probe. For best
   // auto-calibration results, all sides must be reachable.
-  //#define CALIBRATION_MEASURE_RIGHT
-  //#define CALIBRATION_MEASURE_FRONT
+  // #define CALIBRATION_MEASURE_RIGHT
+  // #define CALIBRATION_MEASURE_FRONT
   #define CALIBRATION_MEASURE_LEFT
   #define CALIBRATION_MEASURE_BACK
 
@@ -1259,7 +1259,8 @@
 
   // Probing at the exact top center only works if the center is flat. If
   // probing on a screwhead or hollow washer, probe near the edges.
-  #define CALIBRATION_MEASURE_AT_TOP_EDGES
+  //#define CALIBRATION_MEASURE_AT_TOP_EDGES
+  #define CALIBRATION_SKIP_TOP
 
   // Define the pin to read during calibration
   #ifndef CALIBRATION_PIN
@@ -4258,7 +4259,7 @@
 #if ENABLED(OPTICAL_AUTOCAL)
   #define AUTOCAL_START_POSITION {55, 60, 15}
   #define AUTOCAL_DEFAULT_FEEDRATE 1500.0
-  #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.5, -76.4, -9.0}
+  #define AUTOCAL_PRINTBED_CENTER_DELTA {-54.5, -76.4, -6.0}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT 25.0
 #endif
 
