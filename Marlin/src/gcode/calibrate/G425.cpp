@@ -304,7 +304,7 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
   }
 
   if (probe_top_at_edge) {
-    #if AXIS_CAN_CALIBRATE(Z)
+    #if AXIS_CAN_CALIBRATE(Z) && !defined(CALIBRATION_SKIP_TOP)
       // Probe top nearest the side we are probing
       current_position[axis] = m.obj_center[axis] + (-dir) * (dimensions[axis] / 2 - m.nozzle_outer_dimension[axis]);
       calibration_move();
@@ -325,7 +325,7 @@ inline void probe_side(measurements_t &m, const float uncertainty, const side_t 
     // Plunge below the side of the calibration object and measure
     current_position.z = m.obj_side[TOP] - (CALIBRATION_NOZZLE_TIP_HEIGHT) * 0.7f;
     calibration_move();
-    const float measurement = measure(axis, dir, true, &m.backlash[side], uncertainty);
+    const float measurement = measure(axis, TERN(CALIBRATION_INSIDE_OUT, -dir, dir), true, &m.backlash[side], uncertainty);
     m.obj_center[axis] = measurement + dir * (dimensions[axis] / 2 + m.nozzle_outer_dimension[axis] / 2);
     m.obj_side[side] = measurement;
   }
@@ -344,7 +344,9 @@ inline void probe_sides(measurements_t &m, const float uncertainty) {
     // Probing at the exact center only works if the center is flat. Probing on a washer
     // or bolt will require probing the top near the side edges, away from the center.
     constexpr bool probe_top_at_edge = false;
-    probe_side(m, uncertainty, TOP);
+    #ifndef CALIBRATION_SKIP_TOP
+      probe_side(m, uncertainty, TOP);
+    #endif
   #endif
 
   TERN_(CALIBRATION_MEASURE_RIGHT, probe_side(m, uncertainty, RIGHT,    probe_top_at_edge));
