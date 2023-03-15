@@ -4034,6 +4034,13 @@
   //#define FREEZE_PIN 41   // Override the default (KILL) pin here
   #define FREEZE_STATE HIGH  // State of pin indicating freeze
   #define FREEZE_MSG "INTERLOCK_24V:"
+  // restore steppers after freeze expires
+  #define FREEZE_RESTORE
+  // add debouncing to freeze pin
+  #define FREEZE_DEBOUNCE
+  #if ENABLED(FREEZE_DEBOUNCE)
+    #define FREEZE_DEBOUNCE_COUNT 100
+  #endif
 #endif
 
 /**
