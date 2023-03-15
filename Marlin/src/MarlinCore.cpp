@@ -507,13 +507,25 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   #endif
 
   #if ENABLED(FREEZE_FEATURE)
-    bool new_freeze = READ(FREEZE_PIN) == FREEZE_STATE;
+    bool new_freeze = (READ(FREEZE_PIN) == FREEZE_STATE);
     if (new_freeze != stepper.frozen)
     {
-      #if defined(FREEZE_MSG)
-      SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
+      #if ENABLED(FREEZE_DEBOUNCE)
+        static bool debouncing = true;
+        if (debouncing) {
+          static int debounce_counter = FREEZE_DEBOUNCE_COUNT;
+          --debounce_counter;
+          debouncing = (debounce_counter <= 0);
+          debounce_counter += ((!debouncing) * FREEZE_DEBOUNCE_COUNT);
+        } else 
       #endif
-      stepper.frozen = new_freeze;
+      {
+        #if defined(FREEZE_MSG)
+        SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
+        #endif
+        stepper.frozen = new_freeze;
+        TERN_(FREEZE_RESTORE, if (!stepper.frozen) restore_stepper_drivers());
+        }
     } 
   #endif
 
