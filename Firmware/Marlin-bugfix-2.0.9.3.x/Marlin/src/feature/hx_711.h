@@ -59,7 +59,7 @@ public:
   void  tare_start() { _tare_start = true; _read_counter = 0u; _averaged = 0; };
 
   bool  tare_ready( float &avg_value );
-  bool  tare_ready() { return ~_tare_start;};
+  bool  tare_ready() { return !_tare_start;};
 
   int32_t read();
 
