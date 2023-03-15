@@ -57,6 +57,7 @@ private:
 
 [[nodiscard]] PressureToken use_pressure();
 void update_tank();
+void suck_lid();
 
 struct AnalogPressureSensor
 {
