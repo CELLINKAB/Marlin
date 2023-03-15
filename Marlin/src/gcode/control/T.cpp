@@ -31,6 +31,14 @@
   #include "../../feature/mmu/mmu2.h"
 #endif
 
+#if ENABLED(OPTICAL_AUTOCAL)
+  #include "../../feature/optical_autocal.h"
+#endif
+
+#if ENABLED(CHANTARELLE_SUPPORT)
+  #include "../../feature/guppi_printhead/chantarelle.h"
+#endif
+
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
@@ -54,11 +62,19 @@ void GcodeSuite::T(const int8_t tool_index) {
   // Count this command as movement / activity
   reset_stepper_timeout();
 
+  #if ENABLED(OPTICAL_AUTOCAL)
+
+  #endif
+
   #if HAS_PRUSA_MMU2
     if (parser.string_arg) {
       mmu2.tool_change(parser.string_arg);   // Special commands T?/Tx/Tc
       return;
     }
+  #endif
+
+  #if ENABLED(CHANTARELLE_SUPPORT)
+    ph_controller.tool_change(tool_index);
   #endif
 
   tool_change(tool_index

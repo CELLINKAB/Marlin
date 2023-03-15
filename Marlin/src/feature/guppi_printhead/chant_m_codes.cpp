@@ -103,6 +103,14 @@ void GcodeSuite::G512()
     ph_debug_print(res);
 }
 
+void delay_seconds(uint16_t seconds) {
+    const millis_t timeout = millis() + SEC_TO_MS(seconds);
+    do  {
+        safe_delay(500);
+        idle_no_sleep();
+    } while ( millis() < timeout);
+}
+
 /**
  * @brief Slider valve move
  * 
@@ -115,19 +123,19 @@ void GcodeSuite::G513()
     static auto steps_from_mm = [](float mm) {
         return static_cast<int32_t>(mm * ((steps_per_rev * microsteps) / thread_pitch_mm));
     };
+    static float last_position = 0.0f;
     BIND_INDEX_OR_RETURN(index);
     if (!parser.seenval('P'))
         return;
     float position = parser.value_float();
+    planner.synchronize();
+    delay_seconds(5);
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
-
     // TODO: this stuff should be polled inside idle instead of duplicated in multiple places
-    const millis_t timeout = millis() + 10000;
-    do  {
-        safe_delay(500);
-        idle_no_sleep();
-    } while ( millis() < timeout);
+    uint32_t wait_seconds = static_cast<uint32_t>(abs(position - last_position) * 1.8f + 1.0f);
+    delay_seconds(wait_seconds);
+    last_position = position;
 }
 
 //

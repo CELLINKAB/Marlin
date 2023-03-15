@@ -41,10 +41,22 @@ void printhead::flush_rx(HardwareSerial& serial)
         std::ignore = serial.read();
 }
 
+void Controller::tool_change(uint8_t tool_index)
+{
+    static constexpr uint32_t VOLUME_PER_FULLSTEP = 25;
+    static constexpr uint32_t STEP_VOLUME = 25;
+    Index index = static_cast<Index>(tool_index);
+    set_volume_per_fullstep(index, VOLUME_PER_FULLSTEP);
+    delay(5);
+    set_step_volume(index, STEP_VOLUME);
+    delay(5);
+}
+
 void Controller::init()
 {
     constexpr static unsigned CHANT_BAUDRATE = 115200;
     bus.begin(CHANT_BAUDRATE);
+    tool_change(0);
 }
 
 Result Controller::set_temperature(Index index, celsius_t temperature)
@@ -58,7 +70,8 @@ celsius_float_t Controller::get_temperature(Index index)
 {
     static std::array<millis_t, EXTRUDERS> last_check_times;
     static std::array<celsius_float_t, EXTRUDERS> last_temps;
-    const auto [oldest_it, newest_it] = std::minmax_element(last_check_times.cbegin(), last_check_times.cend());
+    const auto [oldest_it, newest_it] = std::minmax_element(last_check_times.cbegin(),
+                                                            last_check_times.cend());
     if (index == Index::All || index == Index::None)
         return 0.0f;
     size_t index_num = static_cast<size_t>(index);
@@ -66,7 +79,7 @@ celsius_float_t Controller::get_temperature(Index index)
         return last_temps[index_num];
     size_t oldest_index_num = oldest_it - last_check_times.cbegin();
     Packet request(static_cast<Index>(oldest_index_num), Command::GET_MEASURED_TEMP);
-    auto res = send_and_receive<celsius_t>(request, bus);
+    auto res = send_and_receive<celsius_t>(request, bus, false);
     last_check_times[oldest_index_num] = millis();
     if (res.result != Result::OK || res.packet.payload_size < 2)
         return 0.0f;
@@ -184,7 +197,8 @@ Result Controller::set_extruder_direction(Index index, bool direction)
     return send_and_receive<uint8_t>(Packet(index,
                                             Command::SET_EXTRUSION_DIRECTION,
                                             static_cast<uint8_t>(direction)),
-                                     bus).result;
+                                     bus)
+        .result;
 }
 
 Result Controller::extruder_move(Index index, float uL)
@@ -252,7 +266,10 @@ Response<Status> Controller::get_status(Index index)
 {
     Packet packet(index, Command::GET_STATUS);
     auto res = send_and_receive<uint16_t>(packet, bus);
-    return Response<Status>{Packet<Status>(res.packet.ph_index, res.packet.command, static_cast<Status>(res.packet.payload)), res.result};
+    return Response<Status>{Packet<Status>(res.packet.ph_index,
+                                           res.packet.command,
+                                           static_cast<Status>(res.packet.payload)),
+                            res.result};
 }
 
 void Controller::stop_active_extrudes()

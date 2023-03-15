@@ -127,23 +127,24 @@ struct Response
 template<typename T>
 void print_packet(const Packet<T>& packet)
 {
-    SERIAL_PRINT(static_cast<uint16_t>(packet.ph_index), PrintBase::Hex);
-    SERIAL_CHAR(' ');
-
-    SERIAL_PRINT(static_cast<uint16_t>(packet.command), PrintBase::Hex);
-    SERIAL_CHAR(' ');
-
-    SERIAL_PRINT(packet.payload_size, PrintBase::Hex);
-    SERIAL_CHAR(' ');
-
+    SERIAL_ECHO("Packet: { index: ");
+    SERIAL_ECHO(static_cast<uint16_t>(packet.ph_index));
+    SERIAL_ECHO(", command: ");
+    SERIAL_ECHO(static_cast<uint16_t>(packet.command));
+    SERIAL_ECHO(", size: ");
+    SERIAL_ECHO(packet.payload_size);
     if constexpr (!std::is_void_v<T>) {
+        SERIAL_ECHO(", payload: ");
         const auto payload = packet.payload_bytes();
         for (const uint8_t b : payload)
             SERIAL_PRINT(b, PrintBase::Hex);
         SERIAL_CHAR(' ');
+    } else {
+        SERIAL_ECHO(", (no payload)");
     }
-
-    SERIAL_PRINTLN(packet.crc(), PrintBase::Hex);
+    SERIAL_ECHO(", crc: ");
+    SERIAL_PRINT(packet.crc(), PrintBase::Hex);
+    SERIAL_ECHOLN(" }");
 }
 
 template<typename T>
@@ -159,46 +160,54 @@ void print_response(Response<T> response)
 void flush_rx(HardwareSerial& serial);
 
 template<typename T>
-Response<T> receive(HardwareSerial& serial)
+Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
     // this seems bug-prone...
     static constexpr size_t MAX_PACKET = 128;
-    static uint8_t packet_buffer[MAX_PACKET]{};
+    uint8_t packet_buffer[MAX_PACKET]{};
 
     Packet<T> incoming{};
 
     serial.setTimeout(50);
-    auto bytes_received = serial.readBytes(packet_buffer, 6);
+    auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
+    if (DEBUGGING(INFO) && enable_debug) {
+        SERIAL_ECHO("Bytes received: [ ");
+        for (size_t i = 0; i < bytes_received; ++i) {
+            SERIAL_PRINT(packet_buffer[i], PrintBase::Hex);
+            SERIAL_CHAR(' ');
+        }
+        SERIAL_ECHOLN("]");
+    }
 
-    if (bytes_received < 6)
+    if (bytes_received < 8)
         return Response<T>{incoming, Result::PACKET_TOO_SHORT};
 
-    memcpy(&incoming.ph_index, &packet_buffer[0], 2);
-    memcpy(&incoming.command, &packet_buffer[2], 2);
-    memcpy(&incoming.payload_size, &packet_buffer[4], 2);
+    // indexes starting at 1 because there is always a leading zero
+    memcpy(&incoming.ph_index, &packet_buffer[1], 2);
+    memcpy(&incoming.command, &packet_buffer[3], 2);
+    memcpy(&incoming.payload_size, &packet_buffer[5], 2);
 
     if (incoming.command == Command::ERROR) {
-        const uint8_t e = static_cast<uint8_t>(serial.read());
+        //const uint8_t e = static_cast<uint8_t>(serial.read());
         if (DEBUGGING(ERRORS)) {
             SERIAL_ECHO("RECD_CHANT_ERROR: ");
-            SERIAL_PRINTLN(e, PrintBase::Dec);
+            SERIAL_PRINTLN(packet_buffer[6], PrintBase::Dec);
         }
         flush_rx(serial);
         return Response<T>{incoming, Result::UNIMPLEMENTED};
     }
 
-    if (static_cast<size_t>(incoming.payload_size + 2) > MAX_PACKET)
+    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET)
         return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
 
-    bytes_received = serial.readBytes(packet_buffer, incoming.payload_size + 2);
-    if (incoming.payload_size != bytes_received - 2)
+    if (incoming.payload_size > bytes_received)
         return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
 
     uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
-        memcpy(&incoming.payload, packet_buffer, sizeof(incoming.payload));
-        memcpy(&crc, &packet_buffer[incoming.payload_size], 2);
+        memcpy(&incoming.payload, &packet_buffer[7], sizeof(incoming.payload));
     }
+    memcpy(&crc, &packet_buffer[incoming.payload_size + 7], 2);
 
     constexpr static bool allow_bad_crc = true;
     if (!allow_bad_crc && crc != incoming.crc())
@@ -210,17 +219,29 @@ Response<T> receive(HardwareSerial& serial)
 }
 
 template<typename T>
-Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true)
+Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true, bool enable_debug = true)
 {
+    if (DEBUGGING(INFO) && enable_debug) {
+        SERIAL_ECHO("Sending ");
+        print_packet(request);
+    }
     serial.setTimeout(50);
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
+    if (DEBUGGING(INFO) && enable_debug)
+        SERIAL_ECHO("bytes sent: [ ");
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
-    for (const auto byte : packet_bytes)
+    for (const auto byte : packet_bytes) {
+        if (DEBUGGING(INFO) && enable_debug) {
+            SERIAL_PRINT(byte, PrintBase::Hex);
+            SERIAL_CHAR(' ');
+        }
         serial.write(byte);
+    }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
-
+    if (DEBUGGING(INFO) && enable_debug)
+        SERIAL_ECHOLN("]");
     if (serial.getWriteError())
         return Result::WRITE_ERROR;
     // should read an ACK after this write to assure complete transaction
@@ -233,13 +254,13 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
 Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
 
 template<typename OUT, typename IN = void>
-Response<OUT> send_and_receive(const Packet<IN>& packet, HardwareSerial& serial)
+Response<OUT> send_and_receive(const Packet<IN>& packet, HardwareSerial& serial, bool enable_debug = true)
 {
     Response<OUT> response;
-    response.result = send<IN>(packet, serial, false);
+    response.result = send<IN>(packet, serial, false, enable_debug);
     if (response.result != Result::OK)
         return response;
-    return receive<OUT>(serial);
+    return receive<OUT>(serial, enable_debug);
 }
 
 enum class ExtruderDirection : uint8_t {
@@ -286,6 +307,8 @@ public:
         : bus(ph_bus)
     {}
     void init();
+
+    void tool_change(uint8_t tool_index);
 
     // Metadata methods
     Response<void> get_info(Index index);
