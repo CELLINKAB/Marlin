@@ -16,7 +16,7 @@
     // ensure relative mode consistency after move
     axis_bits_t rel_mode = axis_relative;
     set_relative_mode(true);
-    G0_G1();
+    G0_G1(TERN_(HAS_FAST_MOVES, true));
     axis_relative = rel_mode;
   }
 
