@@ -43,12 +43,12 @@ void printhead::flush_rx(HardwareSerial& serial)
 
 void Controller::tool_change(uint8_t tool_index)
 {
-    static constexpr uint32_t VOLUME_PER_FULLSTEP = 25;
-    static constexpr uint32_t STEP_VOLUME = 25;
+    static constexpr uint32_t PL_PER_FULLSTEP = 25'000;
+    static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
-    set_volume_per_fullstep(index, VOLUME_PER_FULLSTEP);
+    set_volume_per_fullstep(index, PL_PER_FULLSTEP);
     delay(5);
-    set_step_volume(index, STEP_VOLUME);
+    set_step_volume(index, PL_STEP_VOLUME);
     delay(5);
 }
 
@@ -253,7 +253,7 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
     }
-    safe_delay(rel_steps / 5000);
+    safe_delay(abs(rel_steps) / 6);
     return result;
 }
 
