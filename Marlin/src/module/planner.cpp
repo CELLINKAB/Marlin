@@ -2249,7 +2249,7 @@ bool Planner::_populate_block(
       static constexpr auto radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f;
       static constexpr auto mm_to_uL_factor = radius * radius * PI;
 
-      return static_cast<uint32_t>(feedrate_mm_s * mm_to_uL_factor * 1000.0f);
+      return static_cast<uint32_t>(feedrate_mm_s * mm_to_uL_factor * 1'000'000.0f);
       }; 
     static auto report_error = [](const char operation[], printhead::Result result) {
       if (result != printhead::Result::OK && DEBUGGING(ERRORS)) {
