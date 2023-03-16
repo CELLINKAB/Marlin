@@ -119,7 +119,11 @@ void GcodeSuite::G513()
     if (!parser.seenval('P'))
         return;
     float position = parser.value_float();
-    planner.synchronize();
+    while (ph_controller.get_status(index).packet.payload.is_stepping)
+    {
+        safe_delay(500);
+        idle();
+    }
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
 }
