@@ -29,13 +29,13 @@ REFERENCES
 
 // The value defined is used for moving average filter depth
 // in a retalion: buffer depth = 2^HX_711_ENABLE_FILTER.
-#define HX_711_ENABLE_FILTER        3
+#define HX_711_ENABLE_FILTER        3           //3 makes depth of 8
 
 // The threshold hysteresys
-#define HX711_SW_HYSTERESIS         3000.0f
+#define HX711_SW_HYSTERESIS         0.3f
 
 // Endstop threshold
-#define HX711_ENDSTOP_THRESHOLD     10000.0f
+#define HX711_ENDSTOP_THRESHOLD     5000.0f
 
 /**
  *   HX_711:   Class thet defines object for HX711 ADC functionalities and

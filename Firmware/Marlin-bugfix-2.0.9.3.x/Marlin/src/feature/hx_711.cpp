@@ -155,7 +155,7 @@ void HX_711::manage_hx_711()
     //THRESHOLD HYSTERESIS MANAGEMENT
     static uint8_t ind_pin_state = 1u;
     #ifdef HX711_SW_HYSTERESIS
-    float th_hysteresis = _th_weigth * 0.3f;
+    float th_hysteresis = _th_weigth * HX711_SW_HYSTERESIS;
       switch (ind_pin_state) {
                   //if threshold reached set-up output pin.
         case 0u:  if((_f_val - _averaged) < (_th_weigth - th_hysteresis)) ind_pin_state = 1u;
