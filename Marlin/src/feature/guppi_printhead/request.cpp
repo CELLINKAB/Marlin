@@ -253,6 +253,7 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
     }
+    safe_delay(rel_steps / 5000);
     return result;
 }
 
