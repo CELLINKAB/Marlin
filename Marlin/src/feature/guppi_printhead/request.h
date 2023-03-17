@@ -79,7 +79,9 @@ struct Status
     bool fan_active : 1;
     bool is_calibrated : 1;
 
-    Status() = default;
+    constexpr Status() noexcept
+        : Status(0)
+    {}
     constexpr Status(uint16_t raw) noexcept
         : estop_top(TEST(raw, ESTOP_TOP))
         , estop_bottom(TEST(raw, ESTOP_BOTTOM))
@@ -219,7 +221,10 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 }
 
 template<typename T>
-Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = true, bool enable_debug = true)
+Result send(const Packet<T>& request,
+            HardwareSerial& serial,
+            bool expect_ack = true,
+            bool enable_debug = true)
 {
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
@@ -254,7 +259,9 @@ Result send(const Packet<T>& request, HardwareSerial& serial, bool expect_ack = 
 Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
 
 template<typename OUT, typename IN = void>
-Response<OUT> send_and_receive(const Packet<IN>& packet, HardwareSerial& serial, bool enable_debug = true)
+Response<OUT> send_and_receive(const Packet<IN>& packet,
+                               HardwareSerial& serial,
+                               bool enable_debug = true)
 {
     Response<OUT> response;
     response.result = send<IN>(packet, serial, false, enable_debug);
@@ -291,24 +298,27 @@ struct PrintheadState
     TemTemps tem_set_temps;
     bool extruder_is_homed;
     bool slider_is_homed;
-    bool is_currently_extruding;
+    Status status;
 };
 
 class Controller
 {
     HardwareSerial& bus;
-    std::array<PrintheadState, EXTRUDERS> ph_states;
-
-    void set_extruder_state(Index index, bool state);
+    std::array<PrintheadState, EXTRUDERS> ph_states{};
 
 public:
     // initialization
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
+    
     void init();
 
     void tool_change(uint8_t tool_index);
+
+    void update(uint8_t tool_index);
+
+    bool extruder_busy();
 
     // Metadata methods
     Response<void> get_info(Index index);

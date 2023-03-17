@@ -6,24 +6,6 @@
 
 using namespace printhead;
 
-void Controller::set_extruder_state(printhead::Index index, bool state)
-{
-    switch (index) {
-    case printhead::Index::One:
-        [[fallthrough]];
-    case printhead::Index::Two:
-        [[fallthrough]];
-    case printhead::Index::Three:
-        ph_states[static_cast<size_t>(index)].is_currently_extruding = state;
-        break;
-    case printhead::Index::All:
-        for (auto& ph_state : ph_states)
-            ph_state.is_currently_extruding = state;
-        break;
-    default:
-        return;
-    }
-}
 
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
@@ -43,12 +25,12 @@ void printhead::flush_rx(HardwareSerial& serial)
 
 void Controller::tool_change(uint8_t tool_index)
 {
-    static constexpr uint32_t VOLUME_PER_FULLSTEP = 25;
-    static constexpr uint32_t STEP_VOLUME = 25;
+    static constexpr uint32_t PL_PER_FULLSTEP = 25'000;
+    static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
-    set_volume_per_fullstep(index, VOLUME_PER_FULLSTEP);
+    set_volume_per_fullstep(index, PL_PER_FULLSTEP);
     delay(5);
-    set_step_volume(index, STEP_VOLUME);
+    set_step_volume(index, PL_STEP_VOLUME);
     delay(5);
 }
 
@@ -57,6 +39,25 @@ void Controller::init()
     constexpr static unsigned CHANT_BAUDRATE = 115200;
     bus.begin(CHANT_BAUDRATE);
     tool_change(0);
+}
+
+void Controller::update(uint8_t tool_index)
+{
+    static millis_t next_update = 0;
+    if (millis() < next_update)
+        return;
+    Index index = static_cast<Index>(tool_index);
+    auto res = get_status(index);
+    if (res.result == Result::OK)
+        ph_states[tool_index].status = res.packet.payload;
+    next_update = millis() + 500;
+}
+
+bool Controller::extruder_busy()
+{
+    return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
+        return (state.status.is_stepping || state.status.is_homing);
+    });
 }
 
 Result Controller::set_temperature(Index index, celsius_t temperature)
@@ -213,16 +214,13 @@ Result Controller::extruder_move(Index index, float uL)
 
 Result Controller::start_extruding(Index index)
 {
-    Packet packet(index, Command::SYRINGEPUMP_START);
-    const auto result = send(packet, bus);
-    if (result == Result::OK)
-        set_extruder_state(index, true);
-    return result;
+    (void)index;
+    return Result::OK;
 }
 
 Result Controller::stop_extruding(Index index)
 {
-    set_extruder_state(index, false);
+    (void)index;
     return Result::OK;
 }
 
@@ -241,6 +239,7 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
         state.slider_is_homed = true;
         state.slider_pos = 0;
     }
+    safe_delay(SEC_TO_MS(35)); // since there's no way to check status for slider motor just wait a long time
     return res;
 }
 
@@ -253,6 +252,7 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
     }
+    safe_delay(abs(rel_steps) / 7);
     return result;
 }
 
@@ -275,7 +275,7 @@ Response<Status> Controller::get_status(Index index)
 void Controller::stop_active_extrudes()
 {
     for (size_t i = 0; i < EXTRUDERS; ++i) {
-        if (ph_states[i].is_currently_extruding)
+        if (ph_states[i].status.is_stepping)
             stop_extruding(static_cast<printhead::Index>(i));
     }
 }

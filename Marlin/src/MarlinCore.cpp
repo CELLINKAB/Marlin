@@ -917,6 +917,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
 
+  // update chantarelle status
+  TERN_(CHANTARELLE_SUPPORT, ph_controller.update(active_extruder));
+
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
   return;
@@ -1699,8 +1702,8 @@ void setup() {
     SETUP_RUN(stepper_probe.stow());
   #endif
 
-  #if PIN_EXISTS(PC_ENABLE_PIN)
-    SETUP_RUN(OUT_WRITE(PC_ENABLE_PIN, LOW));
+  #if PIN_EXISTS(PC_ENABLE)
+    SETUP_RUN(OUT_WRITE(PC_ENABLE_PIN, HIGH));
   #endif
 
 

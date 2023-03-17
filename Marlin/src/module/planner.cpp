@@ -1736,6 +1736,7 @@ bool Planner::busy() {
   return (has_blocks_queued() || cleaning_buffer_counter
       || TERN0(EXTERNAL_CLOSED_LOOP_CONTROLLER, CLOSED_LOOP_WAITING())
       || TERN0(HAS_SHAPING, stepper.input_shaping_busy())
+      || TERN0(CHANTARELLE_SUPPORT, ph_controller.extruder_busy())
   );
 }
 
@@ -2249,15 +2250,16 @@ bool Planner::_populate_block(
       static constexpr auto radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f;
       static constexpr auto mm_to_uL_factor = radius * radius * PI;
 
-      return static_cast<uint32_t>(feedrate_mm_s * mm_to_uL_factor * 1000.0f);
+      return static_cast<uint32_t>(feedrate_mm_s * mm_to_uL_factor * 1'000'000.0f);
       }; 
     static auto report_error = [](const char operation[], printhead::Result result) {
       if (result != printhead::Result::OK && DEBUGGING(ERRORS)) {
       SERIAL_ECHOLNPGM("extrusion operation '", operation, "' failed with code ", printhead::string_from_result_code(result));}
     };
     if (esteps != 0) {
+      uint32_t chant_feedrate = fr_mm_s_to_pl_s(constrain(feedrate_mm_s,settings.min_feedrate_mm_s,settings.max_feedrate_mm_s[E_AXIS]));
       printhead::Index ph_index = static_cast<printhead::Index>(extruder);
-      report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, fr_mm_s_to_pl_s(feedrate_mm_s)));
+      report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, chant_feedrate));
       delay(5);
       report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
       delay(5);

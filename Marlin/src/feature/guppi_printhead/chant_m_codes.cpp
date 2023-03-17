@@ -79,17 +79,7 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
-    millis_t timeout = millis()
-                       + SEC_TO_MS(parser.ulongval('S', 180)); // should home within 100 seconds
-    printhead::Response<printhead::Status> status_poll;
-    do  {
-        safe_delay(1000);
-        idle_no_sleep();
-        status_poll = ph_controller.get_status(index);
-    } while ( (status_poll.result != printhead::Result::OK || status_poll.packet.payload.is_homing) && millis() < timeout);
-
-    if (millis() > timeout)
-        SERIAL_ERROR_MSG("Extruder homing timeout exceeded");
+    planner.synchronize();
 }
 
 /**
@@ -101,14 +91,6 @@ void GcodeSuite::G512()
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
     ph_debug_print(res);
-}
-
-void delay_seconds(uint16_t seconds) {
-    const millis_t timeout = millis() + SEC_TO_MS(seconds);
-    do  {
-        safe_delay(500);
-        idle_no_sleep();
-    } while ( millis() < timeout);
 }
 
 /**
@@ -123,19 +105,13 @@ void GcodeSuite::G513()
     static auto steps_from_mm = [](float mm) {
         return static_cast<int32_t>(mm * ((steps_per_rev * microsteps) / thread_pitch_mm));
     };
-    static float last_position = 0.0f;
     BIND_INDEX_OR_RETURN(index);
     if (!parser.seenval('P'))
         return;
     float position = parser.value_float();
     planner.synchronize();
-    delay_seconds(5);
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
-    // TODO: this stuff should be polled inside idle instead of duplicated in multiple places
-    uint32_t wait_seconds = static_cast<uint32_t>(abs(position - last_position) * 1.8f + 1.0f);
-    delay_seconds(wait_seconds);
-    last_position = position;
 }
 
 //
@@ -197,9 +173,10 @@ void GcodeSuite::M1069()
     SERIAL_PRINT(cmd_buf[6 + cmd_size], PrintBase::Hex);
     SERIAL_PRINT(cmd_buf[6 + cmd_size + 1], PrintBase::Hex);
     SERIAL_ECHOLN(" }");
+    printhead::flush_rx(CHANT_SERIAL);
     WRITE(CHANT_RTS_PIN, HIGH);
-    delay(1);
     auto written = CHANT_SERIAL.write(cmd_buf, cmd_size + 8);
+    CHANT_SERIAL.flush();
     WRITE(CHANT_RTS_PIN, LOW);
     SERIAL_ECHOLNPGM("Sent ", written, " bytes");
     if (written != cmd_size + 8U) {
@@ -214,7 +191,6 @@ void GcodeSuite::M1069()
         SERIAL_CHAR(' ');
     }
     SERIAL_ECHOLN("]");
-    //ph_debug_print(response);
 }
 
 //StartActuatingPrinthead
