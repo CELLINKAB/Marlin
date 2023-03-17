@@ -50,7 +50,7 @@ void Controller::update(uint8_t tool_index)
     auto res = get_status(index);
     if (res.result == Result::OK)
         ph_states[tool_index].status = res.packet.payload;
-    next_update += 500;
+    next_update = millis() + 500;
 }
 
 bool Controller::extruder_busy()
@@ -214,16 +214,13 @@ Result Controller::extruder_move(Index index, float uL)
 
 Result Controller::start_extruding(Index index)
 {
-    Packet packet(index, Command::SYRINGEPUMP_START);
-    const auto result = send(packet, bus);
-    if (result == Result::OK)
-        set_extruder_state(index, true);
-    return result;
+    (void)index;
+    return Result::OK;
 }
 
 Result Controller::stop_extruding(Index index)
 {
-    set_extruder_state(index, false);
+    (void)index;
     return Result::OK;
 }
 
