@@ -68,7 +68,7 @@ public:
      *
      * @param thrIn
      */
-    void setThreshold(int32_t thrIn) { _th_weigth = (float)thrIn; };
+    void setThreshold(float thrIn) { _th_weigth = thrIn; };
 
     /**
      * @brief Set the HX711 channel/mode.

@@ -31,7 +31,7 @@ void GcodeSuite::M7110()
 {
     if (parser.seenval('P'))
     {
-        wScale.setThreshold(parser.value_long());
+        wScale.setThreshold(parser.value_float());
     }
 }
 
