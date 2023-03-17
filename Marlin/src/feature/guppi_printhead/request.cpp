@@ -239,6 +239,7 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
         state.slider_is_homed = true;
         state.slider_pos = 0;
     }
+    safe_delay(SEC_TO_MS(35)); // since there's no way to check status for slider motor just wait a long time
     return res;
 }
 
