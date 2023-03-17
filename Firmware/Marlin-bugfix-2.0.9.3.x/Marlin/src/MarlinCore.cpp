@@ -1623,7 +1623,7 @@ void setup() {
   #endif
 
   #if ENABLED(HX711_WSCALE)
-    wScale.begin(HX711_DATA_PIN,HX711_CLCK_PIN,HX711_INDICATION_PIN);
+    wScale.begin();
   #endif
 
   marlin_state = MF_RUNNING;
