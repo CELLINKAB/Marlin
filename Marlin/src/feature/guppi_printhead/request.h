@@ -306,13 +306,12 @@ class Controller
     HardwareSerial& bus;
     std::array<PrintheadState, EXTRUDERS> ph_states{};
 
-    void set_extruder_state(Index index, bool state);
-
 public:
     // initialization
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
+    
     void init();
 
     void tool_change(uint8_t tool_index);
