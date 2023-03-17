@@ -25,14 +25,8 @@ void GcodeSuite::G514()
     pneumatics::release_mixing_pressure(tool);
 }
 
-static void pressurize()
-{
-    [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
-    idle();
-    safe_delay(8000); // FIXME: reduce when pump is working again
-}
 
-void GcodeSuite::G515()
+    void GcodeSuite::G515()
 {
     using namespace pneumatics;
     static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{130, -45};
@@ -54,10 +48,15 @@ void GcodeSuite::G515()
     if (is_releasing) {
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         set_gripper_valves(GripperState::Release);
-        pressurize();
+        {
+            [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
+            idle();
+            safe_delay(8000); // FIXME: reduce when pump is working again
+        }
         //Expect pressure down
         set_gripper_valves(GripperState::Close);
-        float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
+    
+        float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline ;
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
@@ -69,12 +68,12 @@ void GcodeSuite::G515()
         set_gripper_valves(GripperState::Grip);
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to_z(GRIP_Z_HEIGHT);
-        pressurize();
+        suck_lid();
         set_gripper_valves(GripperState::Close);
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
-        // Expect pressure up
-        float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
+        // Expect pressure down (with pump working)
+        float vacuum_delta = vacuum_baseline- gripper_vacuum.read_avg();
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);

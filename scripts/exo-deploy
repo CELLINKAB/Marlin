@@ -1,10 +1,11 @@
 #!/bin/bash
-platformio run
-EXO_HOST=exop4.local
+platformio run --environment MYCORRHIZA_V1_1 
+EXO_HOST=exo.local 
 ping $EXO_HOST -c 1
 pinged=$?
 if [ $pinged -eq 0 ]
 then
 	ls -l .pio/build/MYCORRHIZA_V1_1/firmware.bin  -h
 	scp .pio/build/MYCORRHIZA_V1_1/firmware.bin  root@$EXO_HOST:/home/root/firmware.bin
+	ssh root@$EXO_HOST mu_updater
 fi

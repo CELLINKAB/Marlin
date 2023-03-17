@@ -150,6 +150,8 @@ void release_mixing_pressure(uint8_t tool)
 //
 //  For grip
 // V1 Off/close V2 On/Open V3 Off/close
+// For release
+// V1 ON/open V2 Off/close V3 ON/open
 void set_gripper_valves(GripperState state)
 {
     switch(state) {
@@ -159,13 +161,28 @@ void set_gripper_valves(GripperState state)
             break;
         }
         case GripperState::Grip:
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
             break;
         case GripperState::Close:
             WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
             WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
             break;
+    }
+}
+
+void suck_lid() {
+    static constexpr float GRIP_VACUUM_THRESHOLD = 100.0f;
+    if (PressureToken::has_users()) {
+        SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
+    }
+    WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
+    WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+    const millis_t timeout = millis() + 5000;
+    while (millis() < timeout && -gripper_vacuum.read_avg() < GRIP_VACUUM_THRESHOLD)
+    {
+        safe_delay(500);
+        idle();
     }
 }
 
