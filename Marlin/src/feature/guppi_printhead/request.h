@@ -291,7 +291,7 @@ struct PrintheadState
     TemTemps tem_set_temps;
     bool extruder_is_homed;
     bool slider_is_homed;
-    bool is_currently_extruding;
+    Status status;
 };
 
 class Controller
@@ -309,6 +309,10 @@ public:
     void init();
 
     void tool_change(uint8_t tool_index);
+
+    void update(uint8_t tool_index);
+
+    bool extruder_busy();
 
     // Metadata methods
     Response<void> get_info(Index index);
