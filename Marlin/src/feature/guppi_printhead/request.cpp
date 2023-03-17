@@ -43,8 +43,8 @@ void Controller::init()
 
 void Controller::update(uint8_t tool_index)
 {
-    static millis_t next_update = millis();
-    if (millis() > next_update)
+    static millis_t next_update = 0;
+    if (millis() < next_update)
         return;
     Index index = static_cast<Index>(tool_index);
     auto res = get_status(index);
