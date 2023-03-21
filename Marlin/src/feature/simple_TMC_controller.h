@@ -123,7 +123,7 @@ struct SimpleTMC
     void stop()
     {
         driver.VACTUAL(0);
-        WRITE(EN, HIGH);
+        if (!hold) WRITE(EN, HIGH);
     }
 
     /**
@@ -181,15 +181,18 @@ struct SimpleTMC
         WRITE(STEP, LOW);
     }
 
-    void rms_current(uint16_t current) { driver.rms_current(current); }
+    inline void rms_current(uint16_t current) { driver.rms_current(current); }
 
-    void stall_threshold(int16_t threshold) { driver.homing_threshold(threshold); }
+    inline void stall_threshold(int16_t threshold) { driver.homing_threshold(threshold); }
 
-    void reinit_driver() { init_driver(); }
+    inline void set_hold(bool hold_) {hold = hold_;}
+
+    inline void reinit_driver() { init_driver(); }
 
 private:
     SimpleTMCConfig config;
     TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver;
+    bool hold = false;
 
     void init_driver()
     {
