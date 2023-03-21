@@ -39,7 +39,7 @@ void HX_711::begin()
   // If there is no pull-up on PIN, external must be added!
   SET_INPUT_PULLUP(_pin_dta); // must have pull-up!
   OUT_WRITE(_pin_clk, LOW);
-  SET_INPUT_PULLUP(_pin_ind); // this is output pin, but for the safety reasons set to 1 with pullup
+  OUT_WRITE_OD(_pin_ind, HIGH); // Open drain provides better safety because of hi-Z
 }
 
 /**
@@ -78,9 +78,7 @@ int32_t HX_711::read()
 
     while (m > 0)
     {
-      delayMicroseconds(1);
       WRITE(_pin_clk, HIGH);
-      delayMicroseconds(1);
       WRITE(_pin_clk, LOW);
       --m;
     }
@@ -148,33 +146,24 @@ void HX_711::manage_hx_711()
             // if threshold reached set-up output pin.
       if (abs(_f_val - _averaged) > (_th_weigth + th_hysteresis))
         ind_pin_state = false;
+        
     } else {
             // if threshold reached set-up output pin.
       if (abs(_f_val - _averaged) < (_th_weigth - th_hysteresis))
         ind_pin_state = true;
     }
 
-    // PIN OPERATION MANAGEMENT
-    if (!ind_pin_state) // set-up output pin.
-    {
-      // Drive the pin low that is logic 0
-      OUT_WRITE(_pin_ind, LOW);
-    }
-    else
-    {
-      // Set pin to high impedance with pullup that is logic 1
-      SET_INPUT_PULLUP(_pin_ind);
-    }
+    WRITE(_pin_ind, ind_pin_state);
 
     // TARE MANAGEMENT
-    constexpr static float TARE_AVG_CNT = 200.0f;
+    constexpr static size_t TARE_AVG_CNT = 200;
 
     if (_tare_start == true)
     {
       _averaged += _f_val;
       if (_read_counter >= TARE_AVG_CNT)
       {
-        _averaged = _averaged / TARE_AVG_CNT;
+        _averaged = _averaged / static_cast<float>(TARE_AVG_CNT);
         _tare_start = false;
       }
     }
