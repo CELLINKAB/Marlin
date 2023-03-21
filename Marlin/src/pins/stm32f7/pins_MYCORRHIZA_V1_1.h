@@ -101,10 +101,10 @@
 #define PC_STEP_PIN PB11
 #define PC_DIR_PIN PB10
 #define PC_ENABLE_PIN PE15
-#define PC_STOP_PIN PE14
+#define PC_DIAG_PIN PE14
+#define PC_ENDSTOP_PIN PD3 // physical switch, backup for DIAG
 #define PC_SERIAL_TX_PIN PB13
 #define PC_SERIAL_RX_PIN PB12
-#define PC_MIN_PIN PD3 // physical backup switch
 // #define PC_HARDWARE_SERIAL TMC_UART2
 #define PC_SLAVE_ADDRESS 0
 
