@@ -1703,7 +1703,7 @@ void setup() {
   #endif
 
   #if PIN_EXISTS(PC_ENABLE)
-    SETUP_RUN(OUT_WRITE(PC_ENABLE_PIN, HIGH));
+    OUT_WRITE(PC_ENABLE_PIN, HIGH);
   #endif
 
 
