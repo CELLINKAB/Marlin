@@ -62,7 +62,10 @@ inline void move_degs(Stepper& stepper, float degs)
 void move_rainbow(Stepper& stepper, CuringLed led)
 {
     static float rainbow_position = [&]() {
-        stepper.move_until_stall(4000);
+        stepper.raw_move(4000);
+        while (READ(PC_STOP_PIN) == LOW)
+            safe_delay(10);
+        stepper.stop();
         return 0.0f;
     }();
     if (led.deg == rainbow_position)
