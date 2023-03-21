@@ -20,7 +20,7 @@ static constexpr float REGULATOR_GAIN = 0.04;
 static constexpr float VACUUM_GAIN = -0.02;
 
 
-static constexpr float TANK_OFFSET = 750.0f;
+static constexpr float TANK_OFFSET = 150.0f;
 static constexpr float VACUUM_OFFSET = -16.5f;
 static constexpr float REGULATOR_OFFSET = 0.0f;
 
@@ -73,6 +73,7 @@ inline void pump_enable(bool enable)
 void pressurize_tank(millis_t timeout_after_ms)
 {
     if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) {
+           if (DEBUGGING(INFO)) SERIAL_ECHOLN("PRESSURE TOO HIGH PUMP OFF");
         pump_enable(false);
         return;
     }
@@ -159,7 +160,7 @@ void set_gripper_valves(GripperState state)
             WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
             WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
             break;
-        }
+            }
         case GripperState::Grip:
             WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
             WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
@@ -176,6 +177,7 @@ void suck_lid() {
     if (PressureToken::has_users()) {
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }
+    auto _ = pneumatics::use_pressure();
     WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     const millis_t timeout = millis() + 5000;
