@@ -51,6 +51,7 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
     }
 }
 
+static constexpr pin_t PC_STOP_PIN = PC_ENDSTOP_PIN;
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
 inline void move_degs(Stepper& stepper, float degs)
@@ -59,19 +60,19 @@ inline void move_degs(Stepper& stepper, float degs)
     stepper.move_steps(steps, 4000, []() { return READ(PC_STOP_PIN); });
 }
 
-void move_rainbow(Stepper& stepper, CuringLed led)
-{
-    static float rainbow_position = [&]() {
+void home_rainbow(Stepper & stepper) {
         stepper.raw_move(4000);
         while (READ(PC_STOP_PIN) == LOW)
             safe_delay(10);
         stepper.stop();
-        return 0.0f;
-    }();
-    if (led.deg == rainbow_position)
-        return;
+    }
 
-    move_degs(stepper, led.deg - rainbow_position);
+void move_rainbow(Stepper& stepper, CuringLed led)
+{
+    stepper.set_hold(true);
+    home_rainbow(stepper);
+    move_degs(stepper, led.deg);
+    stepper.set_hold(false);
 }
 
 void GcodeSuite::M805()
@@ -98,7 +99,8 @@ void GcodeSuite::M805()
                          wavelength);
 
     if (parser.seenval('D'))
-        move_degs(stepper, parser.value_float());
+
+        move_rainbow(stepper, CuringLed{led.pin, parser.value_float()});
     else
         move_rainbow(stepper, led);
     WRITE(led.pin, HIGH);
