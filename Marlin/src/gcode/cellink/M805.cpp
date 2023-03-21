@@ -69,10 +69,8 @@ void home_rainbow(Stepper & stepper) {
 
 void move_rainbow(Stepper& stepper, CuringLed led)
 {
-    stepper.set_hold(true);
     home_rainbow(stepper);
     move_degs(stepper, led.deg);
-    stepper.set_hold(false);
 }
 
 void GcodeSuite::M805()
@@ -98,8 +96,8 @@ void GcodeSuite::M805()
         SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:",
                          wavelength);
 
+    stepper.set_hold(true);
     if (parser.seenval('D'))
-
         move_rainbow(stepper, CuringLed{led.pin, parser.value_float()});
     else
         move_rainbow(stepper, led);
@@ -108,6 +106,8 @@ void GcodeSuite::M805()
     safe_delay(duration);
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
+    stepper.set_hold(false);
+
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING
