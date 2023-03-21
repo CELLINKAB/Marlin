@@ -220,12 +220,18 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     // ACK would go here
 }
 
+extern millis_t last_send;
+
 template<typename T>
 Result send(const Packet<T>& request,
             HardwareSerial& serial,
             bool expect_ack = true,
             bool enable_debug = true)
 {
+    // make sure at least a millisecond has passed between sends
+    if ( millis() <= last_send )
+        delay(1);
+    
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
         print_packet(request);
@@ -245,6 +251,7 @@ Result send(const Packet<T>& request,
     }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
+    last_send = millis();
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())

@@ -6,6 +6,7 @@
 
 using namespace printhead;
 
+millis_t printhead::last_send = 0;
 
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
@@ -29,9 +30,7 @@ void Controller::tool_change(uint8_t tool_index)
     static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
     set_volume_per_fullstep(index, PL_PER_FULLSTEP);
-    delay(5);
     set_step_volume(index, PL_STEP_VOLUME);
-    delay(5);
 }
 
 void Controller::init()
