@@ -2262,8 +2262,6 @@ bool Planner::_populate_block(
       report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, chant_feedrate));
       delay(5);
       report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
-      delay(5);
-      report_error("add raw steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
     }
   }
   #endif
