@@ -51,7 +51,7 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
     }
 }
 
-static constexpr pin_t PC_STOP_PIN = PC_ENDSTOP_PIN;
+static constexpr pin_t PC_STOP_PIN = PC_DIAG_PIN;
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
 inline void move_degs(Stepper& stepper, float degs)
