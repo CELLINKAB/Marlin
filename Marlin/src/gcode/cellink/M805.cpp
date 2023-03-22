@@ -51,6 +51,7 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
     }
 }
 
+static constexpr pin_t PC_STOP_PIN = PC_DIAG_PIN;
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
 inline void move_degs(Stepper& stepper, float degs)
@@ -59,16 +60,17 @@ inline void move_degs(Stepper& stepper, float degs)
     stepper.move_steps(steps, 4000, []() { return READ(PC_STOP_PIN); });
 }
 
+void home_rainbow(Stepper & stepper) {
+        stepper.raw_move(4000);
+        while (READ(PC_STOP_PIN) == LOW)
+            safe_delay(10);
+        stepper.stop();
+    }
+
 void move_rainbow(Stepper& stepper, CuringLed led)
 {
-    static float rainbow_position = [&]() {
-        stepper.move_until_stall(4000);
-        return 0.0f;
-    }();
-    if (led.deg == rainbow_position)
-        return;
-
-    move_degs(stepper, led.deg - rainbow_position);
+    home_rainbow(stepper);
+    move_degs(stepper, led.deg);
 }
 
 void GcodeSuite::M805()
@@ -80,7 +82,7 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 100, 400, 0.15f),
+        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 0, 1200, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
     }();
@@ -94,8 +96,9 @@ void GcodeSuite::M805()
         SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:",
                          wavelength);
 
+    stepper.set_hold(true);
     if (parser.seenval('D'))
-        move_degs(stepper, parser.value_float());
+        move_rainbow(stepper, CuringLed{led.pin, parser.value_float()});
     else
         move_rainbow(stepper, led);
     WRITE(led.pin, HIGH);
@@ -103,6 +106,9 @@ void GcodeSuite::M805()
     safe_delay(duration);
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
+    stepper.set_hold(false);
+    stepper.stop();
+
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING
