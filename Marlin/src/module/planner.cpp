@@ -2260,10 +2260,7 @@ bool Planner::_populate_block(
       uint32_t chant_feedrate = fr_mm_s_to_pl_s(constrain(feedrate_mm_s,settings.min_feedrate_mm_s,settings.max_feedrate_mm_s[E_AXIS]));
       printhead::Index ph_index = static_cast<printhead::Index>(extruder);
       report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, chant_feedrate));
-      delay(5);
       report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
-      delay(5);
-      report_error("add raw steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
     }
   }
   #endif

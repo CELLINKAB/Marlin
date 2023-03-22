@@ -197,7 +197,7 @@
 #define USING_HW_SERIAL2 1
 #define CHANT_RTS_PIN PA1
 
-#define CHANT_IRQ1_PIN -1 //PC13
+#define CHANT_IRQ1_PIN PC13
 #define CHANT_IRQ2_PIN -1 //PC14
 
 #define E0_ENABLE_INIT() NOOP

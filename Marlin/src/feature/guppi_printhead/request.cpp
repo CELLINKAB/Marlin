@@ -6,6 +6,7 @@
 
 using namespace printhead;
 
+millis_t printhead::last_send = 0;
 
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
@@ -29,9 +30,7 @@ void Controller::tool_change(uint8_t tool_index)
     static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
     set_volume_per_fullstep(index, PL_PER_FULLSTEP);
-    delay(5);
     set_step_volume(index, PL_STEP_VOLUME);
-    delay(5);
 }
 
 void Controller::init()
@@ -47,7 +46,7 @@ void Controller::update(uint8_t tool_index)
     if (millis() < next_update)
         return;
     Index index = static_cast<Index>(tool_index);
-    auto res = get_status(index);
+    auto res = get_status(index, false);
     if (res.result == Result::OK)
         ph_states[tool_index].status = res.packet.payload;
     next_update = millis() + 500;
@@ -262,10 +261,10 @@ Response<std::array<uint8_t, 12>> Controller::get_uuid(Index index)
     return send_and_receive<std::array<uint8_t, 12>>(packet, bus);
 }
 
-Response<Status> Controller::get_status(Index index)
+Response<Status> Controller::get_status(Index index, bool debug)
 {
     Packet packet(index, Command::GET_STATUS);
-    auto res = send_and_receive<uint16_t>(packet, bus);
+    auto res = send_and_receive<uint16_t>(packet, bus, debug);
     return Response<Status>{Packet<Status>(res.packet.ph_index,
                                            res.packet.command,
                                            static_cast<Status>(res.packet.payload)),
