@@ -82,7 +82,7 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 100, 400, 0.15f),
+        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 0, 1200, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
     }();
@@ -107,6 +107,7 @@ void GcodeSuite::M805()
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
     stepper.set_hold(false);
+    stepper.stop();
 
 }
 
