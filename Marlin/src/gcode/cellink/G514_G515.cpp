@@ -28,7 +28,7 @@ void GcodeSuite::G514()
 void GcodeSuite::G515()
 {
     using namespace pneumatics;
-    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{132, -45};
+    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{135, -45};
     static constexpr float GRIP_Z_HEIGHT = -5.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
@@ -51,7 +51,7 @@ void GcodeSuite::G515()
             set_gripper_valves(GripperState::Release);
             const millis_t timeout = millis() + 8000;
             while (millis() < timeout
-                   && (gripper_vacuum.read_avg() - vacuum_baseline) < DETECTION_THRESHOLD)
+                   && (gripper_vacuum.read_avg() - vacuum_baseline) < DETECTION_THRESHOLD + 10)
                 idle();
         }
         //Expect pressure down
