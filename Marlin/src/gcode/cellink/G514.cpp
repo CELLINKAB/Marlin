@@ -20,7 +20,7 @@ void GcodeSuite::G514()
     planner.synchronize();
     auto _ = pneumatics::use_pressure();
     pneumatics::apply_mixing_pressure(tool);
-    planner.buffer_line(destination, feedrate_mm_s, tool);
+    prepare_line_to_destination();
     planner.synchronize();
     pneumatics::release_mixing_pressure(tool);
 }
