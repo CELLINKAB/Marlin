@@ -205,8 +205,11 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
     auto res = send(packet, bus);
 
-    if (res == Result::OK)
-        ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
+    if (res == Result::OK) {
+        auto& state = ph_states[static_cast<uint8_t>(index)];
+        state.extruder_is_homed = true;
+        state.status.is_homing = true;
+    }
     return res;
 }
 
@@ -240,7 +243,12 @@ Result Controller::stop_extruding(Index index)
 Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
 {
     Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, steps);
-    return send(packet, bus);
+    auto res = send(packet, bus);
+    if (res == Result::OK) {
+        auto& state = ph_states[static_cast<uint8_t>(index)];
+        state.status.is_stepping = true;
+    }
+    return res;
 }
 
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
@@ -251,9 +259,8 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
     if (res == Result::OK) {
         state.slider_is_homed = true;
         state.slider_pos = 0;
+        state.status.slider_is_stepping = true;
     }
-    while (slider_busy(index))
-        idle();
     return res;
 }
 
@@ -265,9 +272,8 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     auto result = send(packet, bus);
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
+        state.status.slider_is_stepping = true;
     }
-    while (slider_busy(index))
-        idle();
     return result;
 }
 

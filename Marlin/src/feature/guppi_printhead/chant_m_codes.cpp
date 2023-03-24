@@ -108,6 +108,7 @@ void GcodeSuite::G513()
     float position = parser.value_float();
     planner.synchronize();
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
+    planner.synchronize();
     ph_debug_print(res);
 }
 
