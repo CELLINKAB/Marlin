@@ -31,16 +31,18 @@ void StepperRetractingProbe::deploy()
                       / static_cast<float>(config.deploy_velocity))
             + 1000.0f);
         const millis_t timeout = millis() + minimum_deploy_time;
-        static auto probe_hit = []() { return TEST(endstops.trigger_state(), Z_MIN_PROBE); };
-        while (!probe_hit() && millis() < timeout) {
-            safe_delay(200);
-            idle_no_sleep();
+        bool probe_hit = false;
+        const auto was_enabled = endstops.z_probe_enabled;
+        endstops.enable_z_probe();
+        while (!(probe_hit = TEST(endstops.state(), Z_MIN_PROBE)) && millis() < timeout) {
+            idle();
         }
         stepper().stop();
         state = ProbeState::Deployed;
-        if (probe_hit()) {
+        if (probe_hit) {
             stow();
         }
+        endstops.enable_z_probe(was_enabled);
         break;
     }
 }
