@@ -10,6 +10,17 @@
 
 namespace printhead {
 
+constexpr double EXTRUSION_RADIUS = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
+constexpr double UL_PER_MM = EXTRUSION_RADIUS * EXTRUSION_RADIUS * PI;
+constexpr double THREAD_PITCH_MM = 0.6;
+constexpr double STEPS_PER_REV = 400;
+constexpr double MM_PER_FULL_STEP = THREAD_PITCH_MM / STEPS_PER_REV;
+constexpr unsigned MICROSTEPS = 16;
+constexpr double MM_PER_MICRO_STEP = MM_PER_FULL_STEP / MICROSTEPS;
+constexpr uint32_t PL_PER_FULL_STEP = static_cast<uint32_t>(UL_PER_MM * MM_PER_FULL_STEP
+                                                            * 1'000'000.0);
+constexpr uint32_t PL_STEP_VOLUME = PL_PER_FULL_STEP;
+
 enum class Result {
     OK,
     BAD_CRC,
@@ -229,9 +240,9 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    if ( millis() <= last_send )
+    if (millis() <= last_send)
         delay(1);
-    
+
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
         print_packet(request);
@@ -318,7 +329,7 @@ public:
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
-    
+
     void init();
 
     void tool_change(uint8_t tool_index);
