@@ -45,15 +45,18 @@ void GcodeSuite::G515()
 
     float vacuum_baseline = gripper_vacuum.read_avg();
     if (is_releasing) {
-        do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         {
+            do_blocking_move_to_z(GRIP_Z_HEIGHT);
             [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
             set_gripper_valves(GripperState::Release);
             const millis_t timeout = millis() + 8000;
+            current_position.z = RELEASE_Z_HEIGHT;
+            planner.buffer_line(current_position, 8.0f);
             while (millis() < timeout
-                   && (gripper_vacuum.read_avg() - vacuum_baseline) < DETECTION_THRESHOLD + 10)
+                   && gripper_vacuum.read_avg() < 0)
                 idle();
         }
+        planner.synchronize();
         //Expect pressure down
         set_gripper_valves(GripperState::Close);
 

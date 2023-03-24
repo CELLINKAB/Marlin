@@ -176,7 +176,7 @@ void set_gripper_valves(GripperState state)
 
 void suck_lid()
 {
-    static constexpr float GRIP_VACUUM_THRESHOLD = 100.0f;
+    static constexpr float GRIP_VACUUM_THRESHOLD = -20.0f;
     if (PressureToken::has_users()) {
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }
@@ -184,8 +184,8 @@ void suck_lid()
     WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     const millis_t timeout = millis() + 5000;
-    while (millis() < timeout && -gripper_vacuum.read_avg() < GRIP_VACUUM_THRESHOLD) {
-        idle();
+    while (millis() < timeout && gripper_vacuum.read_avg() > GRIP_VACUUM_THRESHOLD) {
+        safe_delay(100);
     }
 }
 
