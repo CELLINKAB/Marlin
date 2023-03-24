@@ -58,6 +58,25 @@ bool Controller::extruder_busy()
     });
 }
 
+bool Controller::extruder_busy(Index index)
+{
+    const auto state = ph_states[static_cast<uint8_t>(index)];
+    return state.status.is_stepping || state.status.is_homing;
+}
+
+bool Controller::slider_busy()
+{
+    return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
+        return (state.status.slider_is_stepping);
+    });
+}
+
+bool Controller::slider_busy(Index index)
+{
+    const auto state = ph_states[static_cast<uint8_t>(index)];
+    return state.status.slider_is_stepping;
+}
+
 Result Controller::set_temperature(Index index, celsius_t temperature)
 {
     uint16_t chant_temp = temperature + 30'000;
@@ -233,7 +252,8 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
         state.slider_is_homed = true;
         state.slider_pos = 0;
     }
-    safe_delay(SEC_TO_MS(35)); // since there's no way to check status for slider motor just wait a long time
+    while (slider_busy(index))
+        idle();
     return res;
 }
 
@@ -246,7 +266,8 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
     }
-    safe_delay(abs(rel_steps) / 7);
+    while (slider_busy(index))
+        idle();
     return result;
 }
 

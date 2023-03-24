@@ -1736,7 +1736,7 @@ bool Planner::busy() {
   return (has_blocks_queued() || cleaning_buffer_counter
       || TERN0(EXTERNAL_CLOSED_LOOP_CONTROLLER, CLOSED_LOOP_WAITING())
       || TERN0(HAS_SHAPING, stepper.input_shaping_busy())
-      || TERN0(CHANTARELLE_SUPPORT, ph_controller.extruder_busy())
+      || TERN0(CHANTARELLE_SUPPORT, ph_controller.extruder_busy() || ph_controller.slider_busy())
   );
 }
 

@@ -89,6 +89,7 @@ struct Status
     bool heater_active : 1;
     bool fan_active : 1;
     bool is_calibrated : 1;
+    bool slider_is_stepping : 1;
 
     constexpr Status() noexcept
         : Status(0)
@@ -103,6 +104,7 @@ struct Status
         , heater_active(TEST(raw, HEATER_ACTIVE))
         , fan_active(TEST(raw, FAN_ACTIVE))
         , is_calibrated(TEST(raw, IS_CALIBRATED))
+        , slider_is_stepping(TEST(raw, SLIDER_IS_STEPPING))
     {}
 
     constexpr auto to_raw() const noexcept -> uint16_t
@@ -125,6 +127,7 @@ private:
         HEATER_ACTIVE = 6,
         FAN_ACTIVE = 7,
         IS_CALIBRATED = 8,
+        SLIDER_IS_STEPPING = 9,
         NUM_STATUS_BITS
     };
 };
@@ -337,6 +340,9 @@ public:
     void update(uint8_t tool_index);
 
     bool extruder_busy();
+    bool extruder_busy(Index index);
+    bool slider_busy();
+    bool slider_busy(Index index);
 
     // Metadata methods
     Response<void> get_info(Index index);
