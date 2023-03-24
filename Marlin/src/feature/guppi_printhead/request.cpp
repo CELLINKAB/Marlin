@@ -39,16 +39,36 @@ void Controller::init()
     tool_change(0);
 }
 
-void Controller::update(uint8_t tool_index)
+void Controller::update()
 {
     static millis_t next_update = 0;
     if (millis() < next_update)
         return;
+
+    static auto next_tool_index = []() {
+        static uint8_t tool_index = 0;
+        tool_index = (tool_index + 1) % EXTRUDERS;
+        return tool_index;
+    };
+    
+    const uint8_t tool_index = next_tool_index();
+    auto & state = ph_states[tool_index];
     Index index = static_cast<Index>(tool_index);
-    auto res = get_status(index, false);
-    if (res.result == Result::OK)
-        ph_states[tool_index].status = res.packet.payload;
-    next_update = millis() + 500;
+
+    const auto status_res = get_status(index, false);
+    if (status_res.result == Result::OK)
+        state.status = status_res.packet.payload;
+    
+    const auto temp_res = get_temperature(index, false);
+    if (temp_res.result == Result::OK)
+        state.raw_temperature = temp_res.packet.payload;
+    
+    next_update = millis() + 200;
+}
+
+celsius_float_t Controller::get_latest_extruder_temp(Index index) {
+    auto & state = ph_states[static_cast<uint8_t>(index)];
+    return (state.raw_temperature - 30'000) / 100.0f;
 }
 
 bool Controller::extruder_busy()
@@ -84,25 +104,10 @@ Result Controller::set_temperature(Index index, celsius_t temperature)
     return send(request, bus);
 }
 
-celsius_float_t Controller::get_temperature(Index index)
+Response<uint16_t> Controller::get_temperature(Index index, bool debug)
 {
-    static std::array<millis_t, EXTRUDERS> last_check_times;
-    static std::array<celsius_float_t, EXTRUDERS> last_temps;
-    const auto [oldest_it, newest_it] = std::minmax_element(last_check_times.cbegin(),
-                                                            last_check_times.cend());
-    if (index == Index::All || index == Index::None)
-        return 0.0f;
-    size_t index_num = static_cast<size_t>(index);
-    if (millis() < *newest_it + 1000)
-        return last_temps[index_num];
-    size_t oldest_index_num = oldest_it - last_check_times.cbegin();
-    Packet request(static_cast<Index>(oldest_index_num), Command::GET_MEASURED_TEMP);
-    auto res = send_and_receive<celsius_t>(request, bus, false);
-    last_check_times[oldest_index_num] = millis();
-    if (res.result != Result::OK || res.packet.payload_size < 2)
-        return 0.0f;
-    last_temps[oldest_index_num] = (res.packet.payload - 30'000) / 100.0f;
-    return last_temps[index_num];
+    Packet request(static_cast<Index>(index), Command::GET_MEASURED_TEMP);
+    return send_and_receive<uint16_t>(request, bus, debug);
 }
 
 Response<void> Controller::get_info(Index index)

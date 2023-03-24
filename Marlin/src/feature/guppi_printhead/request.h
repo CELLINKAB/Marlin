@@ -317,9 +317,10 @@ struct PrintheadState
     int32_t slider_pos;
     FanSpeeds fan_set_speeds;
     TemTemps tem_set_temps;
+    uint16_t raw_temperature;
+    Status status;
     bool extruder_is_homed;
     bool slider_is_homed;
-    Status status;
 };
 
 class Controller
@@ -337,7 +338,9 @@ public:
 
     void tool_change(uint8_t tool_index);
 
-    void update(uint8_t tool_index);
+    void update();
+
+    celsius_float_t get_latest_extruder_temp(Index index);
 
     bool extruder_busy();
     bool extruder_busy(Index index);
@@ -352,7 +355,7 @@ public:
     Response<Status> get_status(Index index, bool debug = true);
     // Temperature methods
     Result set_temperature(Index index, celsius_t temperature);
-    celsius_float_t get_temperature(Index index);
+    Response<uint16_t> get_temperature(Index index, bool debug = true);
     Result set_pid(Index index, float p, float i, float d);
     Response<std::array<uint16_t, 3>> get_pid(Index index);
     Result set_fan_speed(Index index, FanSpeeds fan_speeds);
