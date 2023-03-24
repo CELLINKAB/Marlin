@@ -25,11 +25,10 @@ void GcodeSuite::G514()
     pneumatics::release_mixing_pressure(tool);
 }
 
-
-    void GcodeSuite::G515()
+void GcodeSuite::G515()
 {
     using namespace pneumatics;
-    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{130, -45};
+    static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{135, -45};
     static constexpr float GRIP_Z_HEIGHT = -5.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
     static constexpr float DETECTION_THRESHOLD = 10.0f;
@@ -39,24 +38,29 @@ void GcodeSuite::G514()
 
     xyz_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     apply_motion_limits(gripper_xy);
-    do_blocking_move_to_z(Z_AFTER_PROBING);
+    do_blocking_move_to_z(Z_MAX_POS);
     do_blocking_move_to(gripper_xy);
 
     bool is_releasing = parser.seen('R');
 
     float vacuum_baseline = gripper_vacuum.read_avg();
     if (is_releasing) {
-        do_blocking_move_to_z(RELEASE_Z_HEIGHT);
-        set_gripper_valves(GripperState::Release);
         {
+            do_blocking_move_to_z(GRIP_Z_HEIGHT);
             [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
-            idle();
-            safe_delay(8000); // FIXME: reduce when pump is working again
+            set_gripper_valves(GripperState::Release);
+            const millis_t timeout = millis() + 8000;
+            current_position.z = RELEASE_Z_HEIGHT;
+            planner.buffer_line(current_position, 8.0f);
+            while (millis() < timeout
+                   && gripper_vacuum.read_avg() < 0)
+                idle();
         }
+        planner.synchronize();
         //Expect pressure down
         set_gripper_valves(GripperState::Close);
-    
-        float vacuum_delta = gripper_vacuum.read_avg() -vacuum_baseline ;
+
+        float vacuum_delta = gripper_vacuum.read_avg() - vacuum_baseline;
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);
@@ -73,7 +77,7 @@ void GcodeSuite::G514()
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
         // Expect pressure down (with pump working)
-        float vacuum_delta = vacuum_baseline- gripper_vacuum.read_avg();
+        float vacuum_delta = vacuum_baseline - gripper_vacuum.read_avg();
         if (DEBUGGING(INFO)) {
             SERIAL_ECHOLNPAIR_F("vacuum_baseline:", vacuum_baseline);
             SERIAL_ECHOLNPAIR_F("vacuum_delta:", vacuum_delta);

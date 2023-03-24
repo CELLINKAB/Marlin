@@ -6,19 +6,18 @@
 
 #    include "festo_pneumatics.h"
 
-
 namespace pneumatics {
 
 //
 // constants
 //
-static constexpr float TANK_PRESSURE_TARGET = 100.0f;
-static constexpr float TANK_PRESSURE_MAX = 200.0f;
+static constexpr float TANK_PRESSURE_TARGET = 50.0f;
+static constexpr float TANK_PRESSURE_MAINTAINENCE = 25.0f;
+static constexpr float TANK_PRESSURE_MAX = 100.0f;
 
 static constexpr float TANK_GAIN = 0.183239119;
 static constexpr float REGULATOR_GAIN = 0.04;
 static constexpr float VACUUM_GAIN = -0.02;
-
 
 static constexpr float TANK_OFFSET = 150.0f;
 static constexpr float VACUUM_OFFSET = -16.5f;
@@ -35,7 +34,7 @@ void init()
     OUT_WRITE(PRESSURE_VALVE_C3_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-    OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+    OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
 
     SET_INPUT(PRESSURE_REGULATOR_SENSE_PIN);
@@ -73,7 +72,8 @@ inline void pump_enable(bool enable)
 void pressurize_tank(millis_t timeout_after_ms)
 {
     if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) {
-           if (DEBUGGING(INFO)) SERIAL_ECHOLN("PRESSURE TOO HIGH PUMP OFF");
+        if (DEBUGGING(INFO))
+            SERIAL_ECHOLN("PRESSURE_TOO_HIGH_PUMP_OFF");
         pump_enable(false);
         return;
     }
@@ -107,9 +107,11 @@ PressureToken::~PressureToken()
 
 void update_tank()
 {
-    const bool needs_pressure = PressureToken::has_users()
-                                && tank_pressure.read_avg() < TANK_PRESSURE_TARGET;
-    pump_enable(needs_pressure);
+    const auto current_pressure = tank_pressure.read_avg();
+    const bool needs_pressure = (current_pressure < TANK_PRESSURE_MAINTAINENCE
+                                 || (PressureToken::has_users()
+                                     && current_pressure < TANK_PRESSURE_TARGET));
+    PressureToken::pressure_valves(needs_pressure);
 }
 
 //
@@ -155,25 +157,26 @@ void release_mixing_pressure(uint8_t tool)
 // V1 ON/open V2 Off/close V3 ON/open
 void set_gripper_valves(GripperState state)
 {
-    switch(state) {
-        case GripperState::Release: {
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-            break;
-            }
-        case GripperState::Grip:
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
-            break;
-        case GripperState::Close:
-            WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-            WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
-            break;
+    switch (state) {
+    case GripperState::Release: {
+        WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+        WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+        break;
+    }
+    case GripperState::Grip:
+        WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+        WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+        break;
+    case GripperState::Close:
+        WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+        WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+        break;
     }
 }
 
-void suck_lid() {
-    static constexpr float GRIP_VACUUM_THRESHOLD = 100.0f;
+void suck_lid()
+{
+    static constexpr float GRIP_VACUUM_THRESHOLD = -20.0f;
     if (PressureToken::has_users()) {
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }
@@ -181,10 +184,8 @@ void suck_lid() {
     WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     const millis_t timeout = millis() + 5000;
-    while (millis() < timeout && -gripper_vacuum.read_avg() < GRIP_VACUUM_THRESHOLD)
-    {
-        safe_delay(500);
-        idle();
+    while (millis() < timeout && gripper_vacuum.read_avg() > GRIP_VACUUM_THRESHOLD) {
+        safe_delay(100);
     }
 }
 
@@ -218,7 +219,6 @@ float AnalogPressureSensor::apply_scaling_leveling(float reading,
     return (reading * (static_cast<float>(with_scaling) * scalar))
            - (static_cast<float>(with_offset) * offset);
 }
-
 
 AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN, VACUUM_OFFSET);
 AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN, TANK_GAIN, TANK_OFFSET);
