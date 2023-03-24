@@ -2261,6 +2261,7 @@ bool Planner::_populate_block(
       printhead::Index ph_index = static_cast<printhead::Index>(extruder);
       report_error("set extrude speed",ph_controller.set_extrusion_speed(ph_index, chant_feedrate));
       report_error("set direction",ph_controller.set_extruder_direction(ph_index, (de < 0)));
+      report_error("add steps", ph_controller.add_raw_extruder_steps(ph_index, esteps));
     }
   }
   #endif
