@@ -12,6 +12,7 @@ Result printhead::unsafe_send(const void* data, const size_t size, HardwareSeria
 {
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
     size_t sent = serial.write(static_cast<const uint8_t*>(data), size);
+    serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
     if (sent != size)
         return Result::BUSY;
@@ -26,10 +27,8 @@ void printhead::flush_rx(HardwareSerial& serial)
 
 void Controller::tool_change(uint8_t tool_index)
 {
-    static constexpr uint32_t PL_PER_FULLSTEP = 25'000;
-    static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
-    set_volume_per_fullstep(index, PL_PER_FULLSTEP);
+    set_volume_per_fullstep(index, PL_PER_FULL_STEP);
     set_step_volume(index, PL_STEP_VOLUME);
 }
 
@@ -203,23 +202,19 @@ Result Controller::set_extruder_direction(Index index, bool direction)
 
 Result Controller::extruder_move(Index index, float uL)
 {
-    static constexpr float steps_per_unit[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-    static constexpr float filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
-    static constexpr float step_multiplier = steps_per_unit[3]
-                                             / (filament_radius * filament_radius * PI);
-    uint32_t steps = uL * step_multiplier;
+    uint32_t steps = uL / MM_PER_MICRO_STEP;
     return add_raw_extruder_steps(index, steps);
 }
 
 Result Controller::start_extruding(Index index)
 {
-    (void)index;
+    UNUSED(index);
     return Result::OK;
 }
 
 Result Controller::stop_extruding(Index index)
 {
-    (void)index;
+    UNUSED(index);
     return Result::OK;
 }
 
