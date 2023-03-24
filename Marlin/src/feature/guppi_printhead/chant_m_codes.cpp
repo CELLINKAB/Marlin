@@ -79,7 +79,6 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
-    planner.synchronize();
 }
 
 /**

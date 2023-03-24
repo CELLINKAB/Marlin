@@ -918,7 +918,7 @@ void idle(bool no_stepper_sleep/*=false*/) {
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
 
   // update chantarelle status
-  TERN_(CHANTARELLE_SUPPORT, ph_controller.update(active_extruder));
+  TERN_(CHANTARELLE_SUPPORT, ph_controller.update());
 
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
