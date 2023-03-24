@@ -12,6 +12,7 @@ Result printhead::unsafe_send(const void* data, const size_t size, HardwareSeria
 {
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
     size_t sent = serial.write(static_cast<const uint8_t*>(data), size);
+    serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
     if (sent != size)
         return Result::BUSY;
@@ -26,10 +27,8 @@ void printhead::flush_rx(HardwareSerial& serial)
 
 void Controller::tool_change(uint8_t tool_index)
 {
-    static constexpr uint32_t PL_PER_FULLSTEP = 25'000;
-    static constexpr uint32_t PL_STEP_VOLUME = 100'000;
     Index index = static_cast<Index>(tool_index);
-    set_volume_per_fullstep(index, PL_PER_FULLSTEP);
+    set_volume_per_fullstep(index, PL_PER_FULL_STEP);
     set_step_volume(index, PL_STEP_VOLUME);
 }
 
@@ -57,6 +56,25 @@ bool Controller::extruder_busy()
     return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
         return (state.status.is_stepping || state.status.is_homing);
     });
+}
+
+bool Controller::extruder_busy(Index index)
+{
+    const auto state = ph_states[static_cast<uint8_t>(index)];
+    return state.status.is_stepping || state.status.is_homing;
+}
+
+bool Controller::slider_busy()
+{
+    return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
+        return (state.status.slider_is_stepping);
+    });
+}
+
+bool Controller::slider_busy(Index index)
+{
+    const auto state = ph_states[static_cast<uint8_t>(index)];
+    return state.status.slider_is_stepping;
 }
 
 Result Controller::set_temperature(Index index, celsius_t temperature)
@@ -187,8 +205,11 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
     auto res = send(packet, bus);
 
-    if (res == Result::OK)
-        ph_states[static_cast<uint8_t>(index)].extruder_is_homed = true;
+    if (res == Result::OK) {
+        auto& state = ph_states[static_cast<uint8_t>(index)];
+        state.extruder_is_homed = true;
+        state.status.is_homing = true;
+    }
     return res;
 }
 
@@ -203,30 +224,31 @@ Result Controller::set_extruder_direction(Index index, bool direction)
 
 Result Controller::extruder_move(Index index, float uL)
 {
-    static constexpr float steps_per_unit[] = DEFAULT_AXIS_STEPS_PER_UNIT;
-    static constexpr float filament_radius = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
-    static constexpr float step_multiplier = steps_per_unit[3]
-                                             / (filament_radius * filament_radius * PI);
-    uint32_t steps = uL * step_multiplier;
+    uint32_t steps = uL / MM_PER_MICRO_STEP;
     return add_raw_extruder_steps(index, steps);
 }
 
 Result Controller::start_extruding(Index index)
 {
-    (void)index;
+    UNUSED(index);
     return Result::OK;
 }
 
 Result Controller::stop_extruding(Index index)
 {
-    (void)index;
+    UNUSED(index);
     return Result::OK;
 }
 
 Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
 {
     Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, steps);
-    return send(packet, bus);
+    auto res = send(packet, bus);
+    if (res == Result::OK) {
+        auto& state = ph_states[static_cast<uint8_t>(index)];
+        state.status.is_stepping = true;
+    }
+    return res;
 }
 
 Result Controller::home_slider_valve(Index index, SliderDirection dir)
@@ -237,8 +259,8 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
     if (res == Result::OK) {
         state.slider_is_homed = true;
         state.slider_pos = 0;
+        state.status.slider_is_stepping = true;
     }
-    safe_delay(SEC_TO_MS(35)); // since there's no way to check status for slider motor just wait a long time
     return res;
 }
 
@@ -250,8 +272,8 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     auto result = send(packet, bus);
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
+        state.status.slider_is_stepping = true;
     }
-    safe_delay(abs(rel_steps) / 7);
     return result;
 }
 

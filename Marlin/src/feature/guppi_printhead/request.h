@@ -10,6 +10,17 @@
 
 namespace printhead {
 
+constexpr double EXTRUSION_RADIUS = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
+constexpr double UL_PER_MM = EXTRUSION_RADIUS * EXTRUSION_RADIUS * PI;
+constexpr double THREAD_PITCH_MM = 0.6;
+constexpr double STEPS_PER_REV = 400;
+constexpr double MM_PER_FULL_STEP = THREAD_PITCH_MM / STEPS_PER_REV;
+constexpr unsigned MICROSTEPS = 16;
+constexpr double MM_PER_MICRO_STEP = MM_PER_FULL_STEP / MICROSTEPS;
+constexpr uint32_t PL_PER_FULL_STEP = static_cast<uint32_t>(UL_PER_MM * MM_PER_FULL_STEP
+                                                            * 1'000'000.0);
+constexpr uint32_t PL_STEP_VOLUME = PL_PER_FULL_STEP;
+
 enum class Result {
     OK,
     BAD_CRC,
@@ -78,6 +89,7 @@ struct Status
     bool heater_active : 1;
     bool fan_active : 1;
     bool is_calibrated : 1;
+    bool slider_is_stepping : 1;
 
     constexpr Status() noexcept
         : Status(0)
@@ -92,6 +104,7 @@ struct Status
         , heater_active(TEST(raw, HEATER_ACTIVE))
         , fan_active(TEST(raw, FAN_ACTIVE))
         , is_calibrated(TEST(raw, IS_CALIBRATED))
+        , slider_is_stepping(TEST(raw, SLIDER_IS_STEPPING))
     {}
 
     constexpr auto to_raw() const noexcept -> uint16_t
@@ -114,6 +127,7 @@ private:
         HEATER_ACTIVE = 6,
         FAN_ACTIVE = 7,
         IS_CALIBRATED = 8,
+        SLIDER_IS_STEPPING = 9,
         NUM_STATUS_BITS
     };
 };
@@ -229,9 +243,9 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    if ( millis() <= last_send )
+    if (millis() <= last_send)
         delay(1);
-    
+
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
         print_packet(request);
@@ -318,7 +332,7 @@ public:
     Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
-    
+
     void init();
 
     void tool_change(uint8_t tool_index);
@@ -326,6 +340,9 @@ public:
     void update(uint8_t tool_index);
 
     bool extruder_busy();
+    bool extruder_busy(Index index);
+    bool slider_busy();
+    bool slider_busy(Index index);
 
     // Metadata methods
     Response<void> get_info(Index index);
