@@ -11,8 +11,9 @@ namespace pneumatics {
 //
 // constants
 //
-static constexpr float TANK_PRESSURE_TARGET = 100.0f;
-static constexpr float TANK_PRESSURE_MAX = 200.0f;
+static constexpr float TANK_PRESSURE_TARGET = 50.0f;
+static constexpr float TANK_PRESSURE_MAINTAINENCE = 25.0f;
+static constexpr float TANK_PRESSURE_MAX = 100.0f;
 
 static constexpr float TANK_GAIN = 0.183239119;
 static constexpr float REGULATOR_GAIN = 0.04;
@@ -106,9 +107,11 @@ PressureToken::~PressureToken()
 
 void update_tank()
 {
-    const bool needs_pressure = PressureToken::has_users()
-                                && tank_pressure.read_avg() < TANK_PRESSURE_TARGET;
-    pump_enable(needs_pressure);
+    const auto current_pressure = tank_pressure.read_avg();
+    const bool needs_pressure = (current_pressure < TANK_PRESSURE_MAINTAINENCE
+                                 || (PressureToken::has_users()
+                                     && current_pressure < TANK_PRESSURE_TARGET));
+    PressureToken::pressure_valves(needs_pressure);
 }
 
 //
