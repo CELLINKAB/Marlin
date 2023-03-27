@@ -183,11 +183,12 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     static constexpr size_t MAX_PACKET = []() {
         // header + crc + 1 byte padding on either side
         constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t) + 2;
-        if constexpr (std::is_same_v<T, void>)
-            return EMPTY_PACKET_SIZE;
-        else
+        if constexpr (std::is_same_v<T, void>) {
+            return EMPTY_PACKET_SIZE; }
+        else {
             // using sizeof(Packet<T>) can cause issues due to alignment
-            return EMPTY_PACKET_SIZE + sizeof(T);
+            static_assert(sizeof(T) < 128, "Packet payload type too large for buffer!");
+            return EMPTY_PACKET_SIZE + sizeof(T);}
     }();
     uint8_t packet_buffer[MAX_PACKET]{};
 
