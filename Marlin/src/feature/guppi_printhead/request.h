@@ -179,12 +179,22 @@ template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
     // this seems bug-prone...
-    static constexpr size_t MAX_PACKET = 128;
+
+    static constexpr size_t MAX_PACKET = []() {
+        // header + crc + 1 byte padding on either side
+        constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t) + 2;
+        if constexpr (std::is_same_v<T, void>) {
+            return EMPTY_PACKET_SIZE; }
+        else {
+            // using sizeof(Packet<T>) can cause issues due to alignment
+            static_assert(sizeof(T) < 128, "Packet payload type too large for buffer!");
+            return EMPTY_PACKET_SIZE + sizeof(T);}
+    }();
     uint8_t packet_buffer[MAX_PACKET]{};
 
     Packet<T> incoming{};
 
-    serial.setTimeout(50);
+    serial.setTimeout(5);
     auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
@@ -250,7 +260,6 @@ Result send(const Packet<T>& request,
         SERIAL_ECHO("Sending ");
         print_packet(request);
     }
-    serial.setTimeout(50);
     const auto packet_bytes = request.bytes();
     flush_rx(serial);
     if (DEBUGGING(INFO) && enable_debug)
