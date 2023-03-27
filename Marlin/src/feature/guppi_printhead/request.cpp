@@ -45,29 +45,25 @@ void Controller::update()
     if (millis() < next_update)
         return;
 
-    static auto next_tool_index = []() {
-        static uint8_t tool_index = 0;
-        tool_index = (tool_index + 1) % EXTRUDERS;
-        return tool_index;
-    };
-    
-    const uint8_t tool_index = next_tool_index();
-    auto & state = ph_states[tool_index];
-    Index index = static_cast<Index>(tool_index);
+    for (uint8_t tool_index = 0; tool_index < EXTRUDERS; ++tool_index) {
+        auto& state = ph_states[tool_index];
+        Index index = static_cast<Index>(tool_index);
 
-    const auto status_res = get_status(index, false);
-    if (status_res.result == Result::OK)
-        state.status = status_res.packet.payload;
-    
-    const auto temp_res = get_temperature(index, false);
-    if (temp_res.result == Result::OK)
-        state.raw_temperature = temp_res.packet.payload;
-    
-    next_update = millis() + 200;
+        const auto status_res = get_status(index, false);
+        if (status_res.result == Result::OK)
+            state.status = status_res.packet.payload;
+
+        const auto temp_res = get_temperature(index, false);
+        if (temp_res.result == Result::OK)
+            state.raw_temperature = temp_res.packet.payload;
+    }
+
+    next_update = millis() + SEC_TO_MS(1);
 }
 
-celsius_float_t Controller::get_latest_extruder_temp(Index index) {
-    auto & state = ph_states[static_cast<uint8_t>(index)];
+celsius_float_t Controller::get_latest_extruder_temp(Index index)
+{
+    const auto& state = ph_states[static_cast<uint8_t>(index)];
     return (state.raw_temperature - 30'000) / 100.0f;
 }
 
