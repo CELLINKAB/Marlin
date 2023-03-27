@@ -160,7 +160,7 @@ void set_gripper_valves(GripperState state)
 
 void suck_lid()
 {
-    static constexpr float GRIP_VACUUM_THRESHOLD = -20.0f;
+    static constexpr float GRIP_VACUUM_THRESHOLD = -10.0f;
     if (PressureToken::has_users()) {
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }

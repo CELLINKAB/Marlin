@@ -31,7 +31,7 @@ void GcodeSuite::G515()
     static constexpr xy_pos_t GRIPPER_ABSOLUTE_XY{135, -45};
     static constexpr float GRIP_Z_HEIGHT = -5.0f;
     static constexpr float RELEASE_Z_HEIGHT = 10.0f;
-    static constexpr float GRIP_THRESHOLD = -20.0f;
+    static constexpr float GRIP_THRESHOLD = -10.0f;
     static constexpr float RELEASE_THRESHOLD = 0.0f;
     static constexpr float THRESHOLD_HYSTERESIS = 1.0f;
 
@@ -53,7 +53,7 @@ void GcodeSuite::G515()
             const millis_t timeout = millis() + 8000;
             current_position.z = RELEASE_Z_HEIGHT;
             planner.buffer_line(current_position, 8.0f);
-            while (millis() < timeout && gripper_vacuum.read_avg() < 0)
+            while (millis() < timeout && gripper_vacuum.read() < 0)
                 idle();
         }
         planner.synchronize();
@@ -75,7 +75,7 @@ void GcodeSuite::G515()
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
 
-        if (float reading = gripper_vacuum.read(); reading > GRIP_THRESHOLD - THRESHOLD_HYSTERESIS) {
+        if (float reading = gripper_vacuum.read(); reading > GRIP_THRESHOLD + THRESHOLD_HYSTERESIS) {
             SERIAL_ECHOLN("GRIP_FAILED");
             if (DEBUGGING(INFO))
                 SERIAL_ECHOLNPGM("pressure reading: ", reading);
