@@ -165,7 +165,6 @@ void suck_lid()
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }
     auto _ = pneumatics::use_pressure();
-    WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     const millis_t timeout = millis() + 5000;
     while (millis() < timeout && gripper_vacuum.read_avg() > GRIP_VACUUM_THRESHOLD) {
