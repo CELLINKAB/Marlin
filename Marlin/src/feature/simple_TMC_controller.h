@@ -173,8 +173,8 @@ struct SimpleTMC
         while (!stop_condition() && (steps-- > 0)) {
             single_step();
             if (millis() > next_idle) {
-                next_idle += 100;
-                idle();
+                next_idle += 500;
+                safe_delay(0);
             } else
                 delayMicroseconds(low_microseconds);
         }

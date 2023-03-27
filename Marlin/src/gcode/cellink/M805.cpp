@@ -51,21 +51,22 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
     }
 }
 
-static constexpr pin_t PC_STOP_PIN = PC_DIAG_PIN;
+static constexpr pin_t PC_STOP_PIN = PC_ENDSTOP_PIN;
 using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
 inline void move_degs(Stepper& stepper, float degs)
 {
-    int32_t steps = deg_to_steps(degs);
-    stepper.move_steps(steps, 4000, []() { return READ(PC_STOP_PIN); });
+    int32_t steps = -deg_to_steps(degs);
+    stepper.move_steps(steps, 16000);
 }
 
-void home_rainbow(Stepper & stepper) {
-        stepper.raw_move(4000);
-        while (READ(PC_STOP_PIN) == LOW)
-            safe_delay(10);
-        stepper.stop();
-    }
+void home_rainbow(Stepper& stepper)
+{
+    stepper.raw_move(-16000);
+    while (READ(PC_STOP_PIN) == LOW)
+        safe_delay(0);
+    stepper.stop();
+}
 
 void move_rainbow(Stepper& stepper, CuringLed led)
 {
@@ -82,7 +83,7 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 0, 1200, 0.15f),
+        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, 800, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
     }();
@@ -108,7 +109,6 @@ void GcodeSuite::M805()
     WRITE(led.pin, LOW);
     stepper.set_hold(false);
     stepper.stop();
-
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING
