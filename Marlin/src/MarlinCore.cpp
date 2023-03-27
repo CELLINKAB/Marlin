@@ -770,8 +770,6 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
 
   TERN_(MONITOR_DRIVER_STATUS, monitor_tmc_drivers());
 
-  TERN_(FESTO_PNEUMATICS, pneumatics::update_tank(););
-
   static millis_t next_check_axes_ms = 0;
   if (ELAPSED(ms, next_check_axes_ms)) {
     planner.check_axes_activity();
@@ -916,6 +914,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
 
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
+
+  // update pneumatics
+  TERN_(FESTO_PNEUMATICS, pneumatics::update());
 
   // update chantarelle status
   TERN_(CHANTARELLE_SUPPORT, ph_controller.update());
