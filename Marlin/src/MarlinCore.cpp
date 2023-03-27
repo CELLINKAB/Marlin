@@ -1686,6 +1686,10 @@ void setup() {
     SETUP_RUN(easythreed_ui.init());
   #endif
 
+   #if PIN_EXISTS(PC_ENABLE)
+    OUT_WRITE(PC_ENABLE_PIN, HIGH);
+  #endif
+
   #if ENABLED(FESTO_PNEUMATICS)
     SETUP_RUN(pneumatics::init());
   #endif
@@ -1700,10 +1704,6 @@ void setup() {
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     SETUP_RUN(stepper_probe.stow());
-  #endif
-
-  #if PIN_EXISTS(PC_ENABLE)
-    OUT_WRITE(PC_ENABLE_PIN, HIGH);
   #endif
 
 
