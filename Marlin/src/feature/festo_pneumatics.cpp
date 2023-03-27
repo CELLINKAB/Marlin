@@ -11,8 +11,8 @@ namespace pneumatics {
 //
 // constants
 //
-static constexpr float TANK_PRESSURE_TARGET = 50.0f;
-static constexpr float TANK_PRESSURE_MAINTAINENCE = 25.0f;
+static constexpr float TANK_PRESSURE_TARGET = 75.0f;
+static constexpr float TANK_PRESSURE_MAINTAINENCE = 50.0f;
 static constexpr float TANK_PRESSURE_MAX = 100.0f;
 
 static constexpr float TANK_GAIN = 0.183239119;
@@ -69,22 +69,6 @@ inline void pump_enable(bool enable)
     WRITE(PRESSURE_PUMP_EN_PIN, enable ? HIGH : LOW);
 }
 
-void pressurize_tank(millis_t timeout_after_ms)
-{
-    if (tank_pressure.read_avg() >= TANK_PRESSURE_MAX) {
-        if (DEBUGGING(INFO))
-            SERIAL_ECHOLN("PRESSURE_TOO_HIGH_PUMP_OFF");
-        pump_enable(false);
-        return;
-    }
-    pump_enable(true);
-    millis_t timeout = millis() + timeout_after_ms;
-    while (tank_pressure.read_avg() < TANK_PRESSURE_TARGET && millis() < timeout) {
-        safe_delay(100);
-    }
-    pump_enable(false);
-}
-
 PressureToken::~PressureToken()
 {
     --users;
@@ -105,7 +89,7 @@ PressureToken::~PressureToken()
     return PressureToken{};
 }
 
-void update_tank()
+void pump_update()
 {
     const auto current_pressure = tank_pressure.read_avg();
     const bool needs_pressure = (current_pressure < TANK_PRESSURE_MAINTAINENCE
@@ -176,17 +160,31 @@ void set_gripper_valves(GripperState state)
 
 void suck_lid()
 {
-    static constexpr float GRIP_VACUUM_THRESHOLD = -20.0f;
+    static constexpr float GRIP_VACUUM_THRESHOLD = -10.0f;
     if (PressureToken::has_users()) {
         SERIAL_ECHOLN("SOMETHING_USING_PRESSURE_DURING_LID_GRIP");
     }
     auto _ = pneumatics::use_pressure();
-    WRITE(PRESSURE_PUMP_EN_PIN, HIGH);
     WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     const millis_t timeout = millis() + 5000;
     while (millis() < timeout && gripper_vacuum.read_avg() > GRIP_VACUUM_THRESHOLD) {
-        safe_delay(100);
+        idle();
     }
+}
+
+void update()
+{
+    static millis_t next_update = millis();
+    if (millis() < next_update)
+        return;
+
+    gripper_vacuum.update();
+    tank_pressure.update();
+    regulator_feedback.update();
+
+    pump_update();
+
+    next_update += 100;
 }
 
 //
@@ -197,27 +195,9 @@ AnalogPressureSensor::AnalogPressureSensor(pin_t sense_pin, float scale_factor, 
     : scalar(scale_factor)
     , offset(offset_kPa)
     , pin(sense_pin)
+    , avg_raw(0)
 {
     pinMode(sense_pin, INPUT_ANALOG);
-}
-
-float AnalogPressureSensor::read_avg(bool with_scaling, bool with_offset) const
-{
-    uint32_t samples[40]{};
-    for (uint32_t& sample : samples) {
-        sample = read_raw();
-        delay(1);
-    }
-    float avg_raw = std::accumulate(std::cbegin(samples), std::cend(samples), 0.0f) / 40.0f;
-    return apply_scaling_leveling(avg_raw, with_scaling, with_offset);
-}
-
-float AnalogPressureSensor::apply_scaling_leveling(float reading,
-                                                   bool with_scaling,
-                                                   bool with_offset) const
-{
-    return (reading * (static_cast<float>(with_scaling) * scalar))
-           - (static_cast<float>(with_offset) * offset);
 }
 
 AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN, VACUUM_OFFSET);

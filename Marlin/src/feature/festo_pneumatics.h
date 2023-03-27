@@ -3,25 +3,26 @@
 
 #include "../inc/MarlinConfigPre.h"
 
-#include <numeric>
 #include <atomic>
+#include <numeric>
 
-#    ifndef PRESSURE_VALVE_CLOSE_LEVEL
-#        define PRESSURE_VALVE_CLOSE_LEVEL LOW
-#    endif
-#    ifndef PRESSURE_VALVE_OPEN_LEVEL
-#        define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
-#    endif
+#ifndef PRESSURE_VALVE_CLOSE_LEVEL
+#    define PRESSURE_VALVE_CLOSE_LEVEL LOW
+#endif
+#ifndef PRESSURE_VALVE_OPEN_LEVEL
+#    define PRESSURE_VALVE_OPEN_LEVEL !PRESSURE_VALVE_CLOSE_LEVEL
+#endif
 
 namespace pneumatics {
 
 void init();
 
+void update();
+
 void set_regulator_pressure(float kPa);
 float get_regulator_set_pressure();
-void pressurize_tank(millis_t timeout_after_ms = 10'000);
 
-enum class GripperState{
+enum class GripperState {
     Close,
     Release,
     Grip,
@@ -52,7 +53,7 @@ private:
               enable ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL);
     }
     friend PressureToken use_pressure();
-    friend void update_tank();
+    friend void pump_update();
 };
 
 [[nodiscard]] PressureToken use_pressure();
@@ -89,14 +90,29 @@ struct AnalogPressureSensor
         return apply_scaling_leveling(static_cast<float>(read_raw()), with_scaling, with_offset);
     }
 
-    float read_avg(bool with_scaling = true, bool with_offset = true) const;
+    constexpr float read_avg(bool with_scaling = true, bool with_offset = true) const
+    {
+        return apply_scaling_leveling(static_cast<float>(avg_raw), with_scaling, with_offset);
+    }
 
     inline void tare() { offset = read_avg(true, false); }
 
-private:
-    pin_t pin;
+    inline void update()
+    {
+        avg_raw = avg_raw - (avg_raw / WINDOW_SIZE) + (read_raw() / WINDOW_SIZE);
+    }
 
-    float apply_scaling_leveling(float reading, bool with_scaling, bool with_offset) const;
+private:
+    constexpr static size_t WINDOW_SIZE = 10;
+
+    pin_t pin;
+    uint32_t avg_raw;
+
+    constexpr float apply_scaling_leveling(float reading, bool with_scaling, bool with_offset) const
+    {
+        return (reading * (static_cast<float>(with_scaling) * scalar))
+               - (static_cast<float>(with_offset) * offset);
+    }
 }; // AnalogPressureSensor
 
 extern AnalogPressureSensor gripper_vacuum;
