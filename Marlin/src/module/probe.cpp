@@ -103,10 +103,6 @@
   #include "stepper/indirection.h"
 #endif
 
-#if ENABLED(HAS_ANALOG_PROBE)
-  #include "../feature/analog_surface_probe.h"
-#endif
-
 #if ENABLED(STEPPER_RETRACTING_PROBE)
   #include "../feature/stepper_retracting_probe.h"
 #endif
@@ -529,9 +525,6 @@ bool Probe::set_deployed(const bool deploy) {
     DEBUG_ECHOLNPGM("deploy: ", deploy);
   }
 
-  #if ENABLED(HAS_ANALOG_PROBE)
-    return deploy ? analog_probe.deploy() : analog_probe.stow();
-  #endif
 
   if (endstops.z_probe_enabled == deploy) return false;
 
@@ -625,11 +618,6 @@ bool Probe::probe_down_to_z(const_float_t z, const_feedRate_t fr_mm_s) {
       return true; // Deploy in LOW SPEED MODE on every probe action
   #endif
 
-  // analog sensors have specialized probing logic
-  #if ENABLED(HAS_ANALOG_PROBE)
-    return analog_probe.probe_to_z(z, fr_mm_s);
-  #endif
-
   // Disable stealthChop if used. Enable diag1 pin on driver.
   #if ENABLED(SENSORLESS_PROBING)
     sensorless_t stealth_states {};
@@ -652,7 +640,7 @@ bool Probe::probe_down_to_z(const_float_t z, const_feedRate_t fr_mm_s) {
     #if HAS_DELTA_SENSORLESS_PROBING
       endstops.trigger_state() & (_BV(X_MAX) | _BV(Y_MAX) | _BV(Z_MAX))
     #else
-      TERN(Z_MIN_PROBE, TEST(endstops.trigger_state(), Z_MIN_PROBE), true)
+      TEST(endstops.trigger_state(), Z_MIN_PROBE)
     #endif
   ;
 
@@ -746,7 +734,7 @@ float Probe::run_z_probe(const bool sanity_check/*=true*/) {
 
     // Do a first probe at the fast speed
     const bool probe_fail = probe_down_to_z(z_probe_low_point, fr_mm_s),            // No probe trigger?
-               early_fail = TERN(HAS_ANALOG_PROBE, false , scheck && current_position.z > -offset.z + clearance); // Probe triggered too high?
+               early_fail = scheck && current_position.z > -offset.z + clearance; // Probe triggered too high?
     #if ENABLED(DEBUG_LEVELING_FEATURE)
       if (DEBUGGING(LEVELING) && (probe_fail || early_fail)) {
         DEBUG_ECHOPGM_P(plbl);
@@ -878,7 +866,7 @@ float Probe::run_z_probe(const bool sanity_check/*=true*/) {
   #else
 
     // Return the single probe result
-    const float measured_z = TERN(HAS_ANALOG_PROBE, analog_probe.probe_val(), current_position.z);
+    const float measured_z = current_position.z;
 
   #endif
 
