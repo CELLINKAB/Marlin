@@ -41,6 +41,13 @@ void init()
     SET_INPUT(PRESSURE_TANK_PIN);
     SET_INPUT(GRIPPER_VACUUM_PIN);
 
+    // warm up pressure sensors
+    for (int i = 0; i < 20; ++i) {
+        tank_pressure.update();
+        regulator_feedback.update();
+        gripper_vacuum.update();
+    }
+
     set_regulator_pressure(5.0f);
 }
 
@@ -174,17 +181,15 @@ void suck_lid()
 
 void update()
 {
-    static millis_t next_update = millis();
-    if (millis() < next_update)
-        return;
-
     gripper_vacuum.update();
     tank_pressure.update();
     regulator_feedback.update();
 
+    static millis_t next_update = millis();
+    if (millis() < next_update)
+        return;
     pump_update();
-
-    next_update += 100;
+    next_update = millis() + 250;
 }
 
 //
