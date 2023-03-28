@@ -1108,13 +1108,6 @@
 #endif
 
 /**
- * Set a flag if the bed probe uses analog signal instead of digital endstop behavior
- */
-#if ANY(OPTICAL_SURFACE_PROBE, RETRACTING_DISPLACEMENT_PROBE)
-  #define HAS_ANALOG_PROBE 1
-#endif
-
-/**
  * Fill in undefined Filament Sensor options
  */
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
@@ -1281,7 +1274,7 @@
   #if BOTH(DELTA, SENSORLESS_PROBING)
     #define HAS_DELTA_SENSORLESS_PROBING 1
   #endif
-  #if NONE(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN, HAS_DELTA_SENSORLESS_PROBING, HAS_ANALOG_PROBE)
+  #if NONE(Z_MIN_PROBE_USES_Z_MIN_ENDSTOP_PIN, HAS_DELTA_SENSORLESS_PROBING)
     #define USES_Z_MIN_PROBE_PIN 1
   #endif
   #if Z_HOME_TO_MIN && (DISABLED(USES_Z_MIN_PROBE_PIN) || ENABLED(USE_PROBE_FOR_Z_HOMING))
