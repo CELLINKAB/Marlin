@@ -167,8 +167,6 @@ auto Controller::get_tem_debug(Index index) -> Response<TemTemps>
 Result Controller::set_extrusion_speed(Index index, uint32_t feedrate_pl_s)
 {
     Packet packet(index, Command::SET_EXTRUSION_SPEED, feedrate_pl_s);
-        print_packet(packet);
-
     return send_and_receive<uint32_t>(packet, bus).result;
 }
 
@@ -193,8 +191,6 @@ Response<uint8_t> Controller::get_extruder_stallguard_threshold(Index index)
 Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps)
 {
     Packet packet(index, Command::SET_MICROSTEP, microsteps);
-    print_packet(packet);
-
     return send_and_receive<uint8_t>(packet, bus).result;
 }
 
@@ -213,8 +209,6 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
     auto res = send(packet, bus);
-    print_packet(packet);
-
     if (res == Result::OK) {
         auto& state = ph_states[static_cast<uint8_t>(index)];
         state.extruder_is_homed = true;
@@ -254,8 +248,6 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
 {
     Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, steps);
     auto res = send(packet, bus);
-    print_packet(packet);
-
     if (res == Result::OK) {
         auto& state = ph_states[static_cast<uint8_t>(index)];
         state.status.is_stepping = true;
@@ -268,8 +260,6 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
     auto& state = ph_states[static_cast<uint8_t>(index)];
     Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, dir);
     auto res = send(packet, bus);
-    print_packet(packet);
-
     if (res == Result::OK) {
         state.slider_is_homed = true;
         state.slider_pos = 0;
@@ -287,8 +277,6 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     int32_t rel_steps = abs_steps - state.slider_pos;
     Packet packet(index, Command::DEBUG_ADD_SLIDER_STEPS, rel_steps);
     auto result = send(packet, bus);
-    print_packet(packet);
-
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
         state.status.slider_is_stepping = true;
