@@ -246,6 +246,9 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
 extern millis_t last_send;
 
+extern bool displayed_busy;
+extern bool displayed_not_busy;
+
 template<typename T>
 Result send(const Packet<T>& request,
             HardwareSerial& serial,

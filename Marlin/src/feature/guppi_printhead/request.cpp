@@ -8,6 +8,10 @@ using namespace printhead;
 
 millis_t printhead::last_send = 0;
 
+bool printhead::displayed_busy = false;
+
+bool printhead::displayed_not_busy = false;
+
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
@@ -69,7 +73,25 @@ celsius_float_t Controller::get_latest_extruder_temp(Index index)
 
 bool Controller::extruder_busy()
 {
+
+
     return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
+
+        if ((state.status.is_stepping || state.status.is_homing)) {
+                if (!displayed_busy) {
+         
+            SERIAL_ECHOLNPGM("Extruder busy stepping:", state.status.is_stepping ,"Homing: ", state.status.is_homing);
+            displayed_busy = true;
+            displayed_not_busy = false; 
+                }
+        } else{ 
+            if (!displayed_not_busy) {
+            SERIAL_ECHOLN("Extruder not busy anymore");
+              displayed_not_busy = true; 
+              displayed_busy = false;
+            }
+        }
+    
         return (state.status.is_stepping || state.status.is_homing);
     });
 }
@@ -163,6 +185,8 @@ auto Controller::get_tem_debug(Index index) -> Response<TemTemps>
 Result Controller::set_extrusion_speed(Index index, uint32_t feedrate_pl_s)
 {
     Packet packet(index, Command::SET_EXTRUSION_SPEED, feedrate_pl_s);
+        print_packet(packet);
+
     return send_and_receive<uint32_t>(packet, bus).result;
 }
 
@@ -187,6 +211,8 @@ Response<uint8_t> Controller::get_extruder_stallguard_threshold(Index index)
 Result Controller::set_extruder_microsteps(Index index, uint8_t microsteps)
 {
     Packet packet(index, Command::SET_MICROSTEP, microsteps);
+    print_packet(packet);
+
     return send_and_receive<uint8_t>(packet, bus).result;
 }
 
@@ -205,6 +231,7 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
     auto res = send(packet, bus);
+    print_packet(packet);
 
     if (res == Result::OK) {
         auto& state = ph_states[static_cast<uint8_t>(index)];
@@ -245,6 +272,8 @@ Result Controller::add_raw_extruder_steps(Index index, int32_t steps)
 {
     Packet packet(index, Command::SYRINGEPUMP_DEBUG_ADD_STEPS, steps);
     auto res = send(packet, bus);
+    print_packet(packet);
+
     if (res == Result::OK) {
         auto& state = ph_states[static_cast<uint8_t>(index)];
         state.status.is_stepping = true;
@@ -257,11 +286,16 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
     auto& state = ph_states[static_cast<uint8_t>(index)];
     Packet packet(index, Command::SLIDER_MOVE_TO_HOME_POSITION, dir);
     auto res = send(packet, bus);
+    print_packet(packet);
+
     if (res == Result::OK) {
         state.slider_is_homed = true;
         state.slider_pos = 0;
         state.status.slider_is_stepping = true;
     }
+    SERIAL_ECHO("Homing slider waiting for finish");
+    safe_delay(SEC_TO_MS(20)); // since there's no way to check status for slider motor just wait a long time
+    SERIAL_ECHO("Finished slide value home");
     return res;
 }
 
@@ -271,10 +305,17 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
     int32_t rel_steps = abs_steps - state.slider_pos;
     Packet packet(index, Command::DEBUG_ADD_SLIDER_STEPS, rel_steps);
     auto result = send(packet, bus);
+    print_packet(packet);
+
     if (result == Result::OK) {
         state.slider_pos = abs_steps;
         state.status.slider_is_stepping = true;
     }
+    //TO DO finished move
+    // 400 full steps per rev, x 3 revs per secounds * 16 microsteps per step / 1000 ms/s = 19.2 mircostep/ms
+    SERIAL_ECHOLN("Moving slider value waiting ");
+    safe_delay(abs(rel_steps) / 19);
+    SERIAL_ECHOLN("Finish slider move ");
     return result;
 }
 

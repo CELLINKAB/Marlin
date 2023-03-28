@@ -16,10 +16,10 @@
 
 struct StepperRetractingProbe
 {
-    static constexpr int32_t SRP_DEPLOY_VELOCITY = -100'000;
-    static constexpr int32_t SRP_STOW_VELOCITY = 100'000;
+    static constexpr int32_t SRP_DEPLOY_VELOCITY = -50'000;
+    static constexpr int32_t SRP_STOW_VELOCITY = 50'000;
     static constexpr uint8_t SRP_STALL_THRESHOLD = 120;
-    static constexpr uint32_t SRP_STEPPER_CURRENT = 1000;
+    static constexpr uint32_t SRP_STEPPER_CURRENT = 600;
     static constexpr uint32_t SRP_RETRACT_TIME = 7000;
     static constexpr float SRP_STEPPER_RSENSE = 0.11f;
 
