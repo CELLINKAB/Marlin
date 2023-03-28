@@ -50,8 +50,16 @@ void Controller::update()
         Index index = static_cast<Index>(tool_index);
 
         const auto status_res = get_status(index, false);
-        if (status_res.result == Result::OK)
+        if (status_res.result == Result::OK) {
+            if (DEBUGGING(LEVELING)) {
+                if (state.status.is_homing && !state_res.packet.payload.status.is_homing)
+                    SERIAL_ECHO_MSG("extruder finished homing");
+                if (state.status.slider_is_stepping
+                    && !state_res.packet.payload.status.slider_is_stepping)
+                    SERIAL_ECHO_MSG("slider valve move finished");
+            }
             state.status = status_res.packet.payload;
+        }
 
         const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK)

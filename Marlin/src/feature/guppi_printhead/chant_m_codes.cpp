@@ -79,6 +79,7 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
+    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("extruder home started");
 }
 
 /**
@@ -90,6 +91,7 @@ void GcodeSuite::G512()
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
     ph_debug_print(res);
+    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("slider valve home started");
 }
 
 /**
@@ -108,6 +110,7 @@ void GcodeSuite::G513()
     planner.synchronize();
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
+    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("slider valve move started");
 }
 
 //
