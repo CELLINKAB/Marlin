@@ -1137,10 +1137,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ENABLED(DYNAMIC_3POINT_LEVELING)
           case 1030: M1030(); break;
       #endif
-                                   
-      #if ENABLED(HAS_ANALOG_PROBE)
-        case 1100: M1100(); break;
-      #endif
 
       #if ENABLED(FESTO_PNEUMATICS)
         case 1036: M1036(); break; // set pressure regulator
