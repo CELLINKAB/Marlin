@@ -73,25 +73,7 @@ celsius_float_t Controller::get_latest_extruder_temp(Index index)
 
 bool Controller::extruder_busy()
 {
-
-
     return std::any_of(ph_states.cbegin(), ph_states.cend(), [](const PrintheadState& state) {
-
-        if ((state.status.is_stepping || state.status.is_homing)) {
-                if (!displayed_busy) {
-         
-            SERIAL_ECHOLNPGM("Extruder busy stepping:", state.status.is_stepping ,"Homing: ", state.status.is_homing);
-            displayed_busy = true;
-            displayed_not_busy = false; 
-                }
-        } else{ 
-            if (!displayed_not_busy) {
-            SERIAL_ECHOLN("Extruder not busy anymore");
-              displayed_not_busy = true; 
-              displayed_busy = false;
-            }
-        }
-    
         return (state.status.is_stepping || state.status.is_homing);
     });
 }
