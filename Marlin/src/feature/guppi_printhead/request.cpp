@@ -8,10 +8,6 @@ using namespace printhead;
 
 millis_t printhead::last_send = 0;
 
-bool printhead::displayed_busy = false;
-
-bool printhead::displayed_not_busy = false;
-
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
@@ -265,9 +261,6 @@ Result Controller::home_slider_valve(Index index, SliderDirection dir)
         state.slider_pos = 0;
         state.status.slider_is_stepping = true;
     }
-    SERIAL_ECHO("Homing slider waiting for finish");
-    safe_delay(SEC_TO_MS(20)); // since there's no way to check status for slider motor just wait a long time
-    SERIAL_ECHO("Finished slide value home");
     return res;
 }
 
@@ -281,11 +274,6 @@ Result Controller::move_slider_valve(Index index, int32_t abs_steps)
         state.slider_pos = abs_steps;
         state.status.slider_is_stepping = true;
     }
-    //TO DO finished move
-    // 400 full steps per rev, x 3 revs per secounds * 16 microsteps per step / 1000 ms/s = 19.2 mircostep/ms
-    SERIAL_ECHOLN("Moving slider value waiting ");
-    safe_delay(abs(rel_steps) / 19);
-    SERIAL_ECHOLN("Finish slider move ");
     return result;
 }
 
