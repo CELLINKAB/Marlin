@@ -67,6 +67,12 @@ void GcodeSuite::G515()
                 SERIAL_ECHOLNPGM("pressure reading: ", reading);
         }
     } else {
+        // May need to let out pressure to allow pump to run for grip
+        while (tank_pressure.read_avg() >= 75.0f) {
+            set_gripper_valves(GripperState::Release);
+            WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_OPEN_LEVEL);
+            idle();
+        }
         set_gripper_valves(GripperState::Grip);
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to_z(GRIP_Z_HEIGHT);
