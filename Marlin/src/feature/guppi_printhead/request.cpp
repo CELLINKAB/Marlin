@@ -52,10 +52,9 @@ void Controller::update()
         const auto status_res = get_status(index, false);
         if (status_res.result == Result::OK) {
             if (DEBUGGING(LEVELING)) {
-                if (state.status.is_homing && !state_res.packet.payload.status.is_homing)
+                if (state.status.is_homing && !status_res.packet.payload.is_homing)
                     SERIAL_ECHO_MSG("extruder finished homing");
-                if (state.status.slider_is_stepping
-                    && !state_res.packet.payload.status.slider_is_stepping)
+                if (state.status.slider_is_stepping && !status_res.packet.payload.slider_is_stepping)
                     SERIAL_ECHO_MSG("slider valve move finished");
             }
             state.status = status_res.packet.payload;
