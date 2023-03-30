@@ -1,35 +1,12 @@
-#include "../inc/MarlinConfig.h"
+#include "../../inc/MarlinConfig.h"
 
 #if ENABLED(FESTO_PNEUMATICS)
 
-#    include "../module/planner.h"
+#    include "../../module/planner.h"
 
-#    include "festo_pneumatics.h"
+#    include "pneumatics.h"
 
 namespace pneumatics {
-
-//
-// constants
-//
-
-static constexpr float TANK_GAIN = 0.183239119;
-static constexpr float REGULATOR_GAIN = 0.04;
-static constexpr float VACUUM_GAIN = -0.02;
-
-static constexpr float TANK_OFFSET = 150.0f;
-static constexpr float VACUUM_OFFSET = -16.5f;
-static constexpr float REGULATOR_OFFSET = 0.0f;
-
-
-//
-// statics
-//
-
-Pump<PRESSURE_PUMP_EN_PIN, PRESSURE_VALVE_PUMP_OUT_PIN> pump;
-
-AnalogPressureSensor gripper_vacuum(GRIPPER_VACUUM_PIN, VACUUM_GAIN, VACUUM_OFFSET);
-AnalogPressureSensor tank_pressure(PRESSURE_TANK_PIN, TANK_GAIN, TANK_OFFSET);
-AnalogPressureSensor regulator_feedback(PRESSURE_REGULATOR_SENSE_PIN, REGULATOR_GAIN, REGULATOR_OFFSET);
 
 //
 // init
@@ -80,8 +57,8 @@ static float regulator_set_pressure = 0;
 
 void set_regulator_pressure(float kPa)
 {
-    // 500kPa regulator 5V analog input, 12 bit DAC
-    static constexpr float pressure_factor = 1.0f / REGULATOR_GAIN;
+    // 500kPa regulator 5V analog input clipped to 3.3v, 12 bit DAC
+    static constexpr float pressure_factor = 4096.0 / ((3.3 / 5.0) * 500.0);
     uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
     analogWrite(PRESSURE_REGULATOR_PIN, value);
     regulator_set_pressure = kPa;
@@ -147,21 +124,6 @@ void set_gripper_valves(GripperState state)
         break;
     }
 }
-
-//
-// Analog Pressure Sensor
-//
-
-AnalogPressureSensor::AnalogPressureSensor(pin_t sense_pin, float scale_factor, float offset_kPa)
-    : scalar(scale_factor)
-    , offset(offset_kPa)
-    , pin(sense_pin)
-    , avg_raw(0)
-{
-    pinMode(sense_pin, INPUT_ANALOG);
-}
-
-
 
 } // namespace pneumatics
 

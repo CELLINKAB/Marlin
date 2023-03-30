@@ -3,7 +3,7 @@
 
 #if ENABLED(FESTO_PNEUMATICS)
 
-#    include "../../feature/festo_pneumatics.h"
+#    include "../../feature/air_system/pneumatics.h"
 #    include "../../feature/guppi_printhead/chantarelle.h"
 #    include "../../module/planner.h"
 #    include "../gcode.h"

@@ -187,7 +187,7 @@
 // #endif
 
 #if ENABLED(FESTO_PNEUMATICS)
-  #include "../feature/festo_pneumatics.h"
+#    include "../feature/air_system/pneumatics.h"
 #endif
 
 #define _EN_ITEM(N) , E##N

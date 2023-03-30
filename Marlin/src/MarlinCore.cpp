@@ -163,7 +163,7 @@
 #endif
 
 #if ENABLED(FESTO_PNEUMATICS)
-  #include "feature/festo_pneumatics.h"
+  #include "feature/air_system/pneumatics.h"
 #endif
 
 #if ENABLED(CHANTARELLE_SUPPORT)
