@@ -33,33 +33,6 @@ void set_gripper_valves(GripperState state);
 void apply_mixing_pressure(uint8_t tool);
 void release_mixing_pressure(uint8_t tool);
 
-// instance counter that enables pressure whenever something is using it
-struct [[maybe_unused]] PressureToken
-{
-    ~PressureToken();
-    PressureToken(const PressureToken& token) = delete;
-    PressureToken(PressureToken&& token) = delete;
-    PressureToken& operator=(const PressureToken& token) = delete;
-    PressureToken& operator=(PressureToken&& token) = delete;
-    inline static bool has_users() { return users.load() > 0; }
-
-private:
-    PressureToken() { ++users; }
-    inline static std::atomic_int users{0};
-    inline static void pressure_valves(bool enable)
-    {
-        WRITE(PRESSURE_PUMP_EN_PIN, enable ? HIGH : LOW);
-        WRITE(PRESSURE_VALVE_PUMP_OUT_PIN,
-              enable ? PRESSURE_VALVE_OPEN_LEVEL : PRESSURE_VALVE_CLOSE_LEVEL);
-    }
-    friend PressureToken use_pressure();
-    friend void pump_update();
-};
-
-[[nodiscard]] PressureToken use_pressure();
-void update_tank();
-void suck_lid();
-
 struct AnalogPressureSensor
 {
     AnalogPressureSensor(pin_t sense_pin, float scale_factor = 1.0f, float offset_kPa = 0.0f);
@@ -118,5 +91,100 @@ private:
 extern AnalogPressureSensor gripper_vacuum;
 extern AnalogPressureSensor tank_pressure;
 extern AnalogPressureSensor regulator_feedback;
+
+// instance counter that enables pressure whenever something is using it
+template<const pin_t PUMP, const pin_t VALVE>
+struct Pump
+{
+    void init()
+    {
+        OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
+        OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
+    }
+
+    void update()
+    {
+        if (suction_users > 0) {
+            WRITE(VALVE, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PUMP, HIGH);
+            return;
+        }
+        const float current_pressure = tank_pressure.read_avg();
+        if (current_pressure < TANK_PRESSURE_MAINTAINENCE
+            || (pressure_users > 0 && current_pressure < TANK_PRESSURE_TARGET)) {
+            WRITE(VALVE, PRESSURE_VALVE_OPEN_LEVEL);
+            WRITE(PUMP, HIGH);
+        } else {
+            WRITE(VALVE, PRESSURE_VALVE_CLOSE_LEVEL);
+            WRITE(PUMP, LOW);
+        }
+    }
+
+private:
+    static constexpr float TANK_PRESSURE_TARGET = 75.0f;
+    static constexpr float TANK_PRESSURE_MAINTAINENCE = 50.0f;
+    static constexpr float TANK_PRESSURE_MAX = 100.0f;
+
+    size_t suction_users;
+    size_t pressure_users;
+
+    enum class LockType {
+        Suction,
+        Pressure,
+    };
+
+    void add_user(LockType kind)
+    {
+        switch (kind) {
+        case LockType::Suction:
+            ++suction_users;
+            break;
+        case LockType::Pressure:
+            ++pressure_users;
+            break;
+        }
+        update();
+    }
+
+    void remove_user(LockType kind)
+    {
+        switch (kind) {
+        case LockType::Suction:
+            --suction_users;
+            break;
+        case LockType::Pressure:
+            --pressure_users;
+            break;
+        }
+        update();
+    }
+
+    struct [[maybe_unused]] Lock
+    {
+        explicit Lock(Pump* parent, LockType kind)
+            : parent_(*parent)
+            , kind_(kind)
+        {
+            parent_.add_user(kind_);
+        }
+        ~Lock() { parent_.remove_user(kind_); }
+        Lock(const Lock& token) = delete;
+        Lock(Lock&& token) = delete;
+        Lock& operator=(const Lock& token) = delete;
+        Lock& operator=(Lock&& token) = delete;
+
+    private:
+        Pump& parent_;
+        LockType kind_;
+    };
+
+    friend class Lock;
+
+public:
+    inline Lock use_pressure() { return Lock(this, LockType::Pressure); }
+    inline Lock use_suction() { return Lock(this, LockType::Suction); }
+}; // Pump
+
+extern Pump<PRESSURE_PUMP_EN_PIN, PRESSURE_VALVE_PUMP_OUT_PIN> pump;
 
 } // namespace pneumatics
