@@ -5,20 +5,16 @@
 #include "analog_sensor.h"
 #include "constants.h"
 
-namespace pneumatics 
-{
+namespace pneumatics {
 
 // instance counter that enables pressure whenever something is using it
-template<const pin_t PUMP, const pin_t VALVE>
+template<const pin_t PUMP, const pin_t VALVE, const pin_t SENSE>
 struct Pump
 {
-    explicit Pump(const AnalogPressureSensor& sensor)
+    explicit Pump(const AnalogPressureSensor<SENSE>& sensor)
         : sensor_(sensor)
         , suction_users(0)
         , pressure_users(0)
-    {}
-
-    void init()
     {
         OUT_WRITE(PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
         OUT_WRITE(PRESSURE_PUMP_EN_PIN, LOW);
@@ -48,7 +44,7 @@ private:
     static constexpr float TANK_PRESSURE_MAINTAINENCE = 50.0f;
     static constexpr float TANK_PRESSURE_MAX = 100.0f;
 
-    const AnalogPressureSensor& sensor_;
+    const AnalogPressureSensor<SENSE>& sensor_;
 
     size_t suction_users;
     size_t pressure_users;
@@ -110,6 +106,6 @@ public:
     inline Lock use_suction() { return Lock(this, LockType::Suction); }
 }; // Pump
 
-extern Pump<PRESSURE_PUMP_EN_PIN, PRESSURE_VALVE_PUMP_OUT_PIN> pump;
+extern Pump<PRESSURE_PUMP_EN_PIN, PRESSURE_VALVE_PUMP_OUT_PIN, PRESSURE_TANK_PIN> pump;
 
 } // namespace pneumatics

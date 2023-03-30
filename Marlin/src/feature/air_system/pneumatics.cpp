@@ -20,12 +20,6 @@ void init()
     OUT_WRITE(PRESSURE_VALVE_LID_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
     OUT_WRITE(PRESSURE_VALVE_LID2_PIN, PRESSURE_VALVE_CLOSE_LEVEL);
 
-    SET_INPUT(PRESSURE_REGULATOR_SENSE_PIN);
-    SET_INPUT(PRESSURE_TANK_PIN);
-    SET_INPUT(GRIPPER_VACUUM_PIN);
-
-    pump.init();
-
     // warm up pressure sensors
     for (int i = 0; i < 20; ++i) {
         tank_pressure.update();
