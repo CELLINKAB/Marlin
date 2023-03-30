@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../inc/MarlinConfigPre.h"
+#include "../../inc/MarlinConfig.h"
 
 #include "analog_sensor.h"
 #include "constants.h"

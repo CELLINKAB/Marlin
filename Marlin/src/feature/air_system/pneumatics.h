@@ -4,6 +4,7 @@
 #include "../../inc/MarlinConfigPre.h"
 
 #include "analog_sensor.h"
+#include "regulator.h"
 #include "pump.h"
 
 namespace pneumatics 
@@ -12,9 +13,6 @@ namespace pneumatics
 void init();
 
 void update();
-
-void set_regulator_pressure(float kPa);
-float get_regulator_set_pressure();
 
 enum class GripperState {
     Close,

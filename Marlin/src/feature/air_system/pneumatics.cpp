@@ -33,7 +33,7 @@ void init()
         gripper_vacuum.update();
     }
 
-    set_regulator_pressure(5.0f);
+    regulator.set_point(5.0f);
 }
 
 void update()
@@ -47,26 +47,6 @@ void update()
         return;
     pump.update();
     next_update = millis() + 250;
-}
-
-//
-// Pressure Regulation
-//
-
-static float regulator_set_pressure = 0;
-
-void set_regulator_pressure(float kPa)
-{
-    // 500kPa regulator 5V analog input clipped to 3.3v, 12 bit DAC
-    static constexpr float pressure_factor = 4096.0 / ((3.3 / 5.0) * 500.0);
-    uint32_t value = static_cast<uint32_t>(kPa * pressure_factor);
-    analogWrite(PRESSURE_REGULATOR_PIN, value);
-    regulator_set_pressure = kPa;
-}
-
-float get_regulator_set_pressure()
-{
-    return regulator_set_pressure;
 }
 
 //

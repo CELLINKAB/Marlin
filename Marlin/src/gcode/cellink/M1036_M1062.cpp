@@ -13,9 +13,9 @@ void GcodeSuite::M1036()
 {
     using namespace pneumatics;
     if (parser.seen('K'))
-        set_regulator_pressure(parser.value_float());
+        regulator.set_point(parser.value_float());
     else {
-        SERIAL_ECHOLN_CELLINK_KV("PREG_SET", get_regulator_set_pressure());
+        SERIAL_ECHOLN_CELLINK_KV("PREG_SET", regulator.set_point());
     }
 }
 
