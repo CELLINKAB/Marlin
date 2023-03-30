@@ -28,12 +28,15 @@ struct Pump
             return;
         }
 
-        const float current_pressure = sensor_.read_avg();
-        if (current_pressure < TANK_PRESSURE_MAINTAINENCE
+        if (const float current_pressure = sensor_.read_avg();
+            current_pressure < TANK_PRESSURE_MAINTAINENCE
             || (pressure_users > 0 && current_pressure < TANK_PRESSURE_TARGET)) {
             WRITE(VALVE, PRESSURE_VALVE_OPEN_LEVEL);
             WRITE(PUMP, HIGH);
         } else {
+            if (current_pressure > TANK_PRESSURE_MAX)
+                SERIAL_ECHOLN("PRESSURE_MAX_EXCEEDED");
+
             WRITE(VALVE, PRESSURE_VALVE_CLOSE_LEVEL);
             WRITE(PUMP, LOW);
         }
@@ -42,7 +45,7 @@ struct Pump
 private:
     static constexpr float TANK_PRESSURE_TARGET = 75.0f;
     static constexpr float TANK_PRESSURE_MAINTAINENCE = 50.0f;
-    static constexpr float TANK_PRESSURE_MAX = 100.0f;
+    static constexpr float TANK_PRESSURE_MAX = 200.0f;
 
     const AnalogPressureSensor<SENSE>& sensor_;
 
