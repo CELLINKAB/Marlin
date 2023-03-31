@@ -32,7 +32,6 @@
 
 // Better: "utility/stm32_eeprom.h", but only after updating stm32duino to 2.0.0
 // Use EEPROM.h for compatibility, for now.
-#include <EEPROM.h>
 #include <utility/stm32_eeprom.h>
 
 /**
