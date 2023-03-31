@@ -50,8 +50,15 @@ void Controller::update()
         Index index = static_cast<Index>(tool_index);
 
         const auto status_res = get_status(index, false);
-        if (status_res.result == Result::OK)
+        if (status_res.result == Result::OK) {
+            if (DEBUGGING(LEVELING)) {
+                if (state.status.is_homing && !status_res.packet.payload.is_homing)
+                    SERIAL_ECHO_MSG("extruder finished homing");
+                if (state.status.slider_is_stepping && !status_res.packet.payload.slider_is_stepping)
+                    SERIAL_ECHO_MSG("slider valve move finished");
+            }
             state.status = status_res.packet.payload;
+        }
 
         const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK)
@@ -205,7 +212,6 @@ Result Controller::home_extruder(Index index, ExtruderDirection direction)
 {
     Packet packet(index, Command::MOVE_TO_HOME_POSITION, direction);
     auto res = send(packet, bus);
-
     if (res == Result::OK) {
         auto& state = ph_states[static_cast<uint8_t>(index)];
         state.extruder_is_homed = true;
