@@ -486,7 +486,7 @@ void GcodeSuite::M1035()
             sensor.setGain(gain);
     };
     if (sensor_index == -1) {
-        auto sensors = bed_sensors();
+        auto& sensors = bed_sensors();
         for (auto& sensor : sensors) {
             handle_sensor(sensor);
         }
@@ -494,6 +494,13 @@ void GcodeSuite::M1035()
         auto& sensor
             = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
         handle_sensor(sensor);
+    }
+}
+void GcodeSuite::M1035_report(bool for_replay) {
+    report_heading_etc(for_replay, F("Bed TMP117 Sensors"));
+    size_t sensor_num = 0;
+    for (const auto & sensor : bed_sensors()) {
+        SERIAL_ECHOLNPGM("M1035 I", sensor_num++, " O", sensor.getOffsetTemperature(), " S", sensor.getGain());
     }
 }
 //SetRegulatorPressure
