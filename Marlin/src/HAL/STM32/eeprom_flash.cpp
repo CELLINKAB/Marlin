@@ -32,6 +32,7 @@
 
 // Better: "utility/stm32_eeprom.h", but only after updating stm32duino to 2.0.0
 // Use EEPROM.h for compatibility, for now.
+#include <EEPROM.h>
 #include <utility/stm32_eeprom.h>
 
 /**
@@ -105,8 +106,6 @@ static bool eeprom_data_written = false;
 size_t PersistentStore::capacity() { return MARLIN_EEPROM_SIZE; }
 
 bool PersistentStore::access_start() {
-
-  EEPROM.begin(); // Avoid STM32 EEPROM.h warning (do nothing)
 
   #if ENABLED(FLASH_EEPROM_LEVELING)
 
