@@ -3808,6 +3808,8 @@ void MarlinSettings::reset() {
     TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
 
     TERN_(OPTICAL_AUTOCAL, gcode.M1510_report(forReplay));
+    TERN_(FESTO_PNEUMATICS, gcode.M1036_report(forReplay))
+    TERN_(FESTO_PNEUMATICS, gcode.M1100_report(forReplay))
 
     //
     // Model predictive control

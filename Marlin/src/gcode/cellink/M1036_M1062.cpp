@@ -19,6 +19,13 @@ void GcodeSuite::M1036()
     }
 }
 
+void GcodeSuite::M1036_report(bool for_replay)
+{
+    using namespace pneumatics;
+    report_heading_etc(for_replay, F("Air Pressure Regulator"));
+    SERIAL_ECHOLNPGM("M1036 K", regulator.set_point());
+}
+
 // get pressure sensors
 void GcodeSuite::M1062()
 {
@@ -56,6 +63,16 @@ void GcodeSuite::M1100()
 
         return;
     }
+}
+
+#define REPORT_M1100(letter, sensor) SERIAL_ECHOLNPGM("M1100 "#letter" O", sensor.offset, " S", sensor.scalar);
+
+void GcodeSuite::M1100_report(bool for_replay) {
+    report_heading_etc(for_replay, F("Air Pressure Sensors"));
+    using namespace pneumatics;
+    REPORT_M1100(L, gripper_vacuum);
+    REPORT_M1100(R, regulator_feedback);
+    REPORT_M1100(T, tank_pressure);
 }
 
 #endif // FESTO_PNEUMATICS

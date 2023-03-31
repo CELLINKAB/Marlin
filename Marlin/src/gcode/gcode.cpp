@@ -1141,7 +1141,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #if ENABLED(FESTO_PNEUMATICS)
         case 1036: M1036(); break; // set pressure regulator
         case 1062: M1062(); break; // get pressure sensors
-        case 1100: M1100(); break; // set pressure regulator offset
+        case 1100: M1100(); break; // set pressure sensor offset/gain
         case 1101: M1101(); break; // debug set pump
       #endif
 
