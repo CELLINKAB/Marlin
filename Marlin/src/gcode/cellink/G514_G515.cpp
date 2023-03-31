@@ -3,7 +3,7 @@
 
 #if ENABLED(FESTO_PNEUMATICS)
 
-#    include "../../feature/festo_pneumatics.h"
+#    include "../../feature/air_system/pneumatics.h"
 #    include "../../feature/guppi_printhead/chantarelle.h"
 #    include "../../module/planner.h"
 #    include "../gcode.h"
@@ -18,7 +18,7 @@ void GcodeSuite::G514()
     uint8_t tool = get_target_extruder_from_command();
     get_destination_from_command();
     planner.synchronize();
-    auto _ = pneumatics::use_pressure();
+    auto _ = pneumatics::pump.use_pressure();
     pneumatics::apply_mixing_pressure(tool);
     prepare_line_to_destination();
     planner.synchronize();
@@ -48,7 +48,7 @@ void GcodeSuite::G515()
     if (is_releasing) {
         {
             do_blocking_move_to_z(GRIP_Z_HEIGHT);
-            [[maybe_unused]] auto _using_pressure = pneumatics::use_pressure();
+            auto _using_pressure = pneumatics::pump.use_pressure();
             set_gripper_valves(GripperState::Release);
             const millis_t timeout = millis() + 8000;
             current_position.z = RELEASE_Z_HEIGHT;
@@ -76,7 +76,13 @@ void GcodeSuite::G515()
         set_gripper_valves(GripperState::Grip);
         SET_SOFT_ENDSTOP_LOOSE(true);
         do_blocking_move_to_z(GRIP_Z_HEIGHT);
-        suck_lid();
+        {
+            auto _ = pneumatics::pump.use_suction();
+            const millis_t timeout = millis() + SEC_TO_MS(10);
+            while (millis() < timeout && gripper_vacuum.read_avg() > GRIP_THRESHOLD) {
+                idle();
+            }
+        }
         set_gripper_valves(GripperState::Close);
         do_blocking_move_to_z(RELEASE_Z_HEIGHT);
         SET_SOFT_ENDSTOP_LOOSE(false);
