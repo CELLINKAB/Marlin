@@ -1345,6 +1345,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
     decltype(TT::pid) work_pid{};
     float temp_iState = 0, temp_dState = 0;
     bool pid_reset = true;
+    celsius_t last_set_temp = 0;
 
     PIDRunner(TT &t) : tempinfo(t) { }
 
@@ -1356,10 +1357,11 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
       #else // !PID_OPENLOOP
 
-        if (!tempinfo.is_set) {
+        if (!tempinfo.is_set || last_set_temp != tempinfo.target) {
           pid_reset = true;
           return 0;
         }
+        
 
         float pid_error = tempinfo.target - tempinfo.celsius;
           
@@ -1380,6 +1382,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           pid_reset = false;
           temp_iState = 0.0;
           work_pid.Kd = 0.0;
+          last_set_temp = tempinfo.target;
         }
 
         if constexpr (BIDIRECTIONAL)
