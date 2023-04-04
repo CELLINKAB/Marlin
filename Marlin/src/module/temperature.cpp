@@ -1385,9 +1385,6 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           work_pid.Kd = 0.0;
         }
 
-        if constexpr (BIDIRECTIONAL)
-            pid_error = ABS(pid_error);
-
         const float max_power_over_i_gain = float(MAX_POW) / tempinfo.pid.Ki - float(MIN_POW);
         temp_iState = constrain(temp_iState + pid_error, 0, max_power_over_i_gain);
 
@@ -1397,11 +1394,10 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
         temp_dState = tempinfo.celsius;
 
-        float out_val = constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_POW), 0, MAX_POW);
-        
-        if (BIDIRECTIONAL && tempinfo.is_above_target()) {
-          out_val = -out_val;
-        }
+        float out_val = constrain(work_pid.Kp 
+                                  + work_pid.Ki 
+                                  + work_pid.Kd 
+                                  + static_cast<float>(MIN_POW), TERN(BIDIRECTIONAL, -MAX_POW, MIN_POW), MAX_POW);
 
         return out_val;
 
