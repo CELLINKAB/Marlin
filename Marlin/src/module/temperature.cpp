@@ -1359,6 +1359,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
         if (!tempinfo.is_set || last_set_temp != tempinfo.target) {
           pid_reset = true;
+          last_set_temp = tempinfo.target;
           return 0;
         }
         
@@ -1382,7 +1383,6 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           pid_reset = false;
           temp_iState = 0.0;
           work_pid.Kd = 0.0;
-          last_set_temp = tempinfo.target;
         }
 
         if constexpr (BIDIRECTIONAL)
