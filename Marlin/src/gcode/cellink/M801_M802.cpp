@@ -60,10 +60,8 @@ double get_tmp117_bed_temp()
     return avg;
 }
 
-// get bed temp
-void GcodeSuite::M802()
-{
-    uint8_t sensor_num = 0;
+void report_bed_sensors() {
+        uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
         SERIAL_ECHO("PBT");
@@ -76,6 +74,22 @@ void GcodeSuite::M802()
         SERIAL_CHAR(',');
     }
     SERIAL_EOL();
+}
+
+#if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+    void BedMultiSensorReporter::report() {
+        report_bed_sensors();
+    }
+    BedMultiSensorReporter bed_multi_sensor_reporter;
+#endif
+
+// get bed temp
+void GcodeSuite::M802()
+{
+    report_bed_sensors();
+    #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+        bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
+    #endif
 }
 
 void GcodeSuite::M801()
