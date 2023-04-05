@@ -22,10 +22,10 @@ void GcodeSuite::M1036()
 // get pressure sensors
 void GcodeSuite::M1062()
 {
-    using namespace pneumatics;
-    SERIAL_ECHO_CELLINK_KV("REG", regulator_feedback.read_avg());
-    SERIAL_ECHO_CELLINK_KV("TANK", tank_pressure.read_avg());
-    SERIAL_ECHOLN_CELLINK_KV("GRIP", gripper_vacuum.read_avg());
+    pneumatics::report_sensors();
+    #if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
+    pneumatics::reporter.set_interval(parser.byteval('S'));
+    #endif
 }
 
 template<typename SENSOR>
