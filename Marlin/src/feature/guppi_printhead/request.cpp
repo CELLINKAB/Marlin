@@ -46,7 +46,7 @@ void Controller::update()
         return;
 
     const auto encoder_res = debug_get_encoders(false);
-    if (encoder_res == Result::OK) {
+    if (encoder_res.result == Result::OK) {
         ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderOne);
         ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderTwo);
         ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderThree);
