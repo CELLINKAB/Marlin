@@ -45,6 +45,16 @@ void Controller::update()
     if (millis() < next_update)
         return;
 
+    const auto encoder_res = debug_get_encoders();
+    if (encoder_res == Result::OK) {
+        ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderOne);
+        ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderTwo);
+        ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderThree);
+        ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderOne);
+        ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderTwo);
+        ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderThree);
+    }
+
     for (uint8_t tool_index = 0; tool_index < EXTRUDERS; ++tool_index) {
         auto& state = ph_states[tool_index];
         Index index = static_cast<Index>(tool_index);
@@ -341,4 +351,9 @@ Response<uint32_t> Controller::get_step_volume(Index index)
 {
     Packet packet(index, Command::GET_STEP_VOLUME);
     return send_and_receive<uint32_t>(packet, bus);
+}
+
+Response<EncoderStates> Controller::debug_get_encoders() {
+    Packet packet(Index::All, Command::DEBUG_GET_ENCODERS);
+    return send_and_receive<EncoderStates>(packet, bus);
 }
