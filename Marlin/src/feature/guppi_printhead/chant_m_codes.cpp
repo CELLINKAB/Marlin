@@ -755,7 +755,7 @@ void GcodeSuite::M2200()
                      res.packet.payload[5]);
 
     // FIXME: Put this in a better place and modularize
-    TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S'));
+    TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
 }
 
 #endif //  CHANTARELLE_SUPPORT
