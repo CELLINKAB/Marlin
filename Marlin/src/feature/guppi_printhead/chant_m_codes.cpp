@@ -715,5 +715,9 @@ void GcodeSuite::M2100() {}
 void GcodeSuite::M2110() {}
 //ResetCoaxialCouple
 void GcodeSuite::M2111() {}
+//DebugGetEncoders
+void GcodeSuite::M2200() {
+    
+}
 
 #endif //  CHANTARELLE_SUPPORT
