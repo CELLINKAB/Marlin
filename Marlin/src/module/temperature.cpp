@@ -1368,15 +1368,10 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           
         if (pid_error < -(PID_FUNCTIONAL_RANGE)) {
           pid_reset = true;
-          if constexpr (BIDIRECTIONAL) 
-            return -MAX_POW;
-          else 
-            return 0;
         }
         
         if (pid_error > PID_FUNCTIONAL_RANGE) {
           pid_reset = true;
-          return MAX_POW;
         }
 
         if (pid_reset) {
