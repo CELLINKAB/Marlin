@@ -25,6 +25,19 @@ void printhead::flush_rx(HardwareSerial& serial)
         std::ignore = serial.read();
 }
 
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+void printhead::reporters::Encoders::report() {}
+void printhead::reporters::Status::report() {}
+
+static reporters::Encoders encoder_reporter;
+static reporters::Status status_reporter;
+
+void printhead::reporters::tick_all() {
+    encoder_reporter.tick();
+    status_reporter.tick();
+}
+#endif
+
 void Controller::tool_change(uint8_t tool_index)
 {
     Index index = static_cast<Index>(tool_index);

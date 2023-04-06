@@ -8,6 +8,11 @@
 
 #include "packet.h"
 
+#define AUTO_REPORT_CHANTARELLE
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+  #include "../../libs/autoreport.h"
+#endif
+
 namespace printhead {
 
 constexpr double EXTRUSION_RADIUS = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
@@ -313,12 +318,48 @@ enum class SliderDirection : uint8_t {
 namespace constants {
 static constexpr size_t CS_FANS = 2;
 static constexpr size_t CS_TEMS = 2;
+static constexpr size_t CS_ENCODERS = 6;
 } // namespace constants
 
 namespace {
 using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
 using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
+using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
 } // namespace
+
+enum class EncoderIndex {
+    SliderOne,
+    ExtruderOne,
+    SliderTwo,
+    ExtruderTwo,
+    SliderThree,
+    ExtruderThree
+}
+
+constexpr int32_t get_encoder_state(const EncoderStates & states, EncoderIndex index) {
+    return states[static_cast<size_t>(index)];
+}
+
+constexpr auto get_encoder_index_str(EncoderIndex index) {
+    switch (index) {
+        case EncoderIndex::SliderOne: return "SLIDER_1";
+        case EncoderIndex::SliderTwo: return "SLIDER_2";
+        case EncoderIndex::SliderThree: return "SLIDER_3";
+        case EncoderIndex::ExtruderOne: return "EXTRUDER_1";
+        case EncoderIndex::ExtruderTwo: return "EXTRUDER_2";
+        case EncoderIndex::ExtruderThree: return "EXTRUDER_3";
+    }
+    __unreachable();
+}
+
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+  namespace reporters 
+  {
+    void tick_all();
+    struct Encoders : AutoReporter<Encoders> {static void report();};
+    struct Status : AutoReporter<Status> {static void report();};
+  }
+#endif
 
 struct PrintheadState
 {
@@ -404,6 +445,7 @@ public:
     Result set_volume_per_fullstep(Index index, uint32_t picoliters);
     Result set_step_volume(Index index, uint32_t picoliters);
     Response<uint32_t> get_step_volume(Index index);
+    Response<EncoderStates> debug_get_encoders();
 };
 
 } // namespace printhead
