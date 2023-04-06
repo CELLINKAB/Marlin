@@ -156,6 +156,7 @@ enum class Command : uint16_t {
     DEBUG_GET_FAN_PWM = 1009,
     DEBUG_GET_TEM_PWM = 1010,
     DEBUG_GET_TEMPERATURE = 1011,
+    DEBUG_GET_ENCODERS = 1016,
 
     NOF_CMDS
 };

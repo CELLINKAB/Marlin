@@ -4,6 +4,8 @@
 
 #    include "../../module/planner.h"
 
+#    include "../../gcode/cellink/cellink_reporting.h"
+
 #    include "pneumatics.h"
 
 namespace pneumatics {
@@ -98,6 +100,25 @@ void set_gripper_valves(GripperState state)
         break;
     }
 }
+
+
+//
+// Reporting
+//
+
+void report_sensors() {
+    SERIAL_ECHO_CELLINK_KV("REG", regulator_feedback.read_avg());
+    SERIAL_ECHO_CELLINK_KV("TANK", tank_pressure.read_avg());
+    SERIAL_ECHOLN_CELLINK_KV("GRIP", gripper_vacuum.read_avg());
+}
+
+#if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
+void Reporter::report() 
+{
+    report_sensors();
+}
+Reporter reporter;
+#endif
 
 } // namespace pneumatics
 

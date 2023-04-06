@@ -12,6 +12,25 @@
 printhead::Controller ph_controller(CHANT_SERIAL);
 
 //
+// auto reporting
+//
+
+#    if ENABLED(AUTO_REPORT_CHANTARELLE)
+
+void printhead::reporters::State::report()
+{
+    ph_controller.report_states();
+}
+
+static printhead::reporters::State printhead_reporter;
+
+void printhead::reporters::tick_all()
+{
+    printhead_reporter.tick();
+}
+#    endif
+
+//
 // Helper functions
 //
 
@@ -79,7 +98,8 @@ void GcodeSuite::G511()
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
     ph_debug_print(res);
-    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("extruder home started");
+    if (DEBUGGING(LEVELING))
+        SERIAL_ECHO_MSG("extruder home started");
 }
 
 /**
@@ -91,7 +111,8 @@ void GcodeSuite::G512()
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
     ph_debug_print(res);
-    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("slider valve home started");
+    if (DEBUGGING(LEVELING))
+        SERIAL_ECHO_MSG("slider valve home started");
 }
 
 /**
@@ -110,7 +131,8 @@ void GcodeSuite::G513()
     planner.synchronize();
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
     ph_debug_print(res);
-    if (DEBUGGING(LEVELING)) SERIAL_ECHO_MSG("slider valve move started");
+    if (DEBUGGING(LEVELING))
+        SERIAL_ECHO_MSG("slider valve move started");
 }
 
 //
@@ -715,5 +737,25 @@ void GcodeSuite::M2100() {}
 void GcodeSuite::M2110() {}
 //ResetCoaxialCouple
 void GcodeSuite::M2111() {}
+//DebugGetEncoders
+void GcodeSuite::M2200()
+{
+    const auto res = ph_controller.debug_get_encoders();
+    SERIAL_ECHOLNPGM(",SLIDER_0_ENCODER:",
+                     res.packet.payload[0],
+                     ",EXTRUDER_0_ENCODER:",
+                     res.packet.payload[1],
+                     ",SLIDER_1_ENCODER:",
+                     res.packet.payload[2],
+                     ",EXTRUDER_1_ENCODER:",
+                     res.packet.payload[3],
+                     ",SLIDER_2_ENCODER:",
+                     res.packet.payload[4],
+                     ",EXTRUDER_2_ENCODER:",
+                     res.packet.payload[5]);
+
+    // FIXME: Put this in a better place and modularize
+    TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
+}
 
 #endif //  CHANTARELLE_SUPPORT

@@ -8,6 +8,11 @@
 
 #include "packet.h"
 
+#define AUTO_REPORT_CHANTARELLE
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+#    include "../../libs/autoreport.h"
+#endif
+
 namespace printhead {
 
 constexpr double EXTRUSION_RADIUS = DEFAULT_NOMINAL_FILAMENT_DIA / 2;
@@ -184,11 +189,12 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         // header + crc + 1 byte padding on either side
         constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t) + 2;
         if constexpr (std::is_same_v<T, void>) {
-            return EMPTY_PACKET_SIZE; }
-        else {
+            return EMPTY_PACKET_SIZE;
+        } else {
             // using sizeof(Packet<T>) can cause issues due to alignment
             static_assert(sizeof(T) < 128, "Packet payload type too large for buffer!");
-            return EMPTY_PACKET_SIZE + sizeof(T);}
+            return EMPTY_PACKET_SIZE + sizeof(T);
+        }
     }();
     uint8_t packet_buffer[MAX_PACKET]{};
 
@@ -313,17 +319,34 @@ enum class SliderDirection : uint8_t {
 namespace constants {
 static constexpr size_t CS_FANS = 2;
 static constexpr size_t CS_TEMS = 2;
+static constexpr size_t CS_ENCODERS = 6;
 } // namespace constants
 
 namespace {
 using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
 using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
+using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
 } // namespace
+
+enum class EncoderIndex {
+    SliderOne,
+    ExtruderOne,
+    SliderTwo,
+    ExtruderTwo,
+    SliderThree,
+    ExtruderThree
+};
+
+constexpr int32_t get_encoder_state(const EncoderStates& states, EncoderIndex index)
+{
+    return states[static_cast<size_t>(index)];
+}
 
 struct PrintheadState
 {
-    int32_t extruder_pos;
+    int32_t extruder_encoder;
     int32_t slider_pos;
+    int32_t slider_encoder;
     FanSpeeds fan_set_speeds;
     TemTemps tem_set_temps;
     uint16_t raw_temperature;
@@ -331,6 +354,16 @@ struct PrintheadState
     bool extruder_is_homed;
     bool slider_is_homed;
 };
+
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+namespace reporters {
+void tick_all();
+struct State : AutoReporter<State>
+{
+    static void report();
+};
+} // namespace reporters
+#endif
 
 class Controller
 {
@@ -348,6 +381,8 @@ public:
     void tool_change(uint8_t tool_index);
 
     void update();
+
+    void report_states();
 
     celsius_float_t get_latest_extruder_temp(Index index);
 
@@ -404,6 +439,7 @@ public:
     Result set_volume_per_fullstep(Index index, uint32_t picoliters);
     Result set_step_volume(Index index, uint32_t picoliters);
     Response<uint32_t> get_step_volume(Index index);
+    Response<EncoderStates> debug_get_encoders(bool debug = true);
 };
 
 } // namespace printhead

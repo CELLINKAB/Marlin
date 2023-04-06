@@ -264,6 +264,10 @@
   #include "feature/stepper_retracting_probe.h"
 #endif
 
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
+  #include "feature/tmp117_printbed.h"
+#endif
+
 #if ENABLED(MARLIN_TEST_BUILD)
   #include "tests/marlin_tests.h"
 #endif
@@ -900,6 +904,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
       TERN_(AUTO_REPORT_SD_STATUS, card.auto_reporter.tick());
       TERN_(AUTO_REPORT_POSITION, position_auto_reporter.tick());
       TERN_(BUFFER_MONITORING, queue.auto_report_buffer_statistics());
+      TERN_(AUTO_REPORT_PNEUMATIC_SENSORS, pneumatics::reporter.tick());
+      TERN_(AUTO_REPORT_BED_MULTI_SENSOR, bed_multi_sensor_reporter.tick());
+      TERN_(AUTO_REPORT_CHANTARELLE, printhead::reporters::tick_all());
     }
   #endif
 
