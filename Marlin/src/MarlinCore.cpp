@@ -264,7 +264,7 @@
   #include "feature/stepper_retracting_probe.h"
 #endif
 
-#if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
   #include "feature/tmp117_printbed.h"
 #endif
 
