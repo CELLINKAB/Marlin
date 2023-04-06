@@ -439,7 +439,7 @@ public:
     Result set_volume_per_fullstep(Index index, uint32_t picoliters);
     Result set_step_volume(Index index, uint32_t picoliters);
     Response<uint32_t> get_step_volume(Index index);
-    Response<EncoderStates> debug_get_encoders();
+    Response<EncoderStates> debug_get_encoders(bool debug = true);
 };
 
 } // namespace printhead

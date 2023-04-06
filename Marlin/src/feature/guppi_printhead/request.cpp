@@ -45,7 +45,7 @@ void Controller::update()
     if (millis() < next_update)
         return;
 
-    const auto encoder_res = debug_get_encoders();
+    const auto encoder_res = debug_get_encoders(false);
     if (encoder_res == Result::OK) {
         ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderOne);
         ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderTwo);
@@ -353,7 +353,7 @@ Response<uint32_t> Controller::get_step_volume(Index index)
     return send_and_receive<uint32_t>(packet, bus);
 }
 
-Response<EncoderStates> Controller::debug_get_encoders() {
+Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
     Packet packet(Index::All, Command::DEBUG_GET_ENCODERS);
-    return send_and_receive<EncoderStates>(packet, bus);
+    return send_and_receive<EncoderStates>(packet, bus, debug);
 }
