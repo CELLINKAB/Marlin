@@ -12,6 +12,8 @@ void GcodeSuite::M1130() {
     auto current_1 = analogRead(CS_24V_PIN);
     auto current_2 = analogRead(CS_BED_24V_CS_PIN);
 
+    // TODO: scale these values properly
+
     SERIAL_ECHO_CELLINK_KV("LOAD_SWITCH_1_CURRENT:", current_1);
     SERIAL_ECHOLN_CELLINK_KV("LOAD_SWITCH_2_CURRENT:", current_2);
 }
