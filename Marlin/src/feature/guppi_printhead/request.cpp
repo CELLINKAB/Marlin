@@ -25,19 +25,6 @@ void printhead::flush_rx(HardwareSerial& serial)
         std::ignore = serial.read();
 }
 
-#if ENABLED(AUTO_REPORT_CHANTARELLE)
-void printhead::reporters::Encoders::report() {}
-void printhead::reporters::Status::report() {}
-
-static reporters::Encoders encoder_reporter;
-static reporters::Status status_reporter;
-
-void printhead::reporters::tick_all() {
-    encoder_reporter.tick();
-    status_reporter.tick();
-}
-#endif
-
 void Controller::tool_change(uint8_t tool_index)
 {
     Index index = static_cast<Index>(tool_index);
@@ -79,6 +66,23 @@ void Controller::update()
     }
 
     next_update = millis() + SEC_TO_MS(1);
+}
+
+void Controller::report_states()
+{
+    {
+#define PRINT_FIELD(field) SERIAL_ECHOPGM(#field ": ", state.field, ", ");
+
+        SERIAL_ECHOLN("Printheads: [");
+        for (const auto& state : ph_states) {
+            SERIAL_ECHO("State: { ");
+            PRINT_FIELD(extruder_encoder);
+            PRINT_FIELD(slider_pos);
+            PRINT_FIELD(slider_encoder);
+            SERIAL_ECHOLN("}");
+        }
+        SERIAL_ECHOLN("]");
+    }
 }
 
 celsius_float_t Controller::get_latest_extruder_temp(Index index)

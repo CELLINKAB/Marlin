@@ -12,6 +12,22 @@
 printhead::Controller ph_controller(CHANT_SERIAL);
 
 //
+// auto reporting
+//
+
+#if ENABLED(AUTO_REPORT_CHANTARELLE)
+
+void printhead::reporters::State::report() {ph_controller.report_states();}
+
+static printhead::reporters::State printhead_reporter;
+
+void printhead::reporters::tick_all()
+{
+    printhead_reporter.tick();
+}
+#endif
+
+//
 // Helper functions
 //
 
