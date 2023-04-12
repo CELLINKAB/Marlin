@@ -1345,6 +1345,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
     decltype(TT::pid) work_pid{};
     float temp_iState = 0, temp_dState = 0;
     bool pid_reset = true;
+    celsius_t last_set_temp = 0;
 
     PIDRunner(TT &t) : tempinfo(t) { }
 
@@ -1356,24 +1357,21 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
       #else // !PID_OPENLOOP
 
-        if (!tempinfo.is_set) {
+        if (!tempinfo.is_set || last_set_temp != tempinfo.target) {
           pid_reset = true;
+          last_set_temp = tempinfo.target;
           return 0;
         }
+        
 
         float pid_error = tempinfo.target - tempinfo.celsius;
           
         if (pid_error < -(PID_FUNCTIONAL_RANGE)) {
           pid_reset = true;
-          if constexpr (BIDIRECTIONAL) 
-            return -MAX_POW;
-          else 
-            return 0;
         }
         
         if (pid_error > PID_FUNCTIONAL_RANGE) {
           pid_reset = true;
-          return MAX_POW;
         }
 
         if (pid_reset) {
@@ -1382,11 +1380,8 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
           work_pid.Kd = 0.0;
         }
 
-        if constexpr (BIDIRECTIONAL)
-            pid_error = ABS(pid_error);
-
-        const float max_power_over_i_gain = float(MAX_POW) / tempinfo.pid.Ki - float(MIN_POW);
-        temp_iState = constrain(temp_iState + pid_error, 0, max_power_over_i_gain);
+        const float max_power_over_i_gain = static_cast<float>(MAX_POW) / tempinfo.pid.Ki - static_cast<float>(MIN_POW);
+        temp_iState = constrain(temp_iState + pid_error, (BIDIRECTIONAL? -max_power_over_i_gain : 0), max_power_over_i_gain);
 
         work_pid.Kp = tempinfo.pid.Kp * pid_error;
         work_pid.Ki = tempinfo.pid.Ki * temp_iState;
@@ -1394,11 +1389,11 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
         temp_dState = tempinfo.celsius;
 
-        float out_val = constrain(work_pid.Kp + work_pid.Ki + work_pid.Kd + float(MIN_POW), 0, MAX_POW);
-        
-        if (BIDIRECTIONAL && tempinfo.is_above_target()) {
-          out_val = -out_val;
-        }
+        float out_val = constrain(work_pid.Kp 
+                                  + work_pid.Ki 
+                                  + work_pid.Kd
+                                  + static_cast<float>(BIDIRECTIONAL? 0 : MIN_POW),
+                                  (BIDIRECTIONAL? -MAX_POW : MIN_POW), MAX_POW);
 
         return out_val;
 
