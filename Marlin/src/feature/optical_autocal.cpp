@@ -108,7 +108,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
         print_pos(offsets[tool], F("Calibrated tool offset:"));
 
-    do_blocking_move_to_z(offsets[tool].z + POST_AUTOCAL_SAFE_Z_HEIGHT);
+    do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
 
     return retval;
 }
