@@ -146,10 +146,10 @@ Response<void> Controller::get_info(Index index)
     return send_and_receive<void>(packet, bus); // TODO: parse response into type
 }
 
-Response<void> Controller::get_fw_version(Index index)
+Response<FirmwareVersion> Controller::get_fw_version(Index index)
 {
     Packet packet(index, Command::GET_SW_VERSION);
-    return send_and_receive<void>(packet, bus); //TODO: parse result into relevant type
+    return send_and_receive<FirmwareVersion>(packet, bus);
 }
 
 Result Controller::set_pid(Index index, float p, float i, float d)
@@ -360,3 +360,4 @@ Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
     Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
+
