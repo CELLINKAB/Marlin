@@ -354,6 +354,9 @@ Response<uint32_t> Controller::get_step_volume(Index index)
 }
 
 Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
-    Packet packet(Index::All, Command::DEBUG_GET_ENCODERS);
+    // Semantically it makes sense to use the ALL address here since
+    // this currently is implemented by returning all encoders.
+    // However, receiving an ALL address disables replies in Guppi.
+    Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
