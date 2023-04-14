@@ -320,12 +320,14 @@ namespace constants {
 static constexpr size_t CS_FANS = 2;
 static constexpr size_t CS_TEMS = 2;
 static constexpr size_t CS_ENCODERS = 6;
+static constexpr size_t FW_VERSION_LEN = 12;
 } // namespace constants
 
 namespace {
 using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
 using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
 using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
+using FirmwareVersion = std::array<char, constants::FW_VERSION_LEN>;
 } // namespace
 
 enum class EncoderIndex {
@@ -393,7 +395,7 @@ public:
 
     // Metadata methods
     Response<void> get_info(Index index);
-    Response<void> get_fw_version(Index index);
+    Response<FirmwareVersion> get_fw_version(Index index);
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
     Response<Status> get_status(Index index, bool debug = true);

@@ -146,10 +146,10 @@ Response<void> Controller::get_info(Index index)
     return send_and_receive<void>(packet, bus); // TODO: parse response into type
 }
 
-Response<void> Controller::get_fw_version(Index index)
+Response<FirmwareVersion> Controller::get_fw_version(Index index)
 {
     Packet packet(index, Command::GET_SW_VERSION);
-    return send_and_receive<void>(packet, bus); //TODO: parse result into relevant type
+    return send_and_receive<FirmwareVersion>(packet, bus);
 }
 
 Result Controller::set_pid(Index index, float p, float i, float d)
@@ -354,6 +354,10 @@ Response<uint32_t> Controller::get_step_volume(Index index)
 }
 
 Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
-    Packet packet(Index::All, Command::DEBUG_GET_ENCODERS);
+    // Semantically it makes sense to use the ALL address here since
+    // this currently is implemented by returning all encoders.
+    // However, receiving an ALL address disables replies in Guppi.
+    Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
+
