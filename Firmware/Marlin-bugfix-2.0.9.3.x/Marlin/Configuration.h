@@ -588,7 +588,7 @@
 #define HEATER_5_MAXTEMP 275
 #define HEATER_6_MAXTEMP 275
 #define HEATER_7_MAXTEMP 275
-#define BED_MAXTEMP      150
+#define BED_MAXTEMP      100
 #define CHAMBER_MAXTEMP  85 // changed from 65 to 85 to allow for 70C setpoint - BEJ 12/27/22
 
 /**
@@ -648,7 +648,7 @@
  * heater. If your configuration is significantly different than this and you don't understand
  * the issues involved, don't use bed PID until someone else verifies that your hardware works.
  */
-//#define PIDTEMPBED
+#define PIDTEMPBED
 
 //#define BED_LIMIT_SWITCHING
 
