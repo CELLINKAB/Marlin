@@ -27,39 +27,41 @@ REFERENCES
  * @brief   Sets the weighting scale threshold value for end stop.
  *          Function is non-waiting. Syntax: M7110 P########
  */
-void GcodeSuite::M7110() {
-    if(parser.seenval('P'))
+void GcodeSuite::M7110()
+{
+    if (parser.seenval('P'))
     {
-        wScale.setThreshold(parser.value_long());
+        wScale.setThreshold(parser.value_float());
     }
 }
 
 /**
  * @brief Sets the mode and channel of the HX711. Syntax: M7111 P#
- * 
+ *
  */
-void GcodeSuite::M7111() {
-    if(parser.seenval('P'))
+void GcodeSuite::M7111()
+{
+    if (!parser.seenval('P'))
     {
-        char chan = parser.value_byte();
-        if( (chan > 1 )||(chan < 3) )           //supported values are 1, 2 nad 3.
-        {
-            wScale.setChannel(parser.value_long());
-        }
-        //otherwise do nothing.
+        return;
+    }
+
+    const uint8_t chan = parser.value_byte();
+    if ((chan >= 1) && (chan <= 3)) // supported values are 1, 2 and 3.
+    {
+        wScale.setChannel(chan);
     }
 }
 
 /**
  * @brief   Prints on the command port the raw value of HX711.
  *          Syntax: M7112
- * 
+ *
  */
-void GcodeSuite::M7112() {
+void GcodeSuite::M7112()
+{
     // Optimized print to serial.
-    SERIAL_ECHOPGM("HX711 raw val: ");          //print from PGM
-    SERIAL_ECHO_F(wScale.getCurrentVal());      //print float
-    SERIAL_EOL();                               //print EOL
+    SERIAL_ECHOLNPGM("HX711 raw val: ", wScale.getCurrentVal());
 }
 
 #endif

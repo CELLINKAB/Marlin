@@ -66,6 +66,10 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
+#if ENABLED(HX711_WSCALE)
+  #include "../../feature/hx_711.h"
+#endif
+
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
@@ -243,6 +247,11 @@ void GcodeSuite::G28() {
   TERN_(EXTENSIBLE_UI, ExtUI::onHomingStart());
 
   planner.synchronize();          // Wait for planner moves to finish!
+
+  #if ENABLED(HX711_WSCALE)
+    wScale.tare_start();
+    while( wScale.tare_ready() == false ) idle();
+  #endif
 
   SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state
 
