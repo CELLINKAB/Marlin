@@ -71,7 +71,3 @@
 #if ENABLED(POSTMORTEM_DEBUGGING)
   #error "POSTMORTEM_DEBUGGING is not supported on AVR boards."
 #endif
-
-#if USING_PULLDOWNS
-  #error "PULLDOWN pin mode is not available on AVR boards."
-#endif

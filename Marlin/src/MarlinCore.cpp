@@ -252,6 +252,10 @@
   #include "feature/easythreed_ui.h"
 #endif
 
+#if ENABLED(HX711_WSCALE)
+  #include "feature/hx_711.h"
+#endif
+
 PGMSTR(M112_KILL_STR, "M112 Shutdown");
 
 MarlinState marlin_state = MF_INITIALIZING;
@@ -271,7 +275,6 @@ bool wait_for_heatup = true;
     while (wait_for_user && !(ms && ELAPSED(millis(), ms)))
       idle(TERN_(ADVANCED_PAUSE_FEATURE, no_sleep));
     wait_for_user = false;
-    while (ui.button_pressed()) safe_delay(50);
   }
 
 #endif
@@ -477,7 +480,7 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   #endif
 
   #if HAS_FREEZE_PIN
-    stepper.frozen = READ(FREEZE_PIN) == FREEZE_STATE;
+    Stepper::frozen = !READ(FREEZE_PIN);
   #endif
 
   #if HAS_HOME
@@ -862,6 +865,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
 
+  // Manage Scale
+  TERN_(HX711_WSCALE, wScale.manage_hx_711());
+
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
   return;
@@ -1130,6 +1136,8 @@ void setup() {
       SERIAL_ECHOLNPGM_P(msg);
     };
     #define SETUP_LOG(M) log_current_ms(PSTR(M))
+  #elif ENABLED(CELLINK_REPORTING)
+    #define SETUP_LOG(M) SERIAL_ECHOLNPGM(M)
   #else
     #define SETUP_LOG(...) NOOP
   #endif
@@ -1167,13 +1175,9 @@ void setup() {
     #endif
   #endif
 
-  #if ENABLED(FREEZE_FEATURE)
+  #if HAS_FREEZE_PIN
     SETUP_LOG("FREEZE_PIN");
-    #if FREEZE_STATE
-      SET_INPUT_PULLDOWN(FREEZE_PIN);
-    #else
-      SET_INPUT_PULLUP(FREEZE_PIN);
-    #endif
+    SET_INPUT_PULLUP(FREEZE_PIN);
   #endif
 
   #if HAS_SUICIDE
@@ -1616,6 +1620,10 @@ void setup() {
 
   #if ENABLED(EASYTHREED_UI)
     SETUP_RUN(easythreed_ui.init());
+  #endif
+
+  #if ENABLED(HX711_WSCALE)
+    wScale.begin();
   #endif
 
   marlin_state = MF_RUNNING;

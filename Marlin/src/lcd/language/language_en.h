@@ -104,6 +104,7 @@ namespace Language_en {
   LSTR MSG_HOME_OFFSET_J                  = _UxGT("Home Offset ") STR_J;
   LSTR MSG_HOME_OFFSET_K                  = _UxGT("Home Offset ") STR_K;
   LSTR MSG_HOME_OFFSETS_APPLIED           = _UxGT("Offsets Applied");
+  LSTR MSG_SET_ORIGIN                     = _UxGT("Set Origin");
   LSTR MSG_TRAMMING_WIZARD                = _UxGT("Tramming Wizard");
   LSTR MSG_SELECT_ORIGIN                  = _UxGT("Select Origin");
   LSTR MSG_LAST_VALUE_SP                  = _UxGT("Last value ");
@@ -402,7 +403,7 @@ namespace Language_en {
   LSTR MSG_ADVANCE_K_E                    = _UxGT("Advance K *");
   LSTR MSG_CONTRAST                       = _UxGT("LCD Contrast");
   LSTR MSG_BRIGHTNESS                     = _UxGT("LCD Brightness");
-  LSTR MSG_LCD_TIMEOUT_SEC                = _UxGT("LCD Timeout (s)");
+  LSTR MSG_LCD_BKL_TIMEOUT                = _UxGT("LCD Timeout (s)");
   LSTR MSG_BRIGHTNESS_OFF                 = _UxGT("Backlight Off");
   LSTR MSG_STORE_EEPROM                   = _UxGT("Store Settings");
   LSTR MSG_LOAD_EEPROM                    = _UxGT("Load Settings");

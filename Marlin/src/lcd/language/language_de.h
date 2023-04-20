@@ -88,6 +88,7 @@ namespace Language_de {
   LSTR MSG_HOME_OFFSET_J                  = _UxGT("Homeversatz ") STR_J;
   LSTR MSG_HOME_OFFSET_K                  = _UxGT("Homeversatz ") STR_K;
   LSTR MSG_HOME_OFFSETS_APPLIED           = _UxGT("Homeversatz aktiv");
+  LSTR MSG_SET_ORIGIN                     = _UxGT("Setze Nullpunkte"); //"G92 X0 Y0 Z0" commented out in marlinui.cpp
   LSTR MSG_TRAMMING_WIZARD                = _UxGT("Tramming Assistent");
   LSTR MSG_SELECT_ORIGIN                  = _UxGT("Wählen Sie Ursprung");
   LSTR MSG_LAST_VALUE_SP                  = _UxGT("Letzter Wert ");
@@ -388,7 +389,7 @@ namespace Language_de {
   LSTR MSG_ADVANCE_K_E                    = _UxGT("Vorschubfaktor *");
   LSTR MSG_CONTRAST                       = _UxGT("LCD-Kontrast");
   LSTR MSG_BRIGHTNESS                     = _UxGT("LCD-Helligkeit");
-  LSTR MSG_LCD_TIMEOUT_SEC                = _UxGT("LCD-Ruhezustand (s)");
+  LSTR MSG_LCD_BKL_TIMEOUT                = _UxGT("LCD-Ruhezustand (s)");
   LSTR MSG_BRIGHTNESS_OFF                 = _UxGT("LCD ausschalten");
   LSTR MSG_STORE_EEPROM                   = _UxGT("Konfig. speichern");
   LSTR MSG_LOAD_EEPROM                    = _UxGT("Konfig. laden");

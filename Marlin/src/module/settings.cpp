@@ -277,9 +277,7 @@ typedef struct SettingsDataStruct {
   // X_AXIS_TWIST_COMPENSATION
   //
   #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-    float xatc_spacing;                                 // M423 X Z
-    float xatc_start;
-    xatc_array_t xatc_z_offset;
+    XATC xatc;                                          // M423 X Z
   #endif
 
   //
@@ -398,7 +396,7 @@ typedef struct SettingsDataStruct {
   uint8_t lcd_brightness;                               // M256 B
 
   //
-  // Display Sleep
+  // LCD_BACKLIGHT_TIMEOUT
   //
   #if LCD_BACKLIGHT_TIMEOUT
     uint16_t lcd_backlight_timeout;                     // (G-code needed)
@@ -430,10 +428,10 @@ typedef struct SettingsDataStruct {
   //
   // HAS_TRINAMIC_CONFIG
   //
-  tmc_stepper_current_t tmc_stepper_current;            // M906 X Y Z...
-  tmc_hybrid_threshold_t tmc_hybrid_threshold;          // M913 X Y Z...
-  tmc_sgt_t tmc_sgt;                                    // M914 X Y Z...
-  tmc_stealth_enabled_t tmc_stealth_enabled;            // M569 X Y Z...
+  tmc_stepper_current_t tmc_stepper_current;            // M906 X Y Z X2 Y2 Z2 Z3 Z4 E0 E1 E2 E3 E4 E5
+  tmc_hybrid_threshold_t tmc_hybrid_threshold;          // M913 X Y Z X2 Y2 Z2 Z3 Z4 E0 E1 E2 E3 E4 E5
+  tmc_sgt_t tmc_sgt;                                    // M914 X Y Z X2 Y2 Z2 Z3 Z4
+  tmc_stealth_enabled_t tmc_stealth_enabled;            // M569 X Y Z X2 Y2 Z2 Z3 Z4 E0 E1 E2 E3 E4 E5
 
   //
   // LIN_ADVANCE
@@ -544,7 +542,7 @@ typedef struct SettingsDataStruct {
   // MKS UI controller
   //
   #if ENABLED(DGUS_LCD_UI_MKS)
-    MKS_Language mks_language_index;                    // Display Language
+    uint8_t mks_language_index;                         // Display Language
     xy_int_t mks_corner_offsets[5];                     // Bed Tramming
     xyz_int_t mks_park_pos;                             // Custom Parking (without NOZZLE_PARK)
     celsius_t mks_min_extrusion_temp;                   // Min E Temp (shadow M302 value)
@@ -597,7 +595,7 @@ void MarlinSettings::postprocess() {
 
   TERN_(ENABLE_LEVELING_FADE_HEIGHT, set_z_fade_height(new_z_fade_height, false)); // false = no report
 
-  TERN_(AUTO_BED_LEVELING_BILINEAR, bbl.refresh_bed_level());
+  TERN_(AUTO_BED_LEVELING_BILINEAR, refresh_bed_level());
 
   TERN_(HAS_MOTOR_CURRENT_PWM, stepper.refresh_motor_power());
 
@@ -876,26 +874,22 @@ void MarlinSettings::postprocess() {
     {
       #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
         static_assert(
-          sizeof(Z_VALUES_ARR) == (GRID_MAX_POINTS) * sizeof(Z_VALUES_ARR[0][0]),
+          sizeof(z_values) == (GRID_MAX_POINTS) * sizeof(z_values[0][0]),
           "Bilinear Z array is the wrong size."
         );
+      #else
+        const xy_pos_t bilinear_start{0}, bilinear_grid_spacing{0};
       #endif
 
       const uint8_t grid_max_x = TERN(AUTO_BED_LEVELING_BILINEAR, GRID_MAX_POINTS_X, 3),
                     grid_max_y = TERN(AUTO_BED_LEVELING_BILINEAR, GRID_MAX_POINTS_Y, 3);
       EEPROM_WRITE(grid_max_x);
       EEPROM_WRITE(grid_max_y);
-      #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-        EEPROM_WRITE(bbl.get_grid_spacing());
-        EEPROM_WRITE(bbl.get_grid_start());
-      #else
-        const xy_pos_t bilinear_start{0}, bilinear_grid_spacing{0};
-        EEPROM_WRITE(bilinear_grid_spacing);
-        EEPROM_WRITE(bilinear_start);
-      #endif
+      EEPROM_WRITE(bilinear_grid_spacing);
+      EEPROM_WRITE(bilinear_start);
 
       #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-        EEPROM_WRITE(Z_VALUES_ARR);              // 9-256 floats
+        EEPROM_WRITE(z_values);              // 9-256 floats
       #else
         dummyf = 0;
         for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_WRITE(dummyf);
@@ -906,7 +900,7 @@ void MarlinSettings::postprocess() {
     // X Axis Twist Compensation
     //
     #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-      _FIELD_TEST(xatc_spacing);
+      _FIELD_TEST(xatc);
       EEPROM_WRITE(xatc.spacing);
       EEPROM_WRITE(xatc.start);
       EEPROM_WRITE(xatc.z_offset);
@@ -1134,7 +1128,7 @@ void MarlinSettings::postprocess() {
     }
 
     //
-    // LCD Backlight / Sleep Timeout
+    // LCD Backlight Timeout
     //
     #if LCD_BACKLIGHT_TIMEOUT
       EEPROM_WRITE(ui.lcd_backlight_timeout);
@@ -1148,7 +1142,7 @@ void MarlinSettings::postprocess() {
       #if ENABLED(USE_CONTROLLER_FAN)
         const controllerFan_settings_t &cfs = controllerFan.settings;
       #else
-        constexpr controllerFan_settings_t cfs = controllerFan_defaults;
+        controllerFan_settings_t cfs = controllerFan_defaults;
       #endif
       EEPROM_WRITE(cfs);
     }
@@ -1599,7 +1593,7 @@ void MarlinSettings::postprocess() {
       TERN_(HOST_PROMPT_SUPPORT, hostui.notify(GET_TEXT_F(MSG_SETTINGS_STORED)));
     }
 
-    TERN_(EXTENSIBLE_UI, ExtUI::onSettingsStored(!eeprom_error));
+    TERN_(EXTENSIBLE_UI, ExtUI::onConfigurationStoreWritten(!eeprom_error));
 
     return !eeprom_error;
   }
@@ -1795,19 +1789,20 @@ void MarlinSettings::postprocess() {
         uint8_t grid_max_x, grid_max_y;
         EEPROM_READ_ALWAYS(grid_max_x);                // 1 byte
         EEPROM_READ_ALWAYS(grid_max_y);                // 1 byte
-        xy_pos_t spacing, start;
-        EEPROM_READ(spacing);                          // 2 ints
-        EEPROM_READ(start);                            // 2 ints
         #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
           if (grid_max_x == (GRID_MAX_POINTS_X) && grid_max_y == (GRID_MAX_POINTS_Y)) {
             if (!validating) set_bed_leveling_enabled(false);
-            bbl.set_grid(spacing, start);
-            EEPROM_READ(Z_VALUES_ARR);                 // 9 to 256 floats
+            EEPROM_READ(bilinear_grid_spacing);        // 2 ints
+            EEPROM_READ(bilinear_start);               // 2 ints
+            EEPROM_READ(z_values);                     // 9 to 256 floats
           }
           else // EEPROM data is stale
         #endif // AUTO_BED_LEVELING_BILINEAR
           {
             // Skip past disabled (or stale) Bilinear Grid data
+            xy_pos_t bgs, bs;
+            EEPROM_READ(bgs);
+            EEPROM_READ(bs);
             for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_READ(dummyf);
           }
       }
@@ -1816,7 +1811,7 @@ void MarlinSettings::postprocess() {
       // X Axis Twist Compensation
       //
       #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-        _FIELD_TEST(xatc_spacing);
+        _FIELD_TEST(xatc);
         EEPROM_READ(xatc.spacing);
         EEPROM_READ(xatc.start);
         EEPROM_READ(xatc.z_offset);
@@ -2057,7 +2052,7 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // LCD Backlight / Sleep Timeout
+      // LCD Backlight Timeout
       //
       #if LCD_BACKLIGHT_TIMEOUT
         EEPROM_READ(ui.lcd_backlight_timeout);
@@ -2601,7 +2596,7 @@ void MarlinSettings::postprocess() {
   bool MarlinSettings::load() {
     if (validate()) {
       const bool success = _load();
-      TERN_(EXTENSIBLE_UI, ExtUI::onSettingsLoaded(success));
+      TERN_(EXTENSIBLE_UI, ExtUI::onConfigurationStoreRead(success));
       return success;
     }
     reset();
@@ -3097,7 +3092,7 @@ void MarlinSettings::reset() {
   TERN_(HAS_LCD_BRIGHTNESS, ui.brightness = LCD_BRIGHTNESS_DEFAULT);
 
   //
-  // LCD Backlight / Sleep Timeout
+  // LCD Backlight Timeout
   //
   #if LCD_BACKLIGHT_TIMEOUT
     ui.lcd_backlight_timeout = LCD_BACKLIGHT_TIMEOUT;
@@ -3141,9 +3136,9 @@ void MarlinSettings::reset() {
   //
 
   #if ENABLED(LIN_ADVANCE)
-    EXTRUDER_LOOP() {
-      planner.extruder_advance_K[e] = LIN_ADVANCE_K;
-      TERN_(EXTRA_LIN_ADVANCE_K, other_extruder_advance_K[e] = LIN_ADVANCE_K);
+    LOOP_L_N(i, EXTRUDERS) {
+      planner.extruder_advance_K[i] = LIN_ADVANCE_K;
+      TERN_(EXTRA_LIN_ADVANCE_K, other_extruder_advance_K[i] = LIN_ADVANCE_K);
     }
   #endif
 
@@ -3188,7 +3183,7 @@ void MarlinSettings::reset() {
   // Advanced Pause filament load & unload lengths
   //
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    EXTRUDER_LOOP() {
+    LOOP_L_N(e, EXTRUDERS) {
       fc_settings[e].unload_length = FILAMENT_CHANGE_UNLOAD_LENGTH;
       fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     }
@@ -3340,7 +3335,7 @@ void MarlinSettings::reset() {
             LOOP_L_N(px, GRID_MAX_POINTS_X) {
               CONFIG_ECHO_START();
               SERIAL_ECHOPGM("  G29 W I", px, " J", py);
-              SERIAL_ECHOLNPAIR_F_P(SP_Z_STR, LINEAR_UNIT(Z_VALUES_ARR[px][py]), 5);
+              SERIAL_ECHOLNPAIR_F_P(SP_Z_STR, LINEAR_UNIT(z_values[px][py]), 5);
             }
           }
         }

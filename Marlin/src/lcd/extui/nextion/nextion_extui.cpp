@@ -79,12 +79,12 @@ namespace ExtUI {
     // Called after loading or resetting stored settings
   }
 
-  void onSettingsStored(bool success) {
+  void onConfigurationStoreWritten(bool success) {
     // Called after the entire EEPROM has been written,
     // whether successful or not.
   }
 
-  void onSettingsLoaded(bool success) {
+  void onConfigurationStoreRead(bool success) {
     // Called after the entire EEPROM has been read,
     // whether successful or not.
   }
@@ -117,7 +117,6 @@ namespace ExtUI {
 
   void onSteppersDisabled() {}
   void onSteppersEnabled()  {}
-
 }
 
 #endif // NEXTION_TFT

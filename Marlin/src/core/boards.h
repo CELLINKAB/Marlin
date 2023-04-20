@@ -364,7 +364,6 @@
 #define BOARD_ZONESTAR_ZM3E4          4061  // Zonestar ZM3E4 V1 (STM32F103VC)
 #define BOARD_ZONESTAR_ZM3E4V2        4062  // Zonestar ZM3E4 V2 (STM32F103VC)
 #define BOARD_ERYONE_ERY32_MINI       4063  // Eryone Ery32 mini (STM32F103VE)
-#define BOARD_PANDA_PI_V29            4064  // Panda Pi V2.9 - Standalone (STM32F103RC)
 
 //
 // ARM Cortex-M4F
@@ -427,6 +426,7 @@
 #define BOARD_T41U5XBB                5002  // T41U5XBB Teensy 4.1 breakout board
 #define BOARD_NUCLEO_F767ZI           5003  // ST NUCLEO-F767ZI Dev Board
 #define BOARD_BTT_SKR_SE_BX           5004  // BigTreeTech SKR SE BX (STM32H743II)
+#define BOARD_BTT_SKR_3               5005  // BigTreeTech SKR 3 (STM32H743VG)
 
 //
 // Espressif ESP32 WiFi
@@ -441,7 +441,6 @@
 #define BOARD_PANDA_ZHU               6006  // Panda_ZHU
 #define BOARD_PANDA_M4                6007  // Panda_M4
 #define BOARD_MKS_TINYBEE             6008  // MKS TinyBee based on ESP32 (with I2S stepper stream)
-#define BOARD_ENWI_ESPNP              6009  // enwi ESPNP based on ESP32 (with I2S stepper stream)
 
 //
 // SAMD51 ARM Cortex M4

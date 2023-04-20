@@ -591,7 +591,7 @@ class Planner {
        */
       static float fade_scaling_factor_for_z(const_float_t rz) {
         static float z_fade_factor = 1;
-        if (!z_fade_height || rz <= 0) return 1;
+        if (!z_fade_height) return 1;
         if (rz >= z_fade_height) return 0;
         if (last_fade_z != rz) {
           last_fade_z = rz;
@@ -928,8 +928,8 @@ class Planner {
     #if HAS_LINEAR_E_JERK
       FORCE_INLINE static void recalculate_max_e_jerk() {
         const float prop = junction_deviation_mm * SQRT(0.5) / (1.0f - SQRT(0.5));
-        EXTRUDER_LOOP()
-          max_e_jerk[E_INDEX_N(e)] = SQRT(prop * settings.max_acceleration_mm_per_s2[E_INDEX_N(e)]);
+        LOOP_L_N(i, EXTRUDERS)
+          max_e_jerk[E_INDEX_N(i)] = SQRT(prop * settings.max_acceleration_mm_per_s2[E_INDEX_N(i)]);
       }
     #endif
 
@@ -1020,7 +1020,7 @@ class Planner {
         return limit_value;
       }
 
-    #endif // HAS_JUNCTION_DEVIATION
+    #endif // !CLASSIC_JERK
 };
 
 #define PLANNER_XY_FEEDRATE() _MIN(planner.settings.max_feedrate_mm_s[X_AXIS], planner.settings.max_feedrate_mm_s[Y_AXIS])

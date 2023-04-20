@@ -141,10 +141,10 @@ extern "C" {
 #define PG15  111 //D79
 
 // This must be a literal with the same value as PEND
-#define NUM_DIGITAL_PINS        112
+#define NUM_DIGITAL_PINS        125
 // This must be a literal with a value less than or equal to to MAX_ANALOG_INPUTS
 #define NUM_ANALOG_INPUTS       13
-#define NUM_ANALOG_FIRST        NUM_DIGITAL_PINS
+#define NUM_ANALOG_FIRST        112
 
 //#define ADC_RESOLUTION          12
 

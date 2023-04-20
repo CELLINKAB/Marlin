@@ -41,13 +41,13 @@
  *
  *  DOGLCD                  : Run a Graphical LCD through U8GLib (with MarlinUI)
  *  IS_ULTIPANEL            : Define LCD_PINS_D5/6/7 for direct-connected "Ultipanel" LCDs
- *  HAS_WIRED_LCD           : Ultra LCD, not necessarily Ultipanel.
+ *  IS_ULTRA_LCD            : Ultra LCD, not necessarily Ultipanel.
  *  IS_RRD_SC               : Common RRD Smart Controller digital interface pins
  *  IS_RRD_FG_SC            : Common RRD Full Graphical Smart Controller digital interface pins
  *  IS_U8GLIB_ST7920        : Most common DOGM display SPI interface, supporting a "lightweight" display mode.
  *  U8GLIB_SH1106           : SH1106 OLED with I2C interface via U8GLib
  *  IS_U8GLIB_SSD1306       : SSD1306 OLED with I2C interface via U8GLib (U8GLIB_SSD1306)
- *  U8GLIB_SSD1309          : SSD1309 OLED with I2C interface via U8GLib (HAS_U8GLIB_I2C_OLED, HAS_WIRED_LCD, DOGLCD)
+ *  U8GLIB_SSD1309          : SSD1309 OLED with I2C interface via U8GLib (HAS_U8GLIB_I2C_OLED, IS_ULTRA_LCD, DOGLCD)
  *  IS_U8GLIB_ST7565_64128N : ST7565 128x64 LCD with SPI interface via U8GLib
  *  IS_U8GLIB_LM6059_AF     : LM6059 with Hardware SPI via U8GLib
  */
@@ -101,8 +101,9 @@
 
 #elif ANY(miniVIKI, VIKI2, WYH_L12864, ELB_FULL_GRAPHIC_CONTROLLER, AZSMZ_12864)
 
-  #define DOGLCD
   #define IS_DOGM_12864 1
+
+  #define DOGLCD
   #define IS_ULTIPANEL 1
 
   #if ENABLED(miniVIKI)
@@ -286,7 +287,7 @@
 // 128x64 I2C OLED LCDs - SSD1306/SSD1309/SH1106
 #if ANY(U8GLIB_SSD1306, U8GLIB_SSD1309, U8GLIB_SH1106)
   #define HAS_U8GLIB_I2C_OLED 1
-  #define HAS_WIRED_LCD 1
+  #define IS_ULTRA_LCD 1
   #define DOGLCD
 #endif
 
@@ -442,7 +443,7 @@
 #endif
 
 #if EITHER(IS_ULTIPANEL, ULTRA_LCD)
-  #define HAS_WIRED_LCD 1
+  #define IS_ULTRA_LCD 1
 #endif
 
 #if EITHER(IS_ULTIPANEL, REPRAPWORLD_KEYPAD)
@@ -501,7 +502,8 @@
   #endif
 #endif
 
-#if HAS_WIRED_LCD
+#if IS_ULTRA_LCD
+  #define HAS_WIRED_LCD 1
   #if ENABLED(DOGLCD)
     #define HAS_MARLINUI_U8GLIB 1
   #elif IS_TFTGLCD_PANEL
@@ -522,7 +524,7 @@
   #define HAS_LCDPRINT 1
 #endif
 
-#if ANY(HAS_DISPLAY, HAS_DWIN_E3V2)
+#if ANY(HAS_DISPLAY, HAS_DWIN_E3V2, GLOBAL_STATUS_MESSAGE)
   #define HAS_STATUS_MESSAGE 1
 #endif
 
@@ -747,7 +749,6 @@
 #endif
 
 // Helper macros for extruder and hotend arrays
-#define EXTRUDER_LOOP() for (int8_t e = 0; e < EXTRUDERS; e++)
 #define HOTEND_LOOP() for (int8_t e = 0; e < HOTENDS; e++)
 #define ARRAY_BY_EXTRUDERS(V...) ARRAY_N(EXTRUDERS, V)
 #define ARRAY_BY_EXTRUDERS1(v1) ARRAY_N_1(EXTRUDERS, v1)
@@ -989,11 +990,7 @@
   #undef USE_PROBE_FOR_Z_HOMING
 #endif
 
-#if ENABLED(BELTPRINTER) && !defined(HOME_Y_BEFORE_X)
-  #define HOME_Y_BEFORE_X
-#endif
-
-#if Z_HOME_TO_MAX && DISABLED(Z_SAFE_HOMING)
+#if Z_HOME_TO_MAX
   #define HOME_Z_FIRST // If homing away from BED do Z first
 #endif
 

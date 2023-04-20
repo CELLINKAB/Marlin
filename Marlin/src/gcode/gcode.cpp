@@ -207,7 +207,7 @@ void GcodeSuite::get_destination_from_command() {
   if (parser.floatval('F') > 0)
     feedrate_mm_s = parser.value_feedrate();
 
-  #if BOTH(PRINTCOUNTER, HAS_EXTRUDERS)
+  #if ENABLED(PRINTCOUNTER)
     if (!DEBUGGING(DRYRUN) && !skip_move)
       print_job_timer.incFilamentUsed(destination.e - current_position.e);
   #endif
@@ -922,6 +922,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 710: M710(); break;                                  // M710: Set Controller Fan settings
       #endif
 
+      #if ENABLED(UV_LED_STERILIZATION)
+        case 806: M806(); break;
+      #endif
+
       #if ENABLED(GCODE_MACROS)
         case 810: case 811: case 812: case 813: case 814:
         case 815: case 816: case 817: case 818: case 819:
@@ -1056,6 +1060,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 7219: M7219(); break;                                // M7219: Set LEDs, columns, and rows
       #endif
 
+      #if ENABLED(HX711_WSCALE)
+        case 7110: M7110(); break;                                // Set the end stop threshold value for HX711.
+        case 7111: M7111(); break;                                // Set the HX711 channel/mode.
+        case 7112: M7112(); break;                                // Print HX711 raw filtered value.
+      #endif
+	  
       #if ENABLED(HAS_MCP3426_ADC)
         case 3426: M3426(); break;                                // M3426: Read MCP3426 ADC (over i2c)
       #endif

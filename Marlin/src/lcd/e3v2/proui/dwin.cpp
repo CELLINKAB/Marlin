@@ -1702,7 +1702,7 @@ void DWIN_SetDataDefaults() {
     ApplyExtMinT();
   #endif
   #if BOTH(HAS_HEATED_BED, PREHEAT_BEFORE_LEVELING)
-    HMI_data.BedLevT = LEVELING_BED_TEMP;
+    HMI_data.BedLevT = PREHEAT_1_TEMP_BED;
   #endif
   TERN_(BAUD_RATE_GCODE, SetBaud250K());
 }
@@ -2304,7 +2304,7 @@ TERN(HAS_ONESTEP_LEVELING, float, void) Tram(uint8_t point) {
       inLev = true;
       zval = probe.probe_at_point(xpos, ypos, PROBE_PT_STOW);
       if (isnan(zval))
-        LCD_MESSAGE_F("Position Not Reachable, check offsets");
+        ui.set_status(F("Position Not Reachable, check offsets"));
       else {
         sprintf_P(cmd, PSTR("X:%s, Y:%s, Z:%s"),
           dtostrf(xpos, 1, 1, str_1),
@@ -2336,7 +2336,7 @@ void TramC () { Tram(4); }
   void Trammingwizard() {
     bed_mesh_t zval = {0};
     if (HMI_data.FullManualTramming) {
-      LCD_MESSAGE_F("Disable manual tramming");
+      ui.set_status(F("Disable manual tramming"));
       return;
     }
     zval[0][0] = Tram(0);

@@ -219,8 +219,8 @@
  * M350 - Set microstepping mode. (Requires digital microstepping pins.)
  * M351 - Toggle MS1 MS2 pins directly. (Requires digital microstepping pins.)
  * M355 - Set Case Light on/off and set brightness. (Requires CASE_LIGHT_PIN)
- * M380 - Activate solenoid on active tool (Requires EXT_SOLENOID) or the tool specified by 'S' (Requires MANUAL_SOLENOID_CONTROL).
- * M381 - Disable solenoids on all tools (Requires EXT_SOLENOID) or the tool specified by 'S' (Requires MANUAL_SOLENOID_CONTROL).
+ * M380 - Activate solenoid on active extruder. (Requires EXT_SOLENOID)
+ * M381 - Disable all solenoids. (Requires EXT_SOLENOID)
  * M400 - Finish all moves.
  * M401 - Deploy and activate Z probe. (Requires a probe)
  * M402 - Deactivate and stow Z probe. (Requires a probe)
@@ -1085,6 +1085,10 @@ private:
     static void M702();
   #endif
 
+  #if ENABLED(UV_LED_STERILIZATION)
+    static void M806();
+  #endif
+
   #if ENABLED(GCODE_REPEAT_MARKERS)
     static void M808();
   #endif
@@ -1223,6 +1227,12 @@ private:
   #if ENABLED(CONTROLLER_FAN_EDITABLE)
     static void M710();
     static void M710_report(const bool forReplay=true);
+  #endif
+
+  #if ENABLED(HX711_WSCALE)
+    static void M7110();
+    static void M7111();
+    static void M7112();
   #endif
 
   static void T(const int8_t tool_index);

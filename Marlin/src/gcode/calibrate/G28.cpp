@@ -66,6 +66,10 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
+#if ENABLED(HX711_WSCALE)
+  #include "../../feature/hx_711.h"
+#endif
+
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
@@ -82,13 +86,15 @@
 
     #if ENABLED(SENSORLESS_HOMING)
       sensorless_t stealth_states {
-        LINEAR_AXIS_LIST(
-          TERN0(X_SENSORLESS, tmc_enable_stallguard(stepperX)),
-          TERN0(Y_SENSORLESS, tmc_enable_stallguard(stepperY)),
-          false, false, false, false
-        )
-        , TERN0(X2_SENSORLESS, tmc_enable_stallguard(stepperX2))
-        , TERN0(Y2_SENSORLESS, tmc_enable_stallguard(stepperY2))
+          LINEAR_AXIS_LIST(tmc_enable_stallguard(stepperX), tmc_enable_stallguard(stepperY), false, false, false, false)
+        , false
+          #if AXIS_HAS_STALLGUARD(X2)
+            || tmc_enable_stallguard(stepperX2)
+          #endif
+        , false
+          #if AXIS_HAS_STALLGUARD(Y2)
+            || tmc_enable_stallguard(stepperY2)
+          #endif
       };
     #endif
 
@@ -99,10 +105,14 @@
     current_position.set(0.0, 0.0);
 
     #if ENABLED(SENSORLESS_HOMING) && DISABLED(ENDSTOPS_ALWAYS_ON_DEFAULT)
-      TERN_(X_SENSORLESS, tmc_disable_stallguard(stepperX, stealth_states.x));
-      TERN_(X2_SENSORLESS, tmc_disable_stallguard(stepperX2, stealth_states.x2));
-      TERN_(Y_SENSORLESS, tmc_disable_stallguard(stepperY, stealth_states.y));
-      TERN_(Y2_SENSORLESS, tmc_disable_stallguard(stepperY2, stealth_states.y2));
+      tmc_disable_stallguard(stepperX, stealth_states.x);
+      tmc_disable_stallguard(stepperY, stealth_states.y);
+      #if AXIS_HAS_STALLGUARD(X2)
+        tmc_disable_stallguard(stepperX2, stealth_states.x2);
+      #endif
+      #if AXIS_HAS_STALLGUARD(Y2)
+        tmc_disable_stallguard(stepperY2, stealth_states.y2);
+      #endif
     #endif
   }
 
@@ -237,6 +247,11 @@ void GcodeSuite::G28() {
   TERN_(EXTENSIBLE_UI, ExtUI::onHomingStart());
 
   planner.synchronize();          // Wait for planner moves to finish!
+
+  #if ENABLED(HX711_WSCALE)
+    wScale.tare_start();
+    while( wScale.tare_ready() == false ) idle();
+  #endif
 
   SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state
 
