@@ -257,6 +257,8 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         SERIAL_ECHOLN("Parsed:");
         print_packet(incoming);
     }
+
+    last_send = millis();
     return Response<T>{incoming, Result::OK};
 
     // ACK would go here
