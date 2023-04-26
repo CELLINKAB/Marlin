@@ -45,17 +45,27 @@ void Controller::update()
     if (millis() < next_update)
         return;
 
-    const auto encoder_res = debug_get_encoders(false);
-    if (encoder_res.result == Result::OK) {
-        ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderOne);
-        ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderTwo);
-        ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderThree);
-        ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderOne);
-        ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderTwo);
-        ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderThree);
+    static uint8_t tool_index = 0;
+
+    if (tool_index == 0) {
+        const auto encoder_res = debug_get_encoders(false);
+        if (encoder_res.result == Result::OK) {
+            ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderOne);
+            ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderTwo);
+            ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderThree);
+            ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderOne);
+            ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderTwo);
+            ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderThree);
+        }
     }
 
-    for (uint8_t tool_index = 0; tool_index < EXTRUDERS; ++tool_index) {
+    {
         auto& state = ph_states[tool_index];
         Index index = static_cast<Index>(tool_index);
 
@@ -77,6 +87,8 @@ void Controller::update()
 
     next_update = millis() + SEC_TO_MS(1);
 }
+
+tool_index = ((tool_index + 1) % EXTRUDERS);
 
 void Controller::report_states()
 {
@@ -353,11 +365,11 @@ Response<uint32_t> Controller::get_step_volume(Index index)
     return send_and_receive<uint32_t>(packet, bus);
 }
 
-Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
+Response<EncoderStates> Controller::debug_get_encoders(bool debug)
+{
     // Semantically it makes sense to use the ALL address here since
     // this currently is implemented by returning all encoders.
     // However, receiving an ALL address disables replies in Guppi.
     Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
-
