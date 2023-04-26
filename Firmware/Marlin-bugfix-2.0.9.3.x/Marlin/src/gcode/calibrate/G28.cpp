@@ -251,6 +251,7 @@ void GcodeSuite::G28() {
   #if ENABLED(HX711_WSCALE)
     wScale.tare_start();
     while( wScale.tare_ready() == false ) idle();
+    wScale.enable_out(true);
   #endif
 
   SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state

@@ -62,6 +62,13 @@ public:
     bool tare_ready() { return !_tare_start; };
 
     int32_t read();
+    
+    /**
+     * @brief Enable/disable the output pin write control. It enables/disables the scale gauge.
+     * 
+     * @param input_val 
+     */
+    void enable_out (bool input_val) { _enable = input_val; };
 
     /**
      * @brief Set the HX711 Threshold value that will impact status of indication pin.
@@ -87,6 +94,7 @@ public:
     bool th_init = false;
 
 private:
+    bool _enable = false;   // enable the output pin control
     bool _new_val;          // new value indicator
     float _f_val = 0.0f;    // filtered raw value
     int32_t _last_read = 0; // last read raw value (unfiltered)

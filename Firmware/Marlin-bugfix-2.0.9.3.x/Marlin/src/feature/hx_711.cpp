@@ -40,6 +40,8 @@ void HX_711::begin()
   SET_INPUT_PULLUP(_pin_dta); // must have pull-up!
   OUT_WRITE(_pin_clk, LOW);
   OUT_WRITE_OD(_pin_ind, HIGH); // Open drain provides better safety because of hi-Z
+  // Disable the scale output.
+  _enable = false;
 }
 
 /**
@@ -114,7 +116,7 @@ void HX_711::manage_hx_711()
   if (_new_val) // if there are data available, process it.
   {
 
-// MOVING AVERAGE MANAGEMENT
+    // MOVING AVERAGE MANAGEMENT
 #ifdef HX_711_ENABLE_FILTER
     constexpr static uint8_t FILTER_DEPTH = 1u << HX_711_ENABLE_FILTER;
     constexpr static uint8_t FILTER_MASK = FILTER_DEPTH - 1u;
@@ -153,7 +155,11 @@ void HX_711::manage_hx_711()
         ind_pin_state = true;
     }
 
-    WRITE(_pin_ind, ind_pin_state);
+    // OUTPUT PIN MANAGEMENT
+    if (_enable == true)
+    {
+      WRITE(_pin_ind, ind_pin_state);
+    }
 
     // TARE MANAGEMENT
     constexpr static size_t TARE_AVG_CNT = 200;

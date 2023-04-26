@@ -22,6 +22,7 @@ REFERENCES
 
 #include "../../gcode.h"
 #include "../../../feature/hx_711.h"
+#include "src/MarlinCore.h"
 
 /**
  * @brief   Sets the weighting scale threshold value for end stop.
@@ -55,13 +56,22 @@ void GcodeSuite::M7111()
 
 /**
  * @brief   Prints on the command port the raw value of HX711.
+ *          "T" param: Start tare operation of the strain gauge, and enables it.
  *          Syntax: M7112
+ *                  M7112 T
  *
  */
 void GcodeSuite::M7112()
 {
+    if (!parser.seenval('T'))
+    {
+        wScale.tare_start();
+        while( wScale.tare_ready() == false ) idle();
+        wScale.enable_out(true);
+        SERIAL_ECHOLNPGM("HX711:Tare done; strain gauge enabled.");
+        return;
+    }
     // Optimized print to serial.
-    SERIAL_ECHOLNPGM("HX711 raw val: ", wScale.getCurrentVal());
+    SERIAL_ECHOLNPGM("HX711:Raw val: ", wScale.getCurrentVal());
 }
-
 #endif
