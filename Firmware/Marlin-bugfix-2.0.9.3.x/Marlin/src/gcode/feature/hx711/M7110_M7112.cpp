@@ -63,7 +63,7 @@ void GcodeSuite::M7111()
  */
 void GcodeSuite::M7112()
 {
-    if (!parser.seenval('T'))
+    if (parser.seenval('T'))
     {
         wScale.tare_start();
         while( wScale.tare_ready() == false ) idle();
