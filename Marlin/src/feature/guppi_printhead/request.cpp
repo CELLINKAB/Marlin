@@ -85,10 +85,10 @@ void Controller::update()
             state.raw_temperature = temp_res.packet.payload;
     }
 
+    tool_index = ((tool_index + 1) % EXTRUDERS);
+
     next_update = millis() + SEC_TO_MS(1);
 }
-
-tool_index = ((tool_index + 1) % EXTRUDERS);
 
 void Controller::report_states()
 {

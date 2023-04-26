@@ -211,19 +211,26 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         SERIAL_ECHOLN("]");
     }
 
-    if (bytes_received < 8)
+    size_t packet_index = 1; // usually has a leading 0 byte
+
+    if (bytes_received == 6)
+        packet_index = 0; // no leading 0
+    else if (bytes_received < 8)
         return Response<T>{incoming, Result::PACKET_TOO_SHORT};
 
     // indexes starting at 1 because there is always a leading zero
-    memcpy(&incoming.ph_index, &packet_buffer[1], 2);
-    memcpy(&incoming.command, &packet_buffer[3], 2);
-    memcpy(&incoming.payload_size, &packet_buffer[5], 2);
+    memcpy(&incoming.ph_index, &packet_buffer[packet_index], 2);
+    packet_index += 2;
+    memcpy(&incoming.command, &packet_buffer[packet_index], 2);
+    packet_index += 2;
+    memcpy(&incoming.payload_size, &packet_buffer[packet_index], 2);
+    packet_index += 2;
 
     if (incoming.command == Command::ERROR) {
         //const uint8_t e = static_cast<uint8_t>(serial.read());
         if (DEBUGGING(ERRORS)) {
             SERIAL_ECHO("RECD_CHANT_ERROR: ");
-            SERIAL_PRINTLN(packet_buffer[6], PrintBase::Dec);
+            SERIAL_PRINTLN(packet_buffer[packet_index], PrintBase::Dec);
         }
         flush_rx(serial);
         return Response<T>{incoming, Result::UNIMPLEMENTED};
@@ -237,14 +244,19 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
-        memcpy(&incoming.payload, &packet_buffer[7], sizeof(incoming.payload));
+        memcpy(&incoming.payload, &packet_buffer[packet_index], sizeof(incoming.payload));
+        packet_index += sizeof(incoming.payload);
     }
-    memcpy(&crc, &packet_buffer[incoming.payload_size + 7], 2);
+    memcpy(&crc, &packet_buffer[packet_index], 2);
 
     constexpr static bool allow_bad_crc = true;
     if (!allow_bad_crc && crc != incoming.crc())
         return Response<T>{incoming, Result::BAD_CRC};
 
+    if (DEBUGGING(INFO) && enable_debug) {
+        SERIAL_ECHOLN("Parsed:");
+        print_packet(incoming);
+    }
     return Response<T>{incoming, Result::OK};
 
     // ACK would go here
