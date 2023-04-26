@@ -180,6 +180,8 @@ void print_response(Response<T> response)
 
 void flush_rx(HardwareSerial& serial);
 
+extern millis_t last_send;
+
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
@@ -263,8 +265,6 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     // ACK would go here
 }
-
-extern millis_t last_send;
 
 template<typename T>
 Result send(const Packet<T>& request,
