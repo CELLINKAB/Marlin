@@ -94,6 +94,7 @@ namespace DirectStepping {
           case '\n':
           case '\r':
             state = State::NEWLINE;
+            [[fallthrough]];
           default:
             return false;
         }

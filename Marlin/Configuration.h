@@ -1500,20 +1500,20 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -20 }
+#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -22 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
 #define PROBING_MARGIN 2
 
 // X and Y axis travel speed (mm/min) between probes
-#define XY_PROBE_FEEDRATE (100*60)
+#define XY_PROBE_FEEDRATE (40*60)
 
 // Feedrate (mm/min) for the first approach when double-probing (MULTIPLE_PROBING == 2)
-#define Z_PROBE_FEEDRATE_FAST (40*6)
+#define Z_PROBE_FEEDRATE_FAST (20*60)
 
 // Feedrate (mm/min) for the "accurate" probe of each point
-#define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 4)
+#define Z_PROBE_FEEDRATE_SLOW (Z_PROBE_FEEDRATE_FAST / 2)
 
 /**
  * Probe Activation Switch
@@ -1560,7 +1560,7 @@
  * A total of 2 does fast/slow probes with a weighted average.
  * A total of 3 or more adds more slow probes, taking the average.
  */
-#define MULTIPLE_PROBING 2
+#define MULTIPLE_PROBING 3
 #define EXTRA_PROBING    0
 
 /**
@@ -1577,9 +1577,9 @@
  * Example: `M851 Z-5` with a CLEARANCE of 4  =>  9mm from bed to nozzle.
  *     But: `M851 Z+1` with a CLEARANCE of 2  =>  2mm from bed to nozzle.
  */
-#define Z_CLEARANCE_DEPLOY_PROBE   20 // Z Clearance for Deploy/Stow
-#define Z_CLEARANCE_BETWEEN_PROBES 15 // Z Clearance between probe points
-#define Z_CLEARANCE_MULTI_PROBE    5 // Z Clearance between multiple probes
+#define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
+#define Z_CLEARANCE_BETWEEN_PROBES 20 // Z Clearance between probe points
+#define Z_CLEARANCE_MULTI_PROBE    3 // Z Clearance between multiple probes
 #define Z_AFTER_PROBING           30 // Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -5 // Farthest distance below the trigger-point to go before stopping
@@ -1694,7 +1694,7 @@
 #define Z_HOMING_HEIGHT  20      // (mm) Minimal Z height before homing (G28) for Z clearance above the bed, clamps, ...
                                   // Be sure to have this much clearance over your Z_MAX_POS to prevent grinding.
 
-#define Z_AFTER_HOMING  20      // (mm) Height to move to after homing Z
+#define Z_AFTER_HOMING  Z_MAX_POS      // (mm) Height to move to after homing Z
 
 // Direction of endstops when homing; 1=MAX, -1=MIN
 // :[-1,1]
@@ -1719,7 +1719,7 @@
 #define Y_MIN_POS -38.5
 #define Z_MIN_POS 0
 #define X_MAX_POS 130
-#define Y_MAX_POS 206
+#define Y_MAX_POS 85
 #define Z_MAX_POS 40
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
@@ -2115,7 +2115,7 @@
 #endif
 
 // Homing speeds (mm/min)
-#define HOMING_FEEDRATE_MM_M { (20*60), (50*20), (15*60) }
+#define HOMING_FEEDRATE_MM_M { (40*60), (40*60), (15*60) }
 
 // Validate that endstops are triggered on homing moves
 //#define VALIDATE_HOMING_ENDSTOPS
