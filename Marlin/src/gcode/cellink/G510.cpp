@@ -8,11 +8,13 @@
 
 #    include <stdio.h>
 
+static xyz_pos_t nozzle_calibration_extra_offset{};
+
 static void update_offset(const xyz_pos_t& offset)
 {
-    set_home_offset(AxisEnum::X_AXIS, offset.x);
-    set_home_offset(AxisEnum::Y_AXIS, offset.y);
-    set_home_offset(AxisEnum::Z_AXIS, offset.z);
+    set_home_offset(AxisEnum::X_AXIS, offset.x + nozzle_calibration_extra_offset.x);
+    set_home_offset(AxisEnum::Y_AXIS, offset.y + nozzle_calibration_extra_offset.y);
+    set_home_offset(AxisEnum::Z_AXIS, offset.z + nozzle_calibration_extra_offset.z);
 }
 
 void GcodeSuite::G510()
@@ -62,6 +64,37 @@ void GcodeSuite::G510()
         SERIAL_ECHOLN("AUTOCAL_NO_NOZZLE");
         break;
     }
+}
+
+void GcodeSuite::M1510()
+{
+    if (!parser.seen_any()) {
+        SERIAL_ECHOLNPGM("Nozzle Calibration Extra Offset\nX: ",
+                         nozzle_calibration_extra_offset.x,
+                         ", Y: ",
+                         nozzle_calibration_extra_offset.y,
+                         ", Z: ",
+                         nozzle_calibration_extra_offset.z);
+        return;
+    }
+
+    if (parser.seen('X'))
+        nozzle_calibration_extra_offset.x = parser.value_float();
+    if (parser.seen('Y'))
+        nozzle_calibration_extra_offset.y = parser.value_float();
+    if (parser.seen('Z'))
+        nozzle_calibration_extra_offset.z = parser.value_float();
+}
+
+void GcodeSuite::M1510_report(bool forReplay)
+{
+    GcodeSuite::report_heading_etc(forReplay, F("Nozzle Calibration Extra Offset"));
+    SERIAL_ECHOLNPGM("M1510 X",
+                     nozzle_calibration_extra_offset.x,
+                     " Y",
+                     nozzle_calibration_extra_offset.y,
+                     " Z",
+                     nozzle_calibration_extra_offset.z);
 }
 
 #endif

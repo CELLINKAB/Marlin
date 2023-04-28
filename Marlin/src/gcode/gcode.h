@@ -618,6 +618,8 @@ private:
 
   #if ENABLED(OPTICAL_AUTOCAL)
     static void G510();
+    static void M1510();
+    static void M1510_report(bool forReplay=true);
   #endif
 
   #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
