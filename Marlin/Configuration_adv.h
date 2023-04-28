@@ -2721,7 +2721,7 @@
    * Interpolate microsteps to 256
    * Override for each driver with <driver>_INTERPOLATE settings below
    */
-  #define INTERPOLATE      true
+  #define INTERPOLATE      false
 
   #if AXIS_IS_TMC(X)
     #define X_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
@@ -4266,7 +4266,7 @@
 #if ENABLED(OPTICAL_AUTOCAL)
   #define AUTOCAL_START_POSITION {57.25, 60.5, 20}
   #define AUTOCAL_DEFAULT_FEEDRATE 1500.0
-  #define AUTOCAL_PRINTBED_CENTER_DELTA {-48.75, -73.932, -15.5}
+  #define AUTOCAL_PRINTBED_CENTER_DELTA {-48.75, -76.5, -15.5}
   #define POST_AUTOCAL_SAFE_Z_HEIGHT (Z_MAX_POS - 5.0f)
 #endif
 
