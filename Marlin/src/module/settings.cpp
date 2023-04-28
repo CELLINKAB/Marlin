@@ -190,6 +190,10 @@
 #    include "../feature/air_system/pneumatics.h"
 #endif
 
+#if ENABLED(OPTICAL_AUTOCAL)
+  #include "../feature/optical_autocal.h"
+#endif
+
 #define _EN_ITEM(N) , E##N
 #define _EN1_ITEM(N) , E##N:1
 
@@ -618,6 +622,11 @@ typedef struct SettingsDataStruct {
     float shaping_y_frequency, // M593 Y F
           shaping_y_zeta;      // M593 Y D
   #endif
+
+  //
+  // Nozzle Autocalibration
+  //
+  TERN_(OPTICAL_AUTOCAL, xyz_pos_t nozzle_autocal_extra_offset;)
 
 } SettingsData;
 
@@ -1667,6 +1676,8 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(pneumatics::regulator_feedback.scalar);
     #endif
 
+    TERN_(OPTICAL_AUTOCAL, EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset));
+
     //
     // Model predictive control
     //
@@ -2685,6 +2696,8 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(pneumatics::regulator_feedback.offset);
         EEPROM_READ(pneumatics::regulator_feedback.scalar);
       #endif
+
+      TERN_(OPTICAL_AUTOCAL, EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset));
 
       //
       // Model predictive control
@@ -3793,6 +3806,8 @@ void MarlinSettings::reset() {
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
 
     TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
+
+    TERN_(OPTICAL_AUTOCAL, gcode.M1510_report(forReplay));
 
     //
     // Model predictive control
