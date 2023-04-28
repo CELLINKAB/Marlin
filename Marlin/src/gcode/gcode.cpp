@@ -1176,6 +1176,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 806: M806(); break;
       #endif
 
+      #if ENABLED(OPTICAL_AUTOCAL)
+        case 1510: M1510(); break;                                  // Perform autocalibration routine
+      #endif
+
       #if ENABLED(CHANTARELLE_SUPPORT)
       // TODO: check for conflicts
         case 750: M750(); break;

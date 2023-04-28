@@ -17,6 +17,8 @@ struct OpticalAutocal
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
     using YSweepArray = std::array<float, NUM_CYCLES>;
 
+    static xyz_pos_t nozzle_calibration_extra_offset;
+
     enum class ErrorCode {
         OK,
         POLARITY_MISMATCH,
