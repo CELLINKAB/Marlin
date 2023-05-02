@@ -107,7 +107,8 @@ static constexpr xy_float_t nod = { CALIBRATION_NOZZLE_OUTER_DIAMETER, CALIBRATI
 struct measurements_t {
   xyz_pos_t obj_center = true_center; // Non-static must be assigned from xyz_pos_t
 
-  float obj_side[NUM_SIDES], backlash[NUM_SIDES];
+  float obj_side[NUM_SIDES]{};
+  float backlash[NUM_SIDES]{};
   xyz_float_t pos_error;
 
   xy_float_t nozzle_outer_dimension = nod;
