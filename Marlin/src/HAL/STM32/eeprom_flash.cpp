@@ -232,7 +232,7 @@ bool PersistentStore::access_finish()
 
 #        else // !FLASH_EEPROM_LEVELING
 
-#            if ENABLED(DISABLE_WRITE_PROTECTION)
+#            if ENABLED(DISABLE_FLASH_WRITE_PROTECTION)
         FLASH_OBProgramInitTypeDef flash_config;
         HAL_FLASHEx_OBGetConfig(&flash_config);
         if (flash_config.WRPState != WRPSTATE_DISABLE) {

@@ -278,8 +278,6 @@
 #define FLASH_BASE_ADDRESS 0x08060000 
 #define FLASH_DATA_SECTOR 7
 #define FLASH_BANK_NUMBER FLASH_BANK_1
-#define DISABLE_WRITE_PROTECTION
-
 
 /*----------------------------------------------------------------------------
  *        Arduino objects - C++ only

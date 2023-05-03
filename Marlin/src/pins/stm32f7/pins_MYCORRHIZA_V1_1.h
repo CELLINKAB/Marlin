@@ -30,6 +30,7 @@
 
 #if NO_EEPROM_SELECTED
 #define FLASH_EEPROM_EMULATION // Use Flash-based EEPROM emulation
+#define DISABLE_FLASH_WRITE_PROTECTION // in case factory setting has it enabled
 #endif
 
 #define STEP_TIMER 4
