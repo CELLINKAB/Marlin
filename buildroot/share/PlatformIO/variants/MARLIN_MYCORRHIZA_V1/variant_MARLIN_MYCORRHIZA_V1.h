@@ -273,6 +273,11 @@
 //#define PWM_RESOLUTION          8
 //#define PWM_MAX_DUTY_CYCLE      255
 
+// Flash EEPROM emulation
+// Address and sector taken from table 5 in rm0410-stm32f76xxx
+#define FLASH_BASE_ADDRESS 0x08060000 
+#define FLASH_DATA_SECTOR 7
+#define FLASH_BANK_NUMBER FLASH_BANK_1
 
 /*----------------------------------------------------------------------------
  *        Arduino objects - C++ only

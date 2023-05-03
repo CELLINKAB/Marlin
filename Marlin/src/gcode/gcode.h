@@ -1311,8 +1311,10 @@ private:
 
   #if ENABLED(FESTO_PNEUMATICS)
     static void M1036(); // set pressure regulator
+    static void M1036_report(bool for_replay);
     static void M1062(); // get pressure sensors
     static void M1100(); // pressure regulator offset
+    static void M1100_report(bool for_replay);
     static inline void M1101() {OUT_WRITE(PRESSURE_PUMP_EN_PIN, parser.boolval('P'));}
   #endif
 
@@ -1412,6 +1414,7 @@ private:
     static void M1028();
     static void M1034();
     static void M1035();
+    static void M1035_report(bool for_replay);
     //static void M1036();
     static void M1037();
     static void M1038();

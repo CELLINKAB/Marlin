@@ -37,11 +37,11 @@
 
 // Change EEPROM version if the structure changes
 #define EEPROM_VERSION "V88"
-#define EEPROM_OFFSET 100
+#define EEPROM_OFFSET 0
 
 // Check the integrity of data offsets.
 // Can be disabled for production build.
-//#define DEBUG_EEPROM_READWRITE
+#define DEBUG_EEPROM_READWRITE
 
 #include "settings.h"
 
@@ -3808,6 +3808,8 @@ void MarlinSettings::reset() {
     TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
 
     TERN_(OPTICAL_AUTOCAL, gcode.M1510_report(forReplay));
+    TERN_(FESTO_PNEUMATICS, gcode.M1036_report(forReplay));
+    TERN_(FESTO_PNEUMATICS, gcode.M1100_report(forReplay));
 
     //
     // Model predictive control
