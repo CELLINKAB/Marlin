@@ -93,9 +93,11 @@ void GcodeSuite::M805()
 
     const CuringLed led = led_for_wavelength(wavelength);
 
-    if (led.pin == BAD_PIN)
+    if (led.pin == BAD_PIN) {
         SERIAL_ERROR_MSG("bad wavelength argument! \n Must be one of 365,400,480, or 520\n got:",
                          wavelength);
+        return;
+    }
 
     stepper.set_hold(true);
     if (parser.seenval('D'))
