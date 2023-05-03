@@ -30,7 +30,6 @@
 
 #if NO_EEPROM_SELECTED
 #define FLASH_EEPROM_EMULATION // Use Flash-based EEPROM emulation
-#define MARLIN_EEPROM_SIZE              0x4000  // 32K
 #endif
 
 #define STEP_TIMER 4

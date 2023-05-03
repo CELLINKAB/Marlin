@@ -275,8 +275,10 @@
 
 // Flash EEPROM emulation
 // Address and sector taken from table 5 in rm0410-stm32f76xxx
-#define FLASH_BASE_ADDRESS 0x080C0000 
+#define FLASH_BASE_ADDRESS 0x08060000 
 #define FLASH_DATA_SECTOR 7
+#define FLASH_BANK_NUMBER FLASH_BANK_1
+#define DISABLE_WRITE_PROTECTION
 
 
 /*----------------------------------------------------------------------------
