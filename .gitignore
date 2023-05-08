@@ -170,3 +170,6 @@ __pycache__
 
 # IOLogger logs
 *_log.csv
+GitVersion.json
+version.json
+Marlin/src/inc/Version.h
