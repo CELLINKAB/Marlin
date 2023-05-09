@@ -1,4 +1,5 @@
 pipeline {
+    agent ubuntu
     stages {
         stage('Git Version ') {
             steps {
