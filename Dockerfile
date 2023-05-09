@@ -1,5 +1,6 @@
 FROM ubuntu:22.04
 USER root
+RUN ln -fs /usr/share/zoneinfo/UTC  /etc/localtime
 RUN apt-get update && apt-get install git wget mono-complete libcurl4 -y
 RUN wget http://github.com/GitTools/GitVersion/releases/download/5.11.1/gitversion-linux-x64-5.11.1.tar.gz 
 RUN tar -xvf gitversion-linux-x64-5.11.1.tar.gz
