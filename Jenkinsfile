@@ -1,6 +1,9 @@
 pipeline {  
     agent none
     stages {
+        stage('Git Version ') {
+            sh 'gitversion /output file'
+        }
         stage('Building firmwares') {
             matrix {
                     agent {
