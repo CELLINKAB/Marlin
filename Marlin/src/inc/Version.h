@@ -51,17 +51,17 @@
   #define WEBSITE_URL "cellink.com"
 #endif
 
-#define VER_COMMIT_DATE "2023-05-08"
-#define VER_FULL_BUILD_META_DATA "16841.Branch.issues-marlinversion2.Sha.fc6934dcbbb154418731fbb08a761f00b11f6d74" 
+#define VER_COMMIT_DATE "2023-05-09"
+#define VER_FULL_BUILD_META_DATA "16846.Branch.issues-marlinversion2.Sha.c85f59e84f2af881875b9e2ce396238c1b363942" 
 #define VER_SEM_VER "2.1.0-marlinversion2.1" 
 #define VER_MAJOR 2
 #define VER_MINOR 1
 #define VER_PATCH 0
-#define VER_BUILD_VERSION "exomarlin/v0.0.1-18-gfc6934dcbb" 
+#define VER_BUILD_VERSION "exomarlin/v0.0.1-23-gc85f59e84f" 
 #define VER_BRANCH "issues/marlinversion2" 
-#define VER_CURRENT_COMMIT "fc6934dcbbb154418731fbb08a761f00b11f6d74" 
+#define VER_CURRENT_COMMIT "c85f59e84f2af881875b9e2ce396238c1b363942" 
                 
-#define VER_TIMESTAMP "2023-05-09 10.21"
+#define VER_TIMESTAMP "2023-05-09 12.20"
 #define VER_USER "ed" 
 #define VER_BUILDTAG "local" 
         
