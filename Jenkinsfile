@@ -1,8 +1,10 @@
-pipeline {  
+pipeline {
     agent none
     stages {
         stage('Git Version ') {
-            sh 'gitversion /output file'
+            steps {
+                sh 'gitversion /output file'
+            }
         }
         stage('Building firmwares') {
             matrix {
@@ -15,8 +17,8 @@ pipeline {
                         values 'MYCORRHIZA_V1_1'
                     }
                 }
-            stages {
-                stage('Building Firmware') {
+                stages {
+                    stage('Building Firmware') {
                         steps {
                             sh '''
                                 git clean -Xdf
@@ -25,18 +27,18 @@ pipeline {
                                 python3 -m platformio run --environment  ${BOARD}
                             '''
                         }
+                    }
                 }
-            }
-              post {
+                post {
                     always {
-                         sh '''
+                        sh '''
                             cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
                                                     '''
                         archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
                         sh '''
                             python3 -m platformio run --target clean --environment ${BOARD}
                         '''
-                        // always do this because 'success' is performed after 'always', even if it's listed before..
+                    // always do this because 'success' is performed after 'always', even if it's listed before..
                     }
                 }
             }
