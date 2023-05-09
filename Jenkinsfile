@@ -18,7 +18,6 @@ pipeline {
                             sh '''
                                 git clean -Xdf
                                 git status
-                                git fetch
                                 echo "Do Build for ${BOARD}"
                                 python3 -m platformio run --environment  ${BOARD}
                             '''
