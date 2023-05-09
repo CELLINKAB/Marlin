@@ -1,57 +1,23 @@
-/**
- * Marlin 3D Printer Firmware
- * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- *
- * Based on Sprinter and grbl.
- * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- *
- */
+
+  /**
+   * Auto Generated file by scripts/version.py
+   * 
+   */
 #pragma once
-
-/**
- * Release version. Leave the Marlin version or apply a custom scheme.
- */
+#include <string_view>
+    
 #ifndef SHORT_BUILD_VERSION
-  #define SHORT_BUILD_VERSION "2.1.2"
+    //#define SHORT_MARLIN_VERSION_STRING "2.1.2"
+    #define SHORT_CELLINK_VERSION_STRING "2.1.0-marlinversion2.1"
+    #define SHORT_BUILD_VERSION "2.1.0"
 #endif
-
-/**
- * Verbose version identifier containing a unique identifier, such as the
- * vendor name, download location, GitHub account, etc.
- */
 #ifndef DETAILED_BUILD_VERSION
-  #define DETAILED_BUILD_VERSION SHORT_BUILD_VERSION
+    #define DETAILED_BUILD_VERSION "Cellink-Marlin " SHORT_CELLINK_VERSION_STRING
+    //# " (Marlin " SHORT_MARLIN_VERSION_STRING ")"
 #endif
-
-/**
- * The STRING_DISTRIBUTION_DATE represents when the binary file was built,
- * here we define this default string as the date where the latest release
- * version was tagged.
- */
 #ifndef STRING_DISTRIBUTION_DATE
-  #define STRING_DISTRIBUTION_DATE "2022-12-17"
+    #define STRING_DISTRIBUTION_DATE "2023-02-14"
 #endif
-
-/**
- * Minimum Configuration.h and Configuration_adv.h file versions.
- * Set based on the release version number. Used to catch an attempt to use
- * older configurations. Override these if using a custom versioning scheme
- * to alert users to major changes.
- */
-
 #define MARLIN_HEX_VERSION 02010200
 #ifndef REQUIRED_CONFIGURATION_H_VERSION
   #define REQUIRED_CONFIGURATION_H_VERSION MARLIN_HEX_VERSION
@@ -59,64 +25,43 @@
 #ifndef REQUIRED_CONFIGURATION_ADV_H_VERSION
   #define REQUIRED_CONFIGURATION_ADV_H_VERSION MARLIN_HEX_VERSION
 #endif
-
-/**
- * The protocol for communication to the host. Protocol indicates communication
- * standards such as the use of ASCII, "echo:" and "error:" line prefixes, etc.
- * (Other behaviors are given by the firmware version and capabilities report.)
- */
-#ifndef PROTOCOL_VERSION
-  #define PROTOCOL_VERSION "1.0"
-#endif
-
 /**
  * Define a generic printer name to be output to the LCD after booting Marlin.
  */
-#ifndef MACHINE_NAME
-  #define MACHINE_NAME "3D Printer"
+#ifndef MACHINE_NAMEmajorminiopatch
+    #define MACHINE_NAME "Bio Cell X"
 #endif
-
-/**
- * Website where users can find Marlin source code for the binary installed on the
- * device. Override this if you provide public source code download. (GPLv3 requires
- * providing the source code to your customers.)
- */
+#ifndef PROTOCOL_VERSION
+  #define PROTOCOL_VERSION "1.0"
+#endif
 #ifndef SOURCE_CODE_URL
-  #define SOURCE_CODE_URL "github.com/MarlinFirmware/Marlin"
+  #define SOURCE_CODE_URL "github.com/CELLINKAB/Marlin"
 #endif
-
 /**
  * Default generic printer UUID.
  */
 #ifndef DEFAULT_MACHINE_UUID
   #define DEFAULT_MACHINE_UUID "cede2a2f-41a2-4748-9b12-c55c62f367ff"
 #endif
-
   /**
    * The WEBSITE_URL is the location where users can get more information such as
    * documentation about a specific Marlin release. Displayed in the Info Menu.
    */
 #ifndef WEBSITE_URL
-  #define WEBSITE_URL "marlinfw.org"
+  #define WEBSITE_URL "cellink.com"
 #endif
 
-/**
- * Set the vendor info the serial USB interface, if changable
- * Currently only supported by DUE platform
- */
-#ifndef USB_DEVICE_VENDOR_ID
-  #define USB_DEVICE_VENDOR_ID            0x03EB /* ATMEL VID */
-#endif
-#ifndef USB_DEVICE_PRODUCT_ID
-  #define USB_DEVICE_PRODUCT_ID           0x2424 /* MSC / CDC */
-#endif
-//! USB Device string definitions (Optional)
-#ifndef USB_DEVICE_MANUFACTURE_NAME
-  #define USB_DEVICE_MANUFACTURE_NAME     WEBSITE_URL
-#endif
-#ifdef CUSTOM_MACHINE_NAME
-  #define USB_DEVICE_PRODUCT_NAME         CUSTOM_MACHINE_NAME
-#else
-  #define USB_DEVICE_PRODUCT_NAME         MACHINE_NAME
-#endif
-#define USB_DEVICE_SERIAL_NAME            "123985739853"
+#define VER_COMMIT_DATE "2023-05-08"
+#define VER_FULL_BUILD_META_DATA "16841.Branch.issues-marlinversion2.Sha.fc6934dcbbb154418731fbb08a761f00b11f6d74" 
+#define VER_SEM_VER "2.1.0-marlinversion2.1" 
+#define VER_MAJOR 2
+#define VER_MINOR 1
+#define VER_PATCH 0
+#define VER_BUILD_VERSION "exomarlin/v0.0.1-18-gfc6934dcbb" 
+#define VER_BRANCH "issues/marlinversion2" 
+#define VER_CURRENT_COMMIT "fc6934dcbbb154418731fbb08a761f00b11f6d74" 
+                
+#define VER_TIMESTAMP "2023-05-09 10.21"
+#define VER_USER "ed" 
+#define VER_BUILDTAG "local" 
+        

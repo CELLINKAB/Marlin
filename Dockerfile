@@ -1,6 +1,6 @@
 FROM ubuntu:22.04
 USER root
-RUN apt-get update && apt-get install git wget -y
+RUN apt-get update && apt-get install git wget mono-complete libcurl3 -y
 RUN wget http://github.com/GitTools/GitVersion/releases/download/5.11.1/gitversion-linux-x64-5.11.1.tar.gz 
 RUN tar -xvf gitversion-linux-x64-5.11.1.tar.gz
 RUN chmod +x gitversion
