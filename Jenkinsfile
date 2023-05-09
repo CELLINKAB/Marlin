@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+    agent {
+        label 'ubuntu-yocto'
+    }
     stages {
         stage('Git Version ') {
             steps {
