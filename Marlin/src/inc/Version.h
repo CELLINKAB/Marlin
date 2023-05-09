@@ -8,7 +8,7 @@
     
 #ifndef SHORT_BUILD_VERSION
     //#define SHORT_MARLIN_VERSION_STRING "2.1.2"
-    #define SHORT_CELLINK_VERSION_STRING "2.1.0-marlinversion2.1"
+    #define SHORT_CELLINK_VERSION_STRING "2.1.0-issues-marlinversion2.1"
     #define SHORT_BUILD_VERSION "2.1.0"
 #endif
 #ifndef DETAILED_BUILD_VERSION
@@ -52,16 +52,16 @@
 #endif
 
 #define VER_COMMIT_DATE "2023-05-09"
-#define VER_FULL_BUILD_META_DATA "16846.Branch.issues-marlinversion2.Sha.c85f59e84f2af881875b9e2ce396238c1b363942" 
-#define VER_SEM_VER "2.1.0-marlinversion2.1" 
+#define VER_FULL_BUILD_META_DATA "16847.Branch.issues-marlinversion2.Sha.37c17fb5db0e6ad9edfac5fef8ab428460bb3774" 
+#define VER_SEM_VER "2.1.0-issues-marlinversion2.1" 
 #define VER_MAJOR 2
 #define VER_MINOR 1
 #define VER_PATCH 0
-#define VER_BUILD_VERSION "exomarlin/v0.0.1-23-gc85f59e84f" 
+#define VER_BUILD_VERSION "exomarlin/v0.0.1-24-g37c17fb5db" 
 #define VER_BRANCH "issues/marlinversion2" 
-#define VER_CURRENT_COMMIT "c85f59e84f2af881875b9e2ce396238c1b363942" 
+#define VER_CURRENT_COMMIT "37c17fb5db0e6ad9edfac5fef8ab428460bb3774" 
                 
-#define VER_TIMESTAMP "2023-05-09 12.20"
+#define VER_TIMESTAMP "2023-05-09 12.27"
 #define VER_USER "ed" 
 #define VER_BUILDTAG "local" 
         
