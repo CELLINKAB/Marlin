@@ -1,9 +1,9 @@
 pipeline {
-    agent { label 'ubuntu'}
+    agent { label 'ubuntu' }
     stages {
             stage('Git fetch') {
-              steps {
-                                checkout([
+            steps {
+                checkout([
                                 $class: 'GitSCM',
                                 branches: scm.branches,
                                 doGenerateSubmoduleConfigurations: false,
@@ -16,26 +16,22 @@ pipeline {
                                         trackingSubmodules: false,
                                         threads: 4,
                                     ],
-                                    [$class: 'RelativeTargetDirectory',
-                                        relativeTargetDir: 's'
-                                    ],
-                                    [$class: 'PruneStaleBranch'],
                                     pruneTags(true)
                                 ],
                                 submoduleCfg: [],
                                 userRemoteConfigs: scm.userRemoteConfigs
                             ])
-                                sh '''
-                                cd s
+                sh '''
+                                
                                 git clean -ffdx
                                 git submodule foreach --recursive git clean -ffdx
                             '''
-                            }
+            }
             }
         stage('Building firmwares') {
             matrix {
                     agent {
-                       dockerfile true
+                    dockerfile true
                     }
                 axes {
                     axis {
@@ -62,8 +58,8 @@ pipeline {
                             cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
                                                     '''
                         archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
-                        archiveArtifacts artifacts: " GitVersion.json"
-                        archiveArtifacts artifacts: " version.json"
+                        archiveArtifacts artifacts: ' GitVersion.json'
+                        archiveArtifacts artifacts: ' version.json'
 
                         sh '''
                             python3 -m platformio run --target clean --environment ${BOARD}
