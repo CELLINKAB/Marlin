@@ -16,7 +16,7 @@ pipeline {
                                         trackingSubmodules: false,
                                         threads: 4,
                                     ],
-                                    pruneTags(true)
+                                    pruneTags(false)
                                 ],
                                 submoduleCfg: [],
                                 userRemoteConfigs: scm.userRemoteConfigs
