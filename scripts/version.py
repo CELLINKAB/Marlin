@@ -82,7 +82,7 @@ def generate_marlin(semver,majorminiopatch):
 """.format(semver,majorminiopatch)
 
 def process_gitversion():
-    system("gitversion /output file /nofetch")
+    system("gitversion /output file /nofetch   /config  GitVersion.yml /nocache")
     with open('GitVersion.json', encoding='utf-8-sig') as gitversionjson_file:
         gitversionjson = gitversionjson_file.read()
     return json.loads(gitversionjson)
