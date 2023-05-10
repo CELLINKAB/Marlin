@@ -1,5 +1,5 @@
 pipeline {
-    agent { label 'ubuntu' }
+    agent { label 'onpremise-node' }
     stages {
             stage('Git fetch') {
             steps {
