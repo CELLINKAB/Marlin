@@ -17,7 +17,7 @@ struct Regulator
     inline float set_point() const { return pressure; }
 
 private:
-    static constexpr float REG_MAX = (3.3 / 5.0) * 200.0;
+    static constexpr float REG_MAX = (3.3 / 5.0) * 100.0;
     static constexpr float DAC_FACTOR = 256.0 / REG_MAX;
 
     float pressure;
