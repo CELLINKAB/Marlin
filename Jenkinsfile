@@ -1,7 +1,7 @@
 pipeline {
     agent { label 'ubuntu'}
     stages {
-            stage('Building firmwares') {
+            stage('Git fetch') {
                      steps {
                         sh 'git fetch'
                      }
