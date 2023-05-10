@@ -32,7 +32,7 @@ branches:
     tracks-release-branches: false
     is-release-branch: false
   pull-request:
-    regex: '^(pull|pull\-requests|pr)[/-]'
+    regex: '^(pull|pull\-requests|pr|PR)[/-]'
     mode: ContinuousDelivery
     tag: PullRequest
     increment: Inherit
