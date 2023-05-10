@@ -1,10 +1,15 @@
 pipeline {
-    agent none
+    agent { label 'ubuntu'}
     stages {
+            stage('Building firmwares') {
+                     steps {
+                        sh 'git fetch'
+                     }
+            }
         stage('Building firmwares') {
             matrix {
                     agent {
-                    dockerfile true
+                       dockerfile true
                     }
                 axes {
                     axis {
@@ -17,6 +22,7 @@ pipeline {
                         steps {
                             sh '''
                                 git clean -Xdf
+
                                 git status
                                 echo "Do Build for ${BOARD}"
                                 python3 -m platformio run --environment  ${BOARD}
