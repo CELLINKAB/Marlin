@@ -30,6 +30,7 @@ pipeline {
                             cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
                                                     '''
                         archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
+                        archiveArtifacts artifacts: " GitVersion.json"
                         sh '''
                             python3 -m platformio run --target clean --environment ${BOARD}
                         '''
