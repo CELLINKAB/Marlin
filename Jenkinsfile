@@ -3,6 +3,7 @@ pipeline {
     stages {
             stage('Git fetch') {
             steps {
+                cleanWS()
                 checkout([
                                 $class: 'GitSCM',
                                 branches: scm.branches,
@@ -22,7 +23,6 @@ pipeline {
                                 userRemoteConfigs: scm.userRemoteConfigs
                             ])
                 sh '''
-                                git fetch --all
                                 git clean -ffdx
                                 git submodule foreach --recursive git clean -ffdx
                             '''
