@@ -151,7 +151,10 @@ def make_versionfile():
         print(contents)
 def make_versionjson():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
-    user = os.environ["USER"]
+    if globals().get('USER'):
+            user = os.environ["USER"]
+    else:
+        user = 'nouser'
     if globals().get('BUILD_TAG'):
         buildtag = os.environ["BUILD_TAG"]
     else:
