@@ -2,9 +2,35 @@ pipeline {
     agent { label 'ubuntu'}
     stages {
             stage('Git fetch') {
-                     steps {
-                        sh 'git fetch'
-                     }
+              steps {
+                                checkout([
+                                $class: 'GitSCM',
+                                branches: scm.branches,
+                                doGenerateSubmoduleConfigurations: false,
+                                extensions: [
+                                    [$class: 'SubmoduleOption',
+                                        disableSubmodules: false,
+                                        parentCredentials: true,
+                                        recursiveSubmodules: true,
+                                        reference: '',
+                                        trackingSubmodules: false,
+                                        threads: 4,
+                                    ],
+                                    [$class: 'RelativeTargetDirectory',
+                                        relativeTargetDir: 's'
+                                    ],
+                                    [$class: 'PruneStaleBranch'],
+                                    pruneTags(true)
+                                ],
+                                submoduleCfg: [],
+                                userRemoteConfigs: scm.userRemoteConfigs
+                            ])
+                                sh '''
+                                cd s
+                                git clean -ffdx
+                                git submodule foreach --recursive git clean -ffdx
+                            '''
+                            }
             }
         stage('Building firmwares') {
             matrix {
