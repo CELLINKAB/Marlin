@@ -3,9 +3,9 @@ pipeline {
     stages {
         agent any
         stage('Git Version ') {
-
+         steps {
             sh '''docker run --rm -v "$(pwd):/repo" gittools/gitversion:5.6.6 /repo /output file'''
-        
+         }
         }
         stage('Building firmwares') {
             matrix {
