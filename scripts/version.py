@@ -9,6 +9,7 @@ import os
 from os import path, pardir, getcwd,system
 import sys
 
+
 def get_current_commit():
     head_commit = subprocess.run("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE)
     return head_commit.stdout.rstrip().decode()
