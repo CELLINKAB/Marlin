@@ -4,7 +4,7 @@ pipeline {
         agent any
         stage('Git Version ') {
 
-            sh 'docker run --rm -v "$(pwd):/repo" gittools/gitversion:5.6.6 /repo /output file'
+            sh '''docker run --rm -v "$(pwd):/repo" gittools/gitversion:5.6.6 /repo /output file''''
         
         }
         stage('Building firmwares') {
