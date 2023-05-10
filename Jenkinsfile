@@ -1,5 +1,5 @@
 pipeline {
-agent { label 'ubunutu' }
+agent { label 'ubuntu' }
     stages {
         
         stage('Git Version ') {
