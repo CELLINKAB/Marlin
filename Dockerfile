@@ -15,7 +15,6 @@ USER builder
 WORKDIR /home/builder
 RUN pip3 install PyYaml
 RUN pip3 install platformio
-RUN pip3 install gitversion
 
 RUN git config --global user.email 'service-account-github@cellink.com'
 RUN git config --global user.name 'Cellink Github Service Account - Yocto Builder'
