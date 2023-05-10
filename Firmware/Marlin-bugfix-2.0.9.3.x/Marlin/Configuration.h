@@ -952,7 +952,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 100, 100, 800, 100 } //Changed Z steps_per_unit to 800 for 16th microstepping for 4mm pitch leadscrew. - BEJ Feb_27_23
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 100, 100, 400, 100 } //Changed Z steps_per_unit to 800 for 16th microstepping for 4mm pitch leadscrew. - BEJ Feb_27_23
 
 /**
  * Default Max Feed Rate (mm/s)
