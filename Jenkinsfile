@@ -31,8 +31,10 @@ pipeline {
         stage('Building firmwares') {
             matrix {
                     agent {
-                        dockerfile true
-                        label 'onpremise-node'
+                        dockerfile {
+                            filename 'Dockerfile'
+                            label 'onpremise-node'
+                      }
                     }
                 axes {
                     axis {
