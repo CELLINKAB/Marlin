@@ -3,7 +3,7 @@ pipeline {
     stages {
             stage('Git fetch') {
             steps {
-                cleanWS()
+                cleanWs()
                 checkout([
                                 $class: 'GitSCM',
                                 branches: scm.branches,
