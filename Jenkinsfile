@@ -1,7 +1,6 @@
 pipeline {
     agent none
     stages {
-        agent any
         stage('Git Version ') {
          steps {
             sh '''docker run --rm -v "$(pwd):/repo" gittools/gitversion:5.6.6 /repo /output file'''
