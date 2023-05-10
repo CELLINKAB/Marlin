@@ -1,12 +1,6 @@
 pipeline {
-agent { label 'ubuntu' }
+    agent none
     stages {
-        
-     //   stage('Git Version ') {
-    //     steps {
-    //        sh '''docker run --rm -v "$(pwd):/repo" gittools/gitversion:5.6.6 /repo /output file /nofetch'''
-    //     }
-    //    }
         stage('Building firmwares') {
             matrix {
                     agent {
