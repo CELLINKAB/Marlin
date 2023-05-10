@@ -22,7 +22,7 @@ pipeline {
                                 userRemoteConfigs: scm.userRemoteConfigs
                             ])
                 sh '''
-                                
+                                git fetch --all
                                 git clean -ffdx
                                 git submodule foreach --recursive git clean -ffdx
                             '''
