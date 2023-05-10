@@ -107,7 +107,11 @@ def generate_gitversion(gv):
 
 def generate_env():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
-    user = os.environ["USER"]
+    if globals().get('USER'):
+        user = os.environ["USER"]
+    else:
+        user = 'nouser'
+        
     if globals().get('BUILD_TAG'):
         buildtag = os.environ["BUILD_TAG"]
     else:
