@@ -15,7 +15,21 @@ struct OpticalAutocal
     static constexpr float Z_OFFSET_ERR{-1.0f};
     static constexpr pin_t SENSOR_1{OPTICAL_SENSOR_1_PIN};
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
-    using YSweepArray = std::array<float, NUM_CYCLES>;
+    struct LongSweepCoords
+    {
+        float sensor_1_forward_y;
+        float sensor_2_forward_y;
+        float sensor_2_backward_y;
+        float sensor_1_backward_y;
+        inline constexpr float y1() { return (sensor_1_forward_y + sensor_1_backward_y) / 2.0f; }
+        inline constexpr float y2() { return ((sensor_2_backward_y + sensor_1_backward_y) / 2.0f); }
+        inline constexpr float y_delta() { return ABS(y1() - y2()); }
+        inline constexpr bool has_zeroes()
+        {
+            return sensor_1_forward_y == 0.0f || sensor_2_forward_y == 0.0f
+                   || sensor_2_backward_y == 0.0f || sensor_1_backward_y == 0.0f;
+        }
+    };
 
     static xyz_pos_t nozzle_calibration_extra_offset;
 
@@ -31,7 +45,7 @@ struct OpticalAutocal
 
     auto full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
     [[nodiscard]] bool is_calibrated(const uint8_t tool) const;
-    [[nodiscard]] const xyz_pos_t &offset(const uint8_t tool) const;
+    [[nodiscard]] const xyz_pos_t& offset(const uint8_t tool) const;
     void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
@@ -58,7 +72,9 @@ private:
      * @param feedrate mm/s
      * @param cycles
      */
-    [[nodiscard]] auto full_sensor_sweep(const uint8_t tool, const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
+    [[nodiscard]] auto full_sensor_sweep(const uint8_t tool,
+                                         const xyz_pos_t start_pos,
+                                         const feedRate_t feedrate) -> ErrorCode;
 
     /**
      * @brief sweep in y direction across both sensors to derive nozzle centerpoint distance between beams
@@ -69,10 +85,13 @@ private:
      */
     [[nodiscard]] xy_pos_t find_xy_offset(const xy_pos_t start_pos, const feedRate_t feedrate) const;
 
-    [[nodiscard]] float scan_for_tip(float z, const float inc, bool& condition, const feedRate_t feedrate) const;
+    [[nodiscard]] float scan_for_tip(float z,
+                                     const float inc,
+                                     bool& condition,
+                                     const feedRate_t feedrate) const;
 
     [[nodiscard]] float find_z_offset(float z, const feedRate_t feedrate) const;
 };
 
 extern OpticalAutocal optical_autocal;
-// 
+//
