@@ -152,7 +152,7 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                              (start_pos.x + (coord.y_delta() / 2.0f)),
                              ", y offset: ",
                              (avg_sweep.y1() + (coord.sweep.y_delta() / 2)));
-        }
+        };
     SERIAL_ECHOLN("--minimum--");
     print_stats(min_sweep);
     SERIAL_ECHOLN("--maximum--");
