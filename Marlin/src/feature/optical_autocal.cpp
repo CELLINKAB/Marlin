@@ -172,6 +172,12 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                      " with ",
                      error_count,
                      " sweeps containing errors and discarded");
+    SERIAL_ECHOLNPGM("feedrate: ",
+                     feedrate,
+                     ", start x:",
+                     start_pos.x,
+                     ", start y: ",
+                     start_pos.y, );
     SERIAL_ECHOLN("--minimum--");
     print_stats(min_sweep);
     SERIAL_ECHOLN("--maximum--");
