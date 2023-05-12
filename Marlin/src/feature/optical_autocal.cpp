@@ -157,13 +157,14 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
 
     auto print_stats = [start_pos](LongSweepCoords coord) {
         constexpr static xyz_pos_t delta = AUTOCAL_PRINTBED_CENTER_DELTA;
+        const float offset = (coord.y_delta() / 2.0f);
         coord.print();
         SERIAL_ECHOLNPGM("y delta: ",
                          coord.y_delta(),
                          ", x offset: ",
-                         ((start_pos.x + (coord.y_delta() / 2.0f)) + delta.x),
+                         ((start_pos.x - offset) + delta.x),
                          ", y offset: ",
-                         ((coord.y1() + (coord.y_delta() / 2.0f)) + delta.y));
+                         ((coord.y1() + offset) + delta.y));
     };
 
     SERIAL_ECHOLNPGM("Completed ",
