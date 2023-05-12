@@ -163,7 +163,7 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                          ", x offset: ",
                          ((start_pos.x + (coord.y_delta() / 2.0f)) + delta.x),
                          ", y offset: ",
-                         ((coord.y1() + (coord.y_delta() / 2)) + delta.y));
+                         ((coord.y1() + (coord.y_delta() / 2.0f)) + delta.y));
     };
 
     SERIAL_ECHOLNPGM("Completed ",
