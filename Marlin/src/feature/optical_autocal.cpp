@@ -60,6 +60,112 @@ void OpticalAutocal::reset_all()
     offsets.fill(xyz_pos_t{});
 }
 
+void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
+{
+    constexpr static uint8_t MAX_CYCLES = 48;
+    cycles = min(cycles, MAX_CYCLES);
+    LongSweepCoords coords[MAX_CYCLES];
+    LongSweepCoords avg_sweep;
+    LongSweepCoords min_sweep{1'000'000'000'000.0f,
+                              1'000'000'000'000.0f,
+                              1'000'000'000'000.0f,
+                              1'000'000'000'000.0f};
+    LongSweepCoords max_sweep{-1'000'000'000'000.0f,
+                              -1'000'000'000'000.0f,
+                              -1'000'000'000'000.0f,
+                              -1'000'000'000'000.0f};
+
+    start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
+    do_blocking_move_to(start_pos);
+
+    uint8_t error_count = 0;
+
+    for (uint8_t cycle_count = 0; cycle_count < cycles; ++cycle_count) {
+        coords[cycle_count] = long_sweep(feedrate);
+        if (coords[cycle_count].has_zeroes()) {
+            ++error_count;
+            continue;
+        }
+        if (DEBUGGING(INFO)) {
+            SERIAL_ECHOPGM("sweep: ", cycle_count, ", ");
+            coords[cycle_count].print();
+        }
+
+        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_forward_y / cycles;
+        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_forward_y / cycles;
+        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_backward_y / cycles;
+        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_backward_y / cycles;
+
+        if (coords[cycle_count].sensor_1_forward_y < min_sweep.sensor_1_forward_y)
+            min_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
+        if (coords[cycle_count].sensor_2_forward_y < min_sweep.sensor_2_forward_y)
+            min_sweep.sensor_2_forward_y = coords[cycle_count].sensor_2_forward_y;
+        if (coords[cycle_count].sensor_2_backward_y < min_sweep.sensor_2_backward_y)
+            min_sweep.sensor_2_backward_y = coords[cycle_count].sensor_2_backward_y;
+        if (coords[cycle_count].sensor_1_backward_y < min_sweep.sensor_1_backward_y)
+            min_sweep.sensor_1_backward_y = coords[cycle_count].sensor_1_backward_y;
+
+        if (coords[cycle_count].sensor_1_forward_y > max_sweep.sensor_1_forward_y)
+            max_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
+        if (coords[cycle_count].sensor_2_forward_y > max_sweep.sensor_2_forward_y)
+            max_sweep.sensor_2_forward_y = coords[cycle_count].sensor_2_forward_y;
+        if (coords[cycle_count].sensor_2_backward_y > max_sweep.sensor_2_backward_y)
+            max_sweep.sensor_2_backward_y = coords[cycle_count].sensor_2_backward_y;
+        if (coords[cycle_count].sensor_1_backward_y < max_sweep.sensor_1_backward_y)
+            max_sweep.sensor_1_backward_y = coords[cycle_count].sensor_1_backward_y;
+    }
+
+    // calculate variance
+    LongSweepCoords sweep_variance;
+    for (uint8_t cycle_count = 0; cycle_count < cycles; ++cycle_count) {
+        if (coords[cycle_count].has_zeroes())
+            continue;
+        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_1_forward_y
+                                                     - avg_sweep.sensor_1_forward_y,
+                                                 2.0f)
+                                             / cycles;
+        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_forward_y
+                                                     - avg_sweep.sensor_2_forward_y,
+                                                 2.0f)
+                                             / cycles;
+        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_backward_y
+                                                     - avg_sweep.sensor_2_backward_y,
+                                                 2.0f)
+                                             / cycles;
+        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_1_backward_y
+                                                     - avg_sweep.sensor_1_backward_y,
+                                                 2.0f)
+                                             / cycles;
+    }
+
+    LongSweepCoords sweep_deviation{sqrt(sweep_variance.sensor_1_forward_y),
+                                    sqrt(sweep_variance.sensor_2_forward_y),
+                                    sqrt(sweep_variance.sensor_2_backward_y),
+                                    sqrt(sweep_variance.sensor_1_backward_y)};
+
+    auto print_stats =
+        [start_pos](LongSweepCoords coord) {
+            coord.print();
+            SERIAL_ECHOLNPGM("y delta: ",
+                             coord.y_delta(),
+                             ", x offset: ",
+                             (start_pos.x + (coord.y_delta() / 2.0f)),
+                             ", y offset: ",
+                             (avg_sweep.y1() + (coord.sweep.y_delta() / 2)));
+        }
+    SERIAL_ECHOLN("--minimum--");
+    print_stats(min_sweep);
+    SERIAL_ECHOLN("--maximum--");
+    print_stats(max_sweep);
+    SERIAL_ECHOLN("--mean--");
+    print_stats(avg_sweep);
+    SERIAL_ECHOLN("--variance--");
+    print_stats(sweep_variance);
+    SERIAL_ECHOLN("--standard deviation--");
+    print_stats(sweep_deviation);
+
+}
+
 xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 {
     xyz_pos_t new_offset{};
@@ -70,6 +176,65 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     }
 
     return new_offset;
+}
+
+[[nodiscard]] auto OpticalAutocal::long_sweep(feedRate_t feedrate_mm_s) -> LongSweepCoords
+{
+    volatile float sensor_1_trigger_y_pos{0.0f};
+    volatile float sensor_2_trigger_y_pos{0.0f};
+    LongSweepCoords retval;
+    const bool read_polarity = (sensor_polarity == RISING) ? HIGH : LOW;
+
+    // enable sensors
+    auto isr1 = [&sensor_1_trigger_y_pos] {
+        if (sensor_1_trigger_y_pos == 0.0f)
+            sensor_1_trigger_y_pos = planner.get_axis_positions_mm().y;
+    };
+    auto isr2 = [&sensor_2_trigger_y_pos] {
+        if (sensor_2_trigger_y_pos == 0.0f)
+            sensor_2_trigger_y_pos = planner.get_axis_positions_mm().y;
+    };
+
+    attachInterrupt(SENSOR_1, isr1, sensor_polarity);
+    current_position.y += FULL_Y_RANGE;
+    planner.buffer_line(current_position);
+    while (planner.busy()) {
+        idle();
+        // sensor 1 triggered, switch sensors
+        if (sensor_1_trigger_y_pos != 0.0f) {
+            while (READ(SENSOR_1) == read_polarity)
+                delay(1);
+            hal.isr_off();
+            retval.sensor_1_forward_y = sensor_1_trigger_y_pos;
+            detachInterrupt(SENSOR_1);
+            attachInterrupt(SENSOR_2, isr2, sensor_polarity);
+            sensor_1_trigger_y_pos = 0.0f;
+            hal.isr_on();
+        }
+    }
+    retval.sensor_2_forward_y = sensor_2_trigger_y_pos;
+    sensor_2_trigger_y_pos = 0.0f;
+
+    // switch direction
+    current_position.y -= FULL_Y_RANGE;
+    planner.buffer_line(current_position);
+    while (planner.busy()) {
+        idle();
+        // sensor 2 triggered, switch sensors
+        if (sensor_2_trigger_y_pos != 0.0f) {
+            while (READ(SENSOR_2) == read_polarity)
+                delay(1);
+            hal.isr_off();
+            retval.sensor_2_backward_y = sensor_2_trigger_y_pos;
+            detachInterrupt(SENSOR_2);
+            attachInterrupt(SENSOR_1, isr1, sensor_polarity);
+            sensor_2_trigger_y_pos = 0.0f;
+            hal.isr_on();
+        }
+    }
+    detachInterrupt(SENSOR_1);
+
+    return retval;
 }
 
 [[nodiscard]] auto OpticalAutocal::full_sensor_sweep(const uint8_t tool,
@@ -123,104 +288,33 @@ void OpticalAutocal::report_sensors() const
 [[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos,
                                                       const float feedrate) const
 {
-    volatile float sensor_1_trigger_y_pos{0.0f};
-    volatile float sensor_2_trigger_y_pos{0.0f};
-    volatile bool read_sensor_1 = false;
-    volatile bool read_sensor_2 = false;
+    float delta_y = 0.0f;
+    float avg_y1 = 0.0f
 
-    const unsigned int delay_3mm = static_cast<int>(3000.0f / feedrate ?: feedrate_mm_s);
-
-    // enable sensors
-    auto isr1 = [&sensor_1_trigger_y_pos, &read_sensor_1, &read_sensor_2, delay_3mm] {
-        const float y = planner.get_axis_positions_mm().y;
-        if (!read_sensor_1)
-            return;
-        sensor_1_trigger_y_pos = y;
-        read_sensor_1 = false;
-        safe_delay(delay_3mm);
-        read_sensor_2 = true;
-        if DEBUGGING (LEVELING)
-            SERIAL_ECHOLNPGM("sensor 1 triggered Y", y);
-    };
-    auto isr2 = [&sensor_2_trigger_y_pos, &read_sensor_2, &read_sensor_1, delay_3mm] {
-        const float y = planner.get_axis_positions_mm().y;
-        if (!read_sensor_2)
-            return;
-        sensor_2_trigger_y_pos = y;
-        read_sensor_2 = false;
-        safe_delay(delay_3mm);
-        read_sensor_1 = true;
-        if DEBUGGING (LEVELING)
-            SERIAL_ECHOLNPGM("sensor 2 triggered Y", y);
-    };
-
-    attachInterrupt(SENSOR_1, isr1, sensor_polarity);
-    attachInterrupt(SENSOR_2, isr2, sensor_polarity);
-
-    // y1 - cross sensor 1 forwards; y2 - cross sensor 2 forwards
-    // y3 - cross sensor 2 backwards; y4 - cross sensor 1 backwards
-    YSweepArray y1{};
-    YSweepArray y2{};
-    YSweepArray y3{};
-    YSweepArray y4{};
-
-    for (size_t i = 0; i < NUM_CYCLES; ++i) {
-        read_sensor_1 = true;
-        read_sensor_2 = false;
-
-        do_blocking_move_to_y(start_pos.y + FULL_Y_RANGE, feedrate);
-        y1[i] = sensor_1_trigger_y_pos;
-        y2[i] = sensor_2_trigger_y_pos;
-
-        read_sensor_1 = false;
-        read_sensor_2 = true;
-
-        do_blocking_move_to_y(start_pos.y, feedrate);
-        y3[i] = sensor_2_trigger_y_pos;
-        y4[i] = sensor_1_trigger_y_pos;
-
-        if DEBUGGING (LEVELING)
-            SERIAL_ECHOLNPGM("sweep: ", i, " y1: ", y1[i], " y2: ", y2[i], " y3: ", y3[i], " y4: ", y4[i]);
+        for (size_t i = 0; i < NUM_CYCLES; ++i)
+    {
+        LongSweepCoords sweep = long_sweep(feedrate);
+        if (DEBUGGING(INFO)) {
+            SERIAL_ECHOPGM("sweep: ", i, ", ");
+            sweep.print();
+        }
+        if (sweep.has_zeroes()) {
+            SERIAL_ERROR_MSG("zero values in sweep! Check optical sensors.", "Calibration aborted.");
+            return XY_OFFSET_ERR;
+        }
+        delta_y += sweep.y_delta() / NUM_CYCLES; // iterative average
+        avg_y1 += sweep.y1() / NUM_CYCLES;
     }
-
-    detachInterrupt(SENSOR_1);
-    detachInterrupt(SENSOR_2);
-
-    auto check_non_zero = [](const auto container) -> bool {
-        return std::any_of(container.cbegin(), container.cend(), [](const float v) {
-            return v == 0.0f;
-        });
-    };
-
-    const bool any_non_zero = check_non_zero(y1) || check_non_zero(y2) || check_non_zero(y3)
-                              || check_non_zero(y4);
-
-    if (any_non_zero) {
-        SERIAL_ERROR_MSG("zero values in sweep! Check optical sensors.", "Calibration aborted.");
-        return XY_OFFSET_ERR;
-    }
-
-    auto cycles_avg = [](const auto s1, const auto s2) -> float {
-        const float sum_s1 = std::accumulate(s1.cbegin(), s1.cend(), 0.0f);
-        const float sum_s2 = std::accumulate(s2.cbegin(), s2.cend(), 0.0f);
-        const float avg = (sum_s1 + sum_s2) / (s1.size() + s2.size());
-        return avg;
-    };
-
-    const float nozzle_y1 = cycles_avg(y1, y4);
-    const float nozzle_y2 = cycles_avg(y2, y3);
-
-    const float dy = ABS(nozzle_y1 - nozzle_y2);
 
     // sensors cross at a 90 degree angle, which creates two congruent isosceles
     // right triangles with legs in the X and Y directions, both of value dy/2
-    const float xy_offset = dy / 2.0f;
+    const float xy_offset = delta_y / 2.0f;
 
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
         SERIAL_ECHOLNPGM("XY offset: ", xy_offset);
 
     const float x = start_pos.x - xy_offset;
-    const float y = nozzle_y1 + xy_offset;
+    const float y = avg_y1 + xy_offset;
 
     return {x, y};
 }

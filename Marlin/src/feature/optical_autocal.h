@@ -15,21 +15,6 @@ struct OpticalAutocal
     static constexpr float Z_OFFSET_ERR{-1.0f};
     static constexpr pin_t SENSOR_1{OPTICAL_SENSOR_1_PIN};
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
-    struct LongSweepCoords
-    {
-        float sensor_1_forward_y;
-        float sensor_2_forward_y;
-        float sensor_2_backward_y;
-        float sensor_1_backward_y;
-        inline constexpr float y1() { return (sensor_1_forward_y + sensor_1_backward_y) / 2.0f; }
-        inline constexpr float y2() { return ((sensor_2_backward_y + sensor_1_backward_y) / 2.0f); }
-        inline constexpr float y_delta() { return ABS(y1() - y2()); }
-        inline constexpr bool has_zeroes()
-        {
-            return sensor_1_forward_y == 0.0f || sensor_2_forward_y == 0.0f
-                   || sensor_2_backward_y == 0.0f || sensor_1_backward_y == 0.0f;
-        }
-    };
 
     static xyz_pos_t nozzle_calibration_extra_offset;
 
@@ -49,6 +34,7 @@ struct OpticalAutocal
     void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
+    void test(uint16_t cycles, xyz_pos_t start_pos, feedRate_t feedrate);
 
     xyz_pos_t tool_change_offset(const uint8_t);
 
@@ -60,10 +46,45 @@ private:
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
+    struct LongSweepCoords
+    {
+        float sensor_1_forward_y;
+        float sensor_2_forward_y;
+        float sensor_2_backward_y;
+        float sensor_1_backward_y;
+        inline constexpr float y1() const
+        {
+            return (sensor_1_forward_y + sensor_1_backward_y) / 2.0f;
+        }
+        inline constexpr float y2() const
+        {
+            return ((sensor_2_backward_y + sensor_1_backward_y) / 2.0f);
+        }
+        inline constexpr float y_delta() const { return ABS(y1() - y2()); }
+        inline constexpr bool has_zeroes() const
+        {
+            return sensor_1_forward_y == 0.0f || sensor_2_forward_y == 0.0f
+                   || sensor_2_backward_y == 0.0f || sensor_1_backward_y == 0.0f;
+        }
+        void print()
+        {
+            SERIAL_ECHOLNPGM(" y1: ",
+                             retval.sensor_1_forward_y,
+                             " y2: ",
+                             retval.sensor_2_forward_y,
+                             " y3: ",
+                             retval.sensor_2_backward_y,
+                             " y4: ",
+                             retval.sensor_1_backward_y);
+        }
+    };
+
     static uint32_t sensor_polarity;
 
     std::array<xyz_pos_t, EXTRUDERS> offsets;
     xyz_pos_t active_offset;
+
+    [[nodiscard]] auto long_sweep(feedRate_t feedrate_mm_s) -> LongSweepCoords;
 
     /**
      * @brief Perform a multi-step sweep of optical sensors to find precise tool offset
@@ -74,7 +95,7 @@ private:
      */
     [[nodiscard]] auto full_sensor_sweep(const uint8_t tool,
                                          const xyz_pos_t start_pos,
-                                         const feedRate_t feedrate) -> ErrorCode;
+                                         const feedRate_t feedrate_mm_s) -> ErrorCode;
 
     /**
      * @brief sweep in y direction across both sensors to derive nozzle centerpoint distance between beams
