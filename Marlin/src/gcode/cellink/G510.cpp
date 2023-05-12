@@ -37,7 +37,7 @@ void GcodeSuite::G510()
     start_pos.y = parser.axisunitsval('Y', AxisEnum::Y_AXIS, DEFAULT_START_POS.y);
     start_pos.z = parser.axisunitsval('Z', AxisEnum::Z_AXIS, DEFAULT_START_POS.z);
 
-    const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
+    const auto feedrate = parser.feedrateval('F', 25.0f);
 
     if (parser.seen('D')) {
         optical_autocal.test(48, start_pos, feedrate);
