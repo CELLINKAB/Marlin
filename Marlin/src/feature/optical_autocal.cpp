@@ -180,6 +180,8 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
     print_stats(sweep_variance);
     SERIAL_ECHOLN("--standard deviation--");
     print_stats(sweep_deviation);
+
+    do_blocking_move_to_xy_z(start_pos, POST_AUTOCAL_SAFE_Z_HEIGHT);
 }
 
 xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
