@@ -34,7 +34,7 @@ struct OpticalAutocal
     void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
-    void test(uint16_t cycles, xyz_pos_t start_pos, feedRate_t feedrate);
+    void test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate);
 
     xyz_pos_t tool_change_offset(const uint8_t);
 
@@ -46,7 +46,7 @@ private:
     static constexpr float FINE_Z_INCREMENT = 0.125f;
     static constexpr float PRECISE_Z_INCREMENT = 0.025f;
 
-    struct LongSweepCoords
+        struct LongSweepCoords
     {
         float sensor_1_forward_y;
         float sensor_2_forward_y;
@@ -66,16 +66,16 @@ private:
             return sensor_1_forward_y == 0.0f || sensor_2_forward_y == 0.0f
                    || sensor_2_backward_y == 0.0f || sensor_1_backward_y == 0.0f;
         }
-        void print()
+        void print() const
         {
             SERIAL_ECHOLNPGM(" y1: ",
-                             retval.sensor_1_forward_y,
+                             sensor_1_forward_y,
                              " y2: ",
-                             retval.sensor_2_forward_y,
+                             sensor_2_forward_y,
                              " y3: ",
-                             retval.sensor_2_backward_y,
+                             sensor_2_backward_y,
                              " y4: ",
-                             retval.sensor_1_backward_y);
+                             sensor_1_backward_y);
         }
     };
 
@@ -84,7 +84,7 @@ private:
     std::array<xyz_pos_t, EXTRUDERS> offsets;
     xyz_pos_t active_offset;
 
-    [[nodiscard]] auto long_sweep(feedRate_t feedrate_mm_s) -> LongSweepCoords;
+    [[nodiscard]] auto long_sweep(feedRate_t feedrate_mm_s) const -> LongSweepCoords;
 
     /**
      * @brief Perform a multi-step sweep of optical sensors to find precise tool offset

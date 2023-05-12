@@ -64,8 +64,8 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
 {
     constexpr static uint8_t MAX_CYCLES = 48;
     cycles = min(cycles, MAX_CYCLES);
-    LongSweepCoords coords[MAX_CYCLES];
-    LongSweepCoords avg_sweep;
+    std::array<LongSweepCoords,MAX_CYCLES> coords{};
+    LongSweepCoords avg_sweep{};
     LongSweepCoords min_sweep{1'000'000'000'000.0f,
                               1'000'000'000'000.0f,
                               1'000'000'000'000.0f,
@@ -151,8 +151,9 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                              ", x offset: ",
                              (start_pos.x + (coord.y_delta() / 2.0f)),
                              ", y offset: ",
-                             (avg_sweep.y1() + (coord.sweep.y_delta() / 2)));
+                             (coord.y1() + (coord.y_delta() / 2)));
         };
+
     SERIAL_ECHOLN("--minimum--");
     print_stats(min_sweep);
     SERIAL_ECHOLN("--maximum--");
@@ -178,7 +179,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return new_offset;
 }
 
-[[nodiscard]] auto OpticalAutocal::long_sweep(feedRate_t feedrate_mm_s) -> LongSweepCoords
+[[nodiscard]] auto OpticalAutocal::long_sweep(feedRate_t feedrate_mm_s) const -> LongSweepCoords
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
     volatile float sensor_2_trigger_y_pos{0.0f};
@@ -197,7 +198,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 
     attachInterrupt(SENSOR_1, isr1, sensor_polarity);
     current_position.y += FULL_Y_RANGE;
-    planner.buffer_line(current_position);
+    planner.buffer_line(current_position, feedrate_mm_s);
     while (planner.busy()) {
         idle();
         // sensor 1 triggered, switch sensors
@@ -217,7 +218,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 
     // switch direction
     current_position.y -= FULL_Y_RANGE;
-    planner.buffer_line(current_position);
+    planner.buffer_line(current_position, feedrate_mm_s);
     while (planner.busy()) {
         idle();
         // sensor 2 triggered, switch sensors
@@ -289,7 +290,7 @@ void OpticalAutocal::report_sensors() const
                                                       const float feedrate) const
 {
     float delta_y = 0.0f;
-    float avg_y1 = 0.0f
+    float avg_y1 = 0.0f;
 
         for (size_t i = 0; i < NUM_CYCLES; ++i)
     {
