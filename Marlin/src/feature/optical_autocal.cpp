@@ -69,14 +69,14 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
     SERIAL_ECHOLNPGM("running ", cycles, " sweeps...");
 
     LongSweepCoords avg_sweep{};
-    LongSweepCoords min_sweep{1'000'000'000'000.0f,
-                              1'000'000'000'000.0f,
-                              1'000'000'000'000.0f,
-                              1'000'000'000'000.0f};
-    LongSweepCoords max_sweep{-1'000'000'000'000.0f,
-                              -1'000'000'000'000.0f,
-                              -1'000'000'000'000.0f,
-                              -1'000'000'000'000.0f};
+    LongSweepCoords min_sweep{1'000'000'000.0f,
+                              1'000'000'000.0f,
+                              1'000'000'000.0f,
+                              1'000'000'000.0f};
+    LongSweepCoords max_sweep{-1'000'000'000.0f,
+                              -1'000'000'000.0f,
+                              -1'000'000'000.0f,
+                              -1'000'000'000.0f};
     
     do_blocking_move_to(start_pos);
     start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
@@ -96,9 +96,9 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
         }
 
         avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_forward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_forward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_backward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_backward_y / cycles;
+        avg_sweep.sensor_2_forward_y += coords[cycle_count].sensor_2_forward_y / cycles;
+        avg_sweep.sensor_2_backward_y += coords[cycle_count].sensor_2_backward_y / cycles;
+        avg_sweep.sensor_1_backward_y += coords[cycle_count].sensor_1_backward_y / cycles;
 
         if (coords[cycle_count].sensor_1_forward_y < min_sweep.sensor_1_forward_y)
             min_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
@@ -128,15 +128,15 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                                                      - avg_sweep.sensor_1_forward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_forward_y
+        sweep_variance.sensor_2_forward_y += pow(coords[cycle_count].sensor_2_forward_y
                                                      - avg_sweep.sensor_2_forward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_backward_y
+        sweep_variance.sensor_2_backward_y += pow(coords[cycle_count].sensor_2_backward_y
                                                      - avg_sweep.sensor_2_backward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_1_backward_y
+        sweep_variance.sensor_1_backward_y += pow(coords[cycle_count].sensor_1_backward_y
                                                      - avg_sweep.sensor_1_backward_y,
                                                  2.0f)
                                              / cycles;
@@ -189,7 +189,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
     volatile float sensor_2_trigger_y_pos{0.0f};
-    LongSweepCoords retval;
+    LongSweepCoords retval{0.0f, 0.0f, 0.0f, 0.0f};
     const bool read_polarity = (sensor_polarity == RISING) ? HIGH : LOW;
 
     // enable sensors
@@ -240,6 +240,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
         }
     }
     detachInterrupt(SENSOR_1);
+    retval.sensor_1_backward_y = sensor_1_trigger_y_pos;
 
     return retval;
 }
