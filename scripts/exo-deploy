@@ -1,5 +1,5 @@
 #!/bin/bash
-platformio run --environment MYCORRHIZA_V1_1 
+platformio run --environment MYCORRHIZA_V1_1  -a "--build_tag=local"
 EXO_HOST=exo.local 
 ping $EXO_HOST -c 1
 pinged=$?

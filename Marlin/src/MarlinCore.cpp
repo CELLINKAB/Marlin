@@ -1341,6 +1341,12 @@ void setup() {
     );
   #endif
   SERIAL_ECHO_MSG(" Compiled: " __DATE__);
+  SERIAL_ECHOLNPGM(" SemVer: ", VER_SEM_VER);
+  SERIAL_ECHOLNPGM(" Branch: ", VER_BRANCH);
+  SERIAL_ECHOLNPGM(" Commit: ", VER_CURRENT_COMMIT);
+  SERIAL_ECHOLNPGM(" Timestamp: ", VER_TIMESTAMP);
+  SERIAL_ECHOLNPGM(" BuildTag: ",VER_BUILDTAG);
+
   SERIAL_ECHO_MSG(STR_FREE_MEMORY, hal.freeMemory(), STR_PLANNER_BUFFER_BYTES, sizeof(block_t) * (BLOCK_BUFFER_SIZE));
 
   // Some HAL need precise delay adjustment

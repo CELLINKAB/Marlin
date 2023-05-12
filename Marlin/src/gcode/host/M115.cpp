@@ -63,7 +63,7 @@
  *       the capability is not present.
  */
 void GcodeSuite::M115() {
-  SERIAL_ECHOPGM("FIRMWARE_NAME:Marlin"
+  SERIAL_ECHOLNPGM("FIRMWARE_NAME:Marlin"
     " " DETAILED_BUILD_VERSION " (" __DATE__ " " __TIME__ ")"
     " SOURCE_CODE_URL:" SOURCE_CODE_URL
     " PROTOCOL_VERSION:" PROTOCOL_VERSION
@@ -76,7 +76,13 @@ void GcodeSuite::M115() {
       " UUID:" MACHINE_UUID
     #endif
   );
-
+  SERIAL_ECHOLN("Cellink Version Info");
+  SERIAL_ECHOLNPGM("COMPILED: " __DATE__);
+  SERIAL_ECHOLNPGM("SEMVER: ", VER_SEM_VER);
+  SERIAL_ECHOLNPGM("BRANCH: ", VER_BRANCH);
+  SERIAL_ECHOLNPGM("COMMIT: ", VER_CURRENT_COMMIT);
+  SERIAL_ECHOLNPGM("TIMESTAMP: ", VER_TIMESTAMP);
+  SERIAL_ECHOLNPGM("BUILDTAG: ",VER_BUILDTAG);
   // STM32UID:111122223333
   #if ENABLED(HAS_STM32_UID) && !defined(MACHINE_UUID)
     // STM32 based devices output the CPU device serial number
