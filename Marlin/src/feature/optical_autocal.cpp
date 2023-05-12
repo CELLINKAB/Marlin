@@ -66,7 +66,7 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
     cycles = min(cycles, MAX_CYCLES);
     std::array<LongSweepCoords,MAX_CYCLES> coords{};
 
-    SERIAL_ECHOLNPGM("running " cycles, " sweeps...");
+    SERIAL_ECHOLNPGM("running ", cycles, " sweeps...");
 
     LongSweepCoords avg_sweep{};
     LongSweepCoords min_sweep{1'000'000'000'000.0f,
