@@ -39,6 +39,11 @@ void GcodeSuite::G510()
 
     const auto feedrate = parser.feedrateval('F', AUTOCAL_DEFAULT_FEEDRATE);
 
+    if (parser.seen('D')) {
+        optical_autocal.test(48, start_pos, feedrate);
+        return;
+    }
+
     // reset calibration so results are consistent
     optical_autocal.reset(active_extruder);
     update_offset(optical_autocal.offset(active_extruder));
