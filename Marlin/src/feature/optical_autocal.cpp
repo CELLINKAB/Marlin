@@ -156,13 +156,14 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                                     sqrt(sweep_variance.sensor_1_backward_y)};
 
     auto print_stats = [start_pos](LongSweepCoords coord) {
+        constexpr static xyz_pos_t delta = AUTOCAL_PRINTBED_CENTER_DELTA;
         coord.print();
         SERIAL_ECHOLNPGM("y delta: ",
                          coord.y_delta(),
                          ", x offset: ",
-                         (start_pos.x + (coord.y_delta() / 2.0f)),
+                         ((start_pos.x + (coord.y_delta() / 2.0f)) + delta.x),
                          ", y offset: ",
-                         (coord.y1() + (coord.y_delta() / 2)));
+                         ((coord.y1() + (coord.y_delta() / 2)) + delta.y));
     };
 
     SERIAL_ECHOLNPGM("Completed ",
