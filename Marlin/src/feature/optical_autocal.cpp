@@ -77,7 +77,8 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                               -1'000'000'000'000.0f,
                               -1'000'000'000'000.0f,
                               -1'000'000'000'000.0f};
-
+    
+    do_blocking_move_to(start_pos);
     start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
     do_blocking_move_to(start_pos);
 
@@ -157,6 +158,8 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                              (coord.y1() + (coord.y_delta() / 2)));
         };
 
+
+    SERIAL_ECHOLNPGM("Completed ", cycles , " with ", error_count, " sweeps containing errors and discarded");
     SERIAL_ECHOLN("--minimum--");
     print_stats(min_sweep);
     SERIAL_ECHOLN("--maximum--");
