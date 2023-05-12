@@ -96,9 +96,9 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
         }
 
         avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_forward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_forward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_2_backward_y / cycles;
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_backward_y / cycles;
+        avg_sweep.sensor_2_forward_y += coords[cycle_count].sensor_2_forward_y / cycles;
+        avg_sweep.sensor_2_backward_y += coords[cycle_count].sensor_2_backward_y / cycles;
+        avg_sweep.sensor_1_backward_y += coords[cycle_count].sensor_1_backward_y / cycles;
 
         if (coords[cycle_count].sensor_1_forward_y < min_sweep.sensor_1_forward_y)
             min_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
@@ -128,15 +128,15 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
                                                      - avg_sweep.sensor_1_forward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_forward_y
+        sweep_variance.sensor_2_forward_y += pow(coords[cycle_count].sensor_2_forward_y
                                                      - avg_sweep.sensor_2_forward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_2_backward_y
+        sweep_variance.sensor_2_backward_y += pow(coords[cycle_count].sensor_2_backward_y
                                                      - avg_sweep.sensor_2_backward_y,
                                                  2.0f)
                                              / cycles;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_1_backward_y
+        sweep_variance.sensor_1_backward_y += pow(coords[cycle_count].sensor_1_backward_y
                                                      - avg_sweep.sensor_1_backward_y,
                                                  2.0f)
                                              / cycles;
