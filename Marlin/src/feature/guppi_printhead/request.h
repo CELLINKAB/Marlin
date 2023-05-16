@@ -251,7 +251,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     }
     memcpy(&crc, &packet_buffer[packet_index], 2);
 
-    constexpr static bool allow_bad_crc = true;
+    constexpr static bool allow_bad_crc = false;
     if (!allow_bad_crc && crc != incoming.crc())
         return Response<T>{incoming, Result::BAD_CRC};
 
