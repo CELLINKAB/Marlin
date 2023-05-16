@@ -21,8 +21,8 @@ Result printhead::unsafe_send(const void* data, const size_t size, HardwareSeria
 
 void printhead::flush_rx(HardwareSerial& serial)
 {
-    while (serial.available())
-        std::ignore = serial.read();
+    while (serial.read() >= 0)
+        ;
 }
 
 void Controller::tool_change(uint8_t tool_index)

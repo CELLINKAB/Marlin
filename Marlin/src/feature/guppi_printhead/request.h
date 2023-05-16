@@ -185,11 +185,10 @@ extern millis_t last_send;
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
-    // this seems bug-prone...
+    // header + crc + 1 byte padding on either side
+    static constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t);
 
     static constexpr size_t MAX_PACKET = []() {
-        // header + crc + 1 byte padding on either side
-        constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t) + 2;
         if constexpr (std::is_same_v<T, void>) {
             return EMPTY_PACKET_SIZE;
         } else {
@@ -198,12 +197,19 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             return EMPTY_PACKET_SIZE + sizeof(T);
         }
     }();
-    uint8_t packet_buffer[MAX_PACKET]{};
+    uint8_t packet_buffer[MAX_PACKET + 2]{}; // larger than needed in case of transceiver defects
 
     Packet<T> incoming{};
 
-    serial.setTimeout(5);
+    serial.setTimeout(10);
     auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
+    bool got_extra_zeroes = false;
+    if (serial.available() > 0) {
+        packet_buffer[MAX_PACKET] = static_cast<uint8_t>(serial.read());
+        ++bytes_received;
+        flush_rx(serial);
+        got_extra_zeroes = true;
+    }
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
@@ -213,10 +219,8 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         SERIAL_ECHOLN("]");
     }
 
-    size_t packet_index = 1; // usually has a leading 0 byte
+    size_t packet_index = got_extra_zeroes ? 1 : 0; // usually has a leading 0 byte
 
-    if (bytes_received == 6)
-        packet_index = 0; // no leading 0
     else if (bytes_received < 8)
         return Response<T>{incoming, Result::PACKET_TOO_SHORT};
 
