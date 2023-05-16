@@ -279,7 +279,7 @@ Result send(const Packet<T>& request,
     // make sure at least a millisecond has passed between sends
     constexpr static millis_t MIN_CHANT_SEND_DELAY = 2;
     while (millis() <= last_send + MIN_CHANT_SEND_DELAY)
-        safe_delay(1);
+        delay(1);
 
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
