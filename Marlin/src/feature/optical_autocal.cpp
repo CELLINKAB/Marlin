@@ -62,7 +62,7 @@ void OpticalAutocal::reset_all()
 
 void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
 {
-    constexpr static uint8_t MAX_CYCLES = 48;
+    constexpr static uint8_t MAX_CYCLES = 40;
     cycles = min(cycles, MAX_CYCLES);
     std::array<LongSweepCoords, MAX_CYCLES> coords{};
 
@@ -114,6 +114,8 @@ void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedra
             max_sweep.sensor_2_backward_y = coords[cycle_count].sensor_2_backward_y;
         if (coords[cycle_count].sensor_1_backward_y > max_sweep.sensor_1_backward_y)
             max_sweep.sensor_1_backward_y = coords[cycle_count].sensor_1_backward_y;
+
+        do_blocking_move_to_z(current_position.z - 0.05);
     }
 
     if (error_count >= cycles) {
