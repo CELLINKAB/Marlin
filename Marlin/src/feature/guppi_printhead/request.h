@@ -213,6 +213,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
+            if (i == 0 && got_extra_zeroes) continue;
             SERIAL_PRINT(packet_buffer[i], PrintBase::Hex);
             SERIAL_CHAR(' ');
         }
