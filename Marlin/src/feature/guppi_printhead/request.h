@@ -218,11 +218,10 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         }
         SERIAL_ECHOLN("]");
     }
+    if (bytes_received < 8)
+        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
 
     size_t packet_index = got_extra_zeroes ? 1 : 0; // usually has a leading 0 byte
-
-    else if (bytes_received < 8)
-        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
 
     // indexes starting at 1 because there is always a leading zero
     memcpy(&incoming.ph_index, &packet_buffer[packet_index], 2);
