@@ -171,16 +171,6 @@ void print_packet(const Packet<T>& packet)
     SERIAL_ECHOLN(" }");
 }
 
-template<typename T>
-void print_response(Response<T> response)
-{
-    if (response.result != Result::OK) {
-        SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));
-    }
-
-    print_packet(response.packet);
-}
-
 void flush_rx(HardwareSerial& serial);
 
 extern millis_t last_send;
@@ -189,7 +179,7 @@ extern size_t printhead_rx_err_counter;
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
-    // header + crc + 1 byte padding on either side
+    // header + crc 
     static constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t);
 
     static constexpr size_t MAX_PACKET = []() {
@@ -207,6 +197,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     static auto err = [&incoming](Result code) -> Response<T> {
         ++printhead_rx_err_counter;
+        if (DEBUGGING(ERRORS)) SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
         return Response<T>{incoming, code};
     };
 
@@ -273,7 +264,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         return err(Result::BAD_CRC);
 
     if (DEBUGGING(INFO) && enable_debug) {
-        SERIAL_ECHOLN("Parsed:");
+        SERIAL_ECHOLN("Parsed ");
         print_packet(incoming);
     }
 
