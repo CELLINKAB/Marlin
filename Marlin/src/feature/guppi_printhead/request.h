@@ -204,8 +204,8 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     serial.setTimeout(25);
     auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
     bool got_extra_zeroes = false;
-    if (serial.available() > 0) {
-        packet_buffer[MAX_PACKET] = static_cast<uint8_t>(serial.read());
+    if (int leftover = serial.read(); leftover != -1) {
+        packet_buffer[MAX_PACKET] = static_cast<uint8_t>(leftover);
         ++bytes_received;
         flush_rx(serial);
         got_extra_zeroes = true;
@@ -245,7 +245,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         return err(Result::UNIMPLEMENTED);
     }
 
-    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET || incoming.payload_size > bytes_received) {
+    if (static_cast<size_t>(incoming.payload_size + EMPTY_PACKET_SIZE) > (MAX_PACKET + 2) || incoming.payload_size > bytes_received) {
         return err(Result::BAD_PAYLOAD_SIZE);
     }
 
