@@ -33,7 +33,8 @@ enum class Result {
     PACKET_TOO_SHORT,
     BAD_PAYLOAD_SIZE,
     UNIMPLEMENTED,
-    WRITE_ERROR
+    WRITE_ERROR,
+    EXTRA_ZEROES,
 };
 
 constexpr const char* string_from_result_code(Result result)
@@ -53,6 +54,8 @@ constexpr const char* string_from_result_code(Result result)
         return "UNIMPLEMENTED";
     case Result::WRITE_ERROR:
         return "WRITE_ERROR";
+    case Result::EXTRA_ZEROES:
+        return "EXTRA_ZEROES"
     }
     __unreachable();
 }
@@ -215,6 +218,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         ++bytes_received;
         flush_rx(serial);
         got_extra_zeroes = true;
+        err(Result::EXTRA_ZEROES);
     }
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
