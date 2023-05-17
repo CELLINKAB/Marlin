@@ -55,7 +55,7 @@ constexpr const char* string_from_result_code(Result result)
     case Result::WRITE_ERROR:
         return "WRITE_ERROR";
     case Result::EXTRA_ZEROES:
-        return "EXTRA_ZEROES"
+        return "EXTRA_ZEROES";
     }
     __unreachable();
 }

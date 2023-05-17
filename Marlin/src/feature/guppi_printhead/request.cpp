@@ -54,6 +54,9 @@ void Controller::update()
     static uint8_t tool_index = 0;
     static UpdateState update_state = UpdateState::ENCODERS;
 
+    auto& state = ph_states[tool_index];
+    Index index = static_cast<Index>(tool_index);
+
     switch (update_state) {
     case UpdateState::ENCODERS:
         if (tool_index == 0) {
@@ -85,9 +88,6 @@ void Controller::update()
     }
 
     case UpdateState::STATUS: {
-        auto& state = ph_states[tool_index];
-        Index index = static_cast<Index>(tool_index);
-
         const auto status_res = get_status(index, false);
         if (status_res.result == Result::OK) {
             if (DEBUGGING(LEVELING)) {

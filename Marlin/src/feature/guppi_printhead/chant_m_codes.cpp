@@ -83,7 +83,7 @@ void GcodeSuite::G511()
     BIND_INDEX_OR_RETURN(index);
     printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract
                                                         : printhead::ExtruderDirection::Extrude;
-    auto res = ph_controller.home_extruder(index, dir);
+    ph_controller.home_extruder(index, dir);
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("extruder home started");
@@ -96,7 +96,7 @@ void GcodeSuite::G511()
 void GcodeSuite::G512()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
+    ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve home started");
@@ -116,7 +116,7 @@ void GcodeSuite::G513()
         return;
     float position = parser.value_float();
     planner.synchronize();
-    auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
+    ph_controller.move_slider_valve(index, steps_from_mm(position));
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve move started");
@@ -227,13 +227,13 @@ void GcodeSuite::M771()
             for (auto& tem : both_tems_pwm)
                 tem = tem_pwm;
         }
-        auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
+        ph_controller.set_tem_debug(index, both_tems_pwm);
 
         return;
     }
 
     const int16_t temperature = parser.celsiusval('C');
-    auto res = ph_controller.set_temperature(index, temperature);
+    ph_controller.set_temperature(index, temperature);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -248,7 +248,7 @@ void GcodeSuite::M777()
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
-    auto res = ph_controller.set_pid(index, p, i, d);
+    ph_controller.set_pid(index, p, i, d);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -268,7 +268,7 @@ void GcodeSuite::M784() {}
 void GcodeSuite::M785()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_uuid(index);
+    ph_controller.get_uuid(index);
 }
 //SetPrintheadLED
 void GcodeSuite::M786() {}
@@ -297,7 +297,7 @@ void GcodeSuite::M792()
             fan = fan_pwm;
     }
 
-    auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
+    ph_controller.set_fan_speed(index, both_fans_pwm);
 }
 /**
  * @brief GetFanSpeed returns set speed and tech output for com-module
@@ -306,7 +306,7 @@ void GcodeSuite::M792()
 void GcodeSuite::M793()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_fan_speed(index);
+    ph_controller.get_fan_speed(index);
     // TODO: custom print format
 }
 //SetPHAmpCorrParams
@@ -539,7 +539,7 @@ void GcodeSuite::M2020()
 {
     BIND_INDEX_OR_RETURN(index);
     const int32_t steps = parser.longval('S');
-    auto res = ph_controller.add_raw_extruder_steps(index, steps);
+    ph_controller.add_raw_extruder_steps(index, steps);
 }
 //SetPHExtrusionSpeed
 void GcodeSuite::M2030()
@@ -550,7 +550,7 @@ void GcodeSuite::M2030()
     if (feedrate_ul_s == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
-    auto res = ph_controller.set_extrusion_speed(index, feedrate_pl_s);
+    ph_controller.set_extrusion_speed(index, feedrate_pl_s);
     feedrate_mm_s = feedrate_ul_s
                     / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f)
                        * PI);
@@ -559,7 +559,7 @@ void GcodeSuite::M2030()
 void GcodeSuite::M2031()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_extrusion_speed(index);
+    ph_controller.get_extrusion_speed(index);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
@@ -572,20 +572,20 @@ void GcodeSuite::M2034()
     if (!parser.seenval('V'))
         return;
     const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
-    auto res = ph_controller.set_step_volume(index, picoliters);
+    ph_controller.set_step_volume(index, picoliters);
 }
 //GetPHExtrusionStepVol
 void GcodeSuite::M2035()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_step_volume(index);
+    ph_controller.get_step_volume(index);
 }
 //SetPHFullstepExtrusionVol
 void GcodeSuite::M2036()
 {
     BIND_INDEX_OR_RETURN(index);
     const uint32_t pL_volume = parser.ulongval('V');
-    auto res = ph_controller.set_volume_per_fullstep(index, pL_volume);
+    ph_controller.set_volume_per_fullstep(index, pL_volume);
 }
 //GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
