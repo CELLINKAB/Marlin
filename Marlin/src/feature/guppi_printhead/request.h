@@ -181,6 +181,7 @@ void print_response(Response<T> response)
 void flush_rx(HardwareSerial& serial);
 
 extern millis_t last_send;
+extern size_t printhead_rx_err_counter;
 
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
@@ -201,6 +202,14 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     Packet<T> incoming{};
 
+    static auto err = [&incoming](Result code) {
+        ++printhead_rx_err_counter;
+        return Response
+        {
+            incoming, code
+        }
+    };
+
     serial.setTimeout(10);
     auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
     bool got_extra_zeroes = false;
@@ -213,14 +222,15 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
-            if (i == 0 && got_extra_zeroes) continue;
+            if (i == 0 && got_extra_zeroes)
+                continue;
             SERIAL_PRINT(packet_buffer[i], PrintBase::Hex);
             SERIAL_CHAR(' ');
         }
         SERIAL_ECHOLN("]");
     }
     if (bytes_received < 8)
-        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
+        return err(Result::PACKET_TOO_SHORT);
 
     size_t packet_index = got_extra_zeroes ? 1 : 0; // usually has a leading 0 byte
 
@@ -239,14 +249,16 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             SERIAL_PRINTLN(packet_buffer[packet_index], PrintBase::Dec);
         }
         flush_rx(serial);
-        return Response<T>{incoming, Result::UNIMPLEMENTED};
+        ++printhead_rx_err_counter;
+        return err(Result::UNIMPLEMENTED);
     }
 
-    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
+    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET) {
+        return err(Result::BAD_PAYLOAD_SIZE);
+    }
 
     if (incoming.payload_size > bytes_received)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
+        return err(Result::BAD_PAYLOAD_SIZE);
 
     uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
@@ -257,7 +269,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     constexpr static bool allow_bad_crc = false;
     if (!allow_bad_crc && crc != incoming.crc())
-        return Response<T>{incoming, Result::BAD_CRC};
+        return err(Result::BAD_CRC);
 
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHOLN("Parsed:");
@@ -270,6 +282,8 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     // ACK would go here
 }
 
+extern printhead_tx_err_counter;
+
 template<typename T>
 Result send(const Packet<T>& request,
             HardwareSerial& serial,
@@ -278,8 +292,13 @@ Result send(const Packet<T>& request,
 {
     // make sure at least a millisecond has passed between sends
     constexpr static millis_t MIN_CHANT_SEND_DELAY = 2;
-    while (millis() <= last_send + MIN_CHANT_SEND_DELAY)
-        delay(1);
+    if (millis() <= last_send + MIN_CHANT_SEND_DELAY)
+        delay(MIN_CHANT_SEND_DELAY);
+
+    static auto err = [](Result code) {
+        ++printhead_tx_err_counter;
+        return code;
+    };
 
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
@@ -303,7 +322,7 @@ Result send(const Packet<T>& request,
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())
-        return Result::WRITE_ERROR;
+        return err(Result::WRITE_ERROR);
     // should read an ACK after this write to assure complete transaction
     if (expect_ack)
         return receive<void>(serial).result;
