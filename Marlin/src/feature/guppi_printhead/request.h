@@ -202,12 +202,9 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     Packet<T> incoming{};
 
-    static auto err = [&incoming](Result code) {
+    static auto err = [&incoming](Result code) -> Response<T> {
         ++printhead_rx_err_counter;
-        return Response
-        {
-            incoming, code
-        }
+        return Response<T>{incoming, code};
     };
 
     serial.setTimeout(10);
