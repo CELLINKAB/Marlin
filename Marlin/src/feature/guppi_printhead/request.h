@@ -245,12 +245,9 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         return err(Result::UNIMPLEMENTED);
     }
 
-    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET) {
+    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET || incoming.payload_size > bytes_received) {
         return err(Result::BAD_PAYLOAD_SIZE);
     }
-
-    if (incoming.payload_size > bytes_received)
-        return err(Result::BAD_PAYLOAD_SIZE);
 
     uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
