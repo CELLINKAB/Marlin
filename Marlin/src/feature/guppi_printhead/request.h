@@ -282,7 +282,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     // ACK would go here
 }
 
-extern printhead_tx_err_counter;
+extern size_t printhead_tx_err_counter;
 
 template<typename T>
 Result send(const Packet<T>& request,

@@ -331,12 +331,13 @@ void GcodeSuite::M794() {}
 //GetPHAmpCorrParams
 void GcodeSuite::M795() {}
 //GetPHSWVersion
-void GcodeSuite::M796() {
+void GcodeSuite::M796()
+{
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_fw_version(index);
     ph_debug_print(res);
     if (res.result == printhead::Result::OK) {
-        SERIAL_ECHOLNPGM("PH:", static_cast<uint8_t>(index), ",FW_VERSION:",res.packet.payload.data());
+        SERIAL_ECHOLNPGM("PH:", static_cast<uint8_t>(index), ",FW_VERSION:", res.packet.payload.data());
     }
 }
 //SetPHNotCalibrated
@@ -496,11 +497,17 @@ void GcodeSuite::M1035()
         handle_sensor(sensor);
     }
 }
-void GcodeSuite::M1035_report(bool for_replay) {
+void GcodeSuite::M1035_report(bool for_replay)
+{
     report_heading_etc(for_replay, F("Bed TMP117 Sensors"));
     size_t sensor_num = 0;
-    for (auto & sensor : bed_sensors()) {
-        SERIAL_ECHOLNPGM("M1035 I", sensor_num++, " O", sensor.getOffsetTemperature(), " S", sensor.getGain());
+    for (auto& sensor : bed_sensors()) {
+        SERIAL_ECHOLNPGM("M1035 I",
+                         sensor_num++,
+                         " O",
+                         sensor.getOffsetTemperature(),
+                         " S",
+                         sensor.getGain());
     }
 }
 //SetRegulatorPressure
@@ -770,6 +777,17 @@ void GcodeSuite::M2200()
 
     // FIXME: Put this in a better place and modularize
     TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
+}
+
+size_t printhead::printhead_rx_err_counter = 0;
+size_t printhead::printhead_tx_err_counter = 0;
+
+void GcodeSuite::M2201()
+{
+    SERIAL_ECHOLNPGM("PRINTHEAD_TX_ERRORS:",
+                     printhead::printhead_tx_err_counter,
+                     ",PRINTHEAD_RX_ERRORS:",
+                     printhead::printhead_rx_err_counter);
 }
 
 #endif //  CHANTARELLE_SUPPORT
