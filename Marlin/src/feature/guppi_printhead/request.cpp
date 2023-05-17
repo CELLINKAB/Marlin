@@ -39,6 +39,12 @@ void Controller::init()
     tool_change(0);
 }
 
+enum class UpdateState {
+    ENCODERS,
+    TEMPERATURE,
+    STATUS,
+};
+
 void Controller::update()
 {
     static millis_t next_update = 0;
@@ -46,26 +52,39 @@ void Controller::update()
         return;
 
     static uint8_t tool_index = 0;
+    static UpdateState update_state = UpdateState::ENCODERS;
 
-    if (tool_index == 0) {
-        const auto encoder_res = debug_get_encoders(false);
-        if (encoder_res.result == Result::OK) {
-            ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                              EncoderIndex::ExtruderOne);
-            ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                              EncoderIndex::ExtruderTwo);
-            ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                              EncoderIndex::ExtruderThree);
-            ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                            EncoderIndex::SliderOne);
-            ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                            EncoderIndex::SliderTwo);
-            ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                            EncoderIndex::SliderThree);
+    switch (update_state) {
+    case UpdateState::ENCODERS:
+        if (tool_index == 0) {
+            const auto encoder_res = debug_get_encoders(false);
+            if (encoder_res.result == Result::OK) {
+                ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderOne);
+                ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderTwo);
+                ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderThree);
+                ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderOne);
+                ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderTwo);
+                ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderThree);
+            }
         }
+        update_state = UpdateState::TEMPERATURE;
+        break;
+
+    case UpdateState::TEMPERATURE: {
+        const auto temp_res = get_temperature(index, false);
+        if (temp_res.result == Result::OK)
+            state.raw_temperature = temp_res.packet.payload;
+        update_state = UpdateState::STATUS;
+        break;
     }
 
-    {
+    case UpdateState::STATUS: {
         auto& state = ph_states[tool_index];
         Index index = static_cast<Index>(tool_index);
 
@@ -79,15 +98,14 @@ void Controller::update()
             }
             state.status = status_res.packet.payload;
         }
+        update_state = UpdateState::ENCODERS;
+        tool_index = ((tool_index + 1) % EXTRUDERS);
 
-        const auto temp_res = get_temperature(index, false);
-        if (temp_res.result == Result::OK)
-            state.raw_temperature = temp_res.packet.payload;
+        break;
+    }
     }
 
-    tool_index = ((tool_index + 1) % EXTRUDERS);
-
-    next_update = millis() + SEC_TO_MS(1);
+    next_update = millis() + 150;
 }
 
 void Controller::report_states()
@@ -192,7 +210,8 @@ auto Controller::set_fan_speed(Index index, FanSpeeds fan_speeds) -> Result
 auto Controller::get_fan_speed(Index index) -> Response<FanSpeeds>
 {
     Packet packet(index, Command::DEBUG_GET_FAN_PWM);
-    return send_and_receive<FanSpeeds>(packet, bus); // TODO: handle printhead state, get TACH from chant
+    return send_and_receive<FanSpeeds>(packet,
+                                       bus); // TODO: handle printhead state, get TACH from chant
 }
 
 auto Controller::set_tem_debug(Index index, TemTemps tem_pwms) -> Result

@@ -201,7 +201,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         return Response<T>{incoming, code};
     };
 
-    serial.setTimeout(10);
+    serial.setTimeout(25);
     auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
     bool got_extra_zeroes = false;
     if (serial.available() > 0) {
@@ -280,7 +280,7 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    constexpr static millis_t MIN_CHANT_SEND_DELAY = 2;
+    constexpr static millis_t MIN_CHANT_SEND_DELAY = 5;
     if (millis() <= last_send + MIN_CHANT_SEND_DELAY)
         delay(MIN_CHANT_SEND_DELAY);
 

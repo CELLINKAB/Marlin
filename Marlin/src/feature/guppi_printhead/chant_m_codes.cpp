@@ -56,19 +56,6 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
 }
 
-template<typename T>
-void ph_debug_print(printhead::Response<T> response)
-{
-    if (DEBUGGING(INFO))
-        printhead::print_response(response);
-}
-
-void ph_debug_print(printhead::Result result)
-{
-    if (DEBUGGING(INFO))
-        SERIAL_ECHOLN(printhead::string_from_result_code(result));
-}
-
 //
 // Helper Macros
 //
@@ -97,7 +84,7 @@ void GcodeSuite::G511()
     printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract
                                                         : printhead::ExtruderDirection::Extrude;
     auto res = ph_controller.home_extruder(index, dir);
-    ph_debug_print(res);
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("extruder home started");
 }
@@ -110,7 +97,7 @@ void GcodeSuite::G512()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
-    ph_debug_print(res);
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve home started");
 }
@@ -130,7 +117,7 @@ void GcodeSuite::G513()
     float position = parser.value_float();
     planner.synchronize();
     auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
-    ph_debug_print(res);
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve move started");
 }
@@ -241,13 +228,12 @@ void GcodeSuite::M771()
                 tem = tem_pwm;
         }
         auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
-        ph_debug_print(res);
+
         return;
     }
 
     const int16_t temperature = parser.celsiusval('C');
     auto res = ph_controller.set_temperature(index, temperature);
-    ph_debug_print(res);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -263,7 +249,6 @@ void GcodeSuite::M777()
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
     auto res = ph_controller.set_pid(index, p, i, d);
-    ph_debug_print(res);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -284,7 +269,6 @@ void GcodeSuite::M785()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_uuid(index);
-    ph_debug_print(res);
 }
 //SetPrintheadLED
 void GcodeSuite::M786() {}
@@ -314,7 +298,6 @@ void GcodeSuite::M792()
     }
 
     auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
-    ph_debug_print(res);
 }
 /**
  * @brief GetFanSpeed returns set speed and tech output for com-module
@@ -324,7 +307,7 @@ void GcodeSuite::M793()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_fan_speed(index);
-    ph_debug_print(res); // TODO: custom print format
+    // TODO: custom print format
 }
 //SetPHAmpCorrParams
 void GcodeSuite::M794() {}
@@ -335,7 +318,7 @@ void GcodeSuite::M796()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_fw_version(index);
-    ph_debug_print(res);
+
     if (res.result == printhead::Result::OK) {
         SERIAL_ECHOLNPGM("PH:", static_cast<uint8_t>(index), ",FW_VERSION:", res.packet.payload.data());
     }
@@ -557,7 +540,6 @@ void GcodeSuite::M2020()
     BIND_INDEX_OR_RETURN(index);
     const int32_t steps = parser.longval('S');
     auto res = ph_controller.add_raw_extruder_steps(index, steps);
-    ph_debug_print(res);
 }
 //SetPHExtrusionSpeed
 void GcodeSuite::M2030()
@@ -572,14 +554,12 @@ void GcodeSuite::M2030()
     feedrate_mm_s = feedrate_ul_s
                     / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f)
                        * PI);
-    ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
 void GcodeSuite::M2031()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_extrusion_speed(index);
-    ph_debug_print(res);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
@@ -593,14 +573,12 @@ void GcodeSuite::M2034()
         return;
     const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
     auto res = ph_controller.set_step_volume(index, picoliters);
-    ph_debug_print(res);
 }
 //GetPHExtrusionStepVol
 void GcodeSuite::M2035()
 {
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_step_volume(index);
-    ph_debug_print(res);
 }
 //SetPHFullstepExtrusionVol
 void GcodeSuite::M2036()
@@ -608,7 +586,6 @@ void GcodeSuite::M2036()
     BIND_INDEX_OR_RETURN(index);
     const uint32_t pL_volume = parser.ulongval('V');
     auto res = ph_controller.set_volume_per_fullstep(index, pL_volume);
-    ph_debug_print(res);
 }
 //GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
