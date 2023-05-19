@@ -81,11 +81,12 @@ void Controller::update()
 
     case UpdateState::TEMPERATURE: {
         const auto temp_res = get_temperature(index, false);
-        if (temp_res.result == Result::OK)
+        if (temp_res.result == Result::OK) {
             state.raw_temperature = temp_res.packet.payload;
+        }
         update_state = UpdateState::STATUS;
-        break;
-    }
+
+    } break;
 
     case UpdateState::STATUS: {
         const auto status_res = get_status(index, false);
@@ -100,12 +101,14 @@ void Controller::update()
         }
         update_state = UpdateState::ENCODERS;
         tool_index = ((tool_index + 1) % EXTRUDERS);
-
+    } break;
+    default:
+        update_state = UpdateState::ENCODERS;
+        tool_index = ((tool_index + 1) % EXTRUDERS);
         break;
     }
-    }
 
-    next_update = millis() + 150;
+    next_update = millis() + 100;
 }
 
 void Controller::report_states()
