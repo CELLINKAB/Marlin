@@ -176,7 +176,7 @@ void print_packet(const Packet<T>& packet)
 
 void flush_rx(HardwareSerial& serial);
 
-extern millis_t last_send;
+extern millis_t last_serial_activity;
 extern size_t printhead_rx_err_counter;
 
 constexpr bool valid_index(uint16_t index)
@@ -269,6 +269,8 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         }
     }
 
+    last_serial_activity = millis();
+
     if (DEBUGGING(INFO)) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
@@ -327,7 +329,6 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         print_packet(incoming);
     }
 
-    last_send = millis();
     return Response<T>{incoming, Result::OK};
 
     // ACK would go here
@@ -342,12 +343,13 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    constexpr static millis_t MIN_CHANT_SEND_DELAY = 5;
-    if (millis() <= last_send + MIN_CHANT_SEND_DELAY)
+    constexpr static millis_t MIN_CHANT_SEND_DELAY = 10;
+    if (millis() <= last_serial_activity + MIN_CHANT_SEND_DELAY)
         delay(MIN_CHANT_SEND_DELAY);
 
     static auto err = [](Result code) {
         ++printhead_tx_err_counter;
+        last_serial_activity = millis();
         return code;
     };
 
@@ -369,7 +371,7 @@ Result send(const Packet<T>& request,
     }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
-    last_send = millis();
+    last_serial_activity = millis();
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())

@@ -6,7 +6,7 @@
 
 using namespace printhead;
 
-millis_t printhead::last_send = 0;
+millis_t printhead::last_serial_activity = 0;
 
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
