@@ -231,9 +231,9 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     Packet<T> incoming{};
 
-    static auto err = [&incoming](Result code) -> Response<T> {
+    static auto err = [&incoming, enable_debug](Result code) -> Response<T> {
         ++printhead_rx_err_counter;
-        if (DEBUGGING(ERRORS))
+        if (DEBUGGING(ERRORS) && enable_debug)
             SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
         return Response<T>{incoming, code};
     };
@@ -271,7 +271,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     last_serial_activity = millis();
 
-    if (DEBUGGING(INFO)) {
+    if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
             if (i == 0 && got_extra_zeroes)
