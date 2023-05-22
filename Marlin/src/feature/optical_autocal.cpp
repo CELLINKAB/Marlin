@@ -62,7 +62,6 @@ void OpticalAutocal::reset_all()
 
 void OpticalAutocal::test([[maybe_unused]] uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
 {
-
     do_blocking_move_to(start_pos);
     start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
     do_blocking_move_to(start_pos);
@@ -221,15 +220,24 @@ void OpticalAutocal::report_sensors() const
         avg_y1 += sweep.y1() / NUM_CYCLES;
     }
 
-    // sensors cross at a 90 degree angle, which creates two congruent isosceles
-    // right triangles with legs in the X and Y directions, both of value dy/2
-    const float xy_offset = delta_y / 2.0f;
+    constexpr static float X_OFFSET_FACTOR
+        = 0.874475489369; // tan(41.1689) pre-calculated to avoid including runtime trig functions
+    const float y_offset = delta_y / 2.0f;
+    const float x_offset = y_offset * X_OFFSET_FACTOR;
+
+    const float x = start_pos.x - (y_offset * X_OFFSET_FACTOR);
+    const float y = avg_y1 + y_offset;
 
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
-        SERIAL_ECHOLNPGM("XY offset: ", xy_offset);
-
-    const float x = start_pos.x - xy_offset;
-    const float y = avg_y1 + xy_offset;
+        SERIAL_ECHOLNPGM("X offset: ",
+                         x_offset,
+                         ", Y offset: ",
+                         y_offset,
+                         "\nCalculated intersection: (",
+                         x,
+                         ", ",
+                         y,
+                         ")");
 
     return {x, y};
 }
