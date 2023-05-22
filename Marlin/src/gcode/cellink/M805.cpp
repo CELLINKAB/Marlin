@@ -16,6 +16,7 @@ struct CuringLed
 
 constexpr static uint8_t PC_MICROSTEPS = 32;
 constexpr static float PC_DEG_PER_STEP = 1.8f;
+constexpr static uint32_t PC_VELOCITY = 1000;
 
 constexpr int32_t deg_to_steps(float degs)
 {
@@ -57,12 +58,12 @@ using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 inline void move_degs(Stepper& stepper, float degs)
 {
     int32_t steps = -deg_to_steps(degs);
-    stepper.move_steps(steps, 16000);
+    stepper.move_steps(steps, PC_VELOCITY);
 }
 
 void home_rainbow(Stepper& stepper)
 {
-    stepper.raw_move(-16000);
+    stepper.raw_move(-PC_VELOCITY);
     while (READ(PC_STOP_PIN) == LOW)
         safe_delay(0);
     stepper.stop();
