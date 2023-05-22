@@ -60,138 +60,25 @@ void OpticalAutocal::reset_all()
     offsets.fill(xyz_pos_t{});
 }
 
-void OpticalAutocal::test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
+void OpticalAutocal::test([[maybe_unused]] uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
 {
-    constexpr static uint8_t MAX_CYCLES = 40;
-    cycles = min(cycles, MAX_CYCLES);
-    std::array<LongSweepCoords, MAX_CYCLES> coords{};
-
-    SERIAL_ECHOLNPGM("running ", cycles, " sweeps...");
-
-    LongSweepCoords avg_sweep{};
-    LongSweepCoords min_sweep{1'000'000'000.0f, 1'000'000'000.0f, 1'000'000'000.0f, 1'000'000'000.0f};
-    LongSweepCoords max_sweep{-1'000'000'000.0f,
-                              -1'000'000'000.0f,
-                              -1'000'000'000.0f,
-                              -1'000'000'000.0f};
 
     do_blocking_move_to(start_pos);
     start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
     do_blocking_move_to(start_pos);
 
-    uint8_t error_count = 0;
+    LongSweepCoords coord;
+    do {
+        coord = long_sweep(feedrate);
 
-    for (uint8_t cycle_count = 0; cycle_count < cycles; ++cycle_count) {
-        coords[cycle_count] = long_sweep(feedrate);
-        if (coords[cycle_count].has_zeroes()) {
-            ++error_count;
-            continue;
-        }
-        if (DEBUGGING(INFO)) {
-            SERIAL_ECHOPGM("sweep: ", cycle_count, ", ");
-            coords[cycle_count].print();
-        }
-
-        avg_sweep.sensor_1_forward_y += coords[cycle_count].sensor_1_forward_y;
-        avg_sweep.sensor_2_forward_y += coords[cycle_count].sensor_2_forward_y;
-        avg_sweep.sensor_2_backward_y += coords[cycle_count].sensor_2_backward_y;
-        avg_sweep.sensor_1_backward_y += coords[cycle_count].sensor_1_backward_y;
-
-        if (coords[cycle_count].sensor_1_forward_y < min_sweep.sensor_1_forward_y)
-            min_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
-        if (coords[cycle_count].sensor_2_forward_y < min_sweep.sensor_2_forward_y)
-            min_sweep.sensor_2_forward_y = coords[cycle_count].sensor_2_forward_y;
-        if (coords[cycle_count].sensor_2_backward_y < min_sweep.sensor_2_backward_y)
-            min_sweep.sensor_2_backward_y = coords[cycle_count].sensor_2_backward_y;
-        if (coords[cycle_count].sensor_1_backward_y < min_sweep.sensor_1_backward_y)
-            min_sweep.sensor_1_backward_y = coords[cycle_count].sensor_1_backward_y;
-
-        if (coords[cycle_count].sensor_1_forward_y > max_sweep.sensor_1_forward_y)
-            max_sweep.sensor_1_forward_y = coords[cycle_count].sensor_1_forward_y;
-        if (coords[cycle_count].sensor_2_forward_y > max_sweep.sensor_2_forward_y)
-            max_sweep.sensor_2_forward_y = coords[cycle_count].sensor_2_forward_y;
-        if (coords[cycle_count].sensor_2_backward_y > max_sweep.sensor_2_backward_y)
-            max_sweep.sensor_2_backward_y = coords[cycle_count].sensor_2_backward_y;
-        if (coords[cycle_count].sensor_1_backward_y > max_sweep.sensor_1_backward_y)
-            max_sweep.sensor_1_backward_y = coords[cycle_count].sensor_1_backward_y;
-
-        do_blocking_move_to_z(current_position.z - 0.05);
-    }
-
-    if (error_count >= cycles) {
-        SERIAL_ECHOLN("No sweeps successful!");
-        return;
-    }
-
-    avg_sweep.sensor_1_forward_y /= (cycles - error_count);
-    avg_sweep.sensor_2_forward_y /= (cycles - error_count);
-    avg_sweep.sensor_2_backward_y /= (cycles - error_count);
-    avg_sweep.sensor_1_backward_y /= (cycles - error_count);
-
-    // calculate variance
-    LongSweepCoords sweep_variance;
-    for (uint8_t cycle_count = 0; cycle_count < cycles; ++cycle_count) {
-        if (coords[cycle_count].has_zeroes())
-            continue;
-        sweep_variance.sensor_1_forward_y += pow(coords[cycle_count].sensor_1_forward_y
-                                                     - avg_sweep.sensor_1_forward_y,
-                                                 2.0f);
-        sweep_variance.sensor_2_forward_y += pow(coords[cycle_count].sensor_2_forward_y
-                                                     - avg_sweep.sensor_2_forward_y,
-                                                 2.0f);
-        sweep_variance.sensor_2_backward_y += pow(coords[cycle_count].sensor_2_backward_y
-                                                      - avg_sweep.sensor_2_backward_y,
-                                                  2.0f);
-        sweep_variance.sensor_1_backward_y += pow(coords[cycle_count].sensor_1_backward_y
-                                                      - avg_sweep.sensor_1_backward_y,
-                                                  2.0f);
-    }
-
-    sweep_variance.sensor_1_forward_y /= (cycles - error_count);
-    sweep_variance.sensor_2_forward_y /= (cycles - error_count);
-    sweep_variance.sensor_2_backward_y /= (cycles - error_count);
-    sweep_variance.sensor_1_backward_y /= (cycles - error_count);
-
-    LongSweepCoords sweep_deviation{sqrt(sweep_variance.sensor_1_forward_y),
-                                    sqrt(sweep_variance.sensor_2_forward_y),
-                                    sqrt(sweep_variance.sensor_2_backward_y),
-                                    sqrt(sweep_variance.sensor_1_backward_y)};
-
-    auto print_stats = [start_pos](LongSweepCoords coord) {
-        constexpr static xyz_pos_t delta = AUTOCAL_PRINTBED_CENTER_DELTA;
-        const float offset = (coord.y_delta() / 2.0f);
+        SERIAL_ECHOPGM("X: ", start_pos.x, ", ");
         coord.print();
-        SERIAL_ECHOLNPGM("y delta: ",
-                         coord.y_delta(),
-                         ", x offset: ",
-                         ((start_pos.x - offset) + delta.x),
-                         ", y offset: ",
-                         ((coord.y1() + offset) + delta.y));
-    };
 
-    SERIAL_ECHOLNPGM("Completed ",
-                     cycles,
-                     " with ",
-                     error_count,
-                     " sweeps containing errors and discarded");
-    SERIAL_ECHOLNPGM("feedrate: ",
-                     feedrate,
-                     ", start x:",
-                     start_pos.x,
-                     ", start y: ",
-                     start_pos.y, );
-    SERIAL_ECHOLN("--minimum--");
-    print_stats(min_sweep);
-    SERIAL_ECHOLN("--maximum--");
-    print_stats(max_sweep);
-    SERIAL_ECHOLN("--mean--");
-    print_stats(avg_sweep);
-    SERIAL_ECHOLN("--variance--");
-    print_stats(sweep_variance);
-    SERIAL_ECHOLN("--standard deviation--");
-    print_stats(sweep_deviation);
+        start_pos.x -= 0.05;
+        do_blocking_move_to(start_pos, feedrate);
+    } while (!coord.has_zeroes());
 
-    do_blocking_move_to_xy_z(start_pos, POST_AUTOCAL_SAFE_Z_HEIGHT);
+    do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
 }
 
 xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
