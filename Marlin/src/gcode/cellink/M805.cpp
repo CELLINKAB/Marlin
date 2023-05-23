@@ -16,7 +16,7 @@ struct CuringLed
 
 constexpr static uint8_t PC_MICROSTEPS = 32;
 constexpr static float PC_DEG_PER_STEP = 1.8f;
-constexpr static uint32_t PC_VELOCITY = 1000;
+constexpr static uint32_t PC_VELOCITY = 500;
 
 constexpr int32_t deg_to_steps(float degs)
 {
