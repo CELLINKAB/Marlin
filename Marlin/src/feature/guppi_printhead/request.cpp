@@ -157,7 +157,8 @@ void Controller::update()
         break;
     }
 
-    next_update = millis() + 100;
+    static constexpr millis_t UPDATE_INTERVAL = SEC_TO_MS(1) / 7;
+    next_update = millis() + UPDATE_INTERVAL;
 }
 
 void Controller::report_states()
