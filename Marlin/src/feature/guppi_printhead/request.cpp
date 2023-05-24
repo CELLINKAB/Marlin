@@ -39,20 +39,63 @@ void Controller::init()
     tool_change(0);
 }
 
+//
+// Update handling
+//
+
 enum class UpdateState {
     ENCODERS,
     TEMPERATURE,
     STATUS,
 };
 
+constexpr void next_update_state(UpdateState& current_state)
+{
+    switch (current_state) {
+    case UpdateState::ENCODERS:
+        current_state = UpdateState::TEMPERATURE;
+        break;
+    case UpdateState::TEMPERATURE:
+        current_state = UpdateState::STATUS;
+        break;
+    case UpdateState::STATUS:
+        current_state = UpdateState::ENCODERS;
+        break;
+    }
+}
+
+constexpr auto update_state_to_str(UpdateState current_state)
+{
+    switch (current_state) {
+    case UpdateState::ENCODERS:
+        return "ENCODERS";
+    case UpdateState::TEMPERATURE:
+        return "TEMPERATURE";
+    case UpdateState::STATUS:
+        return "STATUS";
+    }
+    return "UNREACHABLE";
+}
+
 void Controller::update()
 {
     static millis_t next_update = 0;
-    if (millis() < next_update)
-        return;
-
     static uint8_t tool_index = 0;
     static UpdateState update_state = UpdateState::ENCODERS;
+
+    static auto retry = []() {
+        static constexpr size_t MAX_RETRIES = 3;
+        static size_t retries = 0;
+        if (retries++ > MAX_RETRIES) {
+            next_update_state(update_state);
+            retries = 0;
+            if (DEBUGGING(ERRORS))
+                SERIAL_ECHOLNPGM("Retries exceeded for updating ", update_state_to_str(update_state));
+        }
+    };
+
+    if (millis() < next_update)
+        return;
 
     auto& state = ph_states[tool_index];
     Index index = static_cast<Index>(tool_index);
@@ -74,18 +117,22 @@ void Controller::update()
                                                                 EncoderIndex::SliderTwo);
                 ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
                                                                 EncoderIndex::SliderThree);
+                update_state = UpdateState::TEMPERATURE;
+            } else {
+                retry();
             }
+        } else {
+            next_update_state(update_state);
         }
-        update_state = UpdateState::TEMPERATURE;
         break;
 
     case UpdateState::TEMPERATURE: {
         const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK) {
             state.raw_temperature = temp_res.packet.payload;
-        }
-        update_state = UpdateState::STATUS;
-
+            next_update_state(update_state);
+        } else
+            retry();
     } break;
 
     case UpdateState::STATUS: {
@@ -98,13 +145,15 @@ void Controller::update()
                     SERIAL_ECHO_MSG("slider valve move finished");
             }
             state.status = status_res.packet.payload;
-        }
-        update_state = UpdateState::ENCODERS;
+            next_update_state(update_state);
+        } else
+            retry();
         tool_index = ((tool_index + 1) % EXTRUDERS);
     } break;
+
     default:
         update_state = UpdateState::ENCODERS;
-        tool_index = ((tool_index + 1) % EXTRUDERS);
+        tool_index = 0;
         break;
     }
 
