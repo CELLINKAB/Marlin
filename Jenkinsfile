@@ -1,5 +1,9 @@
 pipeline {
     agent { label 'onpremise-node' }
+    environment {
+        ART_NAME = "${BRANCH_NAME}-${env.BUILD_NUMBER}"
+        ART_NAME_NOSLASH = ART_NAME.replaceAll("/", "-")
+    }
     stages {
             stage('Git fetch') {
             steps {
@@ -58,9 +62,9 @@ pipeline {
                 post {
                     always {
                         sh '''
-                            cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
+                            cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${ART_NAME_NOSLASH}.bin
                                                     '''
-                        archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
+                        archiveArtifacts artifacts: " ${BOARD}-${ART_NAME_NOSLASH}.bin"
                         archiveArtifacts artifacts: ' GitVersion.json'
                         archiveArtifacts artifacts: ' version.json'
 
