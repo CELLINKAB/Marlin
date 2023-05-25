@@ -1233,6 +1233,7 @@ private:
     static void M7110();
     static void M7111();
     static void M7112();
+    static void M7110_report(const bool forReplay=true);
   #endif
 
   static void T(const int8_t tool_index);

@@ -249,8 +249,12 @@ void GcodeSuite::G28() {
   planner.synchronize();          // Wait for planner moves to finish!
 
   #if ENABLED(HX711_WSCALE)
+    float t_output;
     wScale.tare_start();
-    while( wScale.tare_ready() == false ) idle();
+    while( wScale.tare_ready(t_output) == false )
+    {
+      idle();
+    }
     wScale.enable_out(true);
   #endif
 

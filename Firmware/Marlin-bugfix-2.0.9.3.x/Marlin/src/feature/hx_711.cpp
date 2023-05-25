@@ -105,7 +105,7 @@ int32_t HX_711::read()
 
 /**
  * @brief This function is non blocking management function for
- *        HX771 base scale wight. This function can be called in
+ *        HX771 base scale weight. This function can be called in
  *        management loop. It manages all functionality related
  *        to weight scale.
  */
@@ -143,15 +143,17 @@ void HX_711::manage_hx_711()
   #define HX711_SW_HYSTERESIS 0.0f
 #endif
     float th_hysteresis = _th_weigth * HX711_SW_HYSTERESIS;
+    float scale_weight = abs(_f_val - _offset)*_scale;
+
     if (ind_pin_state)
     {
             // if threshold reached set-up output pin.
-      if (abs(_f_val - _averaged) > (_th_weigth + th_hysteresis))
+      if (scale_weight > (_th_weigth + th_hysteresis))
         ind_pin_state = false;
         
     } else {
             // if threshold reached set-up output pin.
-      if (abs(_f_val - _averaged) < (_th_weigth - th_hysteresis))
+      if (scale_weight < (_th_weigth - th_hysteresis))
         ind_pin_state = true;
     }
 
@@ -161,16 +163,16 @@ void HX_711::manage_hx_711()
       WRITE(_pin_ind, ind_pin_state);
     }
 
-    // TARE MANAGEMENT
+    // AVERAGING MANAGEMENT
     constexpr static size_t TARE_AVG_CNT = 200;
 
-    if (_tare_start == true)
+    if (_avg_start == true)
     {
       _averaged += _f_val;
       if (_read_counter >= TARE_AVG_CNT)
       {
-        _averaged = _averaged / static_cast<float>(TARE_AVG_CNT);
-        _tare_start = false;
+        _averaged = _averaged / static_cast<float>(TARE_AVG_CNT+1);
+        _avg_start = false;
       }
     }
 
@@ -180,9 +182,24 @@ void HX_711::manage_hx_711()
 
 bool HX_711::tare_ready(float &avg_value)
 {
-  if (_tare_start == false)
+  if (_avg_start == false)
   {
     avg_value = _averaged;
+    _offset = _averaged;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool HX_711::calibrate_ready(float &avg_value)
+{
+  if (_avg_start == false)
+  {
+    avg_value = _averaged;
+    _scale = _calib_weight / abs(_averaged - _offset);
     return true;
   }
   else

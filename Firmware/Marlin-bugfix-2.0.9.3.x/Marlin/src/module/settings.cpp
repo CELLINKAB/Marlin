@@ -170,6 +170,10 @@
   #include "../lcd/extui/dgus/DGUSDisplayDef.h"
 #endif
 
+#if ENABLED(HX711_WSCALE)
+  #include "../feature/hx_711.h"
+#endif
+
 #pragma pack(push, 1) // No padding between variables
 
 #if HAS_ETHERNET
@@ -550,6 +554,15 @@ typedef struct SettingsDataStruct {
 
   #if HAS_MULTI_LANGUAGE
     uint8_t ui_language;                                // M414 S
+  #endif
+
+  //
+  // Strain Gauge
+  //
+  #if ENABLED(HX711_WSCALE)
+    float wscale_scale;                                 // Slope/scale parameter
+    float wscale_th_weigth;                             // Threshold
+    uint8_t wscale_channel;                             // ADC channel/gain
   #endif
 
 } SettingsData;
@@ -1558,6 +1571,24 @@ void MarlinSettings::postprocess() {
     #endif
 
     //
+    // Strain Gauge
+    //
+    #if ENABLED(HX711_WSCALE)
+      _FIELD_TEST(wscale_scale);
+      float wsc_scale, wsc_threshold;
+      uint8_t wsc_channel;
+      // read settings
+      wsc_scale = wScale.getScale();
+      wsc_threshold = wScale.getThreshold();
+      wsc_channel = wScale.getChannel();
+      // write settings
+      EEPROM_WRITE(wsc_scale);
+      EEPROM_WRITE(wsc_threshold);
+      EEPROM_WRITE(wsc_channel);
+    #endif
+
+
+    //
     // Report final CRC and Data Size
     //
     if (!eeprom_error) {
@@ -2509,6 +2540,24 @@ void MarlinSettings::postprocess() {
       #endif
 
       //
+      // Strain Gauge
+      //
+      #if ENABLED(HX711_WSCALE)
+        _FIELD_TEST(wscale_scale);
+        float wscale_scale,wscale_th_weight;
+        uint8_t wscale_cahnnel;
+        EEPROM_READ(wscale_scale);
+        EEPROM_READ(wscale_th_weight);
+        EEPROM_READ(wscale_cahnnel);
+        if(!validating && !isnan(wscale_scale))
+          {
+            wScale.setScale(wscale_scale);
+            wScale.setThreshold(wscale_th_weight);
+            wScale.setChannel(wscale_cahnnel);
+          }
+      #endif
+
+      //
       // Validate Final Size and CRC
       //
       eeprom_error = size_error(eeprom_index - (EEPROM_OFFSET));
@@ -3208,6 +3257,15 @@ void MarlinSettings::reset() {
   //
   TERN_(DGUS_LCD_UI_MKS, MKS_reset_settings());
 
+  //
+  // Strain Gauge
+  //
+  #if ENABLED(HX711_WSCALE)
+    wScale.setScale(HX711_DEFAULT_SCALE);
+    wScale.setThreshold(HX711_ENDSTOP_THRESHOLD);
+    wScale.setChannel(HX711_DEFAULT_CHANNEL);
+  #endif
+
   postprocess();
 
   #if EITHER(EEPROM_CHITCHAT, DEBUG_LEVELING_FEATURE)
@@ -3493,6 +3551,9 @@ void MarlinSettings::reset() {
     #endif
 
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
+
+    TERN_(HX711_WSCALE,gcode.M7110_report(forReplay));
+
   }
 
 #endif // !DISABLE_M503
