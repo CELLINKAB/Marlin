@@ -56,19 +56,6 @@ constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
 }
 
-template<typename T>
-void ph_debug_print(printhead::Response<T> response)
-{
-    if (DEBUGGING(INFO))
-        printhead::print_response(response);
-}
-
-void ph_debug_print(printhead::Result result)
-{
-    if (DEBUGGING(INFO))
-        SERIAL_ECHOLN(printhead::string_from_result_code(result));
-}
-
 //
 // Helper Macros
 //
@@ -96,8 +83,8 @@ void GcodeSuite::G511()
     BIND_INDEX_OR_RETURN(index);
     printhead::ExtruderDirection dir = parser.seen('U') ? printhead::ExtruderDirection::Retract
                                                         : printhead::ExtruderDirection::Extrude;
-    auto res = ph_controller.home_extruder(index, dir);
-    ph_debug_print(res);
+    ph_controller.home_extruder(index, dir);
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("extruder home started");
 }
@@ -109,8 +96,8 @@ void GcodeSuite::G511()
 void GcodeSuite::G512()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
-    ph_debug_print(res);
+    ph_controller.home_slider_valve(index, printhead::SliderDirection::Pull);
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve home started");
 }
@@ -129,8 +116,8 @@ void GcodeSuite::G513()
         return;
     float position = parser.value_float();
     planner.synchronize();
-    auto res = ph_controller.move_slider_valve(index, steps_from_mm(position));
-    ph_debug_print(res);
+    ph_controller.move_slider_valve(index, steps_from_mm(position));
+
     if (DEBUGGING(LEVELING))
         SERIAL_ECHO_MSG("slider valve move started");
 }
@@ -240,14 +227,13 @@ void GcodeSuite::M771()
             for (auto& tem : both_tems_pwm)
                 tem = tem_pwm;
         }
-        auto res = ph_controller.set_tem_debug(index, both_tems_pwm);
-        ph_debug_print(res);
+        ph_controller.set_tem_debug(index, both_tems_pwm);
+
         return;
     }
 
     const int16_t temperature = parser.celsiusval('C');
-    auto res = ph_controller.set_temperature(index, temperature);
-    ph_debug_print(res);
+    ph_controller.set_temperature(index, temperature);
 }
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
@@ -262,8 +248,7 @@ void GcodeSuite::M777()
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
-    auto res = ph_controller.set_pid(index, p, i, d);
-    ph_debug_print(res);
+    ph_controller.set_pid(index, p, i, d);
 }
 //GetPrintHdHeaterPIDparams
 void GcodeSuite::M778() {}
@@ -283,8 +268,7 @@ void GcodeSuite::M784() {}
 void GcodeSuite::M785()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_uuid(index);
-    ph_debug_print(res);
+    ph_controller.get_uuid(index);
 }
 //SetPrintheadLED
 void GcodeSuite::M786() {}
@@ -313,8 +297,7 @@ void GcodeSuite::M792()
             fan = fan_pwm;
     }
 
-    auto res = ph_controller.set_fan_speed(index, both_fans_pwm);
-    ph_debug_print(res);
+    ph_controller.set_fan_speed(index, both_fans_pwm);
 }
 /**
  * @brief GetFanSpeed returns set speed and tech output for com-module
@@ -323,20 +306,21 @@ void GcodeSuite::M792()
 void GcodeSuite::M793()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_fan_speed(index);
-    ph_debug_print(res); // TODO: custom print format
+    ph_controller.get_fan_speed(index);
+    // TODO: custom print format
 }
 //SetPHAmpCorrParams
 void GcodeSuite::M794() {}
 //GetPHAmpCorrParams
 void GcodeSuite::M795() {}
 //GetPHSWVersion
-void GcodeSuite::M796() {
+void GcodeSuite::M796()
+{
     BIND_INDEX_OR_RETURN(index);
     auto res = ph_controller.get_fw_version(index);
-    ph_debug_print(res);
+
     if (res.result == printhead::Result::OK) {
-        SERIAL_ECHOLNPGM("PH:", static_cast<uint8_t>(index), ",FW_VERSION:",res.packet.payload.data());
+        SERIAL_ECHOLNPGM("PH:", static_cast<uint8_t>(index), ",FW_VERSION:", res.packet.payload.data());
     }
 }
 //SetPHNotCalibrated
@@ -496,11 +480,17 @@ void GcodeSuite::M1035()
         handle_sensor(sensor);
     }
 }
-void GcodeSuite::M1035_report(bool for_replay) {
+void GcodeSuite::M1035_report(bool for_replay)
+{
     report_heading_etc(for_replay, F("Bed TMP117 Sensors"));
     size_t sensor_num = 0;
-    for (auto & sensor : bed_sensors()) {
-        SERIAL_ECHOLNPGM("M1035 I", sensor_num++, " O", sensor.getOffsetTemperature(), " S", sensor.getGain());
+    for (auto& sensor : bed_sensors()) {
+        SERIAL_ECHOLNPGM("M1035 I",
+                         sensor_num++,
+                         " O",
+                         sensor.getOffsetTemperature(),
+                         " S",
+                         sensor.getGain());
     }
 }
 //SetRegulatorPressure
@@ -549,8 +539,7 @@ void GcodeSuite::M2020()
 {
     BIND_INDEX_OR_RETURN(index);
     const int32_t steps = parser.longval('S');
-    auto res = ph_controller.add_raw_extruder_steps(index, steps);
-    ph_debug_print(res);
+    ph_controller.add_raw_extruder_steps(index, steps);
 }
 //SetPHExtrusionSpeed
 void GcodeSuite::M2030()
@@ -561,18 +550,16 @@ void GcodeSuite::M2030()
     if (feedrate_ul_s == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
-    auto res = ph_controller.set_extrusion_speed(index, feedrate_pl_s);
+    ph_controller.set_extrusion_speed(index, feedrate_pl_s);
     feedrate_mm_s = feedrate_ul_s
                     / ((DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f) * (DEFAULT_NOMINAL_FILAMENT_DIA / 2.0f)
                        * PI);
-    ph_debug_print(res);
 }
 //GetPHExtrusionSpeed
 void GcodeSuite::M2031()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_extrusion_speed(index);
-    ph_debug_print(res);
+    ph_controller.get_extrusion_speed(index);
 }
 //SetPHIntExtrusionSpeed
 void GcodeSuite::M2032() {}
@@ -585,23 +572,20 @@ void GcodeSuite::M2034()
     if (!parser.seenval('V'))
         return;
     const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
-    auto res = ph_controller.set_step_volume(index, picoliters);
-    ph_debug_print(res);
+    ph_controller.set_step_volume(index, picoliters);
 }
 //GetPHExtrusionStepVol
 void GcodeSuite::M2035()
 {
     BIND_INDEX_OR_RETURN(index);
-    auto res = ph_controller.get_step_volume(index);
-    ph_debug_print(res);
+    ph_controller.get_step_volume(index);
 }
 //SetPHFullstepExtrusionVol
 void GcodeSuite::M2036()
 {
     BIND_INDEX_OR_RETURN(index);
     const uint32_t pL_volume = parser.ulongval('V');
-    auto res = ph_controller.set_volume_per_fullstep(index, pL_volume);
-    ph_debug_print(res);
+    ph_controller.set_volume_per_fullstep(index, pL_volume);
 }
 //GetPHFullstepExtrusionVol
 void GcodeSuite::M2037() {}
@@ -770,6 +754,17 @@ void GcodeSuite::M2200()
 
     // FIXME: Put this in a better place and modularize
     TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
+}
+
+size_t printhead::printhead_rx_err_counter = 0;
+size_t printhead::printhead_tx_err_counter = 0;
+
+void GcodeSuite::M2201()
+{
+    SERIAL_ECHOLNPGM("PRINTHEAD_TX_ERRORS:",
+                     printhead::printhead_tx_err_counter,
+                     ",PRINTHEAD_RX_ERRORS:",
+                     printhead::printhead_rx_err_counter);
 }
 
 #endif //  CHANTARELLE_SUPPORT

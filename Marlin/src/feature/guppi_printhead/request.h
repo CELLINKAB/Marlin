@@ -33,7 +33,9 @@ enum class Result {
     PACKET_TOO_SHORT,
     BAD_PAYLOAD_SIZE,
     UNIMPLEMENTED,
-    WRITE_ERROR
+    WRITE_ERROR,
+    EXTRA_ZEROES,
+    INVALID_HEADER,
 };
 
 constexpr const char* string_from_result_code(Result result)
@@ -53,6 +55,10 @@ constexpr const char* string_from_result_code(Result result)
         return "UNIMPLEMENTED";
     case Result::WRITE_ERROR:
         return "WRITE_ERROR";
+    case Result::EXTRA_ZEROES:
+        return "EXTRA_ZEROES";
+    case Result::INVALID_HEADER:
+        return "INVALID_HEADER";
     }
     __unreachable();
 }
@@ -168,26 +174,51 @@ void print_packet(const Packet<T>& packet)
     SERIAL_ECHOLN(" }");
 }
 
-template<typename T>
-void print_response(Response<T> response)
-{
-    if (response.result != Result::OK) {
-        SERIAL_ECHOLNPGM("ERR:", string_from_result_code(response.result));
-    }
+void flush_rx(HardwareSerial& serial);
 
-    print_packet(response.packet);
+extern millis_t last_serial_activity;
+extern size_t printhead_rx_err_counter;
+
+constexpr bool valid_index(uint16_t index)
+{
+    switch (index) {
+    case 0:
+        [[fallthrough]];
+    case 1:
+        [[fallthrough]];
+    case 2:
+        [[fallthrough]];
+    case 0xFFFF:
+        return true;
+
+    default:
+        return false;
+    }
 }
 
-void flush_rx(HardwareSerial& serial);
+constexpr bool valid_command(uint16_t command)
+{
+    switch (command) {
+    case 0:
+        return false;
+        // TODO: add more cases probably
+    default:
+        return true;
+    }
+}
+
+constexpr bool valid_size(uint16_t size)
+{
+    return (size <= 0x00ff);
+}
 
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
-    // this seems bug-prone...
+    // header + crc
+    static constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t);
 
-    static constexpr size_t MAX_PACKET = []() {
-        // header + crc + 1 byte padding on either side
-        constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t) + 2;
+    static constexpr size_t EXPECTED_PACKET_SIZE = []() {
         if constexpr (std::is_same_v<T, void>) {
             return EMPTY_PACKET_SIZE;
         } else {
@@ -196,61 +227,114 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             return EMPTY_PACKET_SIZE + sizeof(T);
         }
     }();
-    uint8_t packet_buffer[MAX_PACKET]{};
+    uint8_t packet_buffer[EXPECTED_PACKET_SIZE + 2]{}; // larger than needed in case of transceiver defects
 
     Packet<T> incoming{};
 
-    serial.setTimeout(5);
-    auto bytes_received = serial.readBytes(packet_buffer, MAX_PACKET);
+    static auto err = [&incoming, enable_debug](Result code) -> Response<T> {
+        ++printhead_rx_err_counter;
+        if (DEBUGGING(ERRORS) && enable_debug)
+            SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
+        return Response<T>{incoming, code};
+    };
+    serial.setTimeout(25);
+    size_t bytes_received = serial.readBytes(packet_buffer, EXPECTED_PACKET_SIZE);
+
+    // validation
+    uint16_t test_index, test_command, test_size;
+    memcpy(&test_index, &packet_buffer[0], 2);
+    memcpy(&test_command, &packet_buffer[2], 2);
+    memcpy(&test_size, &packet_buffer[4], 2);
+    bool valid = valid_index(test_index) && valid_command(test_command) && valid_size(test_size);
+
+    bool got_extra_zeroes = false;
+    if (!valid) {
+        memcpy(&test_index, &packet_buffer[1], 2);
+        memcpy(&test_command, &packet_buffer[3], 2);
+        memcpy(&test_size, &packet_buffer[5], 2);
+        bool valid_with_zeroes = valid_index(test_index) && valid_command(test_command)
+                                 && valid_size(test_size);
+        if (valid_with_zeroes) {
+            millis_t timeout = millis() + 5;
+            int leftover = -1;
+            while (leftover < 0 && millis() < timeout)
+                leftover = serial.read();
+            if (leftover >= 0) {
+                packet_buffer[bytes_received++] = static_cast<uint8_t>(leftover);
+                flush_rx(serial);
+                got_extra_zeroes = true;
+                valid = true;
+                err(Result::EXTRA_ZEROES);
+            }
+        }
+    }
+
+    last_serial_activity = millis();
+
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
+            if (i == 0 && got_extra_zeroes)
+                continue;
             SERIAL_PRINT(packet_buffer[i], PrintBase::Hex);
             SERIAL_CHAR(' ');
         }
         SERIAL_ECHOLN("]");
     }
+    if (bytes_received < EXPECTED_PACKET_SIZE)
+        return err(Result::PACKET_TOO_SHORT);
 
-    if (bytes_received < 8)
-        return Response<T>{incoming, Result::PACKET_TOO_SHORT};
+    if (!valid)
+        return err(Result::INVALID_HEADER);
+
+    size_t packet_index = got_extra_zeroes ? 1 : 0; // usually has a leading 0 byte
 
     // indexes starting at 1 because there is always a leading zero
-    memcpy(&incoming.ph_index, &packet_buffer[1], 2);
-    memcpy(&incoming.command, &packet_buffer[3], 2);
-    memcpy(&incoming.payload_size, &packet_buffer[5], 2);
+    memcpy(&incoming.ph_index, &packet_buffer[packet_index], 2);
+    packet_index += 2;
+    memcpy(&incoming.command, &packet_buffer[packet_index], 2);
+    packet_index += 2;
+    memcpy(&incoming.payload_size, &packet_buffer[packet_index], 2);
+    packet_index += 2;
 
     if (incoming.command == Command::ERROR) {
         //const uint8_t e = static_cast<uint8_t>(serial.read());
         if (DEBUGGING(ERRORS)) {
             SERIAL_ECHO("RECD_CHANT_ERROR: ");
-            SERIAL_PRINTLN(packet_buffer[6], PrintBase::Dec);
+            SERIAL_PRINTLN(packet_buffer[packet_index], PrintBase::Dec);
         }
         flush_rx(serial);
-        return Response<T>{incoming, Result::UNIMPLEMENTED};
+        ++printhead_rx_err_counter;
+        return err(Result::UNIMPLEMENTED);
     }
 
-    if (static_cast<size_t>(incoming.payload_size + 8) > MAX_PACKET)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
-
-    if (incoming.payload_size > bytes_received)
-        return Response<T>{incoming, Result::BAD_PAYLOAD_SIZE};
+    if (static_cast<size_t>(incoming.payload_size + EMPTY_PACKET_SIZE) > (EXPECTED_PACKET_SIZE + 2)
+        || incoming.payload_size > bytes_received) {
+        return err(Result::BAD_PAYLOAD_SIZE);
+    }
 
     uint16_t crc;
     if constexpr (!std::is_void_v<T>) {
-        memcpy(&incoming.payload, &packet_buffer[7], sizeof(incoming.payload));
+        memcpy(&incoming.payload, &packet_buffer[packet_index], sizeof(incoming.payload));
+        packet_index += sizeof(incoming.payload);
     }
-    memcpy(&crc, &packet_buffer[incoming.payload_size + 7], 2);
+    memcpy(&crc, &packet_buffer[packet_index], 2);
 
-    constexpr static bool allow_bad_crc = true;
+    constexpr static bool allow_bad_crc = false;
     if (!allow_bad_crc && crc != incoming.crc())
-        return Response<T>{incoming, Result::BAD_CRC};
+        return err(Result::BAD_CRC);
+
+    if (DEBUGGING(INFO) && enable_debug) {
+        SERIAL_ECHO("Parsed ");
+        print_packet(incoming);
+    }
 
     return Response<T>{incoming, Result::OK};
 
     // ACK would go here
 }
 
-extern millis_t last_send;
+extern size_t printhead_tx_err_counter;
 
 template<typename T>
 Result send(const Packet<T>& request,
@@ -259,8 +343,15 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    if (millis() <= last_send)
-        delay(1);
+    constexpr static millis_t MIN_CHANT_SEND_DELAY = 10;
+    if (millis() <= last_serial_activity + MIN_CHANT_SEND_DELAY)
+        delay(MIN_CHANT_SEND_DELAY);
+
+    static auto err = [](Result code) {
+        ++printhead_tx_err_counter;
+        last_serial_activity = millis();
+        return code;
+    };
 
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Sending ");
@@ -280,11 +371,11 @@ Result send(const Packet<T>& request,
     }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
-    last_send = millis();
+    last_serial_activity = millis();
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())
-        return Result::WRITE_ERROR;
+        return err(Result::WRITE_ERROR);
     // should read an ACK after this write to assure complete transaction
     if (expect_ack)
         return receive<void>(serial).result;

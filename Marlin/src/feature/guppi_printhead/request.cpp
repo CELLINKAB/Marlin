@@ -6,7 +6,7 @@
 
 using namespace printhead;
 
-millis_t printhead::last_send = 0;
+millis_t printhead::last_serial_activity = 0;
 
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
@@ -21,8 +21,8 @@ Result printhead::unsafe_send(const void* data, const size_t size, HardwareSeria
 
 void printhead::flush_rx(HardwareSerial& serial)
 {
-    while (serial.available())
-        std::ignore = serial.read();
+    while (serial.read() >= 0)
+        ;
 }
 
 void Controller::tool_change(uint8_t tool_index)
@@ -39,26 +39,103 @@ void Controller::init()
     tool_change(0);
 }
 
+//
+// Update handling
+//
+
+enum class UpdateState {
+    ENCODERS,
+    TEMPERATURE,
+    STATUS,
+};
+
+constexpr void next_update_state(UpdateState& current_state)
+{
+    switch (current_state) {
+    case UpdateState::ENCODERS:
+        current_state = UpdateState::TEMPERATURE;
+        break;
+    case UpdateState::TEMPERATURE:
+        current_state = UpdateState::STATUS;
+        break;
+    case UpdateState::STATUS:
+        current_state = UpdateState::ENCODERS;
+        break;
+    }
+}
+
+constexpr auto update_state_to_str(UpdateState current_state)
+{
+    switch (current_state) {
+    case UpdateState::ENCODERS:
+        return "ENCODERS";
+    case UpdateState::TEMPERATURE:
+        return "TEMPERATURE";
+    case UpdateState::STATUS:
+        return "STATUS";
+    }
+    return "UNREACHABLE";
+}
+
 void Controller::update()
 {
     static millis_t next_update = 0;
+    static uint8_t tool_index = 0;
+    static UpdateState update_state = UpdateState::ENCODERS;
+
+    static auto retry = []() {
+        static constexpr size_t MAX_RETRIES = 3;
+        static size_t retries = 0;
+        if (retries++ > MAX_RETRIES) {
+            next_update_state(update_state);
+            retries = 0;
+            if (DEBUGGING(ERRORS))
+                SERIAL_ECHOLNPGM("Retries exceeded for updating ", update_state_to_str(update_state));
+        }
+    };
+
     if (millis() < next_update)
         return;
 
-    const auto encoder_res = debug_get_encoders(false);
-    if (encoder_res.result == Result::OK) {
-        ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderOne);
-        ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderTwo);
-        ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::ExtruderThree);
-        ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderOne);
-        ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderTwo);
-        ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload, EncoderIndex::SliderThree);
-    }
+    auto& state = ph_states[tool_index];
+    Index index = static_cast<Index>(tool_index);
 
-    for (uint8_t tool_index = 0; tool_index < EXTRUDERS; ++tool_index) {
-        auto& state = ph_states[tool_index];
-        Index index = static_cast<Index>(tool_index);
+    switch (update_state) {
+    case UpdateState::ENCODERS:
+        if (tool_index == 0) {
+            const auto encoder_res = debug_get_encoders(false);
+            if (encoder_res.result == Result::OK) {
+                ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderOne);
+                ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderTwo);
+                ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                  EncoderIndex::ExtruderThree);
+                ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderOne);
+                ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderTwo);
+                ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                                EncoderIndex::SliderThree);
+                update_state = UpdateState::TEMPERATURE;
+            } else {
+                retry();
+            }
+        } else {
+            next_update_state(update_state);
+        }
+        break;
 
+    case UpdateState::TEMPERATURE: {
+        const auto temp_res = get_temperature(index, false);
+        if (temp_res.result == Result::OK) {
+            state.raw_temperature = temp_res.packet.payload;
+            next_update_state(update_state);
+        } else
+            retry();
+    } break;
+
+    case UpdateState::STATUS: {
         const auto status_res = get_status(index, false);
         if (status_res.result == Result::OK) {
             if (DEBUGGING(LEVELING)) {
@@ -68,14 +145,20 @@ void Controller::update()
                     SERIAL_ECHO_MSG("slider valve move finished");
             }
             state.status = status_res.packet.payload;
-        }
+            next_update_state(update_state);
+        } else
+            retry();
+        tool_index = ((tool_index + 1) % EXTRUDERS);
+    } break;
 
-        const auto temp_res = get_temperature(index, false);
-        if (temp_res.result == Result::OK)
-            state.raw_temperature = temp_res.packet.payload;
+    default:
+        update_state = UpdateState::ENCODERS;
+        tool_index = 0;
+        break;
     }
 
-    next_update = millis() + SEC_TO_MS(1);
+    static constexpr millis_t UPDATE_INTERVAL = SEC_TO_MS(2) / 7;
+    next_update = millis() + UPDATE_INTERVAL;
 }
 
 void Controller::report_states()
@@ -180,7 +263,8 @@ auto Controller::set_fan_speed(Index index, FanSpeeds fan_speeds) -> Result
 auto Controller::get_fan_speed(Index index) -> Response<FanSpeeds>
 {
     Packet packet(index, Command::DEBUG_GET_FAN_PWM);
-    return send_and_receive<FanSpeeds>(packet, bus); // TODO: handle printhead state, get TACH from chant
+    return send_and_receive<FanSpeeds>(packet,
+                                       bus); // TODO: handle printhead state, get TACH from chant
 }
 
 auto Controller::set_tem_debug(Index index, TemTemps tem_pwms) -> Result
@@ -353,11 +437,11 @@ Response<uint32_t> Controller::get_step_volume(Index index)
     return send_and_receive<uint32_t>(packet, bus);
 }
 
-Response<EncoderStates> Controller::debug_get_encoders(bool debug) {
+Response<EncoderStates> Controller::debug_get_encoders(bool debug)
+{
     // Semantically it makes sense to use the ALL address here since
     // this currently is implemented by returning all encoders.
     // However, receiving an ALL address disables replies in Guppi.
     Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
-

@@ -1502,6 +1502,7 @@ private:
     static void M2110();
     static void M2111();
     static void M2200();
+    static void M2201();
   #endif
 
   // TODO: gate or change these
