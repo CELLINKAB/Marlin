@@ -14,7 +14,8 @@ struct CuringLed
     float deg;
 };
 
-constexpr static uint8_t PC_MICROSTEPS = 32;
+constexpr static uint8_t PC_MICROSTEPS = 4;
+constexpr static uint32_t PC_RMS_CURRENT = 800;
 constexpr static float PC_DEG_PER_STEP = 1.8f;
 constexpr static uint32_t PC_VELOCITY = 500;
 
@@ -84,9 +85,13 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        return Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, 800, 0.15f),
+        auto st = Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
+        st.driver.intpol(false);
+        st.driver.microsteps(PC_MICROSTEPS);
+        st.driver.en_spreadCycle(true);
+        return st;
     }();
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
