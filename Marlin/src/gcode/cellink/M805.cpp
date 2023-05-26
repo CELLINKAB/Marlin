@@ -89,7 +89,6 @@ void GcodeSuite::M805()
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
         st.driver.microsteps(PC_MICROSTEPS);
-        st.driver.en_spreadCycle(true);
         return st;
     }();
     const uint8_t intensity = parser.byteval('I');
