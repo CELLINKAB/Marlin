@@ -88,7 +88,6 @@ void GcodeSuite::M805()
         auto st = Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
-        st.driver.intpol(false);
         st.driver.microsteps(PC_MICROSTEPS);
         st.driver.en_spreadCycle(true);
         return st;
