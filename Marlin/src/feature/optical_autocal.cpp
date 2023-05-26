@@ -101,16 +101,12 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 
     // enable sensors
     auto isr1 = [&sensor_1_trigger_y_pos] {
-        hal.isr_off();
         if (sensor_1_trigger_y_pos == 0.0f)
             sensor_1_trigger_y_pos = planner.get_axis_positions_mm().y;
-        hal.isr_on();
     };
     auto isr2 = [&sensor_2_trigger_y_pos] {
-        hal.isr_off();
         if (sensor_2_trigger_y_pos == 0.0f)
             sensor_2_trigger_y_pos = planner.get_axis_positions_mm().y;
-        hal.isr_on();
     };
 
     attachInterrupt(SENSOR_1, isr1, sensor_polarity);
