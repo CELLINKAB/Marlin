@@ -17,6 +17,7 @@ struct OpticalAutocal
     static constexpr pin_t SENSOR_2{OPTICAL_SENSOR_2_PIN};
 
     static xyz_pos_t nozzle_calibration_extra_offset;
+    static float x_offset_factor;
 
     enum class ErrorCode {
         OK,
@@ -34,7 +35,7 @@ struct OpticalAutocal
     void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
-    void test(uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate);
+    void calibrate(xyz_pos_t start_pos, feedRate_t feedrate);
 
     xyz_pos_t tool_change_offset(const uint8_t);
 
@@ -58,7 +59,7 @@ private:
         }
         inline constexpr float y2() const
         {
-            return ((sensor_2_backward_y + sensor_1_backward_y) / 2.0f);
+            return ((sensor_2_backward_y + sensor_2_forward_y) / 2.0f);
         }
         inline constexpr float y_delta() const { return ABS(y1() - y2()); }
         inline constexpr bool has_zeroes() const

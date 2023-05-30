@@ -3,7 +3,11 @@
 
 #if ENABLED(OPTICAL_AUTOCAL)
 
+#    include <cmath>
+
 #    include "optical_autocal.h"
+
+float OpticalAutocal::x_offset_factor = 1.0f;
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
@@ -60,22 +64,66 @@ void OpticalAutocal::reset_all()
     offsets.fill(xyz_pos_t{});
 }
 
-void OpticalAutocal::test([[maybe_unused]] uint8_t cycles, xyz_pos_t start_pos, feedRate_t feedrate)
+void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
 {
+    constexpr static float linearity_tolerance = 0.01f; // one whole step per 5mm
+
+    // find Z
     do_blocking_move_to(start_pos);
     start_pos.z = find_z_offset(start_pos.z, feedrate) - MEDIUM_Z_INCREMENT;
     do_blocking_move_to(start_pos);
 
-    LongSweepCoords coord;
-    do {
-        coord = long_sweep(feedrate);
+    LongSweepCoords mid = long_sweep(feedrate);
+    do_blocking_move_to_x(start_pos.x - 1.0f);
+    LongSweepCoords start = long_sweep(feedrate);
+    do_blocking_move_to_x(start_pos.x + 1.0f);
+    LongSweepCoords end = long_sweep(feedrate);
 
-        SERIAL_ECHOPGM("X: ", start_pos.x, ", ");
-        coord.print();
+    if (mid.has_zeroes() || start.has_zeroes() || end.has_zeroes())
+        SERIAL_ERROR_MSG("Zero values in sweeps! Cannot calculate sensor angle.");
 
-        start_pos.x -= 0.05;
-        do_blocking_move_to(start_pos, feedrate);
-    } while (!coord.has_zeroes());
+    float calculated_y_delta_mid = (end.y_delta() + start.y_delta()) / 2;
+
+    if (!WITHIN(mid.y_delta(),
+                calculated_y_delta_mid - linearity_tolerance,
+                calculated_y_delta_mid + linearity_tolerance)) {
+        SERIAL_ERROR_MSG("Sensors not linear! Cannot calculate sensor angle.");
+    }
+
+    float sensor1_slope = (end.y1() - start.y1()) / 2.0f;
+    float sensor2_slope = (end.y2() - start.y2()) / 2.0f;
+
+    float sensor_angle = std::atan(ABS(sensor1_slope)) + std::atan(ABS(sensor2_slope));
+    x_offset_factor = (1.0f / tan(sensor_angle / 2.0f));
+
+    float x_intercept_delta = (mid.y_delta() / ABS(sensor1_slope - sensor2_slope));
+    float sensor_x_intercept = start_pos.x - x_intercept_delta;
+    float sensor_y_intercept = mid.y1() - (x_intercept_delta * sensor1_slope);
+
+    float alt_sensor_y_intercept = mid.y2() - (x_intercept_delta * sensor2_slope);
+    if (!WITHIN(sensor_y_intercept,
+                alt_sensor_y_intercept - linearity_tolerance,
+                alt_sensor_y_intercept + linearity_tolerance)) {
+        SERIAL_ERROR_MSG("Sensor Y-intercepts do not match! Cannot calculate intersection point.");
+    }
+    nozzle_calibration_extra_offset.x = END_POSITION_PRINTBED_DELTA.x + sensor_x_intercept;
+    nozzle_calibration_extra_offset.y = END_POSITION_PRINTBED_DELTA.y + sensor_y_intercept;
+    SERIAL_ECHOLNPGM("sensor 1 slope: ",
+                     sensor1_slope,
+                     ", sensor 2 slope: ",
+                     sensor2_slope,
+                     "\nCalculated angle (rad): ",
+                     sensor_angle,
+                     "\nX scale factor: ",
+                     x_offset_factor,
+                     "\nIntersection point: (",
+                     sensor_x_intercept,
+                     ", ",
+                     sensor_y_intercept,
+                     ")\nX offset: ",
+                     nozzle_calibration_extra_offset.x,
+                     ", Y offset: ",
+                     nozzle_calibration_extra_offset.y);
 
     do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
 }
@@ -220,12 +268,10 @@ void OpticalAutocal::report_sensors() const
         avg_y1 += sweep.y1() / NUM_CYCLES;
     }
 
-    constexpr static float X_OFFSET_FACTOR
-        = 0.874475489369; // tan(41.1689) pre-calculated to avoid including runtime trig functions
     const float y_offset = delta_y / 2.0f;
-    const float x_offset = y_offset * X_OFFSET_FACTOR;
+    const float x_offset = y_offset * x_offset_factor;
 
-    const float x = start_pos.x - (y_offset * X_OFFSET_FACTOR);
+    const float x = start_pos.x - (y_offset * x_offset_factor);
     const float y = avg_y1 + y_offset;
 
     if (DEBUGGING(INFO) || DEBUGGING(LEVELING))
