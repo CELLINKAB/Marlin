@@ -49,6 +49,8 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
             stepperZ.rms_current(mA);
             // TODO: add multi Z support
             break;
+        default:
+            break;
         }
         return ret_cur;
     };
@@ -73,7 +75,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     };
 
     auto dir = home_dir(axis);
-    current_position[axis] += ((feedrate / 2) * -dir);
+    current_position[axis] += (feedrate * -dir);
     do_blocking_move_to(current_position, feedrate);
     auto move_cur = set_axis_current(axis, cur);
 
@@ -123,21 +125,21 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     uint16_t recommended_thresh = *min_p / 2;
     recommended_thresh /= 2;
+    if (recommended_thresh > sd) recommended_thresh -= sd;
     set_axis_sg_thresh(axis, recommended_thresh);
     SERIAL_ECHOLNPGM("SG_THRESHOLD: ", recommended_thresh);
 
     planner.synchronize();
 
     set_axis_current(axis, move_cur);
-    current_position[axis] += ((feedrate / 2) * -dir);
-    do_blocking_move_to(current_position, feedrate);
+
 }
 
 void GcodeSuite::G914()
 {
     set_all_unhomed();
 
-    SERIAL_ECHOLN("Manually move the printbed to the center of the movable area");
+    SERIAL_ECHOLN("Manually move the printbed to the home position");
     for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
         SERIAL_ECHOLN(seconds_until_start);
         safe_delay(1000);
