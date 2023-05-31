@@ -69,10 +69,11 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
         }
     };
 
-    auto move_cur = set_axis_current(axis, cur);
     auto dir = home_dir(axis);
     current_position[axis] += ((feedrate / 2) * -dir);
     do_blocking_move_to(current_position, feedrate);
+    auto move_cur = set_axis_current(axis, cur);
+
     SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
     SERIAL_ECHO("Axis: ");
     SERIAL_CHAR(AXIS_CHAR(axis));
@@ -123,10 +124,10 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     SERIAL_ECHOLNPGM("SG_THRESHOLD: ", recommended_thresh);
 
     planner.synchronize();
-    current_position[axis] += ((feedrate / 2) * -dir);
-    do_blocking_move_to(current_position, feedrate);
 
     set_axis_current(axis, move_cur);
+    current_position[axis] += ((feedrate / 2) * -dir);
+    do_blocking_move_to(current_position, feedrate);
 }
 
 void GcodeSuite::G914()
