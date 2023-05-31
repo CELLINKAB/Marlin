@@ -32,22 +32,25 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     };
 
     static auto set_axis_current = [](AxisEnum axis, uint16_t mA) {
+        uint16_t ret_cur = 0;
         switch (axis) {
         case AxisEnum::X_AXIS:
+            ret_cur = stepperX.rms_current();
             stepperX.rms_current(mA);
             TERN_(HAS_DUAL_X_STEPPERS, stepperX2.rms_current(mA));
-            return stepperX.rms_current();
+            break;
         case AxisEnum::Y_AXIS:
+            ret_cur = stepperY.rms_current();
             stepperY.rms_current(mA);
             TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.rms_current(mA));
-            return stepperY.rms_current();
+            break;
         case AxisEnum::Z_AXIS:
+            ret_cur = stepperZ.rms_current();
             stepperZ.rms_current(mA);
             // TODO: add multi Z support
-            return stepperZ.rms_current();
-        default:
-            return static_cast<uint16_t>(0);
+            break;
         }
+        return ret_cur;
     };
 
     static auto set_axis_sg_thresh = [](AxisEnum axis, uint16_t thresh) {
