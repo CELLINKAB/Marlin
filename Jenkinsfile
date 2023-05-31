@@ -54,7 +54,7 @@ pipeline {
 
                                 git status
                                 echo "Do Build for ${BOARD}"
-                                python3 -m platformio run --environment  ${BOARD}  -a "--build_tag=--build_tag=${ART_NAME_NOSLASH}"
+                                python3 -m platformio run --environment  ${BOARD}  -a "--build_tag=${ART_NAME_NOSLASH}"
                             '''
                         }
                     }
