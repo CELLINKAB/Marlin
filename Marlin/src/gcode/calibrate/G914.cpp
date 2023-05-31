@@ -17,13 +17,9 @@ void GcodeSuite::G914()
 
     SERIAL_ECHOLN("Manually move the printbed to the center of the movable area");
     for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
-        SERIAL_ECHO(seconds_until_start);
-        for (size_t i = 0; i < 4; ++i) {
-            safe_delay(250);
-            SERIAL_CHAR('.');
-        }
+        SERIAL_ECHOLN(seconds_until_start);
+        safe_delay(1000);
     }
-    SERIAL_EOL();
 
     auto poll_sg_val = [](AxisEnum axis) -> int32_t {
         static millis_t last_return_time = 0;
@@ -43,46 +39,22 @@ void GcodeSuite::G914()
         }
     };
 
-    feedRate_t x_optimal_feedrate = parser.feedrateval('F', 5.0f);
+    feedRate_t x_optimal_feedrate = parser.feedrateval('F', 30.0f);
+    auto x_cur = parser.ushortval('C', 600);
+
+    stepperX.rms_current(x_cur);
     do_blocking_move_to_x(current_position.x - x_optimal_feedrate, x_optimal_feedrate);
+    SERIAL_ECHOLNPGM("feedrate: ", x_optimal_feedrate, ", current: ", x_cur);
     current_position.x += (x_optimal_feedrate * 2);
     planner.buffer_segment(current_position, x_optimal_feedrate);
-    safe_delay(450);
-    std::array<int32_t, 50> x_sg_samples{};
-    for (auto& sample : x_sg_samples)
-        sample = poll_sg_val(AxisEnum::X_AXIS);
-    auto x_cur = stepperX.rms_current();
+    while (planner.busy()) {
+        SERIAL_ECHOLNPGM("SG:", poll_sg_val(AxisEnum::X_AXIS));
+    }
 
-    float x_avg = static_cast<float>(std::accumulate(x_sg_samples.cbegin(), x_sg_samples.cend(), 0))
-                  / static_cast<float>(x_sg_samples.size());
-    auto x_min_max = std::minmax_element(x_sg_samples.cbegin(), x_sg_samples.cend());
-
-    for (auto& sample : x_sg_samples)
-        sample = (sample - x_avg) * (sample - x_avg);
-
-    float x_var = static_cast<float>(std::accumulate(x_sg_samples.cbegin(), x_sg_samples.cend(), 0))
-                  / static_cast<float>(x_sg_samples.size());
-    float x_sd = sqrt(x_var);
 
     planner.synchronize();
     do_blocking_move_to_x(current_position.x - x_optimal_feedrate, x_optimal_feedrate);
 
-    SERIAL_ECHOLNPGM("X feedrate: ",
-                     x_optimal_feedrate,
-                     ", current: ",
-                     x_cur,
-                     ", avg: ",
-                     x_avg,
-                     ", var: ",
-                     x_var,
-                     ", sd: ",
-                     x_sd,
-                     ", min: ",
-                     *(x_min_max.first),
-                     ", max: ",
-                     *(x_min_max.second));
-
-    SERIAL_ECHOLNPGM("Recommended M914 val: ", static_cast<uint8_t>((x_avg - (4.0f * x_sd)) / 2.0f));
 }
 
 #endif

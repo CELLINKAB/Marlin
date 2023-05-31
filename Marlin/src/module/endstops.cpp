@@ -1698,7 +1698,8 @@ void Endstops::update() {
       #if SENSORLESS_STALLGUARD_DELAY
         safe_delay(SENSORLESS_STALLGUARD_DELAY); // Short delay needed to settle
       #endif
-
+    #else // no specific homing current
+      UNUSED(onoff);
     #endif // XYZ
   }
 #endif
