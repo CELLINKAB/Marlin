@@ -46,7 +46,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
             // TODO: add multi Z support
             return stepperZ.rms_current();
         default:
-            return 0;
+            return static_cast<uint16_t>(0);
         }
     };
 
@@ -70,7 +70,8 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     };
 
     auto move_cur = set_axis_current(axis, cur);
-    current_position[axis] -= (feedrate / 2);
+    auto dir = home_dir(axis);
+    current_position[axis] += ((feedrate / 2) * -dir);
     do_blocking_move_to(current_position, feedrate);
     SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
     SERIAL_ECHO("Axis: ");
@@ -82,7 +83,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     uint32_t sum = 0;
 
-    current_position[axis] += feedrate;
+    current_position[axis] += (feedrate * dir);
     planner.buffer_segment(current_position, feedrate);
     safe_delay(200); // make sure we're into the move
     for (auto& sample : sg_samples) {
@@ -122,10 +123,10 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     SERIAL_ECHOLNPGM("SG_THRESHOLD: ", recommended_thresh);
 
     planner.synchronize();
-    current_position[axis] -= (feedrate / 2);
+    current_position[axis] += ((feedrate / 2) * -dir);
     do_blocking_move_to(current_position, feedrate);
 
-    set_axis_current(move_cur);
+    set_axis_current(axis, move_cur);
 }
 
 void GcodeSuite::G914()
