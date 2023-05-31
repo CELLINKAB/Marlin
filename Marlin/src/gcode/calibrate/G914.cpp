@@ -138,6 +138,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 void GcodeSuite::G914()
 {
     set_all_unhomed();
+    stepper.disable_all_steppers();
 
     SERIAL_ECHOLN("Manually move the printbed to the home position");
     for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
