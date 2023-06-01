@@ -98,16 +98,16 @@ bool test_axis(AxisEnum axis, feedRate_t feedrate)
 {
     planner.synchronize();
     float start_pos = planner.get_axis_position_mm(axis);
-    
+
     current_position[axis] += (5.0f * static_cast<float>(-home_dir(axis)));
     do_blocking_move_to(current_position, feedrate);
 
     auto states = start_sensorless_homing_per_axis(axis);
     endstops.enable();
-    
+
     current_position[axis] += (20.0f * static_cast<float>(home_dir(axis)));
     do_blocking_move_to(current_position, feedrate);
-    
+
     endstops.enable(false);
     end_sensorless_homing_per_axis(axis, states);
 
@@ -134,11 +134,13 @@ SummaryStats analyze_sweep(AxisEnum axis)
     }
 
     uint32_t avg = sum / MAX_SAMPLES;
-    float var = 0.0f;
+
+    float square_difference_sum = 0.0f;
     for (const auto sample : sg_samples) {
-        var += powf(static_cast<float>(sample) - static_cast<float>(avg), 2.0f)
-               / static_cast<float>(MAX_SAMPLES);
+        square_difference_sum += powf(static_cast<float>(sample) - static_cast<float>(avg), 2.0f);
     }
+
+    float variance = square_difference_sum / static_cast<float>(MAX_SAMPLES);
 
     auto [min_p, max_p] = std::minmax_element(sg_samples.cbegin(), sg_samples.cend());
 
@@ -191,7 +193,6 @@ void GcodeSuite::G914()
 {
     planner.finish_and_disable();
     set_all_unhomed();
-
 
     SERIAL_ECHOLN("Manually move the printbed to the home position");
     for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
