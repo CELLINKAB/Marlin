@@ -49,22 +49,26 @@ uint16_t poll_sg_val(AxisEnum axis)
     }
 }
 
-uint16_t set_axis_current(AxisEnum axis, uint16_t mA)
+uint16_t set_axis_current(AxisEnum axis, uint16_t mA = 0)
 {
+    if (mA == 0) {
+        static constexpr uint16_t DEFAULTS[] = {X_CURRENT, Y_CURRENT, Z_CURRENT};
+        mA = DEFAULTS[axis];
+    }
     uint16_t ret_cur = 0;
     switch (axis) {
     case AxisEnum::X_AXIS:
-        ret_cur = stepperX.rms_current();
+        ret_cur = stepperX.getMilliamps();
         stepperX.rms_current(mA);
         TERN_(HAS_DUAL_X_STEPPERS, stepperX2.rms_current(mA));
         break;
     case AxisEnum::Y_AXIS:
-        ret_cur = stepperY.rms_current();
+        ret_cur = stepperY.getMilliamps();
         stepperY.rms_current(mA);
         TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.rms_current(mA));
         break;
     case AxisEnum::Z_AXIS:
-        ret_cur = stepperZ.rms_current();
+        ret_cur = stepperZ.getMilliamps();
         stepperZ.rms_current(mA);
         // TODO: add multi Z support
         break;
@@ -94,18 +98,30 @@ void set_axis_sg_thresh(AxisEnum axis, uint16_t thresh)
     }
 }
 
-bool test_axis(AxisEnum axis, feedRate_t feedrate)
+void do_backoff(AxisEnum axis, float distance)
 {
     planner.synchronize();
+
+    auto stored_current = set_axis_current(axis);
+
+    current_position[axis] += (distance * static_cast<float>(home_dir(axis)));
+    do_blocking_move_to(current_position);
+
+    set_axis_current(axis, stored_current);
+}
+
+bool test_axis(AxisEnum axis, feedRate_t feedrate)
+{
+    constexpr static float TEST_BACKOFF_DISTANCE = 10.0f;
+
     float start_pos = planner.get_axis_position_mm(axis);
 
-    current_position[axis] += (5.0f * static_cast<float>(-home_dir(axis)));
-    do_blocking_move_to(current_position, feedrate);
+    do_backoff(axis, TEST_BACKOFF_DISTANCE);
 
     auto states = start_sensorless_homing_per_axis(axis);
     endstops.enable();
 
-    current_position[axis] += (20.0f * static_cast<float>(home_dir(axis)));
+    current_position[axis] += (TEST_BACKOFF_DISTANCE * 2 * static_cast<float>(home_dir(axis)));
     do_blocking_move_to(current_position, feedrate);
 
     endstops.enable(false);
@@ -144,16 +160,22 @@ SummaryStats analyze_sweep(AxisEnum axis)
 
     auto [min_p, max_p] = std::minmax_element(sg_samples.cbegin(), sg_samples.cend());
 
-    return SummaryStats{avg, var, *min_p, *max_p};
+    return SummaryStats{avg, variance, *min_p, *max_p};
 }
 
 void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
-    auto dir = home_dir(axis);
-    current_position[axis] += (feedrate * -dir);
-    do_blocking_move_to(current_position, feedrate);
+    if (cur == 0) {
+        constexpr static uint16_t DEFAULT_HOMING_CURRENT[] = {X_CURRENT_HOME,
+                                                              Y_CURRENT_HOME,
+                                                              Z_CURRENT_HOME};
+        cur = DEFAULT_HOMING_CURRENT[axis];
+    }
+
+    do_backoff(axis, feedrate); // one second of travel time
+
     auto move_cur = set_axis_current(axis, cur);
 
     SERIAL_ECHO("Axis: ");
@@ -161,7 +183,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     SERIAL_EOL();
     SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
 
-    current_position[axis] += (feedrate * dir);
+    current_position[axis] += (feedrate * home_dir(axis));
     planner.buffer_segment(current_position, feedrate);
     safe_delay(200); // make sure we're into the move
     auto summary = analyze_sweep(axis);
@@ -201,7 +223,7 @@ void GcodeSuite::G914()
     }
 
     feedRate_t feedrate = parser.feedrateval('F');
-    auto cur = parser.ushortval('C', X_CURRENT_HOME);
+    auto cur = parser.ushortval('C');
 
     if (!parser.seen_axis()) {
         tune_axis(AxisEnum::X_AXIS, cur, feedrate);
