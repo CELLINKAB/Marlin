@@ -5,7 +5,6 @@
 #if ENABLED(SENSORLESS_HOMING)
 
 #    include "../../module/endstops.h"
-#    include "../../module/stepper.h"
 #    include "../../module/stepper/trinamic.h"
 #    include "../parser.h"
 
@@ -98,26 +97,26 @@ void set_axis_sg_thresh(AxisEnum axis, uint16_t thresh)
 bool test_axis(AxisEnum axis, feedRate_t feedrate)
 {
     planner.synchronize();
-    static constexpr xyz_pos_t BACKOFFS = SENSORLESS_BACKOFF_MM;
-    float start_pos = current_position[axis];
-    current_position[axis] += BACKOFFS[axis];
+    float start_pos = planner.get_axis_position_mm(axis);
+    
+    current_position[axis] += (5.0f * static_cast<float>(-home_dir(axis)));
     do_blocking_move_to(current_position, feedrate);
 
-    bool triggered = false;
     auto states = start_sensorless_homing_per_axis(axis);
-    current_position[axis] -= (BACKOFFS[axis] * 2);
-    planner.buffer_segment(current_position, feedrate);
-    while (planner.busy() || !triggered) {
-        idle();
-        triggered |= TEST(endstops.state(), axis);
-    }
+    endstops.enable();
+    
+    current_position[axis] += (20.0f * static_cast<float>(home_dir(axis)));
+    do_blocking_move_to(current_position, feedrate);
+    
+    endstops.enable(false);
     end_sensorless_homing_per_axis(axis, states);
-    planner.quick_stop();
+
+    if (!endstops.trigger_state())
+        return false;
+
     endstops.hit_on_purpose();
-
-    SERIAL_ECHOLNPGM("axis test position error: ", planner.get_axis_position_mm(axis) - start_pos);
-
-    return triggered;
+    SERIAL_ECHOLNPGM("axis test position error: ", planner.triggered_position_mm(axis) - start_pos);
+    return true;
 }
 
 SummaryStats analyze_sweep(AxisEnum axis)
@@ -155,10 +154,10 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     do_blocking_move_to(current_position, feedrate);
     auto move_cur = set_axis_current(axis, cur);
 
-    SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
     SERIAL_ECHO("Axis: ");
     SERIAL_CHAR(AXIS_CHAR(axis));
     SERIAL_EOL();
+    SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
 
     current_position[axis] += (feedrate * dir);
     planner.buffer_segment(current_position, feedrate);
@@ -181,8 +180,6 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     SERIAL_ECHOLNPGM("SG_THRESHOLD: ", summary.recommended_sg());
 
-    planner.synchronize();
-
     set_axis_sg_thresh(axis, summary.recommended_sg());
     bool tuning_success = test_axis(axis, feedrate);
     SERIAL_ECHOLNPGM("Tuning trigger test: ", tuning_success);
@@ -192,8 +189,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
 void GcodeSuite::G914()
 {
+    planner.finish_and_disable();
     set_all_unhomed();
-    stepper.disable_all_steppers();
+
 
     SERIAL_ECHOLN("Manually move the printbed to the home position");
     for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
