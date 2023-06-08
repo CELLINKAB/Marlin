@@ -18,25 +18,39 @@ struct SummaryStats
     uint16_t min;
     uint16_t max;
 
-    constexpr inline float standard_deviation() { return sqrt(variance); }
-    constexpr inline uint16_t range() { return max - min; }
-    constexpr inline uint16_t recommended_sg()
+    constexpr float standard_deviation() const { return sqrt(variance); }
+    constexpr uint16_t range() const { return (max > min) ? max - min : 0; }
+
+    constexpr float z_test(float sample) const
     {
-        const int16_t half_minimum = static_cast<int16_t>(min / 2);
-        if (half_minimum > standard_deviation())
-            return half_minimum - static_cast<uint16_t>(standard_deviation());
-        else
-            return 0;
+        return (sample - static_cast<float>(avg)) / standard_deviation();
     }
+
+    void print() const
+    {
+        SERIAL_ECHOLNPGM("avg: ",
+                         avg,
+                         ", var: ",
+                         variance,
+                         ", std: ",
+                         standard_deviation(),
+                         "\nmin: ",
+                         min,
+                         ", max: ",
+                         max,
+                         ", range: ",
+                         range());
+    }
+};
+
+struct SweepResult
+{
+    float z_statistic;
+    uint16_t sg_thresh;
 };
 
 uint16_t poll_sg_val(AxisEnum axis)
 {
-    static millis_t last_return_time = 0;
-    // spin until next result needed
-    while (millis() <= last_return_time + 10)
-        idle_no_sleep();
-    last_return_time = millis();
     switch (axis) {
     case AxisEnum::X_AXIS:
         return stepperX.SG_RESULT();
@@ -75,6 +89,7 @@ uint16_t set_axis_current(AxisEnum axis, uint16_t mA = 0)
     default:
         break;
     }
+    TERN_(SENSORLESS_STALLGUARD_DELAY, safe_delay(SENSORLESS_STALLGUARD_DELAY));
     return ret_cur;
 }
 
@@ -104,7 +119,8 @@ void do_backoff(AxisEnum axis, float distance)
 
     auto stored_current = set_axis_current(axis);
 
-    current_position[axis] += (distance * static_cast<float>(home_dir(axis)));
+    safe_delay(200);
+    current_position[axis] += (distance * static_cast<float>(-home_dir(axis)));
     do_blocking_move_to(current_position);
 
     set_axis_current(axis, stored_current);
@@ -113,6 +129,8 @@ void do_backoff(AxisEnum axis, float distance)
 bool test_axis(AxisEnum axis, feedRate_t feedrate)
 {
     constexpr static float TEST_BACKOFF_DISTANCE = 10.0f;
+
+    planner.synchronize();
 
     float start_pos = planner.get_axis_position_mm(axis);
 
@@ -137,12 +155,17 @@ bool test_axis(AxisEnum axis, feedRate_t feedrate)
 
 SummaryStats analyze_sweep(AxisEnum axis)
 {
-    static constexpr size_t MAX_SAMPLES = 64;
+    static constexpr size_t MAX_SAMPLES = 32;
     std::array<uint16_t, MAX_SAMPLES> sg_samples;
 
     uint32_t sum = 0;
 
+    millis_t last_poll = 0;
     for (auto& sample : sg_samples) {
+        // spin until next result needed
+        while (millis() <= last_poll + 8)
+            idle_no_sleep();
+        last_poll = millis();
         sample = poll_sg_val(axis);
         sum += sample;
         if (DEBUGGING(LEVELING))
@@ -163,7 +186,36 @@ SummaryStats analyze_sweep(AxisEnum axis)
     return SummaryStats{avg, variance, *min_p, *max_p};
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
+SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
+{
+    do_backoff(axis, feedrate); // one second of travel time
+
+    set_axis_current(axis, cur);
+
+    SERIAL_ECHO("Axis: ");
+    SERIAL_CHAR(AXIS_CHAR(axis));
+    SERIAL_EOL();
+    SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
+
+    current_position[axis] += (feedrate * 2.0f * home_dir(axis));
+    line_to_current_position(feedrate);
+    TERN_(SENSORLESS_STALLGUARD_DELAY, safe_delay(SENSORLESS_STALLGUARD_DELAY));
+
+    auto move_summary = analyze_sweep(axis);
+    safe_delay(TERN(SENSORLESS_STALLGUARD_DELAY, 1000 - SENSORLESS_STALLGUARD_DELAY, 1000));
+    auto stall_summary = analyze_sweep(axis);
+
+    if (DEBUGGING(INFO)) {
+        SERIAL_ECHOLN("--pre stall--");
+        move_summary.print();
+        SERIAL_ECHOLN("--post stall--");
+        stall_summary.print();
+    }
+
+    return {move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(stall_summary.avg / 2)};
+}
+
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -173,40 +225,46 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
                                                               Z_CURRENT_HOME};
         cur = DEFAULT_HOMING_CURRENT[axis];
     }
-
-    do_backoff(axis, feedrate); // one second of travel time
-
     auto move_cur = set_axis_current(axis, cur);
 
-    SERIAL_ECHO("Axis: ");
-    SERIAL_CHAR(AXIS_CHAR(axis));
-    SERIAL_EOL();
-    SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
+    auto best_sweep = test_sweep(axis, cur, feedrate);
+    uint16_t optimal_current = cur;
+    feedRate_t optimal_feedrate = feedrate;
 
-    current_position[axis] += (feedrate * home_dir(axis));
-    planner.buffer_segment(current_position, feedrate);
-    safe_delay(200); // make sure we're into the move
-    auto summary = analyze_sweep(axis);
+    static constexpr float CRITICAL_VALUE = -2.33f; // 99% confidence / p < 1%
 
-    if (DEBUGGING(INFO))
-        SERIAL_ECHOLNPGM("avg: ",
-                         summary.avg,
-                         ", var: ",
-                         summary.variance,
-                         ", std: ",
-                         summary.standard_deviation(),
-                         "\nmin: ",
-                         summary.min,
-                         ", max: ",
-                         summary.max,
-                         ", range: ",
-                         summary.range());
+    while (cur < move_cur && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+        cur += 50;
+        auto new_sweep = test_sweep(axis, cur, feedrate);
+        if (new_sweep.z_statistic < best_sweep.z_statistic) {
+            best_sweep = new_sweep;
+            optimal_current = cur;
+        }
+    }
+    cur = optimal_current;
 
-    SERIAL_ECHOLNPGM("SG_THRESHOLD: ", summary.recommended_sg());
+    static constexpr xyze_float_t MAX_FEEDRATE = DEFAULT_MAX_FEEDRATE;
+    while (feedrate < MAX_FEEDRATE[axis] && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+        feedrate += 5.0f;
+        auto new_sweep = test_sweep(axis, cur, feedrate);
+        if (new_sweep.z_statistic < best_sweep.z_statistic) {
+            best_sweep = new_sweep;
+            optimal_feedrate = feedrate;
+        }
+    }
+    feedrate = optimal_feedrate;
 
-    set_axis_sg_thresh(axis, summary.recommended_sg());
-    bool tuning_success = test_axis(axis, feedrate);
-    SERIAL_ECHOLNPGM("Tuning trigger test: ", tuning_success);
+    set_axis_sg_thresh(axis, best_sweep.sg_thresh);
+
+    if (test_axis(axis, feedrate))
+        SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
+                         cur,
+                         "\nHOMING_FEEDRATE ",
+                         feedrate,
+                         "\nSTALLGUARD_THRESHOLD ",
+                         best_sweep.sg_thresh);
+    else
+        SERIAL_ECHOLN("Failed to tune axis");
 
     set_axis_current(axis, move_cur);
 }
@@ -224,20 +282,25 @@ void GcodeSuite::G914()
 
     feedRate_t feedrate = parser.feedrateval('F');
     auto cur = parser.ushortval('C');
+    bool test_all = parser.boolval('A');
+
+    TERN_(IMPROVE_HOMING_RELIABILITY, auto motion_states = begin_slow_homing());
 
     if (!parser.seen_axis()) {
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
         return;
     }
 
     if (parser.seen('X'))
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
     if (parser.seen('Y'))
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
     if (parser.seen('Z'))
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
+
+    TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(motion_states));
 }
 
 #endif
