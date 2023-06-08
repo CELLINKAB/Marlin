@@ -4291,7 +4291,7 @@
 //
 #define DIRECT_PIN_CONTROL
 
-#define SENSORLESS_STALLGUARD_DELAY 500
+#define SENSORLESS_STALLGUARD_DELAY 300
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
