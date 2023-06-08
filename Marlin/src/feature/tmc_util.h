@@ -352,7 +352,7 @@ void test_tmc_connection(LOGICAL_AXIS_DECL(const bool, true));
 
   #if ENABLED(IMPROVE_HOMING_RELIABILITY)
     extern millis_t sg_guard_period;
-    constexpr uint16_t default_sg_guard_duration = 400;
+    constexpr uint16_t default_sg_guard_duration = TERN(SENSORLESS_STALLGUARD_DELAY, SENSORLESS_STALLGUARD_DELAY, 400);
   #endif
 
   bool tmc_enable_stallguard(TMC2130Stepper &st);
