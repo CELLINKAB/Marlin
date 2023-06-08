@@ -15,7 +15,7 @@ static void update_offset(const xyz_pos_t& offset)
 {
     set_home_offset(AxisEnum::X_AXIS, -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x));
     set_home_offset(AxisEnum::Y_AXIS, -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y));
-    set_home_offset(AxisEnum::Z_AXIS, (offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z));
+    set_home_offset(AxisEnum::Z_AXIS, -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z));
 }
 
 void GcodeSuite::G510()
