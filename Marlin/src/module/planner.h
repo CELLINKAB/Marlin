@@ -1056,6 +1056,11 @@ class Planner {
     #endif // HAS_JUNCTION_DEVIATION
 };
 
+#if ENABLED(IMPROVE_HOMING_RELIABILITY)
+motion_state_t begin_slow_homing();
+void end_slow_homing(const motion_state_t &motion_state);
+#endif
+
 #define PLANNER_XY_FEEDRATE() _MIN(planner.settings.max_feedrate_mm_s[X_AXIS], planner.settings.max_feedrate_mm_s[Y_AXIS])
 
 extern Planner planner;
