@@ -194,15 +194,19 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     SERIAL_ECHO("Axis: ");
     SERIAL_CHAR(AXIS_CHAR(axis));
-    SERIAL_EOL();
-    SERIAL_ECHOLNPGM("feedrate: ", feedrate, ", current: ", cur);
+    SERIAL_ECHOLNPGM(", feedrate: ", feedrate, ", current: ", cur);
 
     current_position[axis] += (feedrate * 2.0f * home_dir(axis));
     line_to_current_position(feedrate);
+    idle();
     TERN_(SENSORLESS_STALLGUARD_DELAY, safe_delay(SENSORLESS_STALLGUARD_DELAY));
 
+    if (DEBUGGING(LEVELING))
+        SERIAL_ECHOLN("-moving values-");
     auto move_summary = analyze_sweep(axis);
     safe_delay(TERN(SENSORLESS_STALLGUARD_DELAY, 1000 - SENSORLESS_STALLGUARD_DELAY, 1000));
+    if (DEBUGGING(LEVELING))
+        SERIAL_ECHOLN("-stalling values-");
     auto stall_summary = analyze_sweep(axis);
 
     if (DEBUGGING(INFO)) {
@@ -212,10 +216,14 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
         stall_summary.print();
     }
 
-    return {move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(stall_summary.avg / 2)};
+    SweepResult res{move_summary.z_test(stall_summary.avg),
+                    static_cast<uint16_t>(stall_summary.avg / 2)};
+    SERIAL_ECHOLNPGM("Z statistic of stall: ", res.z_statistic);
+
+    return res;
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]] bool test_all)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -232,24 +240,33 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
     feedRate_t optimal_feedrate = feedrate;
 
     static constexpr float CRITICAL_VALUE = -2.33f; // 99% confidence / p < 1%
-
-    while (cur < move_cur && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
-        cur += 50;
+    uint16_t cur_increment = 50;
+    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+        cur += cur_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_current = cur;
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f) && cur_increment == 50) {
+            // getting worse, try the other way
+            cur_increment = -50;
         }
     }
     cur = optimal_current;
 
-    static constexpr xyze_float_t MAX_FEEDRATE = DEFAULT_MAX_FEEDRATE;
-    while (feedrate < MAX_FEEDRATE[axis] && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
-        feedrate += 5.0f;
+    static constexpr feedRate_t MAX_FEEDRATE = 36.0f;
+    static constexpr feedRate_t MIN_FEEDRATE = 3.0f;
+    feedRate_t feedrate_increment = 5.0f;
+    while (feedrate < MAX_FEEDRATE && feedrate > MIN_FEEDRATE
+           && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+        feedrate += feedrate_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_feedrate = feedrate;
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f)
+                   && feedrate_increment == 5.0f) { // getting worse, change direction
+            feedrate_increment = -2.5f;
         }
     }
     feedrate = optimal_feedrate;
@@ -258,9 +275,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
 
     if (test_axis(axis, feedrate))
         SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
-                         cur,
+                         optimal_current,
                          "\nHOMING_FEEDRATE ",
-                         feedrate,
+                         optimal_feedrate,
                          "\nSTALLGUARD_THRESHOLD ",
                          best_sweep.sg_thresh);
     else
