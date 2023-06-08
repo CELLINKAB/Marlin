@@ -14,7 +14,6 @@ uint32_t OpticalAutocal::sensor_polarity = RISING;
 auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate)
     -> ErrorCode
 {
-    home_if_needed();
     do_blocking_move_to(start_pos);
     planner.synchronize();
 
