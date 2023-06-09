@@ -1500,7 +1500,7 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -22 }
+#define NOZZLE_TO_PROBE_OFFSET { -113, -40, -18.625 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1579,7 +1579,7 @@
  */
 #define Z_CLEARANCE_DEPLOY_PROBE   10 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES 20 // Z Clearance between probe points
-#define Z_CLEARANCE_MULTI_PROBE    3 // Z Clearance between multiple probes
+#define Z_CLEARANCE_MULTI_PROBE    10 // Z Clearance between multiple probes
 #define Z_AFTER_PROBING           30 // Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -5 // Farthest distance below the trigger-point to go before stopping
@@ -2002,9 +2002,9 @@
 
   //#define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh
 
-  #define MESH_INSET 3              // Set Mesh bounds as an inset region of the bed
-  #define GRID_MAX_POINTS_X 12      // Don't use more than 15 points per axis, implementation limited.
-  #define GRID_MAX_POINTS_Y 8
+  #define MESH_INSET 1              // Set Mesh bounds as an inset region of the bed
+  #define GRID_MAX_POINTS_X 6      // Don't use more than 15 points per axis, implementation limited.
+  #define GRID_MAX_POINTS_Y 4
 
   #define UBL_HILBERT_CURVE       // Use Hilbert distribution for less travel when probing multiple points
 
@@ -2198,7 +2198,7 @@
 #define EEPROM_CHITCHAT       // Give feedback on EEPROM commands. Disable to save PROGMEM.
 #define EEPROM_BOOT_SILENT    // Keep M503 quiet and only give errors during first load
 #if ENABLED(EEPROM_SETTINGS)
-  // #define EEPROM_AUTO_INIT  // Init EEPROM automatically on any errors.
+  #define EEPROM_AUTO_INIT  // Init EEPROM automatically on any errors.
   // #define EEPROM_INIT_NOW   // Init EEPROM on first boot after a new build.
 #endif
 
