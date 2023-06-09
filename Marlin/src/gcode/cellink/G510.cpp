@@ -6,30 +6,37 @@
 #    include "../../module/motion.h"
 #    include "../gcode.h"
 
+#    include <cmath>
 #    include <stdio.h>
 
 xyz_pos_t OpticalAutocal::nozzle_calibration_extra_offset{};
 
 static void update_offset(const xyz_pos_t& offset)
 {
-    set_home_offset(AxisEnum::X_AXIS, offset.x + OpticalAutocal::nozzle_calibration_extra_offset.x);
-    set_home_offset(AxisEnum::Y_AXIS, offset.y + OpticalAutocal::nozzle_calibration_extra_offset.y);
-    set_home_offset(AxisEnum::Z_AXIS, offset.z + OpticalAutocal::nozzle_calibration_extra_offset.z);
+    set_home_offset(AxisEnum::X_AXIS,
+                    -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x));
+    set_home_offset(AxisEnum::Y_AXIS,
+                    -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y));
+    set_home_offset(AxisEnum::Z_AXIS,
+                    -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z));
 }
 
 void GcodeSuite::G510()
 {
+    // load offsets for new tool, used during tool change
     if (parser.seen('L')) {
-        if (optical_autocal.is_calibrated(active_extruder)) {
-            auto offset = optical_autocal.tool_change_offset(active_extruder);
-            update_offset(offset);
-        }
+        if (optical_autocal.is_calibrated(active_extruder))
+            update_offset(optical_autocal.offset(active_extruder));
         return;
     }
+
+    // report sensor state for debugging
     if (parser.seen('S')) {
         optical_autocal.report_sensors();
         return;
     }
+
+    home_if_needed(true);
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;
@@ -39,8 +46,8 @@ void GcodeSuite::G510()
 
     const auto feedrate = parser.feedrateval('F', 25.0f);
 
-    if (parser.seen('D')) {
-        optical_autocal.test(48, start_pos, feedrate);
+    if (parser.seen('C')) {
+        optical_autocal.calibrate(start_pos, feedrate);
         return;
     }
 
@@ -79,7 +86,9 @@ void GcodeSuite::M1510()
                          ", Y: ",
                          OpticalAutocal::nozzle_calibration_extra_offset.y,
                          ", Z: ",
-                         OpticalAutocal::nozzle_calibration_extra_offset.z);
+                         OpticalAutocal::nozzle_calibration_extra_offset.z,
+                         "\n X correction factor: ",
+                         OpticalAutocal::x_offset_factor);
         return;
     }
 
@@ -89,6 +98,8 @@ void GcodeSuite::M1510()
         OpticalAutocal::nozzle_calibration_extra_offset.y = parser.value_float();
     if (parser.seen('Z'))
         OpticalAutocal::nozzle_calibration_extra_offset.z = parser.value_float();
+    if (parser.seen('A'))
+        OpticalAutocal::x_offset_factor = (1.0f / std::tan(parser.value_float() / 2));
 }
 
 void GcodeSuite::M1510_report(bool forReplay)
