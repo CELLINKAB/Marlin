@@ -11,6 +11,13 @@ float OpticalAutocal::x_offset_factor = 1.0f;
 
 uint32_t OpticalAutocal::sensor_polarity = RISING;
 
+/**
+ * @brief Find and set offsets for given tool or else give an error
+ * 
+ * @param start_pos Where routine should start searching for nozzle
+ * @param feedrate mm/s
+ * @return ErrorCode
+ */
 auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate)
     -> ErrorCode
 {
@@ -42,27 +49,55 @@ auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedR
     return result;
 }
 
+/**
+ * @brief Checks if given tool has already had calibration performed on it
+ * 
+ * @param tool tool/extruder/hotend index
+ * @return true Given tool has been calibrated at least once since machine start
+ * @return false Given tool has not been calibrated
+ */
 [[nodiscard]] bool OpticalAutocal::is_calibrated(const uint8_t tool) const
 {
     static constexpr xyz_pos_t default_pos{};
     return offsets[tool] != default_pos;
 }
 
+/**
+ * @brief Gets the offsets applied by calibration, or default value if not calibrated
+ * 
+ * @param tool tool/extruder/hotend index
+ * @return const xyz_pos_t& calibration offsets for tool
+ */
 [[nodiscard]] const xyz_pos_t& OpticalAutocal::offset(const uint8_t tool) const
 {
     return offsets[tool];
 }
 
+/**
+ * @brief Reset the calibration state of given tool to default such that is_calibrated will return false
+ * 
+ * @param tool tool/extruder/hotend indexs
+ */
 void OpticalAutocal::reset(const uint8_t tool)
 {
     offsets[tool] = xyz_pos_t{};
 }
 
+/**
+ * @brief Clear all calibration data, resets calibration to power on state.
+ * 
+ */
 void OpticalAutocal::reset_all()
 {
     offsets.fill(xyz_pos_t{});
 }
 
+/**
+ * @brief Machine meta calibration routine to account for possible poor sensor alignment
+ * 
+ * @param start_pos Where the routine should start looking for the nozzle
+ * @param feedrate  mm/s
+ */
 void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
 {
     constexpr static float linearity_tolerance = 0.01f; // one whole step per 5mm
@@ -127,6 +162,12 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
     do_blocking_move_to_z(POST_AUTOCAL_SAFE_Z_HEIGHT);
 }
 
+/**
+ * @brief Get offsets of the new tool needed during a tool change
+ * 
+ * @param tool tool/extruder/hotend index being changed to
+ * @return xyz_pos_t difference in offset compared to current tool
+ */
 xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
 {
     xyz_pos_t new_offset{};
@@ -139,6 +180,12 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return new_offset;
 }
 
+/**
+ * @brief Sweep in the Y direction which should pass through both sensors in both directions
+ * 
+ * @param feedrate_mm_s 
+ * @return LongSweepCoords coordinates where the sensor triggered during sweep
+ */
 [[nodiscard]] auto OpticalAutocal::long_sweep(feedRate_t feedrate_mm_s) const -> LongSweepCoords
 {
     volatile float sensor_1_trigger_y_pos{0.0f};
@@ -199,6 +246,14 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return retval;
 }
 
+/**
+ * @brief Perform sweeps to obtain X Y and Z offsets
+ * 
+ * @param tool tool/extruder/hotend index to calibrate
+ * @param start_pos where the routine should start to look for nozzle
+ * @param feedrate mm/s
+ * @return ErrorCode whether or not routine was successful and why
+ */
 [[nodiscard]] auto OpticalAutocal::full_sensor_sweep(const uint8_t tool,
                                                      const xyz_pos_t start_pos,
                                                      const float feedrate) -> ErrorCode
@@ -240,6 +295,10 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     return retval;
 }
 
+/**
+ * @brief Report sensor states to serial
+ * 
+ */
 void OpticalAutocal::report_sensors() const
 {
     const bool sensor_1_check = READ(SENSOR_1);
@@ -247,6 +306,13 @@ void OpticalAutocal::report_sensors() const
     SERIAL_ECHOLNPGM("sensor 1: ", sensor_1_check, "\nsensor 2: ", sensor_2_check);
 }
 
+/**
+ * @brief Perform a series of sweeps to determine x and y offsets
+ * 
+ * @param start_pos where the routine should start to look for nozzle
+ * @param feedrate mm/s
+ * @return xy_pos_t offsets in mm towards the intersection of both beams (not final tool offset)
+ */
 [[nodiscard]] xy_pos_t OpticalAutocal::find_xy_offset(const xy_pos_t start_pos,
                                                       const float feedrate) const
 {
@@ -287,6 +353,15 @@ void OpticalAutocal::report_sensors() const
     return {x, y};
 }
 
+/**
+ * @brief Perform a series of sweeps in desired intervals to check at which Z height the nozzle is detected
+ * 
+ * @param z height to begin sweeps
+ * @param inc how much should Z change between sweeps
+ * @param condition A marker which should be set high by interrupt when nozzle is detected
+ * @param feedrate mm/s
+ * @return float last Z height before sweeo where nozzle was detected (smallest distance from nozzle for given increment)
+ */
 [[nodiscard]] float OpticalAutocal::scan_for_tip(float z,
                                                  const float inc,
                                                  bool& condition,
@@ -308,6 +383,13 @@ void OpticalAutocal::report_sensors() const
     return (z + inc) + inc; // report position before interrupt triggered
 }
 
+/**
+ * @brief Perform a scan in decreasing increments/increasing precision to find exact Z height of nozzle tip
+ * 
+ * @param z height to begin searching for nozzle
+ * @param feedrate mm/s
+ * @return float Most precise Z of nozzle tip, to be used as Z offset
+ */
 [[nodiscard]] float OpticalAutocal::find_z_offset(float z, const float feedrate) const
 {
     bool triggered = false;
