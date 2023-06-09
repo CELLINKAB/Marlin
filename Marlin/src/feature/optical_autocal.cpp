@@ -163,24 +163,6 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
 }
 
 /**
- * @brief Get offsets of the new tool needed during a tool change
- * 
- * @param tool tool/extruder/hotend index being changed to
- * @return xyz_pos_t difference in offset compared to current tool
- */
-xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
-{
-    xyz_pos_t new_offset{};
-
-    if (is_calibrated(tool)) {
-        new_offset = offsets[tool] - active_offset;
-        active_offset = offsets[tool];
-    }
-
-    return new_offset;
-}
-
-/**
  * @brief Sweep in the Y direction which should pass through both sensors in both directions
  * 
  * @param feedrate_mm_s 
@@ -193,7 +175,6 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
     LongSweepCoords retval{0.0f, 0.0f, 0.0f, 0.0f};
     const bool read_polarity = (sensor_polarity == RISING) ? HIGH : LOW;
 
-    // enable sensors
     auto isr1 = [&sensor_1_trigger_y_pos] {
         if (sensor_1_trigger_y_pos == 0.0f)
             sensor_1_trigger_y_pos = planner.get_axis_positions_mm().y;
@@ -211,7 +192,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
         // sensor 1 triggered, switch sensors
         if (sensor_1_trigger_y_pos != 0.0f) {
             while (READ(SENSOR_1) == read_polarity)
-                delay(1);
+                delay(1); // spin until clear of active sensor
             hal.isr_off();
             retval.sensor_1_forward_y = sensor_1_trigger_y_pos;
             detachInterrupt(SENSOR_1);
@@ -231,7 +212,7 @@ xyz_pos_t OpticalAutocal::tool_change_offset(const uint8_t tool)
         // sensor 2 triggered, switch sensors
         if (sensor_2_trigger_y_pos != 0.0f) {
             while (READ(SENSOR_2) == read_polarity)
-                delay(1);
+                delay(1); // spin until clear of active sensor
             hal.isr_off();
             retval.sensor_2_backward_y = sensor_2_trigger_y_pos;
             detachInterrupt(SENSOR_2);
