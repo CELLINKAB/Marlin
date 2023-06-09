@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V88"
+#define EEPROM_VERSION "V89"
 #define EEPROM_OFFSET 0
 
 // Check the integrity of data offsets.
@@ -587,13 +587,12 @@ typedef struct SettingsDataStruct {
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
-    StepperRetractingProbe::Config srp_conf;
+    int32_t srp_deploy;
+    uint32_t srp_time;
+    int16_t srp_stall;
+    uint16_t srp_current;
+    uint32_t srp_stow;
   #endif
-
-  // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-  //   double bed_temp_sensor_offsets[NUM_BED_TEMP_SENSORS];
-  //   double bed_temp_sensor_gains[NUM_BED_TEMP_SENSORS];
-  // #endif
 
   #if ENABLED(FESTO_PNEUMATICS)
     float vacuum_sensor_offset;
@@ -602,6 +601,16 @@ typedef struct SettingsDataStruct {
     float tank_pressure_gain;
     float regulator_feedback_offset;
     float regulator_feedback_gain;
+  #endif
+
+  //
+  // Nozzle Autocalibration
+  //
+  #if ENABLED(OPTICAL_AUTOCAL)
+    float nozzle_autocal_extra_offset_x;
+    float nozzle_autocal_extra_offset_y;
+    float nozzle_autocal_extra_offset_z;
+    float nozzle_autocal_x_factor;
   #endif
   
   //
@@ -622,11 +631,6 @@ typedef struct SettingsDataStruct {
     float shaping_y_frequency, // M593 Y F
           shaping_y_zeta;      // M593 Y D
   #endif
-
-  //
-  // Nozzle Autocalibration
-  //
-  TERN_(OPTICAL_AUTOCAL, xyz_pos_t nozzle_autocal_extra_offset;)
 
 } SettingsData;
 
@@ -1653,19 +1657,17 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(ui.language);
     #endif
 
-    // TERN_(STEPPER_RETRACTING_PROBE, EEPROM_WRITE(stepper_probe.get_config()));
-
-    // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-    // {  
-    //   auto & sensors = bed_sensors();
-    //   for (auto & sensor : sensors) {
-    //     double offset = sensor.getOffsetTemperature();
-    //     double gain = sensor.getGain();
-    //     EEPROM_WRITE(offset); 
-    //     EEPROM_WRITE(gain);
-    //   }
-    // }
-    // #endif
+    #if ENABLED(STEPPER_RETRACTING_PROBE) 
+    {
+      // _FIELD_TEST(srp_conf);
+      StepperRetractingProbe::Config stepper_conf = stepper_probe.get_config();
+      EEPROM_WRITE(stepper_conf.deploy_velocity);
+      EEPROM_WRITE(stepper_conf.minimum_retract_time);
+      EEPROM_WRITE(stepper_conf.stall_threshold);
+      EEPROM_WRITE(stepper_conf.stepper_current);
+      EEPROM_WRITE(stepper_conf.stow_velocity);
+    }
+    #endif
 
     // #if ENABLED(FESTO_PNEUMATICS)
     //   EEPROM_WRITE(pneumatics::gripper_vacuum.offset);
@@ -1676,7 +1678,16 @@ void MarlinSettings::postprocess() {
     //   EEPROM_WRITE(pneumatics::regulator_feedback.scalar);
     // #endif
 
-    // TERN_(OPTICAL_AUTOCAL, EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset));
+    #if ENABLED(OPTICAL_AUTOCAL)
+    {
+      // _FIELD_TEST(nozzle_autocal_extra_offset);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.x);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.y);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.z);
+      // _FIELD_TEST(nozzle_autocal_x_factor);
+      EEPROM_WRITE(OpticalAutocal::x_offset_factor);
+    }
+    #endif
 
     //
     // Model predictive control
@@ -2669,35 +2680,38 @@ void MarlinSettings::postprocess() {
       }
       #endif
 
-      // #if ENABLED(STEPPER_RETRACTING_PROBE)
-      //   {
-      //     StepperRetractingProbe::Config srp_conf;
-      //     EEPROM_READ(srp_conf);
-      //     stepper_probe.set_config(srp_conf);
-      //   }
-      // #endif
+      #if ENABLED(STEPPER_RETRACTING_PROBE)
+      {
+        // _FIELD_TEST(srp_conf);
+        StepperRetractingProbe::Config stepper_conf;
+        EEPROM_READ(stepper_conf.deploy_velocity);
+        EEPROM_READ(stepper_conf.minimum_retract_time);
+        EEPROM_READ(stepper_conf.stall_threshold);
+        EEPROM_READ(stepper_conf.stepper_current);
+        EEPROM_READ(stepper_conf.stow_velocity);
+        stepper_probe.set_config(stepper_conf);
+      }
+      #endif
 
-      // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
-      //   for (auto & sensor : bed_sensors()) {
-      //     float offset;
-      //     float gain;
-      //     EEPROM_READ(offset); 
-      //     EEPROM_READ(gain);
-      //     sensor.setOffsetTemperature(offset);
-      //     sensor.setGain(gain);
-      //   }
-      // #endif
+      #if ENABLED(FESTO_PNEUMATICS)
+        EEPROM_READ(pneumatics::gripper_vacuum.offset);
+        EEPROM_READ(pneumatics::gripper_vacuum.scalar);
+        EEPROM_READ(pneumatics::tank_pressure.offset);
+        EEPROM_READ(pneumatics::tank_pressure.scalar);
+        EEPROM_READ(pneumatics::regulator_feedback.offset);
+        EEPROM_READ(pneumatics::regulator_feedback.scalar);
+      #endif
 
-      // #if ENABLED(FESTO_PNEUMATICS)
-      //   EEPROM_READ(pneumatics::gripper_vacuum.offset);
-      //   EEPROM_READ(pneumatics::gripper_vacuum.scalar);
-      //   EEPROM_READ(pneumatics::tank_pressure.offset);
-      //   EEPROM_READ(pneumatics::tank_pressure.scalar);
-      //   EEPROM_READ(pneumatics::regulator_feedback.offset);
-      //   EEPROM_READ(pneumatics::regulator_feedback.scalar);
-      // #endif
-
-      // TERN_(OPTICAL_AUTOCAL, EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset));
+      #if ENABLED(OPTICAL_AUTOCAL)
+      {
+        // _FIELD_TEST(nozzle_autocal_extra_offset);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.x);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.y);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.z);
+        // _FIELD_TEST(nozzle_autocal_x_factor);
+        EEPROM_READ(OpticalAutocal::x_offset_factor);
+      }
+      #endif
 
       //
       // Model predictive control
