@@ -1653,7 +1653,16 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(ui.language);
     #endif
 
-    TERN_(STEPPER_RETRACTING_PROBE, EEPROM_WRITE(stepper_probe.get_config()));
+    #if ENABLED(STEPPER_RETRACTING_PROBE) 
+    {
+      StepperRetractingProbe::Config stepper_conf = stepper_probe.get_config();
+      EEPROM_WRITE(stepper_conf.deploy_velocity);
+      EEPROM_WRITE(stepper_conf.minimum_retract_time);
+      EEPROM_WRITE(stepper_conf.stall_threshold);
+      EEPROM_WRITE(stepper_conf.stepper_current);
+      EEPROM_WRITE(stepper_conf.stow_velocity);
+    }
+    #endif
 
     // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
     // {  
@@ -1676,7 +1685,14 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(pneumatics::regulator_feedback.scalar);
     #endif
 
-    TERN_(OPTICAL_AUTOCAL, EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset));
+    #if ENABLED(OPTICAL_AUTOCAL)
+    {
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.x);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.y);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.z);
+      EEPROM_WRITE(OpticalAutocal::x_offset_factor);
+    }
+    #endif
 
     //
     // Model predictive control
@@ -2670,11 +2686,15 @@ void MarlinSettings::postprocess() {
       #endif
 
       #if ENABLED(STEPPER_RETRACTING_PROBE)
-        {
-          StepperRetractingProbe::Config srp_conf;
-          EEPROM_READ(srp_conf);
-          stepper_probe.set_config(srp_conf);
-        }
+      {
+        StepperRetractingProbe::Config stepper_conf;
+        EEPROM_READ(stepper_conf.deploy_velocity);
+        EEPROM_READ(stepper_conf.minimum_retract_time);
+        EEPROM_READ(stepper_conf.stall_threshold);
+        EEPROM_READ(stepper_conf.stepper_current);
+        EEPROM_READ(stepper_conf.stow_velocity);
+        stepper_probe.set_config(stepper_conf);
+      }
       #endif
 
       // #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
@@ -2697,7 +2717,14 @@ void MarlinSettings::postprocess() {
         EEPROM_READ(pneumatics::regulator_feedback.scalar);
       #endif
 
-      TERN_(OPTICAL_AUTOCAL, EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset));
+      #if ENABLED(OPTICAL_AUTOCAL)
+      {
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.x);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.y);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.z);
+        EEPROM_READ(OpticalAutocal::x_offset_factor);
+      }
+      #endif
 
       //
       // Model predictive control
