@@ -1760,13 +1760,7 @@ void prepare_line_to_destination() {
         TERN_(HAS_QUIET_PROBING, if (final_approach) probe.set_probing_paused(true));
       }
 
-      // Disable stealthChop if used. Enable diag1 pin on driver.
-      #if ENABLED(SENSORLESS_HOMING)
-        stealth_states = start_sensorless_homing_per_axis(axis);
-        #if SENSORLESS_STALLGUARD_DELAY
-          safe_delay(SENSORLESS_STALLGUARD_DELAY); // Short delay needed to settle
-        #endif
-      #endif
+
     }
 
     #if EITHER(MORGAN_SCARA, MP_SCARA)
@@ -1789,6 +1783,14 @@ void prepare_line_to_destination() {
       // Set delta/cartesian axes directly
       target[axis] = distance;                  // The move will be towards the endstop
       planner.buffer_segment(target OPTARG(HAS_DIST_MM_ARG, cart_dist_mm), home_fr_mm_s, active_extruder);
+    #endif
+
+        // Disable stealthChop if used. Enable diag1 pin on driver.
+    #if ENABLED(SENSORLESS_HOMING)
+      #if SENSORLESS_STALLGUARD_DELAY
+        safe_delay(SENSORLESS_STALLGUARD_DELAY); // Short delay needed to settle
+      #endif
+      stealth_states = start_sensorless_homing_per_axis(axis);
     #endif
 
     planner.synchronize();

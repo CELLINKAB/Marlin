@@ -1175,7 +1175,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 320, 320, 1280, 10'666.6667}
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 80, 80, 160, 10'666.6667}
 
 /**
  * Default Max Feed Rate (linear=mm/s, rotational=°/s)
@@ -1195,7 +1195,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 900, 1500, 90, 10}
+#define DEFAULT_MAX_ACCELERATION      { 300, 300, 90, 10}
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1210,9 +1210,9 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-#define DEFAULT_ACCELERATION          300    // X, Y, Z and E acceleration for printing moves
-#define DEFAULT_RETRACT_ACCELERATION  300    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   300    // X, Y, Z acceleration for travel (non printing) moves
+#define DEFAULT_ACCELERATION          150    // X, Y, Z and E acceleration for printing moves
+#define DEFAULT_RETRACT_ACCELERATION  200    // E acceleration for retracts
+#define DEFAULT_TRAVEL_ACCELERATION   200    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk limits (mm/s)
@@ -1252,7 +1252,7 @@
  *   https://blog.kyneticcnc.com/2018/10/computing-junction-deviation-for-marlin.html
  */
 #if DISABLED(CLASSIC_JERK)
-  #define JUNCTION_DEVIATION_MM 0.013 // (mm) Distance from real junction edge
+  #define JUNCTION_DEVIATION_MM 0.0125 // (mm) Distance from real junction edge
   #define JD_HANDLE_SMALL_SEGMENTS    // Use curvature estimation instead of just the junction angle
                                       // for small segments (< 1mm) with large junction angles (> 135°).
 #endif
@@ -2115,7 +2115,7 @@
 #endif
 
 // Homing speeds (mm/min)
-#define HOMING_FEEDRATE_MM_M { (30*60), (30*60), (12*60) }
+#define HOMING_FEEDRATE_MM_M { (20*60), (15*60), (15*60) }
 
 // Validate that endstops are triggered on homing moves
 //#define VALIDATE_HOMING_ENDSTOPS

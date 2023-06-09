@@ -2715,7 +2715,7 @@
  */
 #if HAS_TRINAMIC_CONFIG || HAS_TMC26X
 
-  #define HOLD_MULTIPLIER    0.5  // Scales down the holding current from run current
+  #define HOLD_MULTIPLIER    1.0  // Scales down the holding current from run current
 
   /**
    * Interpolate microsteps to 256
@@ -2724,9 +2724,9 @@
   #define INTERPOLATE      true
 
   #if AXIS_IS_TMC(X)
-    #define X_CURRENT       800        // (mA) RMS current. Multiply by 1.414 for peak current.
-    #define X_CURRENT_HOME  200        // (mA) RMS current for sensorless homing
-    #define X_MICROSTEPS     16        // 0..256
+    #define X_CURRENT       600        // (mA) RMS current. Multiply by 1.414 for peak current.
+    #define X_CURRENT_HOME  180        // (mA) RMS current for sensorless homing
+    #define X_MICROSTEPS     4        // 0..256
     #define X_RSENSE          .15
     #define X_CHAIN_POS      -1        // -1..0: Not chained. 1: MCU MOSI connected. 2: Next in chain, ...
     //#define X_INTERPOLATE  true      // Enable to override 'INTERPOLATE' for the X axis
@@ -2744,9 +2744,9 @@
   #endif
 
   #if AXIS_IS_TMC(Y)
-    #define Y_CURRENT       800
-    #define Y_CURRENT_HOME  200
-    #define Y_MICROSTEPS     16
+    #define Y_CURRENT       600
+    #define Y_CURRENT_HOME  240
+    #define Y_MICROSTEPS     4
     #define Y_RSENSE          .15
     #define Y_CHAIN_POS      -1
     //#define Y_INTERPOLATE  true
@@ -2754,9 +2754,9 @@
   #endif
 
   #if AXIS_IS_TMC(Y2)
-    #define Y2_CURRENT      800
-    #define Y2_CURRENT_HOME 200
-    #define Y2_MICROSTEPS    16
+    #define Y2_CURRENT      600
+    #define Y2_CURRENT_HOME 240
+    #define Y2_MICROSTEPS    4
     #define Y2_RSENSE         .15
     #define Y2_CHAIN_POS     -1
     //#define Y2_INTERPOLATE true
@@ -2764,9 +2764,9 @@
   #endif
 
   #if AXIS_IS_TMC(Z)
-    #define Z_CURRENT       800
+    #define Z_CURRENT       600
     #define Z_CURRENT_HOME  200
-    #define Z_MICROSTEPS     32
+    #define Z_MICROSTEPS     4
     #define Z_RSENSE          .15
     #define Z_CHAIN_POS      -1
     //#define Z_INTERPOLATE  true
@@ -3164,12 +3164,12 @@
 
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
-    #define X_STALL_SENSITIVITY  57
+    #define X_STALL_SENSITIVITY  40
 
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  56
+    #define Y_STALL_SENSITIVITY  50
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
-    #define Z_STALL_SENSITIVITY  53
+    #define Z_STALL_SENSITIVITY  40
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
@@ -4290,6 +4290,8 @@
 // M42 - Set pin states
 //
 #define DIRECT_PIN_CONTROL
+
+#define SENSORLESS_STALLGUARD_DELAY 300
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe

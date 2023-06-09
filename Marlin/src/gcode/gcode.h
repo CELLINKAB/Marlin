@@ -610,6 +610,10 @@ private:
     static void G425();
   #endif
 
+  #if ENABLED(SENSORLESS_HOMING)
+    static void G914();
+  #endif
+
   #if ENABLED(LID_GRIPPER_STATION)
     static void G500();
     static void G501();

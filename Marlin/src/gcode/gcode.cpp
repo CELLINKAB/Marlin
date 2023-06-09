@@ -475,6 +475,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       case 92: G92(); break;                                      // G92: Set current axis position(s)
 
+      #if ENABLED(SENSORLESS_HOMING)
+        case 914: G914(); break;
+      #endif
+
       #if ENABLED(CALIBRATION_GCODE)
         case 425: G425(); break;                                  // G425: Perform calibration with calibration cube
       #endif
