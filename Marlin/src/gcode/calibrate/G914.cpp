@@ -163,7 +163,7 @@ SummaryStats analyze_sweep(AxisEnum axis)
     millis_t last_poll = 0;
     for (auto& sample : sg_samples) {
         // spin until next result needed
-        while (millis() <= last_poll + 8)
+        while (millis() <= last_poll + 10)
             idle_no_sleep();
         last_poll = millis();
         sample = poll_sg_val(axis);
@@ -198,13 +198,15 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     current_position[axis] += (feedrate * 2.0f * home_dir(axis));
     line_to_current_position(feedrate);
-    idle();
-    TERN_(SENSORLESS_STALLGUARD_DELAY, safe_delay(SENSORLESS_STALLGUARD_DELAY));
+    const millis_t move_start_time = millis();
+    while (millis() < move_start_time + 300)
+        idle();
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-moving values-");
     auto move_summary = analyze_sweep(axis);
-    safe_delay(TERN(SENSORLESS_STALLGUARD_DELAY, 1000 - SENSORLESS_STALLGUARD_DELAY, 1000));
+    while (millis() < move_start_time + 1000)
+        idle();
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-stalling values-");
     auto stall_summary = analyze_sweep(axis);
@@ -223,7 +225,7 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     return res;
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]] bool test_all)
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -241,7 +243,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
 
     static constexpr float CRITICAL_VALUE = -2.33f; // 99% confidence / p < 1%
     uint16_t cur_increment = 50;
-    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE)) {
         cur += cur_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
@@ -258,7 +260,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
     static constexpr feedRate_t MIN_FEEDRATE = 3.0f;
     feedRate_t feedrate_increment = 5.0f;
     while (feedrate < MAX_FEEDRATE && feedrate > MIN_FEEDRATE
-           && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+           && (best_sweep.z_statistic > CRITICAL_VALUE)) {
         feedrate += feedrate_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
@@ -286,6 +288,10 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
     set_axis_current(axis, move_cur);
 }
 
+/**
+ * @brief Automatically tune for best sensorless homing parameters
+ * 
+ */
 void GcodeSuite::G914()
 {
     planner.finish_and_disable();
@@ -299,23 +305,22 @@ void GcodeSuite::G914()
 
     feedRate_t feedrate = parser.feedrateval('F');
     auto cur = parser.ushortval('C');
-    bool test_all = parser.boolval('A');
 
     TERN_(IMPROVE_HOMING_RELIABILITY, auto motion_states = begin_slow_homing());
 
     if (!parser.seen_axis()) {
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
         return;
     }
 
     if (parser.seen('X'))
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
     if (parser.seen('Y'))
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
     if (parser.seen('Z'))
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
 
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(motion_states));
 }
