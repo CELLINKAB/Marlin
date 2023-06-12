@@ -55,7 +55,9 @@ uint16_t poll_sg_val(AxisEnum axis)
     case AxisEnum::X_AXIS:
         return stepperX.SG_RESULT();
     case AxisEnum::Y_AXIS:
-        TERN(Y_DUAL_ENDSTOPS, return (stepperY.SG_RESULT() + stepperY2.SG_RESULT()) / 2, return stepperY.SG_RESULT());
+        TERN(Y_DUAL_ENDSTOPS,
+             return (stepperY.SG_RESULT() + stepperY2.SG_RESULT()) / 2,
+             return stepperY.SG_RESULT());
     case AxisEnum::Z_AXIS:
         return stepperZ.SG_RESULT();
     default:
@@ -234,8 +236,13 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
         stall_summary.print();
     }
 
-    SweepResult res{move_summary.z_test(stall_summary.avg),
-                    static_cast<uint16_t>(stall_summary.avg / 2)};
+    auto ideal_sg = (stall_summary.avg > stall_summary.standard_deviation())
+                        ? (stall_summary.avg - stall_summary.standard_deviation())
+                        : stall_summary.avg;
+
+    SweepResult res{
+        move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(ideal_sg / 2)
+    };
     SERIAL_ECHOLNPGM("Z statistic of stall: ", res.z_statistic);
 
     return res;
@@ -265,10 +272,12 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_current = cur;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && cur_increment == 50 && (!test_all || cur >= move_cur)) {
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && cur_increment == 50
+                   && (!test_all || cur >= move_cur)) {
             // getting worse, try the other way
             cur_increment = -30;
-            while (cur >= move_cur) cur += cur_increment;
+            while (cur >= move_cur)
+                cur += cur_increment;
         }
     }
     cur = optimal_current;
@@ -283,10 +292,11 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_feedrate = feedrate;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f)
-                   && feedrate_increment == 5.0f && (!test_all || feedrate >= MAX_FEEDRATE)) { // getting worse, change direction
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && feedrate_increment == 5.0f
+                   && (!test_all || feedrate >= MAX_FEEDRATE)) { // getting worse, change direction
             feedrate_increment = -2.0f;
-            while (feedrate >= MAX_FEEDRATE) feedrate += feedrate_increment;
+            while (feedrate >= MAX_FEEDRATE)
+                feedrate += feedrate_increment;
         }
     }
     feedrate = optimal_feedrate;
