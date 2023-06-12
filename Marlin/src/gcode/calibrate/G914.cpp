@@ -126,7 +126,13 @@ void do_backoff(AxisEnum axis, float distance)
     set_axis_current(axis, stored_current);
 }
 
-bool test_axis(AxisEnum axis, feedRate_t feedrate)
+enum class SanityTestResult {
+    Ok,
+    FalsePositive,
+    NoTrigger,
+};
+
+SanityTestResult test_axis(AxisEnum axis, feedRate_t feedrate)
 {
     constexpr static float TEST_BACKOFF_DISTANCE = 10.0f;
 
@@ -146,11 +152,19 @@ bool test_axis(AxisEnum axis, feedRate_t feedrate)
     end_sensorless_homing_per_axis(axis, states);
 
     if (!endstops.trigger_state())
-        return false;
+        return SanityTestResult::NoTrigger;
 
     endstops.hit_on_purpose();
-    SERIAL_ECHOLNPGM("axis test position error: ", planner.triggered_position_mm(axis) - start_pos);
-    return true;
+
+    constexpr static ERROR_MARGIN = 0.1f; // mm
+    auto position_error = planner.triggered_position_mm(axis) - start_pos;
+    if (DEBUGGING(INFO))
+        SERIAL_ECHOLNPGM("axis test position error: ",
+                         planner.triggered_position_mm(axis) - start_pos);
+    if (position_error > 0.1f) {
+        return SanityTestResult::FalsePositive;
+    } else
+        return SanityTestResult::Ok;
 }
 
 SummaryStats analyze_sweep(AxisEnum axis)
@@ -249,9 +263,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_current = cur;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f) && cur_increment == 50) {
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && cur_increment == 50) {
             // getting worse, try the other way
-            cur_increment = -50;
+            cur_increment = -20;
         }
     }
     cur = optimal_current;
@@ -266,26 +280,36 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_feedrate = feedrate;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f)
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f)
                    && feedrate_increment == 5.0f) { // getting worse, change direction
-            feedrate_increment = -2.5f;
+            feedrate_increment = -2.0f;
         }
     }
     feedrate = optimal_feedrate;
 
-    set_axis_sg_thresh(axis, best_sweep.sg_thresh);
+    while (size_t retries = 0; ++retries < 5) {
+        set_axis_sg_thresh(axis, best_sweep.sg_thresh);
+        auto test_result = test_axis(axis, feedrate);
+        switch (test_result) {
+        case SanityTestResult::Ok:
+            SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
+                             optimal_current,
+                             "\nHOMING_FEEDRATE ",
+                             optimal_feedrate,
+                             "\nSTALLGUARD_THRESHOLD ",
+                             best_sweep.sg_thresh);
 
-    if (test_axis(axis, feedrate))
-        SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
-                         optimal_current,
-                         "\nHOMING_FEEDRATE ",
-                         optimal_feedrate,
-                         "\nSTALLGUARD_THRESHOLD ",
-                         best_sweep.sg_thresh);
-    else
-        SERIAL_ECHOLN("Failed to tune axis");
-
-    set_axis_current(axis, move_cur);
+            set_axis_current(axis, move_cur);
+            return;
+        case SanityTestResult::FalsePositive:
+            best_sweep.sg_thresh -= 3;
+            break;
+        case SanityTestResult::NoTrigger:
+            best_sweep.sg_thresh += 2;
+            break;
+        }
+    }
+    SERIAL_ECHOLN("No optimal stallguard settings found. :(");
 }
 
 /**
