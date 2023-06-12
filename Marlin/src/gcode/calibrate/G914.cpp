@@ -157,7 +157,7 @@ SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
     endstops.hit_on_purpose();
 
     constexpr static float ERROR_MARGIN = 0.1f; // mm
-    auto position_error = planner.triggered_position_mm(axis) - start_pos;
+    auto position_error = (planner.triggered_position_mm(axis) - start_pos) * -home_dir(axis);
     if (DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("axis test position error: ",
                          planner.triggered_position_mm(axis) - start_pos);
@@ -221,7 +221,7 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-moving values-");
     auto move_summary = analyze_sweep(axis);
-    while (millis() <= move_start_time + 1000)
+    while (millis() <= move_start_time + 1200)
         idle();
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-stalling values-");
