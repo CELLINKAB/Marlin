@@ -55,7 +55,9 @@ uint16_t poll_sg_val(AxisEnum axis)
     case AxisEnum::X_AXIS:
         return stepperX.SG_RESULT();
     case AxisEnum::Y_AXIS:
-        return stepperY.SG_RESULT();
+        TERN(Y_DUAL_ENDSTOPS,
+             return (stepperY.SG_RESULT() + stepperY2.SG_RESULT()) / 2,
+             return stepperY.SG_RESULT());
     case AxisEnum::Z_AXIS:
         return stepperZ.SG_RESULT();
     default:
@@ -126,7 +128,13 @@ void do_backoff(AxisEnum axis, float distance)
     set_axis_current(axis, stored_current);
 }
 
-bool test_axis(AxisEnum axis, feedRate_t feedrate)
+enum class SanityTestResult {
+    Ok,
+    FalsePositive,
+    NoTrigger,
+};
+
+SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
 {
     constexpr static float TEST_BACKOFF_DISTANCE = 10.0f;
 
@@ -146,26 +154,36 @@ bool test_axis(AxisEnum axis, feedRate_t feedrate)
     end_sensorless_homing_per_axis(axis, states);
 
     if (!endstops.trigger_state())
-        return false;
+        return SanityTestResult::NoTrigger;
 
     endstops.hit_on_purpose();
-    SERIAL_ECHOLNPGM("axis test position error: ", planner.triggered_position_mm(axis) - start_pos);
-    return true;
+
+    constexpr static float ERROR_MARGIN = 0.1f; // mm
+    auto position_error = (planner.triggered_position_mm(axis) - start_pos) * -home_dir(axis);
+    if (DEBUGGING(INFO))
+        SERIAL_ECHOLNPGM("axis test position error: ",
+                         planner.triggered_position_mm(axis) - start_pos);
+    if (position_error > ERROR_MARGIN) {
+        current_position[axis] += position_error * home_dir(axis);
+        do_blocking_move_to(current_position, feedrate);
+        return SanityTestResult::FalsePositive;
+    } else
+        return SanityTestResult::Ok;
 }
 
 SummaryStats analyze_sweep(AxisEnum axis)
 {
-    static constexpr size_t MAX_SAMPLES = 32;
+    static constexpr size_t MAX_SAMPLES = 40;
     std::array<uint16_t, MAX_SAMPLES> sg_samples;
 
     uint32_t sum = 0;
 
-    millis_t last_poll = 0;
+    millis_t next_poll = 0;
     for (auto& sample : sg_samples) {
         // spin until next result needed
-        while (millis() <= last_poll + 8)
+        while (millis() <= next_poll)
             idle_no_sleep();
-        last_poll = millis();
+        next_poll = millis() + 10;
         sample = poll_sg_val(axis);
         sum += sample;
         if (DEBUGGING(LEVELING))
@@ -198,13 +216,15 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     current_position[axis] += (feedrate * 2.0f * home_dir(axis));
     line_to_current_position(feedrate);
-    idle();
-    TERN_(SENSORLESS_STALLGUARD_DELAY, safe_delay(SENSORLESS_STALLGUARD_DELAY));
+    const millis_t move_start_time = millis();
+    while (millis() <= move_start_time + 300)
+        idle();
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-moving values-");
     auto move_summary = analyze_sweep(axis);
-    safe_delay(TERN(SENSORLESS_STALLGUARD_DELAY, 1000 - SENSORLESS_STALLGUARD_DELAY, 1000));
+    while (millis() <= move_start_time + 1200)
+        idle();
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-stalling values-");
     auto stall_summary = analyze_sweep(axis);
@@ -216,14 +236,19 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
         stall_summary.print();
     }
 
-    SweepResult res{move_summary.z_test(stall_summary.avg),
-                    static_cast<uint16_t>(stall_summary.avg / 2)};
+    auto ideal_sg = (stall_summary.avg > stall_summary.standard_deviation())
+                        ? (stall_summary.avg - stall_summary.standard_deviation())
+                        : stall_summary.avg;
+
+    SweepResult res{
+        move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(ideal_sg / 2)
+    };
     SERIAL_ECHOLNPGM("Z statistic of stall: ", res.z_statistic);
 
     return res;
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]] bool test_all)
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -239,7 +264,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
     uint16_t optimal_current = cur;
     feedRate_t optimal_feedrate = feedrate;
 
-    static constexpr float CRITICAL_VALUE = -2.33f; // 99% confidence / p < 1%
+    static constexpr float CRITICAL_VALUE = -6.0f; // 1/100000 expected error rate
     uint16_t cur_increment = 50;
     while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
         cur += cur_increment;
@@ -247,9 +272,12 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_current = cur;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f) && cur_increment == 50) {
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && cur_increment == 50
+                   && (!test_all || cur >= move_cur)) {
             // getting worse, try the other way
-            cur_increment = -50;
+            cur_increment = -30;
+            while (cur >= move_cur)
+                cur += cur_increment;
         }
     }
     cur = optimal_current;
@@ -264,28 +292,45 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, [[maybe_unused]
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_feedrate = feedrate;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 0.6f)
-                   && feedrate_increment == 5.0f) { // getting worse, change direction
-            feedrate_increment = -2.5f;
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && feedrate_increment == 5.0f
+                   && (!test_all || feedrate >= MAX_FEEDRATE)) { // getting worse, change direction
+            feedrate_increment = -2.0f;
+            while (feedrate >= MAX_FEEDRATE)
+                feedrate += feedrate_increment;
         }
     }
     feedrate = optimal_feedrate;
 
-    set_axis_sg_thresh(axis, best_sweep.sg_thresh);
+    size_t retries = 0;
+    while (retries++ < 5 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
+        set_axis_sg_thresh(axis, best_sweep.sg_thresh);
+        auto test_result = test_hit(axis, feedrate);
+        switch (test_result) {
+        case SanityTestResult::Ok:
+            SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
+                             optimal_current,
+                             "\nHOMING_FEEDRATE ",
+                             optimal_feedrate,
+                             "\nSTALLGUARD_THRESHOLD ",
+                             best_sweep.sg_thresh);
 
-    if (test_axis(axis, feedrate))
-        SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
-                         optimal_current,
-                         "\nHOMING_FEEDRATE ",
-                         optimal_feedrate,
-                         "\nSTALLGUARD_THRESHOLD ",
-                         best_sweep.sg_thresh);
-    else
-        SERIAL_ECHOLN("Failed to tune axis");
-
-    set_axis_current(axis, move_cur);
+            set_axis_current(axis, move_cur);
+            return;
+        case SanityTestResult::FalsePositive:
+            best_sweep.sg_thresh -= 5;
+            break;
+        case SanityTestResult::NoTrigger:
+            best_sweep.sg_thresh += 2;
+            break;
+        }
+    }
+    SERIAL_ECHOLN("No optimal stallguard settings found. :(");
 }
 
+/**
+ * @brief Automatically tune for best sensorless homing parameters
+ * 
+ */
 void GcodeSuite::G914()
 {
     planner.finish_and_disable();
