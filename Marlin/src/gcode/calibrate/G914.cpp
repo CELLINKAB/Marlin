@@ -171,7 +171,7 @@ SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
 
 SummaryStats analyze_sweep(AxisEnum axis)
 {
-    static constexpr size_t MAX_SAMPLES = 32;
+    static constexpr size_t MAX_SAMPLES = 40;
     std::array<uint16_t, MAX_SAMPLES> sg_samples;
 
     uint32_t sum = 0;
