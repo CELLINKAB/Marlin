@@ -160,12 +160,12 @@ SummaryStats analyze_sweep(AxisEnum axis)
 
     uint32_t sum = 0;
 
-    millis_t last_poll = 0;
+    millis_t next_poll = 0;
     for (auto& sample : sg_samples) {
         // spin until next result needed
-        while (millis() <= last_poll + 10)
+        while (millis() <= next_poll)
             idle_no_sleep();
-        last_poll = millis();
+        next_poll = millis() + 10;
         sample = poll_sg_val(axis);
         sum += sample;
         if (DEBUGGING(LEVELING))
@@ -199,13 +199,13 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     current_position[axis] += (feedrate * 2.0f * home_dir(axis));
     line_to_current_position(feedrate);
     const millis_t move_start_time = millis();
-    while (millis() < move_start_time + 300)
+    while (millis() <= move_start_time + 300)
         idle();
 
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-moving values-");
     auto move_summary = analyze_sweep(axis);
-    while (millis() < move_start_time + 1000)
+    while (millis() <= move_start_time + 1000)
         idle();
     if (DEBUGGING(LEVELING))
         SERIAL_ECHOLN("-stalling values-");
