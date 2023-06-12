@@ -132,7 +132,7 @@ enum class SanityTestResult {
     NoTrigger,
 };
 
-SanityTestResult test_axis(AxisEnum axis, feedRate_t feedrate)
+SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
 {
     constexpr static float TEST_BACKOFF_DISTANCE = 10.0f;
 
@@ -290,7 +290,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
     size_t retries = 0;
     while (retries++ < 5 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
         set_axis_sg_thresh(axis, best_sweep.sg_thresh);
-        auto test_result = test_axis(axis, feedrate);
+        auto test_result = test_hit(axis, feedrate);
         switch (test_result) {
         case SanityTestResult::Ok:
             SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
