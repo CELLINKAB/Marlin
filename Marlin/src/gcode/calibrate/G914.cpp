@@ -225,7 +225,7 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     return res;
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -243,7 +243,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
 
     static constexpr float CRITICAL_VALUE = -3.5f; // 99.9% confidence / p < 0.1%
     uint16_t cur_increment = 50;
-    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE)) {
+    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
         cur += cur_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
@@ -260,7 +260,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
     static constexpr feedRate_t MIN_FEEDRATE = 3.0f;
     feedRate_t feedrate_increment = 5.0f;
     while (feedrate < MAX_FEEDRATE && feedrate > MIN_FEEDRATE
-           && (best_sweep.z_statistic > CRITICAL_VALUE)) {
+           && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
         feedrate += feedrate_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
@@ -305,22 +305,23 @@ void GcodeSuite::G914()
 
     feedRate_t feedrate = parser.feedrateval('F');
     auto cur = parser.ushortval('C');
+    bool test_all = parser.boolval('A');
 
     TERN_(IMPROVE_HOMING_RELIABILITY, auto motion_states = begin_slow_homing());
 
     if (!parser.seen_axis()) {
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
         return;
     }
 
     if (parser.seen('X'))
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
     if (parser.seen('Y'))
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
     if (parser.seen('Z'))
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
 
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(motion_states));
 }
