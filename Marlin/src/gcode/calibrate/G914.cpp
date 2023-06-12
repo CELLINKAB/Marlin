@@ -164,7 +164,7 @@ SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
         SERIAL_ECHOLNPGM("axis test position error: ",
                          planner.triggered_position_mm(axis) - start_pos);
     if (position_error > ERROR_MARGIN) {
-        current_position[axis] -= position_error;
+        current_position[axis] += position_error * home_dir(axis);
         do_blocking_move_to(current_position, feedrate);
         return SanityTestResult::FalsePositive;
     } else
