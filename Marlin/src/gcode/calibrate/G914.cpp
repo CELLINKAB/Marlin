@@ -55,7 +55,7 @@ uint16_t poll_sg_val(AxisEnum axis)
     case AxisEnum::X_AXIS:
         return stepperX.SG_RESULT();
     case AxisEnum::Y_AXIS:
-        return stepperY.SG_RESULT();
+        TERN(Y_DUAL_ENDSTOPS, return (stepperY.SG_RESULT() + stepperY2.SG_RESULT()) / 2, return stepperY.SG_RESULT());
     case AxisEnum::Z_AXIS:
         return stepperZ.SG_RESULT();
     default:
@@ -162,7 +162,8 @@ SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
         SERIAL_ECHOLNPGM("axis test position error: ",
                          planner.triggered_position_mm(axis) - start_pos);
     if (position_error > ERROR_MARGIN) {
-        do_blocking_move_to(start_pos);
+        current_position[axis] -= position_error;
+        do_blocking_move_to(current_position, feedrate);
         return SanityTestResult::FalsePositive;
     } else
         return SanityTestResult::Ok;
