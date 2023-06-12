@@ -156,12 +156,12 @@ SanityTestResult test_axis(AxisEnum axis, feedRate_t feedrate)
 
     endstops.hit_on_purpose();
 
-    constexpr static ERROR_MARGIN = 0.1f; // mm
+    constexpr static float ERROR_MARGIN = 0.1f; // mm
     auto position_error = planner.triggered_position_mm(axis) - start_pos;
     if (DEBUGGING(INFO))
         SERIAL_ECHOLNPGM("axis test position error: ",
                          planner.triggered_position_mm(axis) - start_pos);
-    if (position_error > 0.1f) {
+    if (position_error > ERROR_MARGIN) {
         return SanityTestResult::FalsePositive;
     } else
         return SanityTestResult::Ok;
@@ -287,7 +287,8 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
     }
     feedrate = optimal_feedrate;
 
-    while (size_t retries = 0; ++retries < 5) {
+    size_t retries = 0;
+    while (retries++ < 5 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
         set_axis_sg_thresh(axis, best_sweep.sg_thresh);
         auto test_result = test_axis(axis, feedrate);
         switch (test_result) {
@@ -302,7 +303,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
             set_axis_current(axis, move_cur);
             return;
         case SanityTestResult::FalsePositive:
-            best_sweep.sg_thresh -= 3;
+            best_sweep.sg_thresh -= 5;
             break;
         case SanityTestResult::NoTrigger:
             best_sweep.sg_thresh += 2;
