@@ -2745,7 +2745,7 @@
 
   #if AXIS_IS_TMC(Y)
     #define Y_CURRENT       600
-    #define Y_CURRENT_HOME  90
+    #define Y_CURRENT_HOME  490
     #define Y_MICROSTEPS     4
     #define Y_RSENSE          .15
     #define Y_CHAIN_POS      -1
@@ -2755,7 +2755,7 @@
 
   #if AXIS_IS_TMC(Y2)
     #define Y2_CURRENT      600
-    #define Y2_CURRENT_HOME 90
+    #define Y2_CURRENT_HOME 490
     #define Y2_MICROSTEPS    4
     #define Y2_RSENSE         .15
     #define Y2_CHAIN_POS     -1
@@ -2765,7 +2765,7 @@
 
   #if AXIS_IS_TMC(Z)
     #define Z_CURRENT       600
-    #define Z_CURRENT_HOME  100
+    #define Z_CURRENT_HOME  500
     #define Z_MICROSTEPS     4
     #define Z_RSENSE          .15
     #define Z_CHAIN_POS      -1
@@ -3164,12 +3164,12 @@
 
   #if EITHER(SENSORLESS_HOMING, SENSORLESS_PROBING)
     // TMC2209: 0...255. TMC2130: -64...63
-    #define X_STALL_SENSITIVITY  35
+    #define X_STALL_SENSITIVITY  45
 
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  60
+    #define Y_STALL_SENSITIVITY  50
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
-    #define Z_STALL_SENSITIVITY  60
+    #define Z_STALL_SENSITIVITY  50
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
