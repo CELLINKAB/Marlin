@@ -257,7 +257,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
     uint16_t optimal_current = cur;
     feedRate_t optimal_feedrate = feedrate;
 
-    static constexpr float CRITICAL_VALUE = -3.5f; // 99.9% confidence / p < 0.1%
+    static constexpr float CRITICAL_VALUE = -6.0f; // 1/100000 expected error rate
     uint16_t cur_increment = 50;
     while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
         cur += cur_increment;
