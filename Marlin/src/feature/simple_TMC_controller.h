@@ -48,8 +48,9 @@ template<pin_t EN, pin_t STOP, pin_t STEP = -1, pin_t DIR = -1, pin_t INDEX = -1
 struct SimpleTMC
 {
     SimpleTMC(SimpleTMCConfig config_, Stream* serial)
-        : config(config_)
-        , driver(serial, config_.rsense, config_.hw_address)
+        : driver(serial, config_.rsense, config_.hw_address)
+        , config(config_)
+
     {
         driver.begin();
         init_driver();
@@ -123,7 +124,8 @@ struct SimpleTMC
     void stop()
     {
         driver.VACTUAL(0);
-        if (!hold) WRITE(EN, HIGH);
+        if (!hold)
+            WRITE(EN, HIGH);
     }
 
     /**
@@ -185,9 +187,11 @@ struct SimpleTMC
 
     inline void stall_threshold(int16_t threshold) { driver.homing_threshold(threshold); }
 
-    inline void set_hold(bool hold_) {hold = hold_;}
+    inline void set_hold(bool hold_) { hold = hold_; }
 
     inline void reinit_driver() { init_driver(); }
+
+    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>& get_driver() { return driver; }
 
 private:
     SimpleTMCConfig config;
@@ -205,14 +209,13 @@ private:
         if constexpr (DIR > -1)
             SET_OUTPUT(DIR);
 
-
         TMC2208_n::GCONF_t gconf{};
         gconf.pdn_disable = true;      // Use UART
         gconf.mstep_reg_select = true; // Select microsteps with UART
         gconf.i_scale_analog = false;  // will be set digitally
         gconf.en_spreadcycle = false;  // use stealthcop
         if constexpr (INDEX != 0)
-            gconf.index_step = true; // index will output generated step pulses
+            gconf.index_step = true;   // index will output generated step pulses
         driver.GCONF(gconf.sr);
         driver.stored.stealthChop_enabled = true;
 
@@ -233,7 +236,7 @@ private:
         tmc_enable_stallguard(driver);
 
         driver.GSTAT(0b111); // Clear
-        safe_delay(200);          // ensures serial transfers finish
+        safe_delay(200);     // ensures serial transfers finish
 
         uint32_t status = driver.DRV_STATUS();
         if (status == 0xFFFF'FFFF)
