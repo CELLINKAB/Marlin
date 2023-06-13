@@ -57,9 +57,8 @@ struct SimpleTMC
     }
 
     SimpleTMC(SimpleTMCConfig config_, pin_t rx_pin, pin_t tx_pin)
-        : driver(rx_pin, tx_pin, config_.rsense, config_.hw_address)
-        , config(config_)
-
+        : config(config_)
+        , driver(rx_pin, tx_pin, config_.rsense, config_.hw_address)
     {
         driver.begin();
         driver.beginSerial(19200);
@@ -192,10 +191,11 @@ struct SimpleTMC
 
     inline void reinit_driver() { init_driver(); }
 
-    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver;
+    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM>& get_driver() { return driver; }
 
 private:
     SimpleTMCConfig config;
+    TMCMarlin<TMC2209Stepper, 'N', '0', AxisEnum::NO_AXIS_ENUM> driver;
     bool hold = false;
 
     void init_driver()

@@ -88,8 +88,9 @@ void GcodeSuite::M805()
         auto st = Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
                        PC_SERIAL_RX_PIN,
                        PC_SERIAL_TX_PIN);
-        st.driver.microsteps(PC_MICROSTEPS);
-        st.driver.ihold(31); // hold current == run current for maximum torque
+        auto driver = st.get_driver();
+        driver.microsteps(PC_MICROSTEPS);
+        driver.ihold(31); // hold current == run current for maximum torque
         return st;
     }();
     const uint8_t intensity = parser.byteval('I');
