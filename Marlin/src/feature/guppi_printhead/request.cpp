@@ -127,9 +127,11 @@ void Controller::update()
         break;
 
     case UpdateState::TEMPERATURE: {
-        const auto temp_res = get_temperature(index, false);
+        const auto temp_res = debug_get_temperature(index, false);
         if (temp_res.result == Result::OK) {
-            state.raw_temperature = temp_res.packet.payload;
+            // TODO: change back when get_temp is fixed on printhead
+            state.raw_temperature = (temp_res.packet.payload[0] / 2)
+                                    + (temp_res.packet.payload[1] / 2) + 30'000;
             next_update_state(update_state);
         } else
             retry();
@@ -450,4 +452,10 @@ Result Controller::disable_heating(Index index)
 {
     Packet packet(index, Command::DISABLE_TEMP_CONTROL);
     return send(packet, bus);
+}
+
+Response<DebugTemTemps> Controller::debug_get_temperature(Index index, bool debug)
+{
+    Packet packet(index, Command::DEBUG_GET_TEMPERATURE);
+    return send_and_receive<DebugTemTemps>(packet, bus, debug);
 }
