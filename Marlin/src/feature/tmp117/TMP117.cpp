@@ -108,7 +108,7 @@ void TMP117<Bus>::setAlertMode(TMP117_PMODE mode)
         reg_value &= ~(1UL << 2); // set pin as alert flag
         reg_value &= ~(1UL << 3); // alert pin low active
     } else if (mode == TMP117_PMODE::DATA) {
-        reg_value |= 1UL << 2; // set pin as data ready flag
+        reg_value |= 1UL << 2;    // set pin as data ready flag
     }
     writeConfig(reg_value);
 }
@@ -424,8 +424,8 @@ uint16_t TMP117<Bus>::i2cRead2B(uint8_t reg)
     static constexpr uint8_t EXPECTED_RETURN_SIZE = 2;
     static constexpr uint8_t SEND_STOP = 1;
 
-            // ping device with empty transmission to see if it's active first
-            bus.beginTransmission(address);
+    // ping device with empty transmission to see if it's active first
+    bus.beginTransmission(address);
     if (bus.endTransmission(SEND_STOP) != I2C_OK)
         return TEMP_READ_ERR_VAL;
 

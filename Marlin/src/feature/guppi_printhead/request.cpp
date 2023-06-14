@@ -445,3 +445,9 @@ Response<EncoderStates> Controller::debug_get_encoders(bool debug)
     Packet packet(Index::One, Command::DEBUG_GET_ENCODERS);
     return send_and_receive<EncoderStates>(packet, bus, debug);
 }
+
+Result Controller::disable_heating(Index index)
+{
+    Packet packet(index, Command::DISABLE_TEMP_CONTROL);
+    return send(packet, bus);
+}

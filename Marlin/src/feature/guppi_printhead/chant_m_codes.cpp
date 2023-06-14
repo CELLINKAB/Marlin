@@ -235,6 +235,7 @@ void GcodeSuite::M771()
     const int16_t temperature = parser.celsiusval('C');
     ph_controller.set_temperature(index, temperature);
 }
+
 //GetAllPrintheadsTemps
 void GcodeSuite::M772() {}
 //SetPrintheadPressure
@@ -364,7 +365,10 @@ void GcodeSuite::M816() {}
 //MovePHsVertically
 void GcodeSuite::M817() {}
 //ReadDoorStatus
-void GcodeSuite::M818() {}
+void GcodeSuite::M818()
+{
+    SERIAL_ECHOLN("DO:", READ(DOOR_PIN), ",INTERLOCK_24V:", READ(FREEZE_PIN));
+}
 //SetBedCoolingFans
 void GcodeSuite::M819()
 {
@@ -392,7 +396,10 @@ void GcodeSuite::M848()
     M42();
 }
 //GetSystemTime
-void GcodeSuite::M849() {}
+void GcodeSuite::M849()
+{
+    SERIAL_ECHOLN("uptime:", millis());
+}
 //GetToolMachineOffset
 void GcodeSuite::M855() {}
 //ProbeSurface
@@ -402,7 +409,18 @@ void GcodeSuite::M857() {}
 //GetIsAutoBedLevelingPointsSet
 void GcodeSuite::M858() {}
 //PrintToolOffset
-void GcodeSuite::M860() {}
+void GcodeSuite::M860()
+{
+    for (uint32_t tool = 0; tool < EXTRUDERS; ++tool)
+        SERIAL_ECHOLN("TOOL:",
+                      tool,
+                      ",X:",
+                      hotend_offset[tool].x,
+                      ",Y:",
+                      hotend_offset[tool].y,
+                      ",Z:",
+                      hotend_offset[tool].z);
+}
 //SetDropSegments
 // void GcodeSuite::M900() {} CONFLICT - linear advance
 //DigitalTrimpotControl
@@ -412,7 +430,13 @@ void GcodeSuite::M910() {}
 //GetPHHWConnectionStatus
 void GcodeSuite::M1001() {}
 //DbgTrig
-void GcodeSuite::M1002() {}
+void GcodeSuite::M1002()
+{
+    if (parser.seenval('S'))
+        WRITE(CHANT_IRQ1_PIN, parser.value_bool());
+    else
+        SERIAL_ECHOLN("TRIG_PIN:", READ(CHANT_IRQ1_PIN));
+}
 //ControlPHActuateStatus
 void GcodeSuite::M1004() {}
 //GetPHMountedStatus
@@ -433,9 +457,15 @@ void GcodeSuite::M1012() {}
 // //PrintCurrentToolOffset
 // void GcodeSuite::M1017() {}
 //DbgPhCom
-void GcodeSuite::M1018() {}
+void GcodeSuite::M1018()
+{
+    M1069();
+}
 //ReadExternalGPIOs
-void GcodeSuite::M1020() {}
+void GcodeSuite::M1020()
+{
+    const SERIAL_ECHOLN("PINNAME:", digitalPinToPinName())
+}
 //GetAllPHTempStatus
 void GcodeSuite::M1023() {}
 //ActivateToolDBG
@@ -605,7 +635,17 @@ void GcodeSuite::M2039()
     ph_controller.get_extruder_microsteps(index);
 }
 //GetPHStatusByte
-void GcodeSuite::M2040() {}
+void GcodeSuite::M2040()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_status(index);
+    if (res.result == printhead::Result::OK) {
+        SERIAL_ECHO("STATUS:");
+        print_bin(static_cast<uint16_t>(res.packet.payload));
+        SERIAL_EOL();
+    } else
+        SERIAL_ECHOLN("ERROR:", printhead::string_from_result_code(res.result));
+}
 //SetPHEndStopThreshold
 void GcodeSuite::M2041()
 {
@@ -647,7 +687,11 @@ void GcodeSuite::M2051() {}
 //HeaterSelfTest
 void GcodeSuite::M2052() {}
 //TurnOffHeater
-void GcodeSuite::M2053() {}
+void GcodeSuite::M2053()
+{
+    BIND_INDEX_OR_RETURN(index);
+    ph_controller.disable_heating(index);
+}
 //GetTempControlCurrent
 void GcodeSuite::M2054() {}
 //GetPHInternalTemp
@@ -759,6 +803,7 @@ void GcodeSuite::M2200()
 size_t printhead::printhead_rx_err_counter = 0;
 size_t printhead::printhead_tx_err_counter = 0;
 
+// get printhead communication error counters
 void GcodeSuite::M2201()
 {
     SERIAL_ECHOLNPGM("PRINTHEAD_TX_ERRORS:",
