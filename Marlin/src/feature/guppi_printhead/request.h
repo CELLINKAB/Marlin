@@ -533,6 +533,7 @@ public:
     Result set_step_volume(Index index, uint32_t picoliters);
     Response<uint32_t> get_step_volume(Index index);
     Response<EncoderStates> debug_get_encoders(bool debug = true);
+    Result disable_heating(Index index);
 };
 
 } // namespace printhead
