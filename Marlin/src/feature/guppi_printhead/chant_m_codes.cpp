@@ -413,13 +413,13 @@ void GcodeSuite::M860()
 {
     for (uint32_t tool = 0; tool < EXTRUDERS; ++tool)
         SERIAL_ECHOLNPGM("TOOL:",
-                      tool,
-                      ",X:",
-                      hotend_offset[tool].x,
-                      ",Y:",
-                      hotend_offset[tool].y,
-                      ",Z:",
-                      hotend_offset[tool].z);
+                         tool,
+                         ",X:",
+                         hotend_offset[tool].x,
+                         ",Y:",
+                         hotend_offset[tool].y,
+                         ",Z:",
+                         hotend_offset[tool].z);
 }
 //SetDropSegments
 // void GcodeSuite::M900() {} CONFLICT - linear advance
@@ -467,10 +467,20 @@ void GcodeSuite::M1018()
 void GcodeSuite::M1020()
 {
     const uint32_t pin = parser.ulongval('P');
-    SERIAL_ECHOLNPGM("PINNAME:", digitalPinToPinName(pin), ",STATE:",READ(pin));
+    SERIAL_ECHOLNPGM("PINNAME:", digitalPinToPinName(pin), ",STATE:", READ(pin));
 }
 //GetAllPHTempStatus
-void GcodeSuite::M1023() {}
+void GcodeSuite::M1023()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.debug_get_temperature(index);
+    if (res.result == printhead::Result::OK) {
+        float temp1 = static_cast<float>(res.packet.payload[0]) / 100.0f;
+        float temp2 = static_cast<float>(res.packet.payload[1]) / 100.0f;
+        SERIAL_ECHOLNPGM("TOOL:", static_cast<uint16_t>(index), ",TEMP_1:", temp1, ",TEMP_2:", temp2);
+    } else
+        SERIAL_ECHOLN("ERROR");
+}
 //ActivateToolDBG
 void GcodeSuite::M1024() {}
 //BedTempDebug

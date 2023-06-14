@@ -412,6 +412,7 @@ static constexpr size_t CS_FANS = 2;
 static constexpr size_t CS_TEMS = 2;
 static constexpr size_t CS_ENCODERS = 6;
 static constexpr size_t FW_VERSION_LEN = 12;
+static constexpr size_t DEBUG_TEM_TEMPS = 4;
 } // namespace constants
 
 namespace {
@@ -419,6 +420,7 @@ using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
 using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
 using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
 using FirmwareVersion = std::array<char, constants::FW_VERSION_LEN>;
+using DebugTemTemps = std::array<int16_t, constants::DEBUG_TEM_TEMPS>;
 } // namespace
 
 enum class EncoderIndex {
@@ -534,6 +536,7 @@ public:
     Response<uint32_t> get_step_volume(Index index);
     Response<EncoderStates> debug_get_encoders(bool debug = true);
     Result disable_heating(Index index);
+    Response<DebugTemTemps> debug_get_temperature(Index index, bool debug = true);
 };
 
 } // namespace printhead
