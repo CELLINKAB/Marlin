@@ -86,8 +86,9 @@ def process_gitversion():
     if os.path.isfile('GitVersion.json'):
         with open('GitVersion.json', encoding='utf-8-sig') as gitversionjson_file:
             gitversionjson = gitversionjson_file.read()
+            return json.loads(gitversionjson)
     else:
-            gitversionjson = {
+            return {
     "Major":2,
     "Minor":1,
     "Patch":0,
@@ -117,7 +118,7 @@ def process_gitversion():
     "CommitDate":"0000-00-00"
     }
             
-    return json.loads(gitversionjson)
+    
 
 
 def generate_gitversion(gv):
