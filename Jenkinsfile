@@ -51,7 +51,7 @@ pipeline {
                         steps {
                             sh '''
                                 git clean -Xdf
-
+                                git update-ref 
                                 git status
                                 echo "Do Build for ${BOARD}"
                                 python3 -m platformio run --environment  ${BOARD}  -a "--build_tag=${ART_NAME_NOSLASH}"
