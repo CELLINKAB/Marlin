@@ -1,5 +1,6 @@
 #!/bin/bash
-platformio run --environment MYCORRHIZA_V1_1  -a "--build_tag=local"
+export BUILD_TAG=exo_deploy
+platformio run --environment MYCORRHIZA_V1_1 
 EXO_HOST=exo.local 
 ping $EXO_HOST -c 1
 pinged=$?
