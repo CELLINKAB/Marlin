@@ -367,7 +367,7 @@ void GcodeSuite::M817() {}
 //ReadDoorStatus
 void GcodeSuite::M818()
 {
-    SERIAL_ECHOLN("DO:", READ(DOOR_PIN), ",INTERLOCK_24V:", READ(FREEZE_PIN));
+    SERIAL_ECHOLNPGM("DO:", READ(DOOR_PIN), ",INTERLOCK_24V:", READ(FREEZE_PIN));
 }
 //SetBedCoolingFans
 void GcodeSuite::M819()
@@ -398,7 +398,7 @@ void GcodeSuite::M848()
 //GetSystemTime
 void GcodeSuite::M849()
 {
-    SERIAL_ECHOLN("uptime:", millis());
+    SERIAL_ECHOLNPGM("uptime:", millis());
 }
 //GetToolMachineOffset
 void GcodeSuite::M855() {}
@@ -412,7 +412,7 @@ void GcodeSuite::M858() {}
 void GcodeSuite::M860()
 {
     for (uint32_t tool = 0; tool < EXTRUDERS; ++tool)
-        SERIAL_ECHOLN("TOOL:",
+        SERIAL_ECHOLNPGM("TOOL:",
                       tool,
                       ",X:",
                       hotend_offset[tool].x,
@@ -432,10 +432,12 @@ void GcodeSuite::M1001() {}
 //DbgTrig
 void GcodeSuite::M1002()
 {
+#    if PIN_EXISTS(CHANT_IRQ1)
     if (parser.seenval('S'))
         WRITE(CHANT_IRQ1_PIN, parser.value_bool());
     else
-        SERIAL_ECHOLN("TRIG_PIN:", READ(CHANT_IRQ1_PIN));
+        SERIAL_ECHOLNPGM("TRIG_PIN:", READ(CHANT_IRQ1_PIN));
+#    endif
 }
 //ControlPHActuateStatus
 void GcodeSuite::M1004() {}
@@ -464,7 +466,8 @@ void GcodeSuite::M1018()
 //ReadExternalGPIOs
 void GcodeSuite::M1020()
 {
-    const SERIAL_ECHOLN("PINNAME:", digitalPinToPinName())
+    const uint32_t pin = parser.ulongval('P');
+    SERIAL_ECHOLNPGM("PINNAME:", digitalPinToPinName(pin), ",STATE:",READ(pin));
 }
 //GetAllPHTempStatus
 void GcodeSuite::M1023() {}
@@ -641,10 +644,10 @@ void GcodeSuite::M2040()
     auto res = ph_controller.get_status(index);
     if (res.result == printhead::Result::OK) {
         SERIAL_ECHO("STATUS:");
-        print_bin(static_cast<uint16_t>(res.packet.payload));
+        print_bin(res.packet.payload.to_raw());
         SERIAL_EOL();
     } else
-        SERIAL_ECHOLN("ERROR:", printhead::string_from_result_code(res.result));
+        SERIAL_ECHOLNPGM("ERROR:", printhead::string_from_result_code(res.result));
 }
 //SetPHEndStopThreshold
 void GcodeSuite::M2041()
