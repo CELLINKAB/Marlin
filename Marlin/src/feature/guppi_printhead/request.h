@@ -32,7 +32,7 @@ enum class Result {
     BUSY,
     PACKET_TOO_SHORT,
     BAD_PAYLOAD_SIZE,
-    UNIMPLEMENTED,
+    ERROR_RESPONSE,
     WRITE_ERROR,
     EXTRA_ZEROES,
     INVALID_HEADER,
@@ -51,8 +51,8 @@ constexpr const char* string_from_result_code(Result result)
         return "PACKET_TOO_SHORT";
     case Result::BUSY:
         return "BUSY";
-    case Result::UNIMPLEMENTED:
-        return "UNIMPLEMENTED";
+    case Result::ERROR_RESPONSE:
+        return "ERROR_RESPONSE";
     case Result::WRITE_ERROR:
         return "WRITE_ERROR";
     case Result::EXTRA_ZEROES:
@@ -60,7 +60,7 @@ constexpr const char* string_from_result_code(Result result)
     case Result::INVALID_HEADER:
         return "INVALID_HEADER";
     }
-    __unreachable();
+    return "???";
 }
 
 enum class ErrorPayload : u_int8_t {
@@ -88,6 +88,81 @@ enum class ErrorPayload : u_int8_t {
     PARAM_STORE,
     PARAM_LOAD,
 };
+
+constexpr auto string_from_error_payload(ErrorPayload payload)
+{
+    switch (payload) {
+    case ErrorPayload::OK:
+        return "OK";
+
+    case ErrorPayload::INVALID_CRC:
+        return "INVALID_CRC";
+
+    case ErrorPayload::INVALID_CMD:
+        return "INVALID_CMD";
+
+    case ErrorPayload::WDOG_RESET:
+        return "WDOG_RESET";
+
+    case ErrorPayload::MAX_TEMP:
+        return "MAX_TEMP";
+
+    case ErrorPayload::MIN_TEMP:
+        return "MIN_TEMP";
+
+    case ErrorPayload::ADDRESS_SETUP:
+        return "ADDRESS_SETUP";
+
+    case ErrorPayload::CHIP_SELECT:
+        return "CHIP_SELECT";
+
+    case ErrorPayload::MICRO_STEP:
+        return "MICRO_STEP";
+
+    case ErrorPayload::MOTOR_DIR:
+        return "MOTOR_DIR";
+
+    case ErrorPayload::HEATER_TIMEOUT:
+        return "HEATER_TIMEOUT";
+
+    case ErrorPayload::HEATER_SENSOR_ERROR:
+        return "HEATER_SENSOR_ERROR";
+
+    case ErrorPayload::HEATER_OVERTEMP:
+        return "HEATER_OVERTEMP";
+
+    case ErrorPayload::ENDSTOP_TOP_HIT:
+        return "ENDSTOP_TOP_HIT";
+
+    case ErrorPayload::ENDSTOP_BOTTOM_HIT:
+        return "ENDSTOP_BOTTOM_HIT";
+
+    case ErrorPayload::MOTOR_TIMEOUT:
+        return "MOTOR_TIMEOUT";
+
+    case ErrorPayload::HEATER_BROKEN:
+        return "HEATER_BROKEN";
+
+    case ErrorPayload::PHYSICS:
+        return "PHYSICS";
+
+    case ErrorPayload::HEATER_DISCONNECTED:
+        return "HEATER_DISCONNECTED";
+
+    case ErrorPayload::INVALID_PARAM:
+        return "INVALID_PARAM";
+
+    case ErrorPayload::VALVE_BROKEN:
+        return "VALVE_BROKEN";
+
+    case ErrorPayload::PARAM_STORE:
+        return "PARAM_STORE";
+
+    case ErrorPayload::PARAM_LOAD:
+        return "PARAM_LOAD";
+    }
+    return "???";
+}
 
 struct Status
 {
@@ -300,12 +375,13 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     if (incoming.command == Command::ERROR) {
         //const uint8_t e = static_cast<uint8_t>(serial.read());
         if (DEBUGGING(ERRORS)) {
-            SERIAL_ECHO("RECD_CHANT_ERROR: ");
-            SERIAL_PRINTLN(packet_buffer[packet_index], PrintBase::Dec);
+            SERIAL_ECHOLNPGM("RECD_CHANT_ERROR: ",
+                             string_from_error_payload(
+                                 static_cast<ErrorPayload>(packet_buffer[packet_index])));
         }
         flush_rx(serial);
         ++printhead_rx_err_counter;
-        return err(Result::UNIMPLEMENTED);
+        return err(Result::ERROR_RESPONSE);
     }
 
     if (static_cast<size_t>(incoming.payload_size + EMPTY_PACKET_SIZE) > (EXPECTED_PACKET_SIZE + 2)
@@ -413,6 +489,7 @@ static constexpr size_t CS_TEMS = 2;
 static constexpr size_t CS_ENCODERS = 6;
 static constexpr size_t FW_VERSION_LEN = 12;
 static constexpr size_t DEBUG_TEM_TEMPS = 4;
+
 } // namespace constants
 
 namespace {
@@ -421,6 +498,7 @@ using TemTemps = std::array<uint16_t, constants::CS_TEMS>;
 using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
 using FirmwareVersion = std::array<char, constants::FW_VERSION_LEN>;
 using DebugTemTemps = std::array<int16_t, constants::DEBUG_TEM_TEMPS>;
+
 } // namespace
 
 enum class EncoderIndex {
