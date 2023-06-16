@@ -240,15 +240,13 @@ SweepResult test_sweep(AxisEnum axis, uint16_t cur, feedRate_t feedrate)
                         ? (stall_summary.avg - stall_summary.standard_deviation())
                         : stall_summary.avg;
 
-    SweepResult res{
-        move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(ideal_sg / 2)
-    };
+    SweepResult res{move_summary.z_test(stall_summary.avg), static_cast<uint16_t>(ideal_sg / 2)};
     SERIAL_ECHOLNPGM("Z statistic of stall: ", res.z_statistic);
 
     return res;
 }
 
-void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
+void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, bool dry_run)
 {
     if (feedrate == 0)
         feedrate = homing_feedrate(axis);
@@ -301,6 +299,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
     }
     feedrate = optimal_feedrate;
 
+    if (dry_run)
+        return;
+
     size_t retries = 0;
     while (retries++ < 5 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
         set_axis_sg_thresh(axis, best_sweep.sg_thresh);
@@ -324,6 +325,7 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all)
             break;
         }
     }
+    homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
     SERIAL_ECHOLN("No optimal stallguard settings found. :(");
 }
 
@@ -345,22 +347,22 @@ void GcodeSuite::G914()
     feedRate_t feedrate = parser.feedrateval('F');
     auto cur = parser.ushortval('C');
     bool test_all = parser.boolval('A');
+    bool dry_run = parser.boolval('D');
 
     TERN_(IMPROVE_HOMING_RELIABILITY, auto motion_states = begin_slow_homing());
 
     if (!parser.seen_axis()) {
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
+        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all, dry_run);
+        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all, dry_run);
+        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all, dry_run);
         return;
     }
 
-    if (parser.seen('X'))
-        tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all);
-    if (parser.seen('Y'))
-        tune_axis(AxisEnum::Y_AXIS, cur, feedrate, test_all);
-    if (parser.seen('Z'))
-        tune_axis(AxisEnum::Z_AXIS, cur, feedrate, test_all);
+    LOOP_NUM_AXES(i)
+    {
+        if (parser.seen(AXIS_CHAR(i)))
+            tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all, dry_run);
+    }
 
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(motion_states));
 }
