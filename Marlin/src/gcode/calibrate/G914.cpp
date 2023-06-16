@@ -115,6 +115,21 @@ void set_axis_sg_thresh(AxisEnum axis, uint16_t thresh)
     }
 }
 
+constexpr void set_homing_current(AxisEnum axis, uint16_t cur) {
+    switch (axis) {
+        case AxisEnum::X_AXIS:
+            X_homing_current = cur;
+            break;
+        case AxisEnum::Y_AXIS:
+            Y_homing_current = cur;
+            Y2_homing_current = cur;
+            break;
+        case AxisEnum::Z_AXIS:
+            Z_homing_current = cur;
+            break;
+    }
+}
+
 void do_backoff(AxisEnum axis, float distance)
 {
     planner.synchronize();
@@ -325,7 +340,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
             break;
         }
     }
+
     homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
+    set_homing_current(axis, optimal_current);
     SERIAL_ECHOLN("No optimal stallguard settings found. :(");
 }
 
