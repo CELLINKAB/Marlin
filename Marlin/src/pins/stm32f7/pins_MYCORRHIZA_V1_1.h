@@ -140,6 +140,8 @@
 
 #define FAN_PIN PE13 // PB
 #define FAN1_PIN PC7 // CC
+#define FAN_MIN_PWM 255
+
 
 #define E0_FAN_TACHO_PIN PE12 // PB
 #define E1_FAN_TACHO_PIN PA8 // CC 1
