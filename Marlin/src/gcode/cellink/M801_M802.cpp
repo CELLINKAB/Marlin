@@ -57,7 +57,9 @@ double get_tmp117_bed_temp()
     }
     retry_count = 0;
     const double avg = total_temps / (bed_sensors().size() - failed_reads);
-    return avg;
+    bed_kalman_filter.predict();
+    bed_kalman_filter.update(avg, 0.01);
+    return bed_kalman_filter.surface_temp();
 }
 
 void report_bed_sensors() {
