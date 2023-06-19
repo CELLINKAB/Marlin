@@ -127,6 +127,8 @@ constexpr void set_homing_current(AxisEnum axis, uint16_t cur) {
         case AxisEnum::Z_AXIS:
             Z_homing_current = cur;
             break;
+        default:
+            break;
     }
 }
 
