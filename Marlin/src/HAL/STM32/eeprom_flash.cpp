@@ -238,7 +238,9 @@ bool PersistentStore::access_finish()
         if (flash_config.WRPState != WRPSTATE_DISABLE) {
             DEBUG_ECHOLNPGM("WP state: ", flash_config.WRPState, ", WP sector: ", flash_config.WRPSector);
             flash_config.WRPState = WRPSTATE_DISABLE;
-            HAL_FLASHEx_OBProgram(&flash_config);
+            HAL_StatusTypeDef status = HAL_FLASHEx_OBProgram(&flash_config);
+            if (status != HAL_StatusTypeDef::HAL_OK)
+                SERIAL_ECHOLNPGM("FLASH_ERR:",status);
         }
 #            endif
 
