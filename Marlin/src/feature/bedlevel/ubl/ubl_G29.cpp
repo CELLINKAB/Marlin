@@ -1451,7 +1451,7 @@ void unified_bed_leveling::smart_fill_mesh() {
 
 #if HAS_BED_PROBE
 
-  //#define VALIDATE_MESH_TILT
+  #define VALIDATE_MESH_TILT
 
   #include "../../../libs/vector_3.h"
 
@@ -1468,7 +1468,9 @@ void unified_bed_leveling::smart_fill_mesh() {
     bool abort_flag = false;
 
     #ifdef VALIDATE_MESH_TILT
-      float z1, z2, z3;  // Needed for algorithm validation below
+      float z1{};
+      float z2{}; 
+      float z3{};  // Needed for algorithm validation below
     #endif
 
     struct linear_fit_data lsf_results;
@@ -1668,11 +1670,14 @@ void unified_bed_leveling::smart_fill_mesh() {
        * numbers for those locations should be 0.
        */
       #ifdef VALIDATE_MESH_TILT
+      xy_pos_t safe_homing_xy{Z_SAFE_HOMING_X_POINT,Z_SAFE_HOMING_Y_POINT};
+      xy_pos_t probe_pt[3];
+      Probe::get_three_points(probe_pt);
         auto d_from = []{ DEBUG_ECHOPGM("D from "); };
         auto normed = [&](const xy_pos_t &pos, const_float_t zadd) {
           return normal.x * pos.x + normal.y * pos.y + zadd;
         };
-        auto debug_pt = [](FSTR_P const pre, const xy_pos_t &pos, const_float_t zadd) {
+        auto debug_pt = [=](FSTR_P const pre, const xy_pos_t &pos, const_float_t zadd) {
           d_from(); SERIAL_ECHOF(pre);
           DEBUG_ECHO_F(normed(pos, zadd), 6);
           DEBUG_ECHOLNPAIR_F("   Z error = ", zadd - get_z_correction(pos), 6);

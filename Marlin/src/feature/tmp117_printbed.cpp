@@ -52,7 +52,6 @@ double get_tmp117_bed_temp()
         bed_kalman_filter.update(avg, 0.01);
     }
     return bed_kalman_filter.surface_temp();
-    return last_temp;
 }
 
 BedKalmanFilter::BedKalmanFilter(double initialSurfaceTemp, double initialOffsetTemp)
