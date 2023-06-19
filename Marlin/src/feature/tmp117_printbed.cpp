@@ -1,6 +1,7 @@
 
-#include "../inc/MarlinConfig.h"
 #include "tmp117_printbed.h"
+
+#include "../inc/MarlinConfig.h"
 
 BedKalmanFilter bed_kalman_filter(25, 0);
 
@@ -12,7 +13,7 @@ BedSensors& bed_sensors()
         static uint8_t rx_buf[4]{};
         pb_i2c.setTxBuffer(tx_buf, 4);
         pb_i2c.setRxBuffer(rx_buf, 4);
-        pb_i2c.setClock(10'000);
+        pb_i2c.setClock(20'000);
         pb_i2c.begin();
         TMP117<SoftWire> sensor_1(TMPAddr::GND, pb_i2c);
         sensor_1.init(nullptr);
@@ -31,6 +32,7 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     size_t failed_reads = 0;
+    static double last_temp;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
         if (!isnan(temperature))
@@ -40,10 +42,10 @@ double get_tmp117_bed_temp()
     }
     static unsigned retry_count = 0;
     if (failed_reads >= bed_sensors().size()) {
-        if (retry_count < 3) {
+        if (retry_count < 3 && last_temp != 0.0) {
             // i2c_hardware_reset(pb_i2c);
             ++retry_count;
-            return get_tmp117_bed_temp();
+            return last_temp;
         } else {
             return -300.0;
         }
@@ -52,7 +54,8 @@ double get_tmp117_bed_temp()
     const double avg = total_temps / (bed_sensors().size() - failed_reads);
     bed_kalman_filter.predict();
     bed_kalman_filter.update(avg, 0.01);
-    return bed_kalman_filter.surface_temp();
+    last_temp = bed_kalman_filter.surface_temp();
+    return last_temp;
 }
 
 BedKalmanFilter::BedKalmanFilter(double initialSurfaceTemp, double initialOffsetTemp)
@@ -86,25 +89,27 @@ void BedKalmanFilter::predict()
 
 void BedKalmanFilter::update(double measValue, double measVariance)
 {
-    Eigen::Matrix<double, 1, 1> z {measValue};
-    Eigen::Matrix<double, 1, 1>  z_var {measVariance};
-    Eigen::Matrix<double, 1, NUM_BED_STATE_VARS>  H;
+    Eigen::Matrix<double, 1, 1> z{measValue};
+    Eigen::Matrix<double, 1, 1> z_var{measVariance};
+    Eigen::Matrix<double, 1, NUM_BED_STATE_VARS> H;
     H.setZero();
     H(0, indexST) = 1;
     H(0, indexOT) = 1;
 
     const auto y = z - (H * m_mean);
-    const auto  S = (H * m_cov * H.transpose()) + z_var;
-    const auto  K = m_cov * H.transpose() * S.inverse();
+    const auto S = (H * m_cov * H.transpose()) + z_var;
+    const auto K = m_cov * H.transpose() * S.inverse();
 
     const auto newX = m_mean + K * y;
-    const auto newP = (Eigen::Matrix<double, NUM_BED_STATE_VARS, NUM_BED_STATE_VARS>::Identity() - K * H) * m_cov;
+    const auto newP = (Eigen::Matrix<double, NUM_BED_STATE_VARS, NUM_BED_STATE_VARS>::Identity()
+                       - K * H)
+                      * m_cov;
 
     m_cov = newP;
     m_mean = newX;
 }
 
-Eigen::Matrix<double, NUM_BED_STATE_VARS, NUM_BED_STATE_VARS>  BedKalmanFilter::cov() const
+Eigen::Matrix<double, NUM_BED_STATE_VARS, NUM_BED_STATE_VARS> BedKalmanFilter::cov() const
 {
     return m_cov;
 }
