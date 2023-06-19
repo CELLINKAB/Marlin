@@ -233,6 +233,11 @@ inline float home_bump_mm(const AxisEnum axis) {
 void report_real_position();
 void report_current_position();
 void report_current_position_projected();
+#if ENABLED(Z_AXIS_CALIBRATION)
+  float get_homing_position();
+  void set_homing_calibration(const bool input_calib);
+  void crash_kill_stop();
+#endif
 
 #if ENABLED(AUTO_REPORT_POSITION)
   #include "../libs/autoreport.h"

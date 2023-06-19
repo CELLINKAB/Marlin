@@ -51,6 +51,15 @@ void GcodeSuite::M7110()
     {
         wScale.setScale(parser.value_float());
     }
+    // Scale direction parameter
+    if (parser.seenval('D'))
+    {
+        const int8_t dir = parser.value_byte();
+        if ((dir == 1) || (dir == -1)) // supported values are -1 and 1.
+        {
+            wScale.setScaleDir(dir);
+        }
+    }
 }
 
 /**
@@ -111,7 +120,8 @@ void GcodeSuite::M7110_report(const bool forReplay/*=true*/) {
   SERIAL_ECHOLNPGM_P(
     PSTR("  M7110 P"), wScale.getThreshold(),
     PSTR("  C"), wScale.getChannel(),
-    PSTR("  S"), wScale.getScale()
+    PSTR("  S"), wScale.getScale(),
+    PSTR("  D"), wScale.getScaleDir()
     );
 }
 #endif

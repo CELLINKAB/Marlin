@@ -47,6 +47,10 @@
   #include "../feature/joystick.h"
 #endif
 
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #include "../feature/hx_711.h"
+#endif
+
 #if HAS_BED_PROBE
   #include "probe.h"
 #endif
@@ -1059,6 +1063,9 @@ void Endstops::update() {
         #endif
       }
     }
+    #if ENABLED(Z_AXIS_CALIBRATION)
+      wScale.set_z_min_status(TEST32(live_state, Z_MIN));
+    #endif
   #endif
 
   #if HAS_I_AXIS

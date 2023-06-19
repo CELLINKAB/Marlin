@@ -563,6 +563,7 @@ typedef struct SettingsDataStruct {
     float wscale_scale;                                 // Slope/scale parameter
     float wscale_th_weigth;                             // Threshold
     uint8_t wscale_channel;                             // ADC channel/gain
+    int8_t wscale_scaledir;                             // Direction of the force
   #endif
 
 } SettingsData;
@@ -1577,14 +1578,17 @@ void MarlinSettings::postprocess() {
       _FIELD_TEST(wscale_scale);
       float wsc_scale, wsc_threshold;
       uint8_t wsc_channel;
+      int8_t wsc_scaledir;
       // read settings
       wsc_scale = wScale.getScale();
       wsc_threshold = wScale.getThreshold();
       wsc_channel = wScale.getChannel();
+      wsc_scaledir = wScale.getScaleDir();
       // write settings
       EEPROM_WRITE(wsc_scale);
       EEPROM_WRITE(wsc_threshold);
       EEPROM_WRITE(wsc_channel);
+      EEPROM_WRITE(wsc_scaledir);
     #endif
 
 
@@ -2546,14 +2550,17 @@ void MarlinSettings::postprocess() {
         _FIELD_TEST(wscale_scale);
         float wscale_scale,wscale_th_weight;
         uint8_t wscale_cahnnel;
+        int8_t wscale_scaledir;
         EEPROM_READ(wscale_scale);
         EEPROM_READ(wscale_th_weight);
         EEPROM_READ(wscale_cahnnel);
+        EEPROM_READ(wscale_scaledir);
         if(!validating && !isnan(wscale_scale))
           {
             wScale.setScale(wscale_scale);
             wScale.setThreshold(wscale_th_weight);
             wScale.setChannel(wscale_cahnnel);
+            wScale.setScaleDir(wscale_scaledir);
           }
       #endif
 
@@ -3264,6 +3271,7 @@ void MarlinSettings::reset() {
     wScale.setScale(HX711_DEFAULT_SCALE);
     wScale.setThreshold(HX711_ENDSTOP_THRESHOLD);
     wScale.setChannel(HX711_DEFAULT_CHANNEL);
+    wScale.setScaleDir(HX711_DEFAULT_SCALE_DIR);
   #endif
 
   postprocess();
