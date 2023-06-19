@@ -32,7 +32,6 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     size_t failed_reads = 0;
-    static double last_temp;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
         if (!isnan(temperature))
@@ -40,21 +39,19 @@ double get_tmp117_bed_temp()
         else
             ++failed_reads;
     }
+    bed_kalman_filter.predict();
     static unsigned retry_count = 0;
     if (failed_reads >= bed_sensors().size()) {
-        if (retry_count < 3 && last_temp != 0.0) {
-            // i2c_hardware_reset(pb_i2c);
-            ++retry_count;
-            return last_temp;
-        } else {
-            return -300.0;
+        ++retry_count;
+        if (retry_count >= 5) {
+            return -300.0; // it's been bad for too long, can no longer rely on kalman predictions
         }
+    } else {
+        retry_count = 0;
+        const double avg = total_temps / (bed_sensors().size() - failed_reads);
+        bed_kalman_filter.update(avg, 0.01);
     }
-    retry_count = 0;
-    const double avg = total_temps / (bed_sensors().size() - failed_reads);
-    bed_kalman_filter.predict();
-    bed_kalman_filter.update(avg, 0.01);
-    last_temp = bed_kalman_filter.surface_temp();
+    return bed_kalman_filter.surface_temp();
     return last_temp;
 }
 
