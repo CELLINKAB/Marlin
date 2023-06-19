@@ -94,7 +94,7 @@ void GcodeSuite::M805()
         driver.ihold(31); // hold current == run current for maximum torque
         return st;
     }();
-    // const uint8_t intensity = parser.byteval('I');
+    const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
     const millis_t duration = (SEC_TO_MS(parser.ulongval('S')) + parser.ushortval('P'));
 
@@ -112,9 +112,9 @@ void GcodeSuite::M805()
     else
         move_rainbow(stepper, led);
     WRITE(led.pin, HIGH);
-    // analogWrite(PC_PWM_PIN, intensity);
+    analogWrite(PC_PWM_PIN, intensity);
     safe_delay(duration);
-    // analogWrite(PC_PWM_PIN, 0);
+    analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
     stepper.set_hold(false);
     stepper.stop();
