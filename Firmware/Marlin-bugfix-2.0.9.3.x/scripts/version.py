@@ -82,10 +82,43 @@ def generate_marlin(semver,majorminiopatch):
 """.format(semver,majorminiopatch)
 
 def process_gitversion():
-    system("gitversion /output file /nofetch   /config  GitVersion.yml /nocache")
-    with open('GitVersion.json', encoding='utf-8-sig') as gitversionjson_file:
-        gitversionjson = gitversionjson_file.read()
-    return json.loads(gitversionjson)
+    system("IGNORE_NORMALISATION_GIT_HEAD_MOVE=1 gitversion /output file /nofetch   /config  GitVersion.yml /nocache")
+    if os.path.isfile('GitVersion.json'):
+        with open('GitVersion.json', encoding='utf-8-sig') as gitversionjson_file:
+            gitversionjson = gitversionjson_file.read()
+            return json.loads(gitversionjson)
+    else:
+            return {
+    "Major":2,
+    "Minor":1,
+    "Patch":0,
+    "PreReleaseTag":"nogitversion",
+    "PreReleaseTagWithDash":"nogitversion",
+    "PreReleaseLabel":"nogitversion",
+    "PreReleaseNumber":0,
+    "WeightedPreReleaseNumber":0,
+    "BuildMetaData":0,
+    "BuildMetaDataPadded":0,
+    "FullBuildMetaData":"0",
+    "MajorMinorPatch":"0.0.0",
+    "SemVer":"0.0.0-nogitversion.1",
+    "LegacySemVer":"0.0.0-nogitversion1",
+    "LegacySemVerPadded":"0.0.0-nogitversion.0001",
+    "AssemblySemVer":"0.0.0.0",
+    "AssemblySemFileVer":"0.0.0.0",
+    "FullSemVer":"0.0.0-nogitversion.1+0",
+    "InformationalVersion":"nogitversion",
+    "BranchName":"nogitversion",
+    "EscapedBranchName":"nogitversion",
+    "Sha":"nogitversion",
+    "ShortSha":"000000",
+    "VersionSourceSha":"000000000000000000000000000000",
+    "CommitsSinceVersionSource":0,
+    "CommitsSinceVersionSourcePadded":0,
+    "CommitDate":"0000-00-00"
+    }
+            
+    
 
 
 def generate_gitversion(gv):
@@ -105,15 +138,29 @@ def generate_gitversion(gv):
 #define VER_CURRENT_COMMIT "{}" 
                 """.format(gv["CommitDate"], gv["FullBuildMetaData"], gv["SemVer"],gv["Major"],gv["Minor"],gv["Patch"],gitdescribe, gitbranch, gitcommit)
 
+
+def generate_gitversionempty(gv):
+           return """
+    #define VER_COMMIT_DATE "Notset"
+    #define VER_FULL_BUILD_META_DATA "Notset" 
+    #define VER_SEM_VER "Notset" 
+    #define VER_MAJOR 0
+    #define VER_MINOR 0
+    #define VER_PATCH 0
+    #define VER_BUILD_VERSION 0 
+    #define VER_BRANCH 0
+    #define VER_CURRENT_COMMIT 0
+                    """
+
 def generate_env():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
-    if globals().get('USER'):
-        user = os.environ["USER"]
+    if os.getenv('USER'):
+        user = os.getenv('USER')
     else:
         user = 'nouser'
         
-    if globals().get('BUILD_TAG'):
-        buildtag = os.environ["BUILD_TAG"]
+    if os.getenv('BUILD_TAG'):
+        buildtag = os.getenv('BUILD_TAG')
     else:
         buildtag = "local"
 
