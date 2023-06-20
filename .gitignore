@@ -30,3 +30,5 @@
 *.exe
 *.out
 *.app
+Firmware/Marlin-bugfix-2.0.9.3.x/Marlin/Version.h
+Firmware/Marlin-bugfix-2.0.9.3.x/version.json
