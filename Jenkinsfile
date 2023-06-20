@@ -62,6 +62,8 @@ pipeline {
                             cp  ./Firmware/Marlin-bugfix-2.0.9.3.x/.pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
                                                     '''
                         archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
+                        archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/GitVersion.json'
+                        archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/version.json'
 
                         sh '''
                             cd ./Firmware/Marlin-bugfix-2.0.9.3.x/
@@ -71,12 +73,6 @@ pipeline {
                     }
                 }
             }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/GitVersion.json'
-            archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/version.json'
         }
     }
 }
