@@ -952,7 +952,7 @@
  * Override with M92
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 100, 100, 400, 100 } //Changed Z steps_per_unit to 800 for 16th microstepping for 4mm pitch leadscrew. - BEJ Feb_27_23
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 100, 100, 800, 100 } //Changed Z steps_per_unit to 800 for 16th microstepping for 4mm pitch leadscrew. - BEJ Feb_27_23
 
 /**
  * Default Max Feed Rate (mm/s)
@@ -1390,6 +1390,30 @@
 //#define NO_MOTION_BEFORE_HOMING // Inhibit movement until all axes have been homed. Also enable HOME_AFTER_DEACTIVATE for extra safety.
 //#define HOME_AFTER_DEACTIVATE   // Require rehoming after steppers are deactivated. Also enable NO_MOTION_BEFORE_HOMING for extra safety.
 
+// Foton Homing calibration option
+#define Z_AXIS_CALIBRATION
+
+/**
+ * When the Z axis calibration option is selected, the G28 command is altered with
+ * additional coeficient C (example G28 Z C), that gives the functionality to calibrate
+ * z axis travel. This command should be called after homing to Z-MAX in order to calibrate
+ * z travel down to Z-MIN having a Strain Gauge as a Z-MIN trigger.
+ * 
+ * The procedure is using the two parameters from below to determine where to expect a 0 level:
+ * Z_MAX_POS_CALIB   - is giving the expected position of the 0 level detection, and
+ * Z_HOME_BOUNDARIES - is giving the tolerated boundaries from the Z_MAX_POS_CALIB in both 
+ *                     directions (above/before and below/after).
+ * 
+ * So taking the example (Z_MAX_POS_CALIB=117; Z_HOME_BOUNDARIES=10) the 0 level is expected at
+ * 107 (+10mm) from the Z-MAX all the way down to 127mm (-10mm) from the Z-MAX.
+ * This functionality overall gives the operation range(maximum z-travel) as:
+ *    Z_MAX_POS = Z_MAX_POS_CALIB - Z_HOME_BOUNDARIES
+ */
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #define Z_MAX_POS_CALIB 117
+  #define Z_HOME_BOUNDARIES 10
+#endif
+
 /**
  * Set Z_IDLE_HEIGHT if the Z-Axis moves on its own when steppers are disabled.
  *  - Use a low value (i.e., Z_MIN_POS) if the nozzle falls down to the bed.
@@ -1406,7 +1430,7 @@
 // :[-1,1]
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
+#define Z_HOME_DIR 1
 //#define I_HOME_DIR -1
 //#define J_HOME_DIR -1
 //#define K_HOME_DIR -1
@@ -1423,13 +1447,18 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 270
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #define Z_MAX_POS (Z_MAX_POS_CALIB - Z_HOME_BOUNDARIES)
+#else
+  #define Z_MAX_POS 117
+#endif
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
 //#define J_MAX_POS 50
 //#define K_MIN_POS 0
 //#define K_MAX_POS 50
+
 
 /**
  * Software Endstops
