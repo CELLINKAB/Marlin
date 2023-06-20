@@ -589,7 +589,7 @@ void GcodeSuite::M2030()
 {
     BIND_INDEX_OR_RETURN(index);
     const float feedrate_ul_s = parser.floatval('F');
-    const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_ul_s * 1000);
+    const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_ul_s * 1'000'000);
     if (feedrate_ul_s == 0.0f)
         return;
     // TODO: maybe need to convert from uL/s to mm/m
