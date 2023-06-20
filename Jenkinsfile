@@ -72,11 +72,11 @@ pipeline {
                 }
             }
         }
-        post {
-            always {
-                archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/GitVersion.json'
-                archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/version.json'
-            }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/GitVersion.json'
+            archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/version.json'
         }
     }
 }
