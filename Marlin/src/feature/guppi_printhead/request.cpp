@@ -127,11 +127,10 @@ void Controller::update()
         break;
 
     case UpdateState::TEMPERATURE: {
-        const auto temp_res = debug_get_temperature(index, false);
+        const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK) {
             // TODO: change back when get_temp is fixed on printhead
-            state.raw_temperature = (temp_res.packet.payload[0] / 2)
-                                    + (temp_res.packet.payload[1] / 2) + 30'000;
+            state.raw_temperature = temp_res.packet.payload + 30'000;
             next_update_state(update_state);
         } else
             retry();
@@ -221,7 +220,7 @@ Result Controller::set_temperature(Index index, celsius_t temperature)
 
 Response<uint16_t> Controller::get_temperature(Index index, bool debug)
 {
-    Packet request(static_cast<Index>(index), Command::GET_MEASURED_TEMP);
+    Packet request(index, Command::GET_MEASURED_TEMP);
     return send_and_receive<uint16_t>(request, bus, debug);
 }
 
