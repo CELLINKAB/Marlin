@@ -130,7 +130,7 @@ void Controller::update()
         const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK) {
             // TODO: change back when get_temp is fixed on printhead
-            state.raw_temperature = temp_res.packet.payload + 30'000;
+            state.raw_temperature = temp_res.packet.payload;
             next_update_state(update_state);
         } else
             retry();
