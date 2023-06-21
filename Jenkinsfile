@@ -39,7 +39,7 @@ pipeline {
                 axes {
                     axis {
                         name 'BOARD'
-                        values 'STM32H743Vx_btt'
+                        values 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
                 }
                 stages {
