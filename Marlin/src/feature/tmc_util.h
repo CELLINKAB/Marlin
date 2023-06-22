@@ -41,6 +41,15 @@
   #define MONITOR_DRIVER_STATUS_INTERVAL_MS 500U
 #endif
 
+#define HAS_CURRENT_HOME(N) (defined(N##_CURRENT_HOME) && N##_CURRENT_HOME != N##_CURRENT)
+
+extern uint16_t X_homing_current;
+extern uint16_t Y_homing_current;
+extern uint16_t Z_homing_current;
+extern uint16_t X2_homing_current;
+extern uint16_t Y2_homing_current;
+extern uint16_t Z2_homing_current;
+
 constexpr uint16_t _tmc_thrs(const uint16_t msteps, const uint32_t thrs, const uint32_t spmm) {
   return 12650000UL * msteps / (256 * thrs * spmm);
 }

@@ -1505,6 +1505,8 @@ void prepare_line_to_destination() {
     return homing_feedrate(axis) / float(hbd);
   }
 
+  xyz_feedrate_t homing_feedrate_mm_m = HOMING_FEEDRATE_MM_M;
+
   #if ENABLED(SENSORLESS_HOMING)
     /**
      * Set sensorless homing if the axis has it, accounting for Core Kinematics.

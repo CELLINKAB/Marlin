@@ -65,8 +65,9 @@ inline void move_degs(Stepper& stepper, float degs)
 void home_rainbow(Stepper& stepper)
 {
     stepper.raw_move(-PC_VELOCITY);
-    while (READ(PC_STOP_PIN) == LOW)
-        safe_delay(0);
+    millis_t timeout = millis() + 1000;
+    while (READ(PC_STOP_PIN) == LOW && millis() < timeout)
+        idle();
     stepper.stop();
 }
 
