@@ -252,7 +252,17 @@ void GcodeSuite::M777()
     ph_controller.set_pid(index, p, i, d);
 }
 //GetPrintHdHeaterPIDparams
-void GcodeSuite::M778() {}
+void GcodeSuite::M778()
+{
+    BIND_INDEX_OR_RETURN(index);
+    auto res = ph_controller.get_pid(index);
+    if (res.result != printhead::Result::OK)
+        return;
+    float kP = static_cast<float>(res.packet.payload[0]) / 100.0f;
+    float kI = static_cast<float>(res.packet.payload[1]) / 100.0f;
+    float kD = static_cast<float>(res.packet.payload[2]) / 100.0f;
+    SERIAL_ECHOLNPGM("TOOL:", static_cast<uint16_t>(index), ",kP:", kP, ",kI:", kI, ",kD:", kD);
+}
 //SetPrintheadTempFilterParams
 void GcodeSuite::M779() {}
 //GetPrintheadTempFilterParams
