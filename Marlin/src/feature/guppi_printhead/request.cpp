@@ -243,7 +243,7 @@ Result Controller::set_pid(Index index, float p, float i, float d)
     uint16_t d_ = static_cast<uint16_t>(d * 100);
 
     Packet packet(index, Command::SET_PID, std::array{p_, i_, d_});
-    return send(packet, bus);
+    return send_and_receive<PIDParams>(packet, bus);
 }
 
 Response<std::array<uint16_t, 3>> Controller::get_pid(Index index)
