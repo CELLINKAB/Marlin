@@ -236,7 +236,7 @@ Response<FirmwareVersion> Controller::get_fw_version(Index index)
     return send_and_receive<FirmwareVersion>(packet, bus);
 }
 
-Result Controller::set_pid(Index index, float p, float i, float d)
+Response<PIDParams> Controller::set_pid(Index index, float p, float i, float d)
 {
     uint16_t p_ = static_cast<uint16_t>(p * 100);
     uint16_t i_ = static_cast<uint16_t>(i * 100);
