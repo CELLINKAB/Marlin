@@ -213,7 +213,7 @@ bool Controller::slider_busy(Index index)
 
 Result Controller::set_temperature(Index index, celsius_t temperature)
 {
-    uint16_t chant_temp = temperature + 30'000;
+    uint16_t chant_temp = (temperature * 100) + 30'000;
     Packet request(index, Command::SET_TEMP, chant_temp);
     return send(request, bus);
 }
@@ -453,8 +453,8 @@ Result Controller::disable_heating(Index index)
     return send(packet, bus);
 }
 
-Response<DebugTemTemps> Controller::debug_get_temperature(Index index, bool debug)
+Response<TemTemps> Controller::debug_get_temperature(Index index, bool debug)
 {
     Packet packet(index, Command::DEBUG_GET_TEMPERATURE);
-    return send_and_receive<DebugTemTemps>(packet, bus, debug);
+    return send_and_receive<TemTemps>(packet, bus, debug);
 }
