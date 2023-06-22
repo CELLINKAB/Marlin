@@ -488,6 +488,7 @@ static constexpr size_t CS_FANS = 2;
 static constexpr size_t CS_TEMS = 2;
 static constexpr size_t CS_ENCODERS = 6;
 static constexpr size_t FW_VERSION_LEN = 12;
+static constexpr size_t PID_PARAMS = 3;
 } // namespace constants
 
 namespace {
@@ -495,6 +496,7 @@ using FanSpeeds = std::array<uint16_t, constants::CS_FANS>;
 using TemTemps = std::array<int16_t, constants::CS_TEMS>;
 using EncoderStates = std::array<int32_t, constants::CS_ENCODERS>;
 using FirmwareVersion = std::array<char, constants::FW_VERSION_LEN>;
+using PIDParams = std::array<uint16_t, constants::PID_PARAMS>;
 
 } // namespace
 
@@ -570,7 +572,7 @@ public:
     // Temperature methods
     Response<uint16_t> set_temperature(Index index, celsius_t temperature);
     Response<uint16_t> get_temperature(Index index, bool debug = true);
-    Result set_pid(Index index, float p, float i, float d);
+    Response<PIDParams> set_pid(Index index, float p, float i, float d);
     Response<std::array<uint16_t, 3>> get_pid(Index index);
     Result set_fan_speed(Index index, FanSpeeds fan_speeds);
     Response<FanSpeeds> get_fan_speed(Index index);
