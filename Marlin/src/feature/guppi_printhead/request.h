@@ -568,7 +568,7 @@ public:
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
     Response<Status> get_status(Index index, bool debug = true);
     // Temperature methods
-    Result set_temperature(Index index, celsius_t temperature);
+    Response<uint16_t> set_temperature(Index index, celsius_t temperature);
     Response<uint16_t> get_temperature(Index index, bool debug = true);
     Result set_pid(Index index, float p, float i, float d);
     Response<std::array<uint16_t, 3>> get_pid(Index index);
