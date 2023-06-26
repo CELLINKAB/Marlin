@@ -2,6 +2,7 @@
 
 #pragma once
 
+// DO NOT REORDER
 #include <array>
 #include <eigen.h>
 #include <Eigen/LU>
@@ -10,7 +11,7 @@
 
 #define AUTO_REPORT_BED_MULTI_SENSOR 1
 #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-  #include "../libs/autoreport.h"
+#    include "../libs/autoreport.h"
 #endif
 
 double get_tmp117_bed_temp();
@@ -23,8 +24,12 @@ using BedSensors = std::array<TMP117<SoftWire>, NUM_BED_TEMP_SENSORS>;
 BedSensors& bed_sensors();
 
 #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-    struct BedMultiSensorReporter : AutoReporter<BedMultiSensorReporter> {static void report();};
-    extern BedMultiSensorReporter bed_multi_sensor_reporter;
+struct BedMultiSensorReporter : AutoReporter<BedMultiSensorReporter>
+{
+    static bool all_sensors;
+    static void report();
+};
+extern BedMultiSensorReporter bed_multi_sensor_reporter;
 #endif
 
 class BedKalmanFilter
@@ -42,7 +47,7 @@ public:
     double offset_temp() const;
 
 private:
-    Eigen::Matrix<double, NUM_BED_STATE_VARS, 1> m_mean ;
+    Eigen::Matrix<double, NUM_BED_STATE_VARS, 1> m_mean;
     Eigen::Matrix<double, NUM_BED_STATE_VARS, NUM_BED_STATE_VARS> m_cov;
 };
 

@@ -7,10 +7,16 @@
 #    include "../../feature/tmp117_printbed.h"
 #    include "../../module/temperature.h"
 #    include "../gcode.h"
+
 #    include <numeric>
 
-void report_bed_sensors() {
-        uint8_t sensor_num = 0;
+void report_bed_sensors(bool all_sensors)
+{
+    if (!all_sensors) {
+        SERIAL_ECHOLNPGM("PBT:",Temperature::degBed());
+        return;
+    }
+    uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
         SERIAL_ECHO("PBT");
@@ -25,20 +31,24 @@ void report_bed_sensors() {
     SERIAL_EOL();
 }
 
-#if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-    void BedMultiSensorReporter::report() {
-        report_bed_sensors();
-    }
-    BedMultiSensorReporter bed_multi_sensor_reporter;
-#endif
+#    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+bool BedMultiSensorReporter::all_sensors = false;
+void BedMultiSensorReporter::report()
+{
+    report_bed_sensors(all_sensors);
+}
+BedMultiSensorReporter bed_multi_sensor_reporter;
+#    endif
 
 // get bed temp
 void GcodeSuite::M802()
 {
-    report_bed_sensors();
-    #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-        bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
-    #endif
+    const bool all_sensors = parser.seen_test('D');
+    report_bed_sensors(all_sensors);
+#    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+    bed_multi_sensor_reporter.all_sensors = all_sensors;
+    bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
+#    endif
 }
 
 void GcodeSuite::M801()
@@ -63,6 +73,60 @@ void GcodeSuite::M801()
     }
 #    endif
     M140();
+}
+
+void GcodeSuite::M772()
+{
+    EXTRUDER_LOOP()
+    {
+        SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
+    }
+    SERIAL_EOL();
+}
+
+//SetBedThermisterParams
+void GcodeSuite::M1035()
+{
+    int16_t sensor_index = parser.intval('I', -1);
+    float gain = parser.floatval('S', 1.0f);
+    float offset = parser.floatval('O');
+
+    auto handle_sensor = [=](auto& sensor) {
+        if (offset == 0.0f && gain == 1.0f)
+            SERIAL_ECHOLNPGM("SENSOR_ID:",
+                             sensor.getDeviceID(),
+                             ",OFFSET:",
+                             sensor.getOffsetTemperature(),
+                             ",GAIN:",
+                             sensor.getGain());
+        if (offset != 0.0f)
+            sensor.setOffsetTemperature(offset);
+        if (gain != 1.0f)
+            sensor.setGain(gain);
+    };
+    if (sensor_index == -1) {
+        auto& sensors = bed_sensors();
+        for (auto& sensor : sensors) {
+            handle_sensor(sensor);
+        }
+    } else {
+        auto& sensor
+            = bed_sensors()[constrain(sensor_index, 0, static_cast<int16_t>(bed_sensors().size() - 1))];
+        handle_sensor(sensor);
+    }
+}
+void GcodeSuite::M1035_report(bool for_replay)
+{
+    report_heading_etc(for_replay, F("Bed TMP117 Sensors"));
+    size_t sensor_num = 0;
+    for (auto& sensor : bed_sensors()) {
+        SERIAL_ECHOLNPGM("M1035 I",
+                         sensor_num++,
+                         " O",
+                         sensor.getOffsetTemperature(),
+                         " S",
+                         sensor.getGain());
+    }
 }
 
 #endif // CELLINK_REPORTING
