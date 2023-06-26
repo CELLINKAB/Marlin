@@ -13,7 +13,8 @@
 void report_bed_sensors(bool all_sensors)
 {
     if (!all_sensors) {
-        SERIAL_ECHOLN("PBT:",Temperature::degBed())
+        SERIAL_ECHOLNPGM("PBT:",Temperature::degBed());
+        return;
     }
     uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
@@ -31,6 +32,7 @@ void report_bed_sensors(bool all_sensors)
 }
 
 #    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+bool BedMultiSensorReporter::all_sensors = false;
 void BedMultiSensorReporter::report()
 {
     report_bed_sensors(all_sensors);

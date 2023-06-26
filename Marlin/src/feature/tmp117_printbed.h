@@ -26,7 +26,7 @@ BedSensors& bed_sensors();
 #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
 struct BedMultiSensorReporter : AutoReporter<BedMultiSensorReporter>
 {
-    bool all_sensors = true;
+    static bool all_sensors;
     static void report();
 };
 extern BedMultiSensorReporter bed_multi_sensor_reporter;
