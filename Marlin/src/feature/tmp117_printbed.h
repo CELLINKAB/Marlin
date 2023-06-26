@@ -2,12 +2,12 @@
 
 #pragma once
 
-#include "tmp117/TMP117.h"
-
-#include <Eigen/LU>
-#include <SoftWire.h>
+// DO NOT REORDER
 #include <array>
 #include <eigen.h>
+#include <Eigen/LU>
+#include <SoftWire.h>
+#include "tmp117/TMP117.h"
 
 #define AUTO_REPORT_BED_MULTI_SENSOR 1
 #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
