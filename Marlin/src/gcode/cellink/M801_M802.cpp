@@ -7,10 +7,15 @@
 #    include "../../feature/tmp117_printbed.h"
 #    include "../../module/temperature.h"
 #    include "../gcode.h"
+
 #    include <numeric>
 
-void report_bed_sensors() {
-        uint8_t sensor_num = 0;
+void report_bed_sensors(bool all_sensors)
+{
+    if (!all_sensors) {
+        SERIAL_ECHOLN("PBT:",Temperature::degBed())
+    }
+    uint8_t sensor_num = 0;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
         SERIAL_ECHO("PBT");
@@ -25,20 +30,21 @@ void report_bed_sensors() {
     SERIAL_EOL();
 }
 
-#if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-    void BedMultiSensorReporter::report() {
-        report_bed_sensors();
-    }
-    BedMultiSensorReporter bed_multi_sensor_reporter;
-#endif
+#    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+void BedMultiSensorReporter::report()
+{
+    report_bed_sensors();
+}
+BedMultiSensorReporter bed_multi_sensor_reporter;
+#    endif
 
 // get bed temp
 void GcodeSuite::M802()
 {
-    report_bed_sensors();
-    #if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-        bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
-    #endif
+    report_bed_sensors(parser.seen_test('D'));
+#    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+    bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
+#    endif
 }
 
 void GcodeSuite::M801()
