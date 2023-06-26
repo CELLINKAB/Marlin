@@ -4,6 +4,7 @@
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
+#include "../../module/temperature.h"
 
 #include "chantarelle.h"
 
@@ -237,7 +238,14 @@ void GcodeSuite::M771()
 }
 
 //GetAllPrintheadsTemps
-void GcodeSuite::M772() {}
+void GcodeSuite::M772()
+{
+    HOTEND_LOOP(i)
+    {
+        SERIAL_ECHOPGM(",PH", i, "T:", Temperature::degHotend(i));
+    }
+    SERIAL_EOL();
+}
 //SetPrintheadPressure
 void GcodeSuite::M773() {}
 //GetPrintheadPressure
