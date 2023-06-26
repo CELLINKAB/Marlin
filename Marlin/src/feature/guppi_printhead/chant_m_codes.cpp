@@ -1,10 +1,8 @@
 // copyright Cellink 2022 GPLv3
 
-#include "../../feature/tmp117_printbed.h"
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
-#include "../../module/temperature.h"
 
 #include "chantarelle.h"
 
@@ -238,14 +236,7 @@ void GcodeSuite::M771()
 }
 
 //GetAllPrintheadsTemps
-void GcodeSuite::M772()
-{
-    EXTRUDER_LOOP()
-    {
-        SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
-    }
-    SERIAL_EOL();
-}
+// M772 - MOVED
 //SetPrintheadPressure
 void GcodeSuite::M773() {}
 //GetPrintheadPressure

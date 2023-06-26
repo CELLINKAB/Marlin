@@ -75,4 +75,13 @@ void GcodeSuite::M801()
     M140();
 }
 
+void GcodeSuite::M772()
+{
+    EXTRUDER_LOOP()
+    {
+        SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
+    }
+    SERIAL_EOL();
+}
+
 #endif // CELLINK_REPORTING
