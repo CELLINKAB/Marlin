@@ -240,9 +240,9 @@ void GcodeSuite::M771()
 //GetAllPrintheadsTemps
 void GcodeSuite::M772()
 {
-    HOTEND_LOOP(i)
+    EXTRUDER_LOOP()
     {
-        SERIAL_ECHOPGM(",PH", i, "T:", Temperature::degHotend(i));
+        SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
     }
     SERIAL_EOL();
 }

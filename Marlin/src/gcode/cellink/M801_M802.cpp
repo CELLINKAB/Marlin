@@ -33,7 +33,7 @@ void report_bed_sensors(bool all_sensors)
 #    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
 void BedMultiSensorReporter::report()
 {
-    report_bed_sensors();
+    report_bed_sensors(all_sensors);
 }
 BedMultiSensorReporter bed_multi_sensor_reporter;
 #    endif
@@ -41,8 +41,10 @@ BedMultiSensorReporter bed_multi_sensor_reporter;
 // get bed temp
 void GcodeSuite::M802()
 {
-    report_bed_sensors(parser.seen_test('D'));
+    const bool all_sensors = parser.seen_test('D');
+    report_bed_sensors(all_sensors);
 #    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
+    bed_multi_sensor_reporter.all_sensors = all_sensors;
     bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
 #    endif
 }
