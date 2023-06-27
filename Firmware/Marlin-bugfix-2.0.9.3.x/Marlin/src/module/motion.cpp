@@ -1883,7 +1883,7 @@ void homeaxis(const AxisEnum axis){
         if(homing_calibration == true) {
           float t_output;
           wScale.tare_start();
-          SERIAL_ECHOLNPGM("wScale: Tare second pass started...");
+          SERIAL_ECHOLNPGM("echo: wScale: Tare second pass started...");
           while( wScale.tare_ready(t_output) == false ) {
             idle();
           }
@@ -2152,9 +2152,9 @@ void homeaxis(const AxisEnum axis){
 
     #if ENABLED(CELLINK_REPORTING)
       if(homing_calibration)
-        SERIAL_ECHOLNPGM("CALIB_DONE");
+        SERIAL_ECHOLNPGM("Z_AXIS_CALIB_DONE");
       else
-        SERIAL_ECHOLNPGM("HOME");
+        SERIAL_ECHOLNPGM("HOME: 1");
     #endif
 
   } // homeaxis()

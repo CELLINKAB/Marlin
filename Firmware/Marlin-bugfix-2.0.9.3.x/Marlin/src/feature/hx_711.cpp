@@ -132,19 +132,19 @@ void HX_711::manage_hx_711() {
             if (_homing_dir > 0) {
               if(_crash_det_ind == _wscale_direction)
                 // Homing crash detected from ABOVE
-                SERIAL_ECHOLNPGM("CD_HOME_A");
+                SERIAL_ECHOLNPGM("CD_ABOVE");
               else
                 // Homing crash detected from BELOW
-                SERIAL_ECHOLNPGM("CD_HOME_B");
+                SERIAL_ECHOLNPGM("CD_BELOW");
               crash_kill_stop();
             }
             else if( (_homing_dir < 0) && (!inside_boundaries)) {
               if(_crash_det_ind == _wscale_direction)
                 // Calibration crash detected from ABOVE
-                SERIAL_ECHOLNPGM("CD_CALIB_A");
+                SERIAL_ECHOLNPGM("CD_ABOVE");
               else
                 // Calibration crash detected from BELOW
-                SERIAL_ECHOLNPGM("CD_CALIB_B");
+                SERIAL_ECHOLNPGM("CD_BELOW");
               crash_kill_stop();
             }
           }
