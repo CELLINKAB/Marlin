@@ -35,7 +35,7 @@
  *  D<dval> - Set the D value
  */
 void GcodeSuite::M304() {
-  if (!parser.seen("PID")) return M304_report();
+  if (!parser.seen(TERN(BED_TEMP_COMPENSATION,"PIDSO", "PID"))) return M304_report();
   if (parser.seen('P')) thermalManager.temp_bed.pid.Kp = parser.value_float();
   if (parser.seen('I')) thermalManager.temp_bed.pid.Ki = scalePID_i(parser.value_float());
   if (parser.seen('D')) thermalManager.temp_bed.pid.Kd = scalePID_d(parser.value_float());
