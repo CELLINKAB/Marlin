@@ -51,6 +51,8 @@ void GcodeSuite::M304_report(const bool forReplay/*=true*/) {
       "  M304 P", thermalManager.temp_bed.pid.Kp
     , " I", unscalePID_i(thermalManager.temp_bed.pid.Ki)
     , " D", unscalePID_d(thermalManager.temp_bed.pid.Kd)
+    , " O", thermalManager.temp_bed.offset
+    , " S", thermalManager.temp_bed.scale
   );
 }
 
