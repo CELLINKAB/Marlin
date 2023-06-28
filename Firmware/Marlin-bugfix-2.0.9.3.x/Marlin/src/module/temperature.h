@@ -199,7 +199,7 @@ typedef struct TempInfo {
   inline void sample(const uint16_t s) { acc += s; }
   inline void update() { raw = acc; }
   #if ENABLED(BED_TEMP_COMPENSATION)
-    float offset = 8.9422f;
+    float offset = -8.9422f;
     float scale = 0.6035f;
   #endif
 } temp_info_t;
