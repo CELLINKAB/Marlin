@@ -3586,12 +3586,7 @@ void Temperature::isr() {
       print_heater_state(H_NONE, degHotend(target_extruder), degTargetHotend(target_extruder) OPTARG(SHOW_TEMP_ADC_VALUES, rawHotendTemp(target_extruder)));
     #endif
     #if HAS_HEATED_BED
-      #if ENABLED(BED_TEMP_COMPENSATION)
-        float temp = thermalManager.temp_bed.target * thermalManager.temp_bed.scale - thermalManager.temp_bed.offset;
-        print_heater_state(H_BED, degBed(), temp OPTARG(SHOW_TEMP_ADC_VALUES, rawBedTemp()));
-      #else
         print_heater_state(H_BED, degBed(), degTargetBed() OPTARG(SHOW_TEMP_ADC_VALUES, rawBedTemp()));
-      #endif
     #endif
     #if HAS_TEMP_CHAMBER
       print_heater_state(H_CHAMBER, degChamber(), TERN0(HAS_HEATED_CHAMBER, degTargetChamber()) OPTARG(SHOW_TEMP_ADC_VALUES, rawChamberTemp()));
