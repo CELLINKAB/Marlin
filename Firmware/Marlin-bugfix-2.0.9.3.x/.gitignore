@@ -169,3 +169,6 @@ __pycache__
 
 # IOLogger logs
 *_log.csv
+
+# Version file automatically generated each build
+Marlin/src/inc/Version.h

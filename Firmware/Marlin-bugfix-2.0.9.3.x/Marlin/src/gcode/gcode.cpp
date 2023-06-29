@@ -1065,6 +1065,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 7111: M7111(); break;                                // Set the HX711 channel/mode.
         case 7112: M7112(); break;                                // Print HX711 raw filtered value.
       #endif
+
+      #if ENABLED(CELLINK_REPORTING)
+        case 1051: M1051(); break;                                // Report firmware branch, version etc.
+      #endif
 	  
       #if ENABLED(HAS_MCP3426_ADC)
         case 3426: M3426(); break;                                // M3426: Read MCP3426 ADC (over i2c)

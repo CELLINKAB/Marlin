@@ -1236,6 +1236,10 @@ private:
     static void M7110_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(CELLINK_REPORTING)
+    static void M1051();
+  #endif
+
   static void T(const int8_t tool_index);
 
 };
