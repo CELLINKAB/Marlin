@@ -601,6 +601,12 @@
 #define BED_OVERSHOOT    10   // (°C) Forbid temperatures over MAXTEMP - OVERSHOOT
 #define COOLER_OVERSHOOT  2   // (°C) Forbid temperatures closer than OVERSHOOT
 
+/**
+ * Bed temperature compensation for heating the vet
+ * 
+ */
+#define BED_TEMP_COMPENSATION
+
 //===========================================================================
 //============================= PID Settings ================================
 //===========================================================================

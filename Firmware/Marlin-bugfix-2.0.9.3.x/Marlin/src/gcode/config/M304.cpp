@@ -35,10 +35,14 @@
  *  D<dval> - Set the D value
  */
 void GcodeSuite::M304() {
-  if (!parser.seen("PID")) return M304_report();
+  if (!parser.seen(TERN(BED_TEMP_COMPENSATION,"PIDSO", "PID"))) return M304_report();
   if (parser.seen('P')) thermalManager.temp_bed.pid.Kp = parser.value_float();
   if (parser.seen('I')) thermalManager.temp_bed.pid.Ki = scalePID_i(parser.value_float());
   if (parser.seen('D')) thermalManager.temp_bed.pid.Kd = scalePID_d(parser.value_float());
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    if (parser.seen('O')) thermalManager.temp_bed.offset = parser.value_float();
+    if (parser.seen('S')) thermalManager.temp_bed.scale = parser.value_float();
+  #endif
 }
 
 void GcodeSuite::M304_report(const bool forReplay/*=true*/) {
@@ -47,6 +51,8 @@ void GcodeSuite::M304_report(const bool forReplay/*=true*/) {
       "  M304 P", thermalManager.temp_bed.pid.Kp
     , " I", unscalePID_i(thermalManager.temp_bed.pid.Ki)
     , " D", unscalePID_d(thermalManager.temp_bed.pid.Kd)
+    , " O", thermalManager.temp_bed.offset
+    , " S", thermalManager.temp_bed.scale
   );
 }
 
