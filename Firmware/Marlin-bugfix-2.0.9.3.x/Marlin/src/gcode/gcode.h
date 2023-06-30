@@ -1237,6 +1237,9 @@ private:
   #endif
 
   #if ENABLED(CELLINK_REPORTING)
+    static void M800();
+    static void M801();
+    static void M802();
     static void M1051();
   #endif
 

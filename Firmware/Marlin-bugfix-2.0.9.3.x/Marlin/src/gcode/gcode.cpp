@@ -1067,6 +1067,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(CELLINK_REPORTING)
+        case 800: M800(); break;                                  // Wrapper for M140 S0
+        case 801: M801(); break;                                  // Wrapper for M140
+        case 802: M802(); break;                                  // Report bed temp. in Cellink format
         case 1051: M1051(); break;                                // Report firmware branch, version etc.
       #endif
 	  
