@@ -216,7 +216,7 @@ void GcodeSuite::M771()
     BIND_INDEX_OR_RETURN(index);
     if (parser.seen('D')) { // debug, set PWM directly
         printhead::TemTemps both_tems_pwm;
-        const uint16_t tem_pwm = min(parser.ulongval('S'), 4096UL);
+        const uint16_t tem_pwm = min(parser.ulongval('S'), 4095UL);
         if (parser.seen('I')) {
             const uint8_t tem_index = constrain(parser.value_byte(),
                                                 0,
@@ -298,7 +298,7 @@ void GcodeSuite::M792()
 {
     BIND_INDEX_OR_RETURN(index);
     printhead::FanSpeeds both_fans_pwm;
-    const uint16_t fan_pwm = min(parser.ulongval('S'), 4096UL);
+    const uint16_t fan_pwm = min(parser.ulongval('S'), 4095UL);
     if (parser.seen('I')) {
         const uint8_t fan_index = constrain(parser.value_byte(), 0, printhead::constants::CS_FANS - 1);
         both_fans_pwm[fan_index] = fan_pwm;
