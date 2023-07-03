@@ -50,15 +50,16 @@ struct StepperRetractingProbe
 
     inline void set_config(const Config& conf)
     {
-        UNUSED(conf);
+        config = conf;
         // reset stepper to force reinitialization next use
+        _stepper.reset();
     }
 
     void report_config(bool for_replay) const;
 
     constexpr inline void reset_position() noexcept { state = ProbeState::Unknown; }
 
-    constexpr inline bool is_deployed() noexcept {return state == ProbeState::Deployed;}
+    constexpr inline bool is_deployed() const noexcept {return state == ProbeState::Deployed;}
 
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
