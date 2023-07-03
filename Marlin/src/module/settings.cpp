@@ -587,11 +587,7 @@ typedef struct SettingsDataStruct {
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
-    int32_t srp_deploy;
-    uint32_t srp_time;
-    int16_t srp_stall;
-    uint16_t srp_current;
-    uint32_t srp_stow;
+    StepperRetractingProbe::Config srp_conf;
   #endif
 
   #if ENABLED(FESTO_PNEUMATICS)
@@ -607,9 +603,7 @@ typedef struct SettingsDataStruct {
   // Nozzle Autocalibration
   //
   #if ENABLED(OPTICAL_AUTOCAL)
-    float nozzle_autocal_extra_offset_x;
-    float nozzle_autocal_extra_offset_y;
-    float nozzle_autocal_extra_offset_z;
+    xyz_pos_t nozzle_autocal_extra_offset;
     float nozzle_autocal_x_factor;
   #endif
   
@@ -1659,13 +1653,9 @@ void MarlinSettings::postprocess() {
 
     #if ENABLED(STEPPER_RETRACTING_PROBE) 
     {
-      // _FIELD_TEST(srp_conf);
+      _FIELD_TEST(srp_conf);
       StepperRetractingProbe::Config stepper_conf = stepper_probe.get_config();
-      EEPROM_WRITE(stepper_conf.deploy_velocity);
-      EEPROM_WRITE(stepper_conf.minimum_retract_time);
-      EEPROM_WRITE(stepper_conf.stall_threshold);
-      EEPROM_WRITE(stepper_conf.stepper_current);
-      EEPROM_WRITE(stepper_conf.stow_velocity);
+      EEPROM_WRITE(stepper_conf);
     }
     #endif
 
@@ -1680,11 +1670,9 @@ void MarlinSettings::postprocess() {
 
     #if ENABLED(OPTICAL_AUTOCAL)
     {
-      // _FIELD_TEST(nozzle_autocal_extra_offset);
-      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.x);
-      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.y);
-      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset.z);
-      // _FIELD_TEST(nozzle_autocal_x_factor);
+      _FIELD_TEST(nozzle_autocal_extra_offset);
+      EEPROM_WRITE(OpticalAutocal::nozzle_calibration_extra_offset);
+      _FIELD_TEST(nozzle_autocal_x_factor);
       EEPROM_WRITE(OpticalAutocal::x_offset_factor);
     }
     #endif
