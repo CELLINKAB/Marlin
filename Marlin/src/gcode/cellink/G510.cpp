@@ -36,7 +36,15 @@ void GcodeSuite::G510()
         return;
     }
 
-    home_if_needed(true);
+    // clear calibration on current printhead
+    if (parser.seen('R')) {
+        optical_autocal.reset(active_extruder);
+        update_offset(optical_autocal.offset(active_extruder));
+        return;
+    }
+
+    if (homing_needed_error())
+        return;
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;
