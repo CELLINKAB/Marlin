@@ -380,7 +380,7 @@ void GcodeSuite::G914()
     LOOP_NUM_AXES(i)
     {
         if (parser.seen(AXIS_CHAR(i)))
-            tune_axis(AxisEnum::X_AXIS, cur, feedrate, test_all, dry_run);
+            tune_axis(static_cast<AxisEnum>(i), cur, feedrate, test_all, dry_run);
     }
 
     TERN_(IMPROVE_HOMING_RELIABILITY, end_slow_homing(motion_states));
