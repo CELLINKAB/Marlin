@@ -50,8 +50,9 @@ struct StepperRetractingProbe
 
     inline void set_config(const Config& conf)
     {
-        UNUSED(conf);
+        config = conf;
         // reset stepper to force reinitialization next use
+        _stepper.reset();
     }
 
     void report_config(bool for_replay) const;
