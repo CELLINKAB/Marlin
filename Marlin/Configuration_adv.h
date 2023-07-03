@@ -1117,8 +1117,8 @@
  * The Deactive Time can be overridden with M18 and M84. Set to 0 for No Timeout.
  */
 #define DEFAULT_STEPPER_DEACTIVE_TIME 60
-#define DISABLE_INACTIVE_X true
-#define DISABLE_INACTIVE_Y true
+#define DISABLE_INACTIVE_X false
+#define DISABLE_INACTIVE_Y false
 #define DISABLE_INACTIVE_Z false  // Set 'false' if the nozzle could fall onto your printed part!
 #define DISABLE_INACTIVE_I true
 #define DISABLE_INACTIVE_J true
@@ -1127,6 +1127,9 @@
 #define DISABLE_INACTIVE_V true
 #define DISABLE_INACTIVE_W true
 #define DISABLE_INACTIVE_E true
+// Apply holding current to steppers at boot.
+// Useful if a 'cold' stepper delivers bad performance
+#define HOLD_STEPPERS_AT_BOOT
 
 // Default Minimum Feedrates for printing and travel moves
 #define DEFAULT_MINIMUMFEEDRATE       0.1     // (mm/s. °/s for rotational-only moves) Minimum feedrate. Set with M205 S.
@@ -3167,9 +3170,9 @@
     #define X_STALL_SENSITIVITY  5
 
     //#define X2_STALL_SENSITIVITY X_STALL_SENSITIVITY
-    #define Y_STALL_SENSITIVITY  45
+    #define Y_STALL_SENSITIVITY  40
     #define Y2_STALL_SENSITIVITY Y_STALL_SENSITIVITY
-    #define Z_STALL_SENSITIVITY  55
+    #define Z_STALL_SENSITIVITY  50
     //#define Z2_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z3_STALL_SENSITIVITY Z_STALL_SENSITIVITY
     //#define Z4_STALL_SENSITIVITY Z_STALL_SENSITIVITY
@@ -4291,7 +4294,7 @@
 //
 #define DIRECT_PIN_CONTROL
 
-#define SENSORLESS_STALLGUARD_DELAY 300
+#define SENSORLESS_STALLGUARD_DELAY 500
 
 //
 // M43 - display pin status, toggle pins, watch pins, watch endstops & toggle LED, test servo probe
