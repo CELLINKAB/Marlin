@@ -30,15 +30,18 @@ struct StepperRetractingProbe
         int16_t stall_threshold;
         uint16_t stepper_current;
         uint32_t minimum_retract_time;
+
+        constexpr Config()
+            : deploy_velocity(SRP_DEPLOY_VELOCITY)
+            , stow_velocity(SRP_STOW_VELOCITY)
+            , stall_threshold(SRP_STALL_THRESHOLD)
+            , stepper_current(SRP_STEPPER_CURRENT)
+            , minimum_retract_time(SRP_RETRACT_TIME)
+        {}
     };
 
     constexpr StepperRetractingProbe()
-        : config{SRP_DEPLOY_VELOCITY,
-                 SRP_STOW_VELOCITY,
-                 SRP_STALL_THRESHOLD,
-                 SRP_STEPPER_CURRENT,
-                 SRP_RETRACT_TIME}
-        , state{ProbeState::Unknown}
+        : state{ProbeState::Unknown}
         , _stepper{}
     {}
 
@@ -59,7 +62,7 @@ struct StepperRetractingProbe
 
     constexpr inline void reset_position() noexcept { state = ProbeState::Unknown; }
 
-    constexpr inline bool is_deployed() const noexcept {return state == ProbeState::Deployed;}
+    constexpr inline bool is_deployed() const noexcept { return state == ProbeState::Deployed; }
 
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
