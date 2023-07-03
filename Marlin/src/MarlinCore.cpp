@@ -1426,6 +1426,10 @@ void setup() {
 
   SETUP_RUN(stepper.init());          // Init stepper. This enables interrupts!
 
+  #if ENABLED(HOLD_STEPPERS_AT_BOOT)
+    stepper.enable_all_steppers();
+  #endif
+
   #if HAS_SERVOS
     SETUP_RUN(servo_init());
   #endif
