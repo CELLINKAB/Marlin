@@ -1669,14 +1669,14 @@ void MarlinSettings::postprocess() {
     }
     #endif
 
-    // #if ENABLED(FESTO_PNEUMATICS)
-    //   EEPROM_WRITE(pneumatics::gripper_vacuum.offset);
-    //   EEPROM_WRITE(pneumatics::gripper_vacuum.scalar);
-    //   EEPROM_WRITE(pneumatics::tank_pressure.offset);
-    //   EEPROM_WRITE(pneumatics::tank_pressure.scalar);
-    //   EEPROM_WRITE(pneumatics::regulator_feedback.offset);
-    //   EEPROM_WRITE(pneumatics::regulator_feedback.scalar);
-    // #endif
+    #if ENABLED(FESTO_PNEUMATICS)
+      EEPROM_WRITE(pneumatics::gripper_vacuum.offset);
+      EEPROM_WRITE(pneumatics::gripper_vacuum.scalar);
+      EEPROM_WRITE(pneumatics::tank_pressure.offset);
+      EEPROM_WRITE(pneumatics::tank_pressure.scalar);
+      EEPROM_WRITE(pneumatics::regulator_feedback.offset);
+      EEPROM_WRITE(pneumatics::regulator_feedback.scalar);
+    #endif
 
     #if ENABLED(OPTICAL_AUTOCAL)
     {
