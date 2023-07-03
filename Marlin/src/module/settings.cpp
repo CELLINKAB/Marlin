@@ -2670,13 +2670,9 @@ void MarlinSettings::postprocess() {
 
       #if ENABLED(STEPPER_RETRACTING_PROBE)
       {
-        // _FIELD_TEST(srp_conf);
+        _FIELD_TEST(srp_conf);
         StepperRetractingProbe::Config stepper_conf;
-        EEPROM_READ(stepper_conf.deploy_velocity);
-        EEPROM_READ(stepper_conf.minimum_retract_time);
-        EEPROM_READ(stepper_conf.stall_threshold);
-        EEPROM_READ(stepper_conf.stepper_current);
-        EEPROM_READ(stepper_conf.stow_velocity);
+        EEPROM_READ(stepper_conf);
         stepper_probe.set_config(stepper_conf);
       }
       #endif
@@ -2692,11 +2688,9 @@ void MarlinSettings::postprocess() {
 
       #if ENABLED(OPTICAL_AUTOCAL)
       {
-        // _FIELD_TEST(nozzle_autocal_extra_offset);
-        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.x);
-        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.y);
-        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset.z);
-        // _FIELD_TEST(nozzle_autocal_x_factor);
+        _FIELD_TEST(nozzle_autocal_extra_offset);
+        EEPROM_READ(OpticalAutocal::nozzle_calibration_extra_offset);
+        _FIELD_TEST(nozzle_autocal_x_factor);
         EEPROM_READ(OpticalAutocal::x_offset_factor);
       }
       #endif
@@ -3510,6 +3504,17 @@ void MarlinSettings::reset() {
       stepper.set_shaping_frequency(Y_AXIS, SHAPING_FREQ_Y);
       stepper.set_shaping_damping_ratio(Y_AXIS, SHAPING_ZETA_Y);
     #endif
+  #endif
+
+  #if ENABLED(OPTICAL_AUTOCAL) 
+    optical_autocal.reset_all();
+    optical_autocal.nozzle_calibration_extra_offset.reset();
+    optical_autocal.x_offset_factor = 1.0f;
+  #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    StepperRetractingProbe::Config srp_conf{};
+    stepper_probe.set_config(srp_conf);
   #endif
 
   postprocess();
