@@ -13,12 +13,12 @@ xyz_pos_t OpticalAutocal::nozzle_calibration_extra_offset{};
 
 static void update_offset(const xyz_pos_t& offset)
 {
-    set_home_offset(AxisEnum::X_AXIS,
-                    -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x));
-    set_home_offset(AxisEnum::Y_AXIS,
-                    -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y));
-    set_home_offset(AxisEnum::Z_AXIS,
-                    -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z));
+    position_shift.x = -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x);
+    update_workspace_offset(AxisEnum::X_AXIS);
+    position_shift.y = -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y);
+    update_workspace_offset(AxisEnum::Y_AXIS);
+    position_shift.z = -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z);
+    update_workspace_offset(AxisEnum::Z_AXIS);
 }
 
 void GcodeSuite::G510()
