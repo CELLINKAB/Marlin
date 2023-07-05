@@ -25,6 +25,8 @@ void GcodeSuite::G510()
 {
     // load offsets for new tool, used during tool change
     if (parser.seen('L')) {
+        select_coordinate_system(active_extruder);
+
         if (optical_autocal.is_calibrated(active_extruder))
             update_offset(optical_autocal.offset(active_extruder));
         return;
@@ -53,6 +55,9 @@ void GcodeSuite::G510()
     start_pos.z = parser.axisunitsval('Z', AxisEnum::Z_AXIS, DEFAULT_START_POS.z);
 
     const auto feedrate = parser.feedrateval('F', 25.0f);
+
+    // use coordinate system to match tool
+    select_coordinate_system(active_extruder);
 
     if (parser.seen('C')) {
         optical_autocal.calibrate(start_pos, feedrate);
