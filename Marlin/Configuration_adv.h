@@ -3621,6 +3621,10 @@
  * and G92.1 to reset the workspace to native machine space.
  */
 #define CNC_COORDINATE_SYSTEMS
+#ifdef CNC_COORDINATE_SYSTEMS
+// force using native workspace for UBL
+#define ALWAYS_MACHINE_NATIVE_UBL
+#endif
 
 // @section reporting
 

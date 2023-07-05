@@ -117,12 +117,6 @@ void GcodeSuite::G92() {
       break;
   }
 
-  #if ENABLED(CNC_COORDINATE_SYSTEMS)
-    // Apply Workspace Offset to the active coordinate system
-    if (WITHIN(active_coordinate_system, 0, MAX_COORDINATE_SYSTEMS - 1))
-      coordinate_system[active_coordinate_system] = position_shift;
-  #endif
-
   if (sync_XYZE) sync_plan_position();
   #if HAS_EXTRUDERS
     else if (sync_E) sync_plan_position_e();

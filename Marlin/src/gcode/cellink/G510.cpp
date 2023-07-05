@@ -13,18 +13,20 @@ xyz_pos_t OpticalAutocal::nozzle_calibration_extra_offset{};
 
 static void update_offset(const xyz_pos_t& offset)
 {
-    set_home_offset(AxisEnum::X_AXIS,
-                    -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x));
-    set_home_offset(AxisEnum::Y_AXIS,
-                    -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y));
-    set_home_offset(AxisEnum::Z_AXIS,
-                    -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z));
+    position_shift.x = -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x);
+    update_workspace_offset(AxisEnum::X_AXIS);
+    position_shift.y = -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y);
+    update_workspace_offset(AxisEnum::Y_AXIS);
+    position_shift.z = -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z);
+    update_workspace_offset(AxisEnum::Z_AXIS);
 }
 
 void GcodeSuite::G510()
 {
     // load offsets for new tool, used during tool change
     if (parser.seen('L')) {
+        select_coordinate_system(active_extruder);
+
         if (optical_autocal.is_calibrated(active_extruder))
             update_offset(optical_autocal.offset(active_extruder));
         return;
@@ -53,6 +55,9 @@ void GcodeSuite::G510()
     start_pos.z = parser.axisunitsval('Z', AxisEnum::Z_AXIS, DEFAULT_START_POS.z);
 
     const auto feedrate = parser.feedrateval('F', 25.0f);
+
+    // use coordinate system to match tool
+    select_coordinate_system(active_extruder);
 
     if (parser.seen('C')) {
         optical_autocal.calibrate(start_pos, feedrate);
