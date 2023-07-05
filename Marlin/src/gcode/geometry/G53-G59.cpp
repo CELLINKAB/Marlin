@@ -33,10 +33,12 @@
  */
 bool GcodeSuite::select_coordinate_system(const int8_t _new) {
   if (active_coordinate_system == _new) return false;
-  active_coordinate_system = _new;
+  if (active_coordinate_system != -1)
+    coordinate_system[active_coordinate_system] = position_shift;
   xyz_float_t new_offset{};
-  if (WITHIN(_new, 0, MAX_COORDINATE_SYSTEMS - 1))
+  if (WITHIN(_new, 0, MAX_COORDINATE_SYSTEMS - 1)) 
     new_offset = coordinate_system[_new];
+  active_coordinate_system = _new;
   LOOP_NUM_AXES(i) {
     if (position_shift[i] != new_offset[i]) {
       position_shift[i] = new_offset[i];
