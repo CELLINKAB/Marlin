@@ -16,9 +16,9 @@
     //# " (Marlin " SHORT_MARLIN_VERSION_STRING ")"
 #endif
 #ifndef STRING_DISTRIBUTION_DATE
-    #define STRING_DISTRIBUTION_DATE "2023-02-14"
+    #define STRING_DISTRIBUTION_DATE "0000-00-00"
 #endif
-#define MARLIN_HEX_VERSION 02010200
+#define MARLIN_HEX_VERSION 0
 #ifndef REQUIRED_CONFIGURATION_H_VERSION
   #define REQUIRED_CONFIGURATION_H_VERSION MARLIN_HEX_VERSION
 #endif
@@ -51,17 +51,16 @@
   #define WEBSITE_URL "cellink.com"
 #endif
 
-#define VER_COMMIT_DATE "2023-06-14"
-#define VER_FULL_BUILD_META_DATA "16949.Branch.issues-addbuildtage.Sha.548aa53d905d42f57f62418675976896b7679bc6" 
-#define VER_SEM_VER "2.1.0-issues-addbuildtage.1" 
-#define VER_MAJOR 2
-#define VER_MINOR 1
+#define VER_COMMIT_DATE "YYYY-MM-DD"
+#define VER_FULL_BUILD_META_DATA "gitversion.FullBuildMetaData" 
+#define VER_SEM_VER "gitversion.SemVer" 
+#define VER_MAJOR 0
+#define VER_MINOR 0
 #define VER_PATCH 0
-#define VER_BUILD_VERSION "exomarlin/v0.0.1-31-g548aa53d90" 
-#define VER_BRANCH "issues/addbuildtage" 
-#define VER_CURRENT_COMMIT "548aa53d905d42f57f62418675976896b7679bc6" 
-                
-#define VER_TIMESTAMP "2023-06-14 10.40"
-#define VER_USER "ed" 
-#define VER_BUILDTAG "local" 
-        
+#define VER_BUILD_VERSION "git_describe" 
+#define VER_BRANCH "git HEAD" 
+#define VER_CURRENT_COMMIT "ffffffffffffffffffffffffffffffffffffffff" 
+
+#define VER_TIMESTAMP "YYYY-MM-DD HH.MM"
+#define VER_USER "default" 
+#define VER_BUILDTAG "default" 
