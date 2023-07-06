@@ -153,10 +153,12 @@ cmake-build-*
 
 # Python
 __pycache__
+*.pyc
 
 # IOLogger logs
 *_log.csv
+
+# Generated version files
 GitVersion.json
 version.json
 Marlin/src/inc/Version.h
-*.pyc

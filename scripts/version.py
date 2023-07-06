@@ -5,9 +5,7 @@ import os
 import subprocess
 import json
 from datetime import datetime
-import pioutil
 import sys
-sys.path.append('buildroot/share/PlatformIO/scripts')
 
 
 def get_current_commit():
@@ -239,6 +237,7 @@ else:
     #
     # From within PlatformIO use the loaded INI file
     #
+    sys.path.append('buildroot/share/PlatformIO/scripts')
     import pioutil
     if pioutil.is_pio_build():
         try:
