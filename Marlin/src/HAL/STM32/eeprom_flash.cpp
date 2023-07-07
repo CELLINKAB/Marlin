@@ -268,10 +268,8 @@ bool PersistentStore::access_finish()
 
 bool PersistentStore::write_data(int& pos, const uint8_t* value, size_t size, uint16_t* crc)
 {
-    UNUSED(value);
-    static uint8_t debug_value = 0x2E;
     while (size--) {
-        uint8_t v = debug_value;
+        uint8_t v = *value;
 #        if ENABLED(FLASH_EEPROM_LEVELING)
         if (v != ram_eeprom[pos]) {
             ram_eeprom[pos] = v;
@@ -285,6 +283,7 @@ bool PersistentStore::write_data(int& pos, const uint8_t* value, size_t size, ui
 #        endif
         crc16(crc, &v, 1);
         pos++;
+        value++;
     }
     return false;
 }
