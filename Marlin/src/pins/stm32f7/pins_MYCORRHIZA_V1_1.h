@@ -29,8 +29,8 @@
 #define DEFAULT_MACHINE_NAME "Exocyte"
 
 #if NO_EEPROM_SELECTED
-//#define FLASH_EEPROM_EMULATION // Use Flash-based EEPROM emulation
-#define SRAM_EEPROM_EMULATION // SRAM based volatile EEPROM for testing
+#define FLASH_EEPROM_EMULATION // Use Flash-based EEPROM emulation
+// #define SRAM_EEPROM_EMULATION // SRAM based volatile EEPROM for testing
 //#define DISABLE_FLASH_WRITE_PROTECTION // in case factory setting has it enabled
 #endif
 
