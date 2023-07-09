@@ -1003,6 +1003,9 @@ void reset_trinamic_drivers() {
     TERN_(I_SENSORLESS, stepperI.homing_threshold(I_STALL_SENSITIVITY));
     TERN_(J_SENSORLESS, stepperJ.homing_threshold(J_STALL_SENSITIVITY));
     TERN_(K_SENSORLESS, stepperK.homing_threshold(K_STALL_SENSITIVITY));
+    TERN_(U_SENSORLESS, stepperU.homing_threshold(U_STALL_SENSITIVITY));
+    TERN_(V_SENSORLESS, stepperV.homing_threshold(V_STALL_SENSITIVITY));
+    TERN_(W_SENSORLESS, stepperW.homing_threshold(W_STALL_SENSITIVITY));
     TERN_(E0_SENSORLESS, stepperE0.homing_threshold(E0_STALL_SENSITIVITY));
     TERN_(E1_SENSORLESS, stepperE1.homing_threshold(E1_STALL_SENSITIVITY));
     TERN_(E2_SENSORLESS, stepperE2.homing_threshold(E2_STALL_SENSITIVITY));
@@ -1011,9 +1014,30 @@ void reset_trinamic_drivers() {
     TERN_(E5_SENSORLESS, stepperE5.homing_threshold(E5_STALL_SENSITIVITY));
     TERN_(E6_SENSORLESS, stepperE6.homing_threshold(E6_STALL_SENSITIVITY));
     TERN_(E7_SENSORLESS, stepperE7.homing_threshold(E7_STALL_SENSITIVITY));
-    TERN_(U_SENSORLESS, stepperU.homing_threshold(U_STALL_SENSITIVITY));
-    TERN_(V_SENSORLESS, stepperV.homing_threshold(V_STALL_SENSITIVITY));
-    TERN_(W_SENSORLESS, stepperW.homing_threshold(W_STALL_SENSITIVITY));
+
+
+    TERN_(X_SENSORLESS, stepperX.set_homing_current(X_CURRENT_HOME));
+    TERN_(X2_SENSORLESS, stepperX2.set_homing_current(CAT(TERN(X2_SENSORLESS, X2, X), _CURRENT_HOME)));
+    TERN_(Y_SENSORLESS, stepperY.set_homing_current(Y_CURRENT_HOME));
+    TERN_(Y2_SENSORLESS, stepperY2.set_homing_current(CAT(TERN(Y2_SENSORLESS, Y2, Y), _CURRENT_HOME)));
+    TERN_(Z_SENSORLESS, stepperZ.set_homing_current(Z_CURRENT_HOME));
+    TERN_(Z2_SENSORLESS, stepperZ2.set_homing_current(CAT(TERN(Z2_SENSORLESS, Z2, Z), _CURRENT_HOME)));
+    TERN_(Z3_SENSORLESS, stepperZ3.set_homing_current(CAT(TERN(Z3_SENSORLESS, Z3, Z), _CURRENT_HOME)));
+    TERN_(Z4_SENSORLESS, stepperZ4.set_homing_current(CAT(TERN(Z4_SENSORLESS, Z4, Z), _CURRENT_HOME)));
+    TERN_(I_SENSORLESS, stepperI.set_homing_current(I_CURRENT_HOME));
+    TERN_(J_SENSORLESS, stepperJ.set_homing_current(J_CURRENT_HOME));
+    TERN_(K_SENSORLESS, stepperK.set_homing_current(K_CURRENT_HOME));
+    TERN_(U_SENSORLESS, stepperU.set_homing_current(U_CURRENT_HOME));
+    TERN_(V_SENSORLESS, stepperV.set_homing_current(V_CURRENT_HOME));
+    TERN_(W_SENSORLESS, stepperW.set_homing_current(W_CURRENT_HOME));
+    TERN_(E0_SENSORLESS, stepperE0.set_homing_current(E0_CURRENT_HOME));
+    TERN_(E1_SENSORLESS, stepperE1.set_homing_current(E1_CURRENT_HOME));
+    TERN_(E2_SENSORLESS, stepperE2.set_homing_current(E2_CURRENT_HOME));
+    TERN_(E3_SENSORLESS, stepperE3.set_homing_current(E3_CURRENT_HOME));
+    TERN_(E4_SENSORLESS, stepperE4.set_homing_current(E4_CURRENT_HOME));
+    TERN_(E5_SENSORLESS, stepperE5.set_homing_current(E5_CURRENT_HOME));
+    TERN_(E6_SENSORLESS, stepperE6.set_homing_current(E6_CURRENT_HOME));
+    TERN_(E7_SENSORLESS, stepperE7.set_homing_current(E7_CURRENT_HOME));
   #endif
 
   #ifdef TMC_ADV
