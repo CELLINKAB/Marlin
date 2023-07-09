@@ -458,6 +458,7 @@ typedef struct SettingsDataStruct {
   per_stepper_uint32_t tmc_hybrid_threshold;            // M913 X Y Z...
   mot_stepper_int16_t tmc_sgt;                          // M914 X Y Z...
   per_stepper_bool_t tmc_stealth_enabled;               // M569 X Y Z...
+  per_stepper_uint16_t homing_current;                  // M916 X Y Z...
 
   //
   // LIN_ADVANCE
@@ -1422,6 +1423,40 @@ void MarlinSettings::postprocess() {
         TERN_(E7_SENSORLESS, tmc_sgt.E7 = stepperE7.homing_threshold());
       #endif
       EEPROM_WRITE(tmc_sgt);
+    }
+
+    //
+    // Sensorless homing motor current
+    //
+    {
+      per_stepper_uint16_t homing_current{};
+      #if USE_SENSORLESS
+        NUM_AXIS_CODE(
+          TERN_(X_SENSORLESS, homing_current.X = stepperX.homing_current),
+          TERN_(Y_SENSORLESS, homing_current.Y = stepperY.homing_current),
+          TERN_(Z_SENSORLESS, homing_current.Z = stepperZ.homing_current),
+          TERN_(I_SENSORLESS, homing_current.I = stepperI.homing_current),
+          TERN_(J_SENSORLESS, homing_current.J = stepperJ.homing_current),
+          TERN_(K_SENSORLESS, homing_current.K = stepperK.homing_current),
+          TERN_(U_SENSORLESS, homing_current.U = stepperU.homing_current),
+          TERN_(V_SENSORLESS, homing_current.V = stepperV.homing_current),
+          TERN_(W_SENSORLESS, homing_current.W = stepperW.homing_current)
+        );
+        TERN_(X2_SENSORLESS, homing_current.X2 = stepperX2.homing_current);
+        TERN_(Y2_SENSORLESS, homing_current.Y2 = stepperY2.homing_current);
+        TERN_(Z2_SENSORLESS, homing_current.Z2 = stepperZ2.homing_current);
+        TERN_(Z3_SENSORLESS, homing_current.Z3 = stepperZ3.homing_current);
+        TERN_(Z4_SENSORLESS, homing_current.Z4 = stepperZ4.homing_current);
+        TERN_(E0_SENSORLESS, homing_current.E0 = stepperE0.homing_current);
+        TERN_(E1_SENSORLESS, homing_current.E1 = stepperE1.homing_current);
+        TERN_(E2_SENSORLESS, homing_current.E2 = stepperE2.homing_current);
+        TERN_(E3_SENSORLESS, homing_current.E3 = stepperE3.homing_current);
+        TERN_(E4_SENSORLESS, homing_current.E4 = stepperE4.homing_current);
+        TERN_(E5_SENSORLESS, homing_current.E5 = stepperE5.homing_current);
+        TERN_(E6_SENSORLESS, homing_current.E6 = stepperE6.homing_current);
+        TERN_(E7_SENSORLESS, homing_current.E7 = stepperE7.homing_current);
+      #endif
+      EEPROM_WRITE(homing_current);
     }
 
     //
@@ -2408,6 +2443,43 @@ void MarlinSettings::postprocess() {
             TERN_(E5_SENSORLESS, stepperE5.homing_threshold(tmc_sgt.E5));
             TERN_(E6_SENSORLESS, stepperE6.homing_threshold(tmc_sgt.E6));
             TERN_(E7_SENSORLESS, stepperE7.homing_threshold(tmc_sgt.E7));
+          }
+        #endif
+      }
+
+      //
+      // TMC StallGuard threshold.
+      //
+      {
+        mot_stepper_int16_t homing_current;
+        _FIELD_TEST(homing_current);
+        EEPROM_READ(homing_current);
+        #if USE_SENSORLESS
+          if (!validating) {
+            NUM_AXIS_CODE(
+              TERN_(X_SENSORLESS, stepperX.homing_current = homing_current.X),
+              TERN_(Y_SENSORLESS, stepperY.homing_current = homing_current.Y),
+              TERN_(Z_SENSORLESS, stepperZ.homing_current = homing_current.Z),
+              TERN_(I_SENSORLESS, stepperI.homing_current = homing_current.I),
+              TERN_(J_SENSORLESS, stepperJ.homing_current = homing_current.J),
+              TERN_(K_SENSORLESS, stepperK.homing_current = homing_current.K),
+              TERN_(U_SENSORLESS, stepperU.homing_current = homing_current.U),
+              TERN_(V_SENSORLESS, stepperV.homing_current = homing_current.V),
+              TERN_(W_SENSORLESS, stepperW.homing_current = homing_current.W)
+            );
+            TERN_(X2_SENSORLESS, stepperX2.homing_current = homing_current.X2);
+            TERN_(Y2_SENSORLESS, stepperY2.homing_current = homing_current.Y2);
+            TERN_(Z2_SENSORLESS, stepperZ2.homing_current = homing_current.Z2);
+            TERN_(Z3_SENSORLESS, stepperZ3.homing_current = homing_current.Z3);
+            TERN_(Z4_SENSORLESS, stepperZ4.homing_current = homing_current.Z4);
+            TERN_(E0_SENSORLESS, stepperE0.homing_current = homing_current.E0);
+            TERN_(E1_SENSORLESS, stepperE1.homing_current = homing_current.E1);
+            TERN_(E2_SENSORLESS, stepperE2.homing_current = homing_current.E2);
+            TERN_(E3_SENSORLESS, stepperE3.homing_current = homing_current.E3);
+            TERN_(E4_SENSORLESS, stepperE4.homing_current = homing_current.E4);
+            TERN_(E5_SENSORLESS, stepperE5.homing_current = homing_current.E5);
+            TERN_(E6_SENSORLESS, stepperE6.homing_current = homing_current.E6);
+            TERN_(E7_SENSORLESS, stepperE7.homing_current = homing_current.E7);
           }
         #endif
       }
@@ -3757,6 +3829,11 @@ void MarlinSettings::reset() {
       // TMC Sensorless homing thresholds
       //
       TERN_(USE_SENSORLESS, gcode.M914_report(forReplay));
+
+      //
+      // Sensorless homing current
+      //
+      TERN_(USE_SENSORLESS, gcode.M916_report(forReplay));
     #endif
 
     //
