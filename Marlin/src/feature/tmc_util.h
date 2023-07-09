@@ -43,13 +43,6 @@
 
 #define HAS_CURRENT_HOME(N) (defined(N##_CURRENT_HOME) && N##_CURRENT_HOME != N##_CURRENT)
 
-extern uint16_t X_homing_current;
-extern uint16_t Y_homing_current;
-extern uint16_t Z_homing_current;
-extern uint16_t X2_homing_current;
-extern uint16_t Y2_homing_current;
-extern uint16_t Z2_homing_current;
-
 constexpr uint16_t _tmc_thrs(const uint16_t msteps, const uint32_t thrs, const uint32_t spmm) {
   return 12650000UL * msteps / (256 * thrs * spmm);
 }
@@ -88,6 +81,8 @@ class TMCStorage {
       OPTCODE(HAS_STEALTHCHOP,  bool stealthChop_enabled = false)
       OPTCODE(HYBRID_THRESHOLD, uint8_t hybrid_thrs = 0)
       OPTCODE(USE_SENSORLESS,   int16_t homing_thrs = 0)
+      OPTCODE(USE_SENSORLESS, uint16_t homing_current = 0)
+      OPTCODE(USE_SENSORLESS, feedRate_t homing_feedrate = 0)
     } stored;
 };
 
@@ -119,7 +114,7 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
 
     #if HAS_STEALTHCHOP
       bool get_stealthChop()                { return this->en_pwm_mode(); }
-      bool get_stored_stealthChop()         { return this->stored.stealthChop_enabled; }
+      bool get_stored_stealthChop() const   { return this->stored.stealthChop_enabled; }
       void refresh_stepping_mode()          { this->en_pwm_mode(this->stored.stealthChop_enabled); }
       void set_stealthChop(const bool stch) { this->stored.stealthChop_enabled = stch; refresh_stepping_mode(); }
       bool toggle_stepping_mode()           { set_stealthChop(!this->stored.stealthChop_enabled); return get_stealthChop(); }
@@ -132,7 +127,7 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
     }
 
     #if ENABLED(HYBRID_THRESHOLD)
-      uint32_t get_pwm_thrs() {
+      uint32_t get_pwm_thrs() const {
         return _tmc_thrs(this->microsteps(), this->TPWMTHRS(), planner.settings.axis_steps_per_mm[AXIS_ID]);
       }
       void set_pwm_thrs(const uint32_t thrs) {
@@ -142,12 +137,22 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
     #endif
 
     #if USE_SENSORLESS
-      int16_t homing_threshold() { return TMC::sgt(); }
+      int16_t homing_threshold() const { return TMC::sgt(); }
       void homing_threshold(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
+      void set_homing_current(uint16_t mA) { stored.homing_current = mA; }
+      uint16_t get_homing_current() const { return stored.homing_current; }
+      uint16_t apply_homing_current() {
+        if (stored.homing_current == 0) return 0;
+        uint16_t move_current = getMilliamps();
+        rms_current(stored.homing_current);
+        return move_current;
+      }
+      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
+      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
       #if ENABLED(SPI_ENDSTOPS)
         bool test_stall_status();
       #endif
@@ -276,6 +281,16 @@ class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC220
         TMC2209Stepper::SGTHRS(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
+      void set_homing_current(uint16_t mA) { stored.homing_current = mA; }
+      uint16_t get_homing_current() const { return stored.homing_current; }
+      uint16_t apply_homing_current() {
+        if (stored.homing_current == 0) return 0;
+        uint16_t move_current = getMilliamps();
+        rms_current(stored.homing_current);
+        return move_current;
+      }
+      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
+      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
     #endif
 
     #if HAS_MARLINUI_MENU
@@ -322,6 +337,16 @@ class TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC266
         TMC2660Stepper::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
+      void set_homing_current(uint16_t mA) { stored.homing_current = mA; }
+      uint16_t get_homing_current() const { return stored.homing_current; }
+      uint16_t apply_homing_current() {
+        if (stored.homing_current == 0) return 0;
+        uint16_t move_current = getMilliamps();
+        rms_current(stored.homing_current);
+        return move_current;
+      }
+      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
+      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
     #endif
 
     #if HAS_MARLINUI_MENU
