@@ -81,7 +81,6 @@ class TMCStorage {
       OPTCODE(HAS_STEALTHCHOP,  bool stealthChop_enabled = false)
       OPTCODE(HYBRID_THRESHOLD, uint8_t hybrid_thrs = 0)
       OPTCODE(USE_SENSORLESS,   int16_t homing_thrs = 0)
-      OPTCODE(USE_SENSORLESS, uint16_t homing_current = 0)
     } stored;
 };
 
@@ -142,12 +141,11 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
         TMC::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
-      void set_homing_current(uint16_t mA) { this->stored.homing_current = mA; }
-      uint16_t get_homing_current() const { return this->stored.homing_current; }
+      uint16_t homing_current = 0;
       uint16_t apply_homing_current() {
-        if (this->stored.homing_current == 0) return 0;
+        if (homing_current == 0) return 0;
         uint16_t move_current = this->getMilliamps();
-        rms_current(this->stored.homing_current);
+        rms_current(homing_current);
         return move_current;
       }
       #if ENABLED(SPI_ENDSTOPS)
@@ -278,12 +276,11 @@ class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC220
         TMC2209Stepper::SGTHRS(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
-      void set_homing_current(uint16_t mA) { this->stored.homing_current = mA; }
-      uint16_t get_homing_current() const { return this->stored.homing_current; }
+      uint16_t homing_current = 0;
       uint16_t apply_homing_current() {
-        if (this->stored.homing_current == 0) return 0;
+        if (homing_current == 0) return 0;
         uint16_t move_current = this->getMilliamps();
-        rms_current(this->stored.homing_current);
+        rms_current(homing_current);
         return move_current;
       }
     #endif
@@ -332,12 +329,11 @@ class TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC266
         TMC2660Stepper::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
-      void set_homing_current(uint16_t mA) { this->stored.homing_current = mA; }
-      uint16_t get_homing_current() const { return this->stored.homing_current; }
+      uint16_t homing_current = 0;
       uint16_t apply_homing_current() {
-        if (this->stored.homing_current == 0) return 0;
+        if (homing_current == 0) return 0;
         uint16_t move_current = this->getMilliamps();
-        rms_current(this->stored.homing_current);
+        rms_current(homing_current);
         return move_current;
       }
     #endif
