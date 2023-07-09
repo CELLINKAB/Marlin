@@ -118,15 +118,15 @@ void set_axis_sg_thresh(AxisEnum axis, uint16_t thresh)
 constexpr void set_homing_current(AxisEnum axis, uint16_t cur) {
     switch (axis) {
         case AxisEnum::X_AXIS:
-            stepperX.set_homing_current(cur);
-            TERN_(HAS_DUAL_X_STEPPERS, stepperX2.set_homing_current(cur));
+            stepperX.homing_current = cur;
+            TERN_(HAS_DUAL_X_STEPPERS, stepperX2.homing_current = cur);
             break;
         case AxisEnum::Y_AXIS:
-            stepperY.set_homing_current(cur);
-            TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.set_homing_current(cur));
+            stepperY.homing_current = cur;
+            TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.homing_current = cur);
             break;
         case AxisEnum::Z_AXIS:
-            stepperZ.set_homing_current(cur);
+            stepperZ.homing_current = cur;
             break;
         default:
             break;
