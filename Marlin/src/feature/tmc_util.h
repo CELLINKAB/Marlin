@@ -82,7 +82,6 @@ class TMCStorage {
       OPTCODE(HYBRID_THRESHOLD, uint8_t hybrid_thrs = 0)
       OPTCODE(USE_SENSORLESS,   int16_t homing_thrs = 0)
       OPTCODE(USE_SENSORLESS, uint16_t homing_current = 0)
-      OPTCODE(USE_SENSORLESS, feedRate_t homing_feedrate = 0)
     } stored;
 };
 
@@ -151,8 +150,6 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
         rms_current(stored.homing_current);
         return move_current;
       }
-      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
-      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
       #if ENABLED(SPI_ENDSTOPS)
         bool test_stall_status();
       #endif
@@ -289,8 +286,6 @@ class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC220
         rms_current(stored.homing_current);
         return move_current;
       }
-      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
-      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
     #endif
 
     #if HAS_MARLINUI_MENU
@@ -345,8 +340,6 @@ class TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC266
         rms_current(stored.homing_current);
         return move_current;
       }
-      feedRate_t get_homing_feedrate() const {return stored.homing_feedrate;}
-      void set_homing_feedrate(feedRate_t feedrate) {stored.homing_feedrate = feedrate;}
     #endif
 
     #if HAS_MARLINUI_MENU
