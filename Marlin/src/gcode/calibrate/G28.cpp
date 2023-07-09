@@ -155,11 +155,6 @@
 
 #endif // Z_SAFE_HOMING
 
-uint16_t X_homing_current = X_CURRENT_HOME;
-uint16_t Y_homing_current = Y_CURRENT_HOME;
-uint16_t Z_homing_current = Z_CURRENT_HOME;
-uint16_t Y2_homing_current = Y2_CURRENT_HOME;
-
 #if ENABLED(IMPROVE_HOMING_RELIABILITY)
 
   motion_state_t begin_slow_homing() {
