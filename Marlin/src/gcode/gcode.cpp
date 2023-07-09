@@ -1052,6 +1052,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         #endif
         #if USE_SENSORLESS
           case 914: M914(); break;                                // M914: Set StallGuard sensitivity.
+          case 916: M916(); break;                                // M914: Set sensorless homing current
         #endif
         case 919: M919(); break;                                  // M919: Set stepper Chopper Times
       #endif
