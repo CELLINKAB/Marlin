@@ -1663,19 +1663,16 @@ void Endstops::update() {
       };
       if (onoff) {
         #if HAS_DELTA_X_CURRENT
-          saved_current_x = stepperX.getMilliamps();
-          stepperX.rms_current(X_CURRENT_HOME);
-          debug_current_on(PSTR("X"), saved_current_x, X_CURRENT_HOME);
+          saved_current_x = stepperX.apply_homing_current();
+          debug_current_on(PSTR("X"), saved_current_x, stepperX.homing_current);
         #endif
         #if HAS_DELTA_Y_CURRENT
-          saved_current_y = stepperY.getMilliamps();
-          stepperY.rms_current(Y_CURRENT_HOME);
-          debug_current_on(PSTR("Y"), saved_current_y, Y_CURRENT_HOME);
+          saved_current_y = stepperY.apply_homing_current();
+          debug_current_on(PSTR("Y"), saved_current_y, stepperY.homing_current);
         #endif
         #if HAS_CURRENT_HOME(Z)
-          saved_current_z = stepperZ.getMilliamps();
-          stepperZ.rms_current(Z_CURRENT_HOME);
-          debug_current_on(PSTR("Z"), saved_current_z, Z_CURRENT_HOME);
+          saved_current_z = stepperZ.apply_homing_current();
+          debug_current_on(PSTR("Z"), saved_current_z, stepperZ.homing_current);
         #endif
       }
       else {

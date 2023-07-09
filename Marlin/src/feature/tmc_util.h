@@ -277,6 +277,7 @@ class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC220
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
       uint16_t homing_current = 0;
+      // apply homing current to steppers and return the previously applied current
       uint16_t apply_homing_current() {
         if (homing_current == 0) return 0;
         uint16_t move_current = this->getMilliamps();
