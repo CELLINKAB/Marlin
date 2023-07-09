@@ -757,6 +757,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       case 203: M203(); break;                                    // M203: Set max feedrate (units/sec)
       case 204: M204(); break;                                    // M204: Set acceleration
       case 205: M205(); break;                                    // M205: Set advanced settings
+      case 213: M213(); break;                                    // M213: Set homing feedrate
 
       #if HAS_M206_COMMAND
         case 206: M206(); break;                                  // M206: Set home offsets

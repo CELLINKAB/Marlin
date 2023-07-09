@@ -883,6 +883,8 @@ private:
   static void M204_report(const bool forReplay=true);
   static void M205();
   static void M205_report(const bool forReplay=true);
+  static void M213();
+  static void M213_report(const bool forReplay=true);
 
   #if HAS_M206_COMMAND
     static void M206();
