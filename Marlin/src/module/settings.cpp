@@ -1439,6 +1439,38 @@ void MarlinSettings::postprocess() {
     }
 
     //
+    // TMC stepping mode
+    //
+    {
+      _FIELD_TEST(tmc_stealth_enabled);
+
+      per_stepper_bool_t tmc_stealth_enabled = {};
+      TERN_(X_HAS_STEALTHCHOP,  tmc_stealth_enabled.X  = stepperX.get_stored_stealthChop());
+      TERN_(Y_HAS_STEALTHCHOP,  tmc_stealth_enabled.Y  = stepperY.get_stored_stealthChop());
+      TERN_(Z_HAS_STEALTHCHOP,  tmc_stealth_enabled.Z  = stepperZ.get_stored_stealthChop());
+      TERN_(I_HAS_STEALTHCHOP,  tmc_stealth_enabled.I  = stepperI.get_stored_stealthChop());
+      TERN_(J_HAS_STEALTHCHOP,  tmc_stealth_enabled.J  = stepperJ.get_stored_stealthChop());
+      TERN_(K_HAS_STEALTHCHOP,  tmc_stealth_enabled.K  = stepperK.get_stored_stealthChop());
+      TERN_(U_HAS_STEALTHCHOP,  tmc_stealth_enabled.U  = stepperU.get_stored_stealthChop());
+      TERN_(V_HAS_STEALTHCHOP,  tmc_stealth_enabled.V  = stepperV.get_stored_stealthChop());
+      TERN_(W_HAS_STEALTHCHOP,  tmc_stealth_enabled.W  = stepperW.get_stored_stealthChop());
+      TERN_(X2_HAS_STEALTHCHOP, tmc_stealth_enabled.X2 = stepperX2.get_stored_stealthChop());
+      TERN_(Y2_HAS_STEALTHCHOP, tmc_stealth_enabled.Y2 = stepperY2.get_stored_stealthChop());
+      TERN_(Z2_HAS_STEALTHCHOP, tmc_stealth_enabled.Z2 = stepperZ2.get_stored_stealthChop());
+      TERN_(Z3_HAS_STEALTHCHOP, tmc_stealth_enabled.Z3 = stepperZ3.get_stored_stealthChop());
+      TERN_(Z4_HAS_STEALTHCHOP, tmc_stealth_enabled.Z4 = stepperZ4.get_stored_stealthChop());
+      TERN_(E0_HAS_STEALTHCHOP, tmc_stealth_enabled.E0 = stepperE0.get_stored_stealthChop());
+      TERN_(E1_HAS_STEALTHCHOP, tmc_stealth_enabled.E1 = stepperE1.get_stored_stealthChop());
+      TERN_(E2_HAS_STEALTHCHOP, tmc_stealth_enabled.E2 = stepperE2.get_stored_stealthChop());
+      TERN_(E3_HAS_STEALTHCHOP, tmc_stealth_enabled.E3 = stepperE3.get_stored_stealthChop());
+      TERN_(E4_HAS_STEALTHCHOP, tmc_stealth_enabled.E4 = stepperE4.get_stored_stealthChop());
+      TERN_(E5_HAS_STEALTHCHOP, tmc_stealth_enabled.E5 = stepperE5.get_stored_stealthChop());
+      TERN_(E6_HAS_STEALTHCHOP, tmc_stealth_enabled.E6 = stepperE6.get_stored_stealthChop());
+      TERN_(E7_HAS_STEALTHCHOP, tmc_stealth_enabled.E7 = stepperE7.get_stored_stealthChop());
+      EEPROM_WRITE(tmc_stealth_enabled);
+    }
+
+    //
     // Sensorless homing motor current
     //
     {
@@ -1470,38 +1502,6 @@ void MarlinSettings::postprocess() {
         TERN_(E7_SENSORLESS, homing_current.E7 = stepperE7.homing_current);
       #endif
       EEPROM_WRITE(homing_current);
-    }
-
-    //
-    // TMC stepping mode
-    //
-    {
-      _FIELD_TEST(tmc_stealth_enabled);
-
-      per_stepper_bool_t tmc_stealth_enabled = {};
-      TERN_(X_HAS_STEALTHCHOP,  tmc_stealth_enabled.X  = stepperX.get_stored_stealthChop());
-      TERN_(Y_HAS_STEALTHCHOP,  tmc_stealth_enabled.Y  = stepperY.get_stored_stealthChop());
-      TERN_(Z_HAS_STEALTHCHOP,  tmc_stealth_enabled.Z  = stepperZ.get_stored_stealthChop());
-      TERN_(I_HAS_STEALTHCHOP,  tmc_stealth_enabled.I  = stepperI.get_stored_stealthChop());
-      TERN_(J_HAS_STEALTHCHOP,  tmc_stealth_enabled.J  = stepperJ.get_stored_stealthChop());
-      TERN_(K_HAS_STEALTHCHOP,  tmc_stealth_enabled.K  = stepperK.get_stored_stealthChop());
-      TERN_(U_HAS_STEALTHCHOP,  tmc_stealth_enabled.U  = stepperU.get_stored_stealthChop());
-      TERN_(V_HAS_STEALTHCHOP,  tmc_stealth_enabled.V  = stepperV.get_stored_stealthChop());
-      TERN_(W_HAS_STEALTHCHOP,  tmc_stealth_enabled.W  = stepperW.get_stored_stealthChop());
-      TERN_(X2_HAS_STEALTHCHOP, tmc_stealth_enabled.X2 = stepperX2.get_stored_stealthChop());
-      TERN_(Y2_HAS_STEALTHCHOP, tmc_stealth_enabled.Y2 = stepperY2.get_stored_stealthChop());
-      TERN_(Z2_HAS_STEALTHCHOP, tmc_stealth_enabled.Z2 = stepperZ2.get_stored_stealthChop());
-      TERN_(Z3_HAS_STEALTHCHOP, tmc_stealth_enabled.Z3 = stepperZ3.get_stored_stealthChop());
-      TERN_(Z4_HAS_STEALTHCHOP, tmc_stealth_enabled.Z4 = stepperZ4.get_stored_stealthChop());
-      TERN_(E0_HAS_STEALTHCHOP, tmc_stealth_enabled.E0 = stepperE0.get_stored_stealthChop());
-      TERN_(E1_HAS_STEALTHCHOP, tmc_stealth_enabled.E1 = stepperE1.get_stored_stealthChop());
-      TERN_(E2_HAS_STEALTHCHOP, tmc_stealth_enabled.E2 = stepperE2.get_stored_stealthChop());
-      TERN_(E3_HAS_STEALTHCHOP, tmc_stealth_enabled.E3 = stepperE3.get_stored_stealthChop());
-      TERN_(E4_HAS_STEALTHCHOP, tmc_stealth_enabled.E4 = stepperE4.get_stored_stealthChop());
-      TERN_(E5_HAS_STEALTHCHOP, tmc_stealth_enabled.E5 = stepperE5.get_stored_stealthChop());
-      TERN_(E6_HAS_STEALTHCHOP, tmc_stealth_enabled.E6 = stepperE6.get_stored_stealthChop());
-      TERN_(E7_HAS_STEALTHCHOP, tmc_stealth_enabled.E7 = stepperE7.get_stored_stealthChop());
-      EEPROM_WRITE(tmc_stealth_enabled);
     }
 
     //
@@ -2469,43 +2469,6 @@ void MarlinSettings::postprocess() {
         #endif
       }
 
-      //
-      // TMC StallGuard threshold.
-      //
-      {
-        mot_stepper_int16_t homing_current;
-        _FIELD_TEST(homing_current);
-        EEPROM_READ(homing_current);
-        #if USE_SENSORLESS
-          if (!validating) {
-            NUM_AXIS_CODE(
-              TERN_(X_SENSORLESS, stepperX.homing_current = homing_current.X),
-              TERN_(Y_SENSORLESS, stepperY.homing_current = homing_current.Y),
-              TERN_(Z_SENSORLESS, stepperZ.homing_current = homing_current.Z),
-              TERN_(I_SENSORLESS, stepperI.homing_current = homing_current.I),
-              TERN_(J_SENSORLESS, stepperJ.homing_current = homing_current.J),
-              TERN_(K_SENSORLESS, stepperK.homing_current = homing_current.K),
-              TERN_(U_SENSORLESS, stepperU.homing_current = homing_current.U),
-              TERN_(V_SENSORLESS, stepperV.homing_current = homing_current.V),
-              TERN_(W_SENSORLESS, stepperW.homing_current = homing_current.W)
-            );
-            TERN_(X2_SENSORLESS, stepperX2.homing_current = homing_current.X2);
-            TERN_(Y2_SENSORLESS, stepperY2.homing_current = homing_current.Y2);
-            TERN_(Z2_SENSORLESS, stepperZ2.homing_current = homing_current.Z2);
-            TERN_(Z3_SENSORLESS, stepperZ3.homing_current = homing_current.Z3);
-            TERN_(Z4_SENSORLESS, stepperZ4.homing_current = homing_current.Z4);
-            TERN_(E0_SENSORLESS, stepperE0.homing_current = homing_current.E0);
-            TERN_(E1_SENSORLESS, stepperE1.homing_current = homing_current.E1);
-            TERN_(E2_SENSORLESS, stepperE2.homing_current = homing_current.E2);
-            TERN_(E3_SENSORLESS, stepperE3.homing_current = homing_current.E3);
-            TERN_(E4_SENSORLESS, stepperE4.homing_current = homing_current.E4);
-            TERN_(E5_SENSORLESS, stepperE5.homing_current = homing_current.E5);
-            TERN_(E6_SENSORLESS, stepperE6.homing_current = homing_current.E6);
-            TERN_(E7_SENSORLESS, stepperE7.homing_current = homing_current.E7);
-          }
-        #endif
-      }
-
       // TMC stepping mode
       {
         _FIELD_TEST(tmc_stealth_enabled);
@@ -2539,6 +2502,43 @@ void MarlinSettings::postprocess() {
             TERN_(E5_HAS_STEALTHCHOP, SET_STEPPING_MODE(E5));
             TERN_(E6_HAS_STEALTHCHOP, SET_STEPPING_MODE(E6));
             TERN_(E7_HAS_STEALTHCHOP, SET_STEPPING_MODE(E7));
+          }
+        #endif
+      }
+
+      //
+      // Sensorless homing current.
+      //
+      {
+        mot_stepper_int16_t homing_current;
+        _FIELD_TEST(homing_current);
+        EEPROM_READ(homing_current);
+        #if USE_SENSORLESS
+          if (!validating) {
+            NUM_AXIS_CODE(
+              TERN_(X_SENSORLESS, stepperX.homing_current = homing_current.X),
+              TERN_(Y_SENSORLESS, stepperY.homing_current = homing_current.Y),
+              TERN_(Z_SENSORLESS, stepperZ.homing_current = homing_current.Z),
+              TERN_(I_SENSORLESS, stepperI.homing_current = homing_current.I),
+              TERN_(J_SENSORLESS, stepperJ.homing_current = homing_current.J),
+              TERN_(K_SENSORLESS, stepperK.homing_current = homing_current.K),
+              TERN_(U_SENSORLESS, stepperU.homing_current = homing_current.U),
+              TERN_(V_SENSORLESS, stepperV.homing_current = homing_current.V),
+              TERN_(W_SENSORLESS, stepperW.homing_current = homing_current.W)
+            );
+            TERN_(X2_SENSORLESS, stepperX2.homing_current = homing_current.X2);
+            TERN_(Y2_SENSORLESS, stepperY2.homing_current = homing_current.Y2);
+            TERN_(Z2_SENSORLESS, stepperZ2.homing_current = homing_current.Z2);
+            TERN_(Z3_SENSORLESS, stepperZ3.homing_current = homing_current.Z3);
+            TERN_(Z4_SENSORLESS, stepperZ4.homing_current = homing_current.Z4);
+            TERN_(E0_SENSORLESS, stepperE0.homing_current = homing_current.E0);
+            TERN_(E1_SENSORLESS, stepperE1.homing_current = homing_current.E1);
+            TERN_(E2_SENSORLESS, stepperE2.homing_current = homing_current.E2);
+            TERN_(E3_SENSORLESS, stepperE3.homing_current = homing_current.E3);
+            TERN_(E4_SENSORLESS, stepperE4.homing_current = homing_current.E4);
+            TERN_(E5_SENSORLESS, stepperE5.homing_current = homing_current.E5);
+            TERN_(E6_SENSORLESS, stepperE6.homing_current = homing_current.E6);
+            TERN_(E7_SENSORLESS, stepperE7.homing_current = homing_current.E7);
           }
         #endif
       }
