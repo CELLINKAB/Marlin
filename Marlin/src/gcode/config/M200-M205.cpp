@@ -235,10 +235,10 @@ void GcodeSuite::M213() {
 }
 
 void GcodeSuite::M213_report(const bool forReplay/*=true*/) {
-  report_heading_etc(forReplay, F(STR_MAX_FEEDRATES));
+  report_heading_etc(forReplay, F("Homing feedrates (mm/m)"));
   SERIAL_ECHOLNPGM_P(
     LIST_N(DOUBLE(NUM_AXES),
-      PSTR("  M203 X"), LINEAR_UNIT(homing_feedrate_mm_m[X_AXIS]),
+      PSTR("  M213 X"), LINEAR_UNIT(homing_feedrate_mm_m[X_AXIS]),
       SP_Y_STR, LINEAR_UNIT(homing_feedrate_mm_m[Y_AXIS]),
       SP_Z_STR, LINEAR_UNIT(homing_feedrate_mm_m[Z_AXIS]),
       SP_I_STR, LINEAR_UNIT(homing_feedrate_mm_m[I_AXIS]),

@@ -1311,6 +1311,7 @@ private:
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     static void M1029();
+    static void M1029_report(bool for_replay);
   #endif
 
   #if ENABLED(DYNAMIC_3POINT_LEVELING)

@@ -231,11 +231,11 @@ void GcodeSuite::M916() {
 }
 
 void GcodeSuite::M916_report(const bool forReplay/*=true*/) {
-  report_heading(forReplay, F(STR_STEPPER_DRIVER_CURRENT));
+  report_heading(forReplay, F("Sensorless homing current"));
 
   auto say_M906 = [](const bool forReplay) {
     report_echo_start(forReplay);
-    SERIAL_ECHOPGM("  M906");
+    SERIAL_ECHOPGM("  M916");
   };
 
   #if  AXIS_IS_TMC(X) || AXIS_IS_TMC(Y) || AXIS_IS_TMC(Z) \
