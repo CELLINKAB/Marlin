@@ -155,11 +155,6 @@
 
 #endif // Z_SAFE_HOMING
 
-uint16_t X_homing_current = X_CURRENT_HOME;
-uint16_t Y_homing_current = Y_CURRENT_HOME;
-uint16_t Z_homing_current = Z_CURRENT_HOME;
-uint16_t Y2_homing_current = Y2_CURRENT_HOME;
-
 #if ENABLED(IMPROVE_HOMING_RELIABILITY)
 
   motion_state_t begin_slow_homing() {
@@ -279,59 +274,49 @@ void GcodeSuite::G28() {
       DEBUG_ECHOF(s); DEBUG_ECHOLNPGM(" current: ", a, " -> ", b);
     };
     #if HAS_CURRENT_HOME(X)
-      const int16_t tmc_save_current_X = stepperX.getMilliamps();
-      stepperX.rms_current(X_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_X), tmc_save_current_X, X_homing_current);
+      const int16_t tmc_save_current_X = stepperX.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_X), tmc_save_current_X, stepperX.homing_current);
     #endif
     #if HAS_CURRENT_HOME(X2)
-      const int16_t tmc_save_current_X2 = stepperX2.getMilliamps();
+      const int16_t tmc_save_current_X2 = stepperX2.apply_homing_current();
       stepperX2.rms_current(X2_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_X2), tmc_save_current_X2, X2_CURRENT_HOME);
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_X2), tmc_save_current_X2, stepperX2.homing_current);
     #endif
     #if HAS_CURRENT_HOME(Y)
-      const int16_t tmc_save_current_Y = stepperY.getMilliamps();
-      stepperY.rms_current(Y_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_Y), tmc_save_current_Y, Y_homing_current);
+      const int16_t tmc_save_current_Y = stepperY.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_Y), tmc_save_current_Y, stepperY.homing_current);
     #endif
     #if HAS_CURRENT_HOME(Y2)
-      const int16_t tmc_save_current_Y2 = stepperY2.getMilliamps();
-      stepperY2.rms_current(Y2_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_Y2), tmc_save_current_Y2, Y2_homing_current);
+      const int16_t tmc_save_current_Y2 = stepperY2.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_Y2), tmc_save_current_Y2, stepperY2.homing_current);
     #endif
     #if HAS_CURRENT_HOME(Z)
-      const int16_t tmc_save_current_Z = stepperZ.getMilliamps();
-      stepperZ.rms_current(Z_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_Z), tmc_save_current_Z, Z_CURRENT_HOME);
+      const int16_t tmc_save_current_Z = stepperZ.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_Z), tmc_save_current_Z, stepperZ.homing_current);
     #endif
     #if HAS_CURRENT_HOME(I)
-      const int16_t tmc_save_current_I = stepperI.getMilliamps();
-      stepperI.rms_current(I_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_I), tmc_save_current_I, I_CURRENT_HOME);
+      const int16_t tmc_save_current_I = stepperI.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_I), tmc_save_current_I, stepperI.homing_current);
     #endif
     #if HAS_CURRENT_HOME(J)
-      const int16_t tmc_save_current_J = stepperJ.getMilliamps();
-      stepperJ.rms_current(J_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_J), tmc_save_current_J, J_CURRENT_HOME);
+      const int16_t tmc_save_current_J = stepperJ.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_J), tmc_save_current_J, stepperJ.homing_current);
     #endif
     #if HAS_CURRENT_HOME(K)
-      const int16_t tmc_save_current_K = stepperK.getMilliamps();
-      stepperK.rms_current(K_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_K), tmc_save_current_K, K_CURRENT_HOME);
+      const int16_t tmc_save_current_K = stepperK.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_K), tmc_save_current_K, stepperK.homing_current);
     #endif
     #if HAS_CURRENT_HOME(U)
-      const int16_t tmc_save_current_U = stepperU.getMilliamps();
-      stepperU.rms_current(U_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_U), tmc_save_current_U, U_CURRENT_HOME);
+      const int16_t tmc_save_current_U = stepperU.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_U), tmc_save_current_U, stepperU.homing_current);
     #endif
     #if HAS_CURRENT_HOME(V)
-      const int16_t tmc_save_current_V = stepperV.getMilliamps();
-      stepperV.rms_current(V_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_V), tmc_save_current_V, V_CURRENT_HOME);
+      const int16_t tmc_save_current_V = stepperV.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_V), tmc_save_current_V, stepperV.homing_current);
     #endif
     #if HAS_CURRENT_HOME(W)
-      const int16_t tmc_save_current_W = stepperW.getMilliamps();
-      stepperW.rms_current(W_CURRENT_HOME);
-      if (DEBUGGING(LEVELING)) debug_current(F(STR_W), tmc_save_current_W, W_CURRENT_HOME);
+      const int16_t tmc_save_current_W = stepperW.apply_homing_current();
+      if (DEBUGGING(LEVELING)) debug_current(F(STR_W), tmc_save_current_W, stepperW.homing_current);
     #endif
     #if SENSORLESS_STALLGUARD_DELAY
       safe_delay(SENSORLESS_STALLGUARD_DELAY); // Short delay needed to settle

@@ -1505,7 +1505,7 @@ void prepare_line_to_destination() {
     return homing_feedrate(axis) / float(hbd);
   }
 
-  xyz_feedrate_t homing_feedrate_mm_m = HOMING_FEEDRATE_MM_M;
+  feedRate_t homing_feedrate_mm_m[DISTINCT_AXES] = HOMING_FEEDRATE_MM_M;
 
   #if ENABLED(SENSORLESS_HOMING)
     /**

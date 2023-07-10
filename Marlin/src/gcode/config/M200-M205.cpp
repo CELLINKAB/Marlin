@@ -219,6 +219,38 @@ void GcodeSuite::M203_report(const bool forReplay/*=true*/) {
 }
 
 /**
+ * M213: Set feedrate your machine should use while homing in units/min
+ *
+ *       With multiple extruders use T to specify which one.
+ */
+void GcodeSuite::M213() {
+  if (!parser.seen(STR_AXES_MAIN))
+    return M213_report();
+
+  LOOP_DISTINCT_AXES(i)
+    if (parser.seenval(AXIS_CHAR(i))) {
+      const AxisEnum a = static_cast<AxisEnum>(i);
+      homing_feedrate_mm_m[a] = parser.value_float();
+    }
+}
+
+void GcodeSuite::M213_report(const bool forReplay/*=true*/) {
+  report_heading_etc(forReplay, F("Homing feedrates (mm/m)"));
+  SERIAL_ECHOLNPGM_P(
+    LIST_N(DOUBLE(NUM_AXES),
+      PSTR("  M213 X"), LINEAR_UNIT(homing_feedrate_mm_m[X_AXIS]),
+      SP_Y_STR, LINEAR_UNIT(homing_feedrate_mm_m[Y_AXIS]),
+      SP_Z_STR, LINEAR_UNIT(homing_feedrate_mm_m[Z_AXIS]),
+      SP_I_STR, LINEAR_UNIT(homing_feedrate_mm_m[I_AXIS]),
+      SP_J_STR, LINEAR_UNIT(homing_feedrate_mm_m[J_AXIS]),
+      SP_K_STR, LINEAR_UNIT(homing_feedrate_mm_m[K_AXIS]),
+      SP_U_STR, LINEAR_UNIT(homing_feedrate_mm_m[U_AXIS]),
+      SP_V_STR, LINEAR_UNIT(homing_feedrate_mm_m[V_AXIS]),
+      SP_W_STR, LINEAR_UNIT(homing_feedrate_mm_m[W_AXIS])
+    ));
+}
+
+/**
  * M204: Set Accelerations in units/sec^2 (M204 P1200 R3000 T3000)
  *
  *    P = Printing moves

@@ -883,6 +883,8 @@ private:
   static void M204_report(const bool forReplay=true);
   static void M205();
   static void M205_report(const bool forReplay=true);
+  static void M213();
+  static void M213_report(const bool forReplay=true);
 
   #if HAS_M206_COMMAND
     static void M206();
@@ -1210,6 +1212,8 @@ private:
     #if USE_SENSORLESS
       static void M914();
       static void M914_report(const bool forReplay=true);
+      static void M916();
+      static void M916_report(const bool forReplay=true);
     #endif
     static void M919();
   #endif
@@ -1307,6 +1311,7 @@ private:
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     static void M1029();
+    static void M1029_report(bool for_replay);
   #endif
 
   #if ENABLED(DYNAMIC_3POINT_LEVELING)

@@ -73,20 +73,20 @@ extern xyz_pos_t cartes;
  * Feed rates are often configured with mm/m
  * but the planner and stepper like mm/s units.
  */
-extern xyz_feedrate_t homing_feedrate_mm_m;
+extern feedRate_t homing_feedrate_mm_m[DISTINCT_AXES];
 FORCE_INLINE feedRate_t homing_feedrate(const AxisEnum a) {
-  float v = TERN0(HAS_Z_AXIS, homing_feedrate_mm_m.z);
+  float v = TERN0(HAS_Z_AXIS, homing_feedrate_mm_m[AxisEnum::Z_AXIS]);
   #if DISABLED(DELTA)
     NUM_AXIS_CODE(
-           if (a == X_AXIS) v = homing_feedrate_mm_m.x,
-      else if (a == Y_AXIS) v = homing_feedrate_mm_m.y,
-      else if (a == Z_AXIS) v = homing_feedrate_mm_m.z,
-      else if (a == I_AXIS) v = homing_feedrate_mm_m.i,
-      else if (a == J_AXIS) v = homing_feedrate_mm_m.j,
-      else if (a == K_AXIS) v = homing_feedrate_mm_m.k,
-      else if (a == U_AXIS) v = homing_feedrate_mm_m.u,
-      else if (a == V_AXIS) v = homing_feedrate_mm_m.v,
-      else if (a == W_AXIS) v = homing_feedrate_mm_m.w
+           if (a == X_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == Y_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == Z_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == I_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == J_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == K_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == U_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == V_AXIS) v = homing_feedrate_mm_m[a],
+      else if (a == W_AXIS) v = homing_feedrate_mm_m[a]
     );
   #endif
   return MMM_TO_MMS(v);

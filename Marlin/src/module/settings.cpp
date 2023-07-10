@@ -239,6 +239,11 @@ typedef struct SettingsDataStruct {
   float planner_junction_deviation_mm;                  // M205 J     planner.junction_deviation_mm
 
   //
+  // Homing feedrate
+  //
+  feedRate_t homing_feedrate[DISTINCT_AXES];
+
+  //
   // Home Offset
   //
   xyz_pos_t home_offset;                                // M206 XYZ / M665 TPZ
@@ -458,6 +463,7 @@ typedef struct SettingsDataStruct {
   per_stepper_uint32_t tmc_hybrid_threshold;            // M913 X Y Z...
   mot_stepper_int16_t tmc_sgt;                          // M914 X Y Z...
   per_stepper_bool_t tmc_stealth_enabled;               // M569 X Y Z...
+  per_stepper_uint16_t homing_current;                  // M916 X Y Z...
 
   //
   // LIN_ADVANCE
@@ -835,6 +841,14 @@ void MarlinSettings::postprocess() {
 
       TERN_(CLASSIC_JERK, dummyf = 0.02f);
       EEPROM_WRITE(TERN(CLASSIC_JERK, dummyf, planner.junction_deviation_mm));
+    }
+
+    //
+    // Homing feedrate
+    //
+
+    {
+      EEPROM_WRITE(homing_feedrate_mm_m);
     }
 
     //
@@ -1457,6 +1471,40 @@ void MarlinSettings::postprocess() {
     }
 
     //
+    // Sensorless homing motor current
+    //
+    {
+      per_stepper_uint16_t homing_current{};
+      #if USE_SENSORLESS
+        NUM_AXIS_CODE(
+          TERN_(X_SENSORLESS, homing_current.X = stepperX.homing_current),
+          TERN_(Y_SENSORLESS, homing_current.Y = stepperY.homing_current),
+          TERN_(Z_SENSORLESS, homing_current.Z = stepperZ.homing_current),
+          TERN_(I_SENSORLESS, homing_current.I = stepperI.homing_current),
+          TERN_(J_SENSORLESS, homing_current.J = stepperJ.homing_current),
+          TERN_(K_SENSORLESS, homing_current.K = stepperK.homing_current),
+          TERN_(U_SENSORLESS, homing_current.U = stepperU.homing_current),
+          TERN_(V_SENSORLESS, homing_current.V = stepperV.homing_current),
+          TERN_(W_SENSORLESS, homing_current.W = stepperW.homing_current)
+        );
+        TERN_(X2_SENSORLESS, homing_current.X2 = stepperX2.homing_current);
+        TERN_(Y2_SENSORLESS, homing_current.Y2 = stepperY2.homing_current);
+        TERN_(Z2_SENSORLESS, homing_current.Z2 = stepperZ2.homing_current);
+        TERN_(Z3_SENSORLESS, homing_current.Z3 = stepperZ3.homing_current);
+        TERN_(Z4_SENSORLESS, homing_current.Z4 = stepperZ4.homing_current);
+        TERN_(E0_SENSORLESS, homing_current.E0 = stepperE0.homing_current);
+        TERN_(E1_SENSORLESS, homing_current.E1 = stepperE1.homing_current);
+        TERN_(E2_SENSORLESS, homing_current.E2 = stepperE2.homing_current);
+        TERN_(E3_SENSORLESS, homing_current.E3 = stepperE3.homing_current);
+        TERN_(E4_SENSORLESS, homing_current.E4 = stepperE4.homing_current);
+        TERN_(E5_SENSORLESS, homing_current.E5 = stepperE5.homing_current);
+        TERN_(E6_SENSORLESS, homing_current.E6 = stepperE6.homing_current);
+        TERN_(E7_SENSORLESS, homing_current.E7 = stepperE7.homing_current);
+      #endif
+      EEPROM_WRITE(homing_current);
+    }
+
+    //
     // Linear Advance
     //
     {
@@ -1820,6 +1868,15 @@ void MarlinSettings::postprocess() {
         #endif
 
         EEPROM_READ(TERN(CLASSIC_JERK, dummyf, planner.junction_deviation_mm));
+      }
+
+      //
+      // Homing feedrate
+      //
+      {
+        _FIELD_TEST(homing_feedrate);
+        feedRate_t homing_feedrate[DISTINCT_AXES];
+        EEPROM_READ(homing_feedrate);
       }
 
       //
@@ -2450,6 +2507,43 @@ void MarlinSettings::postprocess() {
       }
 
       //
+      // Sensorless homing current.
+      //
+      {
+        mot_stepper_int16_t homing_current;
+        _FIELD_TEST(homing_current);
+        EEPROM_READ(homing_current);
+        #if USE_SENSORLESS
+          if (!validating) {
+            NUM_AXIS_CODE(
+              TERN_(X_SENSORLESS, stepperX.homing_current = homing_current.X),
+              TERN_(Y_SENSORLESS, stepperY.homing_current = homing_current.Y),
+              TERN_(Z_SENSORLESS, stepperZ.homing_current = homing_current.Z),
+              TERN_(I_SENSORLESS, stepperI.homing_current = homing_current.I),
+              TERN_(J_SENSORLESS, stepperJ.homing_current = homing_current.J),
+              TERN_(K_SENSORLESS, stepperK.homing_current = homing_current.K),
+              TERN_(U_SENSORLESS, stepperU.homing_current = homing_current.U),
+              TERN_(V_SENSORLESS, stepperV.homing_current = homing_current.V),
+              TERN_(W_SENSORLESS, stepperW.homing_current = homing_current.W)
+            );
+            TERN_(X2_SENSORLESS, stepperX2.homing_current = homing_current.X2);
+            TERN_(Y2_SENSORLESS, stepperY2.homing_current = homing_current.Y2);
+            TERN_(Z2_SENSORLESS, stepperZ2.homing_current = homing_current.Z2);
+            TERN_(Z3_SENSORLESS, stepperZ3.homing_current = homing_current.Z3);
+            TERN_(Z4_SENSORLESS, stepperZ4.homing_current = homing_current.Z4);
+            TERN_(E0_SENSORLESS, stepperE0.homing_current = homing_current.E0);
+            TERN_(E1_SENSORLESS, stepperE1.homing_current = homing_current.E1);
+            TERN_(E2_SENSORLESS, stepperE2.homing_current = homing_current.E2);
+            TERN_(E3_SENSORLESS, stepperE3.homing_current = homing_current.E3);
+            TERN_(E4_SENSORLESS, stepperE4.homing_current = homing_current.E4);
+            TERN_(E5_SENSORLESS, stepperE5.homing_current = homing_current.E5);
+            TERN_(E6_SENSORLESS, stepperE6.homing_current = homing_current.E6);
+            TERN_(E7_SENSORLESS, stepperE7.homing_current = homing_current.E7);
+          }
+        #endif
+      }
+
+      //
       // Linear Advance
       //
       {
@@ -2976,6 +3070,9 @@ void MarlinSettings::reset() {
   planner.settings.travel_acceleration = DEFAULT_TRAVEL_ACCELERATION;
   planner.settings.min_feedrate_mm_s = feedRate_t(DEFAULT_MINIMUMFEEDRATE);
   planner.settings.min_travel_feedrate_mm_s = feedRate_t(DEFAULT_MINTRAVELFEEDRATE);
+
+  feedRate_t tmp_homing_feedrate[DISTINCT_AXES] = HOMING_FEEDRATE_MM_M;
+  LOOP_DISTINCT_AXES(i) homing_feedrate_mm_m[i] = tmp_homing_feedrate[i];
 
   #if HAS_CLASSIC_JERK
     #ifndef DEFAULT_XJERK
@@ -3601,6 +3698,11 @@ void MarlinSettings::reset() {
     TERN_(HAS_M206_COMMAND, gcode.M206_report(forReplay));
 
     //
+    // M213 Homing Feedrate
+    //
+    gcode.M213_report(forReplay);
+
+    //
     // M218 Hotend offsets
     //
     TERN_(HAS_HOTEND_OFFSET, gcode.M218_report(forReplay));
@@ -3757,6 +3859,11 @@ void MarlinSettings::reset() {
       // TMC Sensorless homing thresholds
       //
       TERN_(USE_SENSORLESS, gcode.M914_report(forReplay));
+
+      //
+      // Sensorless homing current
+      //
+      TERN_(USE_SENSORLESS, gcode.M916_report(forReplay));
     #endif
 
     //

@@ -757,6 +757,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       case 203: M203(); break;                                    // M203: Set max feedrate (units/sec)
       case 204: M204(); break;                                    // M204: Set acceleration
       case 205: M205(); break;                                    // M205: Set advanced settings
+      case 213: M213(); break;                                    // M213: Set homing feedrate
 
       #if HAS_M206_COMMAND
         case 206: M206(); break;                                  // M206: Set home offsets
@@ -1052,6 +1053,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         #endif
         #if USE_SENSORLESS
           case 914: M914(); break;                                // M914: Set StallGuard sensitivity.
+          case 916: M916(); break;                                // M914: Set sensorless homing current
         #endif
         case 919: M919(); break;                                  // M919: Set stepper Chopper Times
       #endif
