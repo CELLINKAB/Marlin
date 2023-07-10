@@ -224,12 +224,12 @@ void GcodeSuite::M203_report(const bool forReplay/*=true*/) {
  *       With multiple extruders use T to specify which one.
  */
 void GcodeSuite::M213() {
-  if (!parser.seen(STR_AXES_LOGICAL))
+  if (!parser.seen(STR_AXES_MAIN))
     return M213_report();
 
-  LOOP_LOGICAL_AXES(i)
+  LOOP_DISTINCT_AXES(i)
     if (parser.seenval(AXIS_CHAR(i))) {
-      const AxisEnum a = TERN(HAS_EXTRUDERS, (i == E_AXIS ? E_AXIS_N(target_extruder) : (AxisEnum)i), (AxisEnum)i);
+      const AxisEnum a = static_cast<AxisEnum>(i);
       homing_feedrate_mm_m[a] = parser.value_float();
     }
 }

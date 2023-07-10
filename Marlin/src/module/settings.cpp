@@ -239,6 +239,11 @@ typedef struct SettingsDataStruct {
   float planner_junction_deviation_mm;                  // M205 J     planner.junction_deviation_mm
 
   //
+  // Homing feedrate
+  //
+  feedRate_t homing_feedrate[DISTINCT_AXES];
+
+  //
   // Home Offset
   //
   xyz_pos_t home_offset;                                // M206 XYZ / M665 TPZ
@@ -836,6 +841,14 @@ void MarlinSettings::postprocess() {
 
       TERN_(CLASSIC_JERK, dummyf = 0.02f);
       EEPROM_WRITE(TERN(CLASSIC_JERK, dummyf, planner.junction_deviation_mm));
+    }
+
+    //
+    // Homing feedrate
+    //
+
+    {
+      EEPROM_WRITE(homing_feedrate_mm_m);
     }
 
     //
@@ -1855,6 +1868,15 @@ void MarlinSettings::postprocess() {
         #endif
 
         EEPROM_READ(TERN(CLASSIC_JERK, dummyf, planner.junction_deviation_mm));
+      }
+
+      //
+      // Homing feedrate
+      //
+      {
+        _FIELD_TEST(homing_feedrate);
+        feedRate_t homing_feedrate[DISTINCT_AXES];
+        EEPROM_READ(homing_feedrate);
       }
 
       //
@@ -3049,6 +3071,9 @@ void MarlinSettings::reset() {
   planner.settings.min_feedrate_mm_s = feedRate_t(DEFAULT_MINIMUMFEEDRATE);
   planner.settings.min_travel_feedrate_mm_s = feedRate_t(DEFAULT_MINTRAVELFEEDRATE);
 
+  feedRate_t tmp_homing_feedrate[DISTINCT_AXES] = HOMING_FEEDRATE_MM_M;
+  LOOP_DISTINCT_AXES(i) homing_feedrate_mm_m[i] = tmp_homing_feedrate[i];
+
   #if HAS_CLASSIC_JERK
     #ifndef DEFAULT_XJERK
       #define DEFAULT_XJERK 0
@@ -3671,6 +3696,11 @@ void MarlinSettings::reset() {
     // M206 Home Offset
     //
     TERN_(HAS_M206_COMMAND, gcode.M206_report(forReplay));
+
+    //
+    // M213 Homing Feedrate
+    //
+    gcode.M213_report(forReplay);
 
     //
     // M218 Hotend offsets
