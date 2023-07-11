@@ -39,14 +39,14 @@ void GcodeSuite::G29() {
 
   TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(M_PROBE));
 
-  #if ENABLED(ALWAYS_MACHINE_NATIVE_UBL)    // use machine native workspace for bed leveling
+  #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
     const auto old_workspace = active_coordinate_system;
     select_coordinate_system(-1);
   #endif
 
   bedlevel.G29();
 
-  #if ENABLED(ALWAYS_MACHINE_NATIVE_UBL)
+  #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)
     select_coordinate_system(old_workspace);
   #endif
 
