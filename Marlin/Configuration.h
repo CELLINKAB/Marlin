@@ -1504,7 +1504,7 @@
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
-#define PROBING_MARGIN 2
+#define PROBING_MARGIN 1
 
 // X and Y axis travel speed (mm/min) between probes
 #define XY_PROBE_FEEDRATE (40*60)
@@ -1711,8 +1711,8 @@
 // @section geometry
 
 // The size of the printable area
-#define X_BED_SIZE 108
-#define Y_BED_SIZE 72
+#define X_BED_SIZE 120
+#define Y_BED_SIZE 80
 
 // Travel limits (mm) after homing, corresponding to endstop positions.
 #define X_MIN_POS -369
@@ -2002,7 +2002,7 @@
 
   //#define MESH_EDIT_GFX_OVERLAY   // Display a graphics overlay while editing the mesh
 
-  #define MESH_INSET 1              // Set Mesh bounds as an inset region of the bed
+  #define MESH_INSET 2              // Set Mesh bounds as an inset region of the bed
   #define GRID_MAX_POINTS_X 6      // Don't use more than 15 points per axis, implementation limited.
   #define GRID_MAX_POINTS_Y 4
 
