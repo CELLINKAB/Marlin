@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V89"
+#define EEPROM_VERSION "C01"
 #define EEPROM_OFFSET 0
 
 // Check the integrity of data offsets.

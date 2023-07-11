@@ -85,6 +85,7 @@ static void pre_g29_return(const bool retry, const bool did) {
 
 #define G29_RETURN(retry, did) do{ \
   pre_g29_return(TERN0(G29_RETRY_AND_RECOVER, retry), did); \
+  TERN_(ALWAYS_MACHINE_NATIVE_ABL, select_coordinate_system(old_workspace)); \
   return TERN_(G29_RETRY_AND_RECOVER, retry); \
 }while(0)
 
@@ -228,6 +229,11 @@ public:
 G29_TYPE GcodeSuite::G29() {
   DEBUG_SECTION(log_G29, "G29", DEBUGGING(LEVELING));
 
+  #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
+    const auto old_workspace = active_coordinate_system;
+    select_coordinate_system(-1);
+  #endif
+
   // Leveling state is persistent when done manually with multiple G29 commands
   TERN_(PROBE_MANUALLY, static) G29_State abl;
 
@@ -344,7 +350,13 @@ G29_TYPE GcodeSuite::G29() {
     #endif
 
     // Jettison bed leveling data
-    if (!seen_w && parser.seen_test('J')) {
+    // if (!seen_w && parser.seen_test('J')) {
+    //   reset_bed_level();
+    //   G29_RETURN(false, false);
+    // }
+
+    if (!seen_w && parser.seenval('P') && parser.value_int() == 0) // emulate UBL behavior
+    {
       reset_bed_level();
       G29_RETURN(false, false);
     }

@@ -3622,8 +3622,8 @@
  */
 #define CNC_COORDINATE_SYSTEMS
 #ifdef CNC_COORDINATE_SYSTEMS
-// force using native workspace for UBL
-#define ALWAYS_MACHINE_NATIVE_UBL
+// force using native workspace for ABL
+#define ALWAYS_MACHINE_NATIVE_ABL
 #endif
 
 // @section reporting
