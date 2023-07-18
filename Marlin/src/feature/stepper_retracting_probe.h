@@ -85,6 +85,8 @@ private:
             stepper_init();
         return *_stepper;
     }
+
+    void unstick();
 };
 
 extern StepperRetractingProbe stepper_probe;
