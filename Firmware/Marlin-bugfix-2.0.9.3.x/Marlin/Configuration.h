@@ -1038,6 +1038,11 @@
 #endif
 
 /**
+ * Enable relative movement command.
+ */
+#define G7_RELATIVE_MOVE
+
+/**
  * S-Curve Acceleration
  *
  * This option eliminates vibration during printing by fitting a Bézier
