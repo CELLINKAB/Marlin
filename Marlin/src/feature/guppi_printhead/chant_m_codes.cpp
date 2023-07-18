@@ -231,7 +231,7 @@ void GcodeSuite::M771()
         return;
     }
 
-    const int16_t temperature = parser.celsiusval('C');
+    const int16_t temperature = parser.celsiusval('P');
     ph_controller.set_temperature(index, temperature);
 }
 
