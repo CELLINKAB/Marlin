@@ -199,8 +199,8 @@ typedef struct TempInfo {
   inline void sample(const uint16_t s) { acc += s; }
   inline void update() { raw = acc; }
   #if ENABLED(BED_TEMP_COMPENSATION)
-    float offset = -8.9422f;
-    float scale = 0.6035f;
+    float offset = BED_TEMP_OFFSET;
+    float scale = BED_TEMP_SCALE;
   #endif
 } temp_info_t;
 
@@ -787,7 +787,7 @@ class Temperature {
 
       static void setTargetBed(const celsius_t celsius) {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
-        temp_bed.target = _MIN(celsius, BED_MAX_TARGET);
+        temp_bed.target = _MIN(celsius, TERN(BED_TEMP_COMPENSATION, ((BED_MAX_TARGET * temp_bed.scale) + temp_bed.offset), BED_MAX_TARGET));
         start_watching_bed();
       }
 

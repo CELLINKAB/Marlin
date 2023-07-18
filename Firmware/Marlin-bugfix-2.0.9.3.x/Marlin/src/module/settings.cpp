@@ -566,6 +566,13 @@ typedef struct SettingsDataStruct {
     int8_t wscale_scaledir;                             // Direction of the force
   #endif
 
+  //
+  // Printbed temperature correction
+  //
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    float bed_temp_compensation[2];
+  #endif
+
 } SettingsData;
 
 //static_assert(sizeof(SettingsData) <= MARLIN_EEPROM_SIZE, "EEPROM too small to contain SettingsData!");
@@ -1591,6 +1598,15 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(wsc_scaledir);
     #endif
 
+    //
+    // Printbed temperature correction
+    //
+    #if ENABLED(BED_TEMP_COMPENSATION)
+      _FIELD_TEST(bed_temp_correction);
+      EEPROM_WRITE(thermalManager.temp_bed.offset);
+      EEPROM_WRITE(thermalManager.temp_bed.scale);
+    #endif
+
 
     //
     // Report final CRC and Data Size
@@ -2564,6 +2580,15 @@ void MarlinSettings::postprocess() {
           }
       #endif
 
+    //
+    // Printbed temperature correction
+    //
+    #if ENABLED(BED_TEMP_COMPENSATION)
+      _FIELD_TEST(bed_temp_correction);
+      EEPROM_READ(thermalManager.temp_bed.offset);
+      EEPROM_READ(thermalManager.temp_bed.scale);
+    #endif
+
       //
       // Validate Final Size and CRC
       //
@@ -3272,6 +3297,14 @@ void MarlinSettings::reset() {
     wScale.setThreshold(HX711_ENDSTOP_THRESHOLD);
     wScale.setChannel(HX711_DEFAULT_CHANNEL);
     wScale.setScaleDir(HX711_DEFAULT_SCALE_DIR);
+  #endif
+
+  //
+  // Printbed temperature correction
+  //
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    thermalManager.temp_bed.offset = BED_TEMP_OFFSET;
+    thermalManager.temp_bed.scale = BED_TEMP_SCALE;
   #endif
 
   postprocess();

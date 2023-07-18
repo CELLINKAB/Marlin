@@ -606,6 +606,10 @@
  * 
  */
 #define BED_TEMP_COMPENSATION
+#if ENABLED(BED_TEMP_COMPENSATION)
+  #define BED_TEMP_OFFSET 8.9422
+  #define BED_TEMP_SCALE 0.6035
+#endif
 
 //===========================================================================
 //============================= PID Settings ================================
