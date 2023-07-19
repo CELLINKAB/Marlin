@@ -527,9 +527,7 @@ constexpr bool valid_command(uint16_t command)
     case 1011:
         [[fallthrough]];
     case 1016:
-        [[fallthrough]];
         return true;
-        // TODO: add more cases probably
     default:
         return false;
     }
