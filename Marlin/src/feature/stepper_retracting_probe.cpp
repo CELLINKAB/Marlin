@@ -10,6 +10,15 @@
 
 #    include "stepper_retracting_probe.h"
 
+void StepperRetractingProbe::unstick(int32_t velocity){
+    for (size_t i = 0; i < 5; ++i) {
+        stepper().raw_move(velocity / 4);
+        delay(15);
+        stepper().stop();
+        safe_delay(5);
+    }
+}
+
 void StepperRetractingProbe::deploy()
 {
     switch (state) {
@@ -24,6 +33,7 @@ void StepperRetractingProbe::deploy()
     case ProbeState::Stowed:
         // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
+        unstick(config.deploy_velocity); 
         stepper().raw_move(config.deploy_velocity);
         const millis_t minimum_deploy_time = static_cast<millis_t>(
             static_cast<float>(config.minimum_retract_time)
@@ -57,6 +67,7 @@ void StepperRetractingProbe::stow()
         delay(10);
         [[fallthrough]];
     case ProbeState::Deployed:
+        unstick(config.stow_velocity);
         stepper().raw_move(config.stow_velocity);
         safe_delay(config.minimum_retract_time);
         stepper().stop();

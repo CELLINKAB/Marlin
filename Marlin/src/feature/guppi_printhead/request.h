@@ -273,12 +273,263 @@ constexpr bool valid_index(uint16_t index)
 
 constexpr bool valid_command(uint16_t command)
 {
-    switch (command) {
-    case 0:
+    if (command >= static_cast<uint16_t>(Command::NOF_CMDS))
         return false;
-        // TODO: add more cases probably
-    default:
+    switch (command) {
+    case 1:
+        [[fallthrough]];
+    case 2:
+        [[fallthrough]];
+    case 3:
+        [[fallthrough]];
+    case 4:
+        [[fallthrough]];
+    case 5:
+        [[fallthrough]];
+    case 6:
+        [[fallthrough]];
+    case 7:
+        [[fallthrough]];
+    case 8:
+        [[fallthrough]];
+    case 9:
+        [[fallthrough]];
+    case 10:
+        [[fallthrough]];
+    case 11:
+        [[fallthrough]];
+    case 12:
+        [[fallthrough]];
+    case 13:
+        [[fallthrough]];
+    case 14:
+        [[fallthrough]];
+    case 15:
+        [[fallthrough]];
+    case 16:
+        [[fallthrough]];
+    case 17:
+        [[fallthrough]];
+    case 18:
+        [[fallthrough]];
+    case 19:
+        [[fallthrough]];
+    case 20:
+        [[fallthrough]];
+    case 21:
+        [[fallthrough]];
+    case 22:
+        [[fallthrough]];
+    case 23:
+        [[fallthrough]];
+    case 24:
+        [[fallthrough]];
+    case 25:
+        [[fallthrough]];
+    case 26:
+        [[fallthrough]];
+    case 27:
+        [[fallthrough]];
+    case 28:
+        [[fallthrough]];
+    case 29:
+        [[fallthrough]];
+    case 30:
+        [[fallthrough]];
+    case 31:
+        [[fallthrough]];
+    case 32:
+        [[fallthrough]];
+    case 33:
+        [[fallthrough]];
+    case 34:
+        [[fallthrough]];
+    case 35:
+        [[fallthrough]];
+    case 36:
+        [[fallthrough]];
+    case 37:
+        [[fallthrough]];
+    case 38:
+        [[fallthrough]];
+    case 39:
+        [[fallthrough]];
+    case 40:
+        [[fallthrough]];
+    case 41:
+        [[fallthrough]];
+    case 42:
+        [[fallthrough]];
+    case 43:
+        [[fallthrough]];
+    case 44:
+        [[fallthrough]];
+    case 45:
+        [[fallthrough]];
+    case 46:
+        [[fallthrough]];
+    case 47:
+        [[fallthrough]];
+    case 48:
+        [[fallthrough]];
+    case 49:
+        [[fallthrough]];
+    case 50:
+        [[fallthrough]];
+    case 51:
+        [[fallthrough]];
+    case 52:
+        [[fallthrough]];
+    case 53:
+        [[fallthrough]];
+    case 54:
+        [[fallthrough]];
+    case 55:
+        [[fallthrough]];
+    case 56:
+        [[fallthrough]];
+    case 57:
+        [[fallthrough]];
+    case 58:
+        [[fallthrough]];
+    case 59:
+        [[fallthrough]];
+    case 60:
+        [[fallthrough]];
+    case 61:
+        [[fallthrough]];
+    case 62:
+        [[fallthrough]];
+    case 63:
+        [[fallthrough]];
+    case 64:
+        [[fallthrough]];
+    case 65:
+        [[fallthrough]];
+    case 66:
+        [[fallthrough]];
+    case 67:
+        [[fallthrough]];
+    case 68:
+        [[fallthrough]];
+    case 69:
+        [[fallthrough]];
+    case 70:
+        [[fallthrough]];
+    case 71:
+        [[fallthrough]];
+    case 72:
+        [[fallthrough]];
+    case 73:
+        [[fallthrough]];
+    case 74:
+        [[fallthrough]];
+    case 75:
+        [[fallthrough]];
+    case 76:
+        [[fallthrough]];
+    case 77:
+        [[fallthrough]];
+    case 78:
+        [[fallthrough]];
+    case 84:
+        [[fallthrough]];
+    case 99:
+        [[fallthrough]];
+    case 201:
+        [[fallthrough]];
+    case 202:
+        [[fallthrough]];
+    case 203:
+        [[fallthrough]];
+    case 204:
+        [[fallthrough]];
+    case 205:
+        [[fallthrough]];
+    case 206:
+        [[fallthrough]];
+    case 301:
+        [[fallthrough]];
+    case 302:
+        [[fallthrough]];
+    case 401:
+        [[fallthrough]];
+    case 402:
+        [[fallthrough]];
+    case 403:
+        [[fallthrough]];
+    case 404:
+        [[fallthrough]];
+    case 405:
+        [[fallthrough]];
+    case 406:
+        [[fallthrough]];
+    case 407:
+        [[fallthrough]];
+    case 408:
+        [[fallthrough]];
+    case 601:
+        [[fallthrough]];
+    case 602:
+        [[fallthrough]];
+    case 603:
+        [[fallthrough]];
+    case 604:
+        [[fallthrough]];
+    case 605:
+        [[fallthrough]];
+    case 606:
+        [[fallthrough]];
+    case 607:
+        [[fallthrough]];
+    case 608:
+        [[fallthrough]];
+    case 609:
+        [[fallthrough]];
+    case 610:
+        [[fallthrough]];
+    case 611:
+        [[fallthrough]];
+    case 612:
+        [[fallthrough]];
+    case 613:
+        [[fallthrough]];
+    case 801:
+        [[fallthrough]];
+    case 802:
+        [[fallthrough]];
+    case 803:
+        [[fallthrough]];
+    case 804:
+        [[fallthrough]];
+    case 805:
+        [[fallthrough]];
+    case 806:
+        [[fallthrough]];
+    case 807:
+        [[fallthrough]];
+    case 808:
+        [[fallthrough]];
+    case 809:
+        [[fallthrough]];
+    case 1001:
+        [[fallthrough]];
+    case 1006:
+        [[fallthrough]];
+    case 1007:
+        [[fallthrough]];
+    case 1008:
+        [[fallthrough]];
+    case 1009:
+        [[fallthrough]];
+    case 1010:
+        [[fallthrough]];
+    case 1011:
+        [[fallthrough]];
+    case 1016:
         return true;
+    default:
+        return false;
     }
 }
 
@@ -323,7 +574,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     bool valid = valid_index(test_index) && valid_command(test_command) && valid_size(test_size);
 
     bool got_extra_zeroes = false;
-    if (!valid) {
+    if (!valid || test_command == static_cast<uint16_t>(Command::ACK)) {
         memcpy(&test_index, &packet_buffer[1], 2);
         memcpy(&test_command, &packet_buffer[3], 2);
         memcpy(&test_size, &packet_buffer[5], 2);
@@ -396,7 +647,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     }
     memcpy(&crc, &packet_buffer[packet_index], 2);
 
-    constexpr static bool allow_bad_crc = false;
+    constexpr static bool allow_bad_crc = true;
     if (!allow_bad_crc && crc != incoming.crc())
         return err(Result::BAD_CRC);
 
