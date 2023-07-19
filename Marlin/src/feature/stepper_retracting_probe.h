@@ -86,7 +86,7 @@ private:
         return *_stepper;
     }
 
-    void unstick();
+    void unstick(int32_t velocity);
 };
 
 extern StepperRetractingProbe stepper_probe;
