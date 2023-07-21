@@ -357,7 +357,6 @@ void GcodeSuite::M800()
 {
     thermalManager.temp_bed.target = 0;
     thermalManager.temp_bed.is_set = false;
-    thermalManager.temp_bed.pid.
 }
 //SetBedTempController
 // void GcodeSuite::M801() {}
