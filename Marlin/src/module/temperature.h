@@ -943,8 +943,6 @@ public:
         else if (temp_hotend[ee].target == 0)
             start_preheat_time(ee);
 #    endif
-        TERN_(CHANTARELLE_SUPPORT,
-              ph_controller.set_temperature(static_cast<printhead::Index>(ee), celsius));
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
         temp_hotend[ee].target = _MIN(celsius, hotend_max_target(ee));
         temp_hotend[ee].is_set = true;

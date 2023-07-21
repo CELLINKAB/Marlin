@@ -2975,7 +2975,7 @@ void Temperature::disable_all_heaters() {
   #if HAS_HOTEND
     HOTEND_LOOP() {
       setTargetHotend(0, e);
-      temp_bed.is_set = false;
+      temp_hotend[e].is_set = false;
       temp_hotend[e].soft_pwm_amount = 0;
     }
   #endif
