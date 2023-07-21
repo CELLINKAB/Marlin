@@ -213,6 +213,10 @@ void GcodeSuite::M770() {}
 //SetCurrentPrintheadTemp
 void GcodeSuite::M771()
 {
+    if (!parser.seen("PID")) {
+        SERIAL_ECHOLN("BAD_TEMPERATURE_CONTROL_PARAMS");
+        return;
+    }
     BIND_INDEX_OR_RETURN(index);
     if (parser.seen('D')) { // debug, set PWM directly
         printhead::TemTemps both_tems_pwm;
