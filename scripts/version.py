@@ -1,28 +1,33 @@
 #!/usr/bin/python3
-import sys
-sys.path.append('buildroot/share/PlatformIO/scripts')
-import pioutil
-from datetime import datetime
-import json
-import subprocess
+from os import path, pardir, getcwd, system
+import traceback
 import os
-from os import path, pardir, getcwd,system
+import subprocess
+import json
+from datetime import datetime
 import sys
 
 
 def get_current_commit():
-    head_commit = subprocess.run("git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE)
+    head_commit = subprocess.run(
+        "git rev-parse --verify HEAD", shell=True, stdout=subprocess.PIPE)
     return head_commit.stdout.rstrip().decode()
 
+
 def get_current_branch():
-    branch = subprocess.run("git symbolic-ref -q --short HEAD", shell=True, stdout=subprocess.PIPE)
+    branch = subprocess.run(
+        "git symbolic-ref -q --short HEAD", shell=True, stdout=subprocess.PIPE)
     return branch.stdout.rstrip().decode()
 
+
 def git_describe():
-    describe = subprocess.run("git describe --tags --first-parent", shell=True, stdout=subprocess.PIPE)
+    describe = subprocess.run(
+        "git describe --tags --first-parent", shell=True, stdout=subprocess.PIPE)
     if describe.stdout.rstrip().decode() is None:
-        describe = subprocess.run("git describe --tags --first-parent --always", shell=True, stdout=subprocess.PIPE)
+        describe = subprocess.run(
+            "git describe --tags --first-parent --always", shell=True, stdout=subprocess.PIPE)
     return describe.stdout.rstrip().decode()
+
 
 def generate_header():
     return """
@@ -33,7 +38,9 @@ def generate_header():
 #pragma once
 #include <string_view>
     """
-def generate_marlin(semver,majorminiopatch):
+
+
+def generate_marlin(semver, majorminiopatch):
     return """
 #ifndef SHORT_BUILD_VERSION
     //#define SHORT_MARLIN_VERSION_STRING "2.1.2"
@@ -45,7 +52,7 @@ def generate_marlin(semver,majorminiopatch):
     //# " (Marlin " SHORT_MARLIN_VERSION_STRING ")"
 #endif
 #ifndef STRING_DISTRIBUTION_DATE
-    #define STRING_DISTRIBUTION_DATE "2023-02-14"
+    #define STRING_DISTRIBUTION_DATE "0000-00-00"
 #endif
 #define MARLIN_HEX_VERSION 02010200
 #ifndef REQUIRED_CONFIGURATION_H_VERSION
@@ -79,7 +86,8 @@ def generate_marlin(semver,majorminiopatch):
 #ifndef WEBSITE_URL
   #define WEBSITE_URL "cellink.com"
 #endif
-""".format(semver,majorminiopatch)
+""".format(semver, majorminiopatch)
+
 
 def process_gitversion():
     system("IGNORE_NORMALISATION_GIT_HEAD_MOVE=1 gitversion /output file /nofetch   /config  GitVersion.yml /nocache")
@@ -88,45 +96,43 @@ def process_gitversion():
             gitversionjson = gitversionjson_file.read()
             return json.loads(gitversionjson)
     else:
-            return {
-    "Major":2,
-    "Minor":1,
-    "Patch":0,
-    "PreReleaseTag":"nogitversion",
-    "PreReleaseTagWithDash":"nogitversion",
-    "PreReleaseLabel":"nogitversion",
-    "PreReleaseNumber":0,
-    "WeightedPreReleaseNumber":0,
-    "BuildMetaData":0,
-    "BuildMetaDataPadded":0,
-    "FullBuildMetaData":"0",
-    "MajorMinorPatch":"0.0.0",
-    "SemVer":"0.0.0-nogitversion.1",
-    "LegacySemVer":"0.0.0-nogitversion1",
-    "LegacySemVerPadded":"0.0.0-nogitversion.0001",
-    "AssemblySemVer":"0.0.0.0",
-    "AssemblySemFileVer":"0.0.0.0",
-    "FullSemVer":"0.0.0-nogitversion.1+0",
-    "InformationalVersion":"nogitversion",
-    "BranchName":"nogitversion",
-    "EscapedBranchName":"nogitversion",
-    "Sha":"nogitversion",
-    "ShortSha":"000000",
-    "VersionSourceSha":"000000000000000000000000000000",
-    "CommitsSinceVersionSource":0,
-    "CommitsSinceVersionSourcePadded":0,
-    "CommitDate":"0000-00-00"
-    }
-            
-    
+        return {
+            "Major": 2,
+            "Minor": 1,
+            "Patch": 0,
+            "PreReleaseTag": "nogitversion",
+            "PreReleaseTagWithDash": "nogitversion",
+            "PreReleaseLabel": "nogitversion",
+            "PreReleaseNumber": 0,
+            "WeightedPreReleaseNumber": 0,
+            "BuildMetaData": 0,
+            "BuildMetaDataPadded": 0,
+            "FullBuildMetaData": "0",
+            "MajorMinorPatch": "0.0.0",
+            "SemVer": "0.0.0-nogitversion.1",
+            "LegacySemVer": "0.0.0-nogitversion1",
+            "LegacySemVerPadded": "0.0.0-nogitversion.0001",
+            "AssemblySemVer": "0.0.0.0",
+            "AssemblySemFileVer": "0.0.0.0",
+            "FullSemVer": "0.0.0-nogitversion.1+0",
+            "InformationalVersion": "nogitversion",
+            "BranchName": "nogitversion",
+            "EscapedBranchName": "nogitversion",
+            "Sha": "nogitversion",
+            "ShortSha": "000000",
+            "VersionSourceSha": "000000000000000000000000000000",
+            "CommitsSinceVersionSource": 0,
+            "CommitsSinceVersionSourcePadded": 0,
+            "CommitDate": "0000-00-00"
+        }
 
 
 def generate_gitversion(gv):
-        gitdescribe = git_describe()
-        gitbranch = get_current_branch()
-        gitcommit = get_current_commit()
+    gitdescribe = git_describe()
+    gitbranch = get_current_branch()
+    gitcommit = get_current_commit()
 
-        return """
+    return """
 #define VER_COMMIT_DATE "{}"
 #define VER_FULL_BUILD_META_DATA "{}" 
 #define VER_SEM_VER "{}" 
@@ -136,11 +142,11 @@ def generate_gitversion(gv):
 #define VER_BUILD_VERSION "{}" 
 #define VER_BRANCH "{}" 
 #define VER_CURRENT_COMMIT "{}" 
-                """.format(gv["CommitDate"], gv["FullBuildMetaData"], gv["SemVer"],gv["Major"],gv["Minor"],gv["Patch"],gitdescribe, gitbranch, gitcommit)
+                """.format(gv["CommitDate"], gv["FullBuildMetaData"], gv["SemVer"], gv["Major"], gv["Minor"], gv["Patch"], gitdescribe, gitbranch, gitcommit)
 
 
 def generate_gitversionempty(gv):
-           return """
+    return """
     #define VER_COMMIT_DATE "Notset"
     #define VER_FULL_BUILD_META_DATA "Notset" 
     #define VER_SEM_VER "Notset" 
@@ -152,18 +158,18 @@ def generate_gitversionempty(gv):
     #define VER_CURRENT_COMMIT 0
                     """
 
+
 def generate_env():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
     if os.getenv('USER'):
         user = os.getenv('USER')
     else:
         user = 'nouser'
-        
+
     if os.getenv('BUILD_TAG'):
         buildtag = os.getenv('BUILD_TAG')
     else:
         buildtag = "local"
-
 
     return """
 #define VER_TIMESTAMP "{}"
@@ -171,35 +177,36 @@ def generate_env():
 #define VER_BUILDTAG "{}" 
         """.format(timestamp, user, buildtag)
 
+
 def make_versionfile():
 
-    source_dir = path.join( 'Marlin','src', 'inc',)
+    source_dir = path.join('Marlin', 'src', 'inc',)
     version_file = path.join(source_dir, '_Version.h')
     gv = process_gitversion()
 
     print("Current working dir: " + getcwd())
     print(generate_header())
-    print(generate_marlin(gv["SemVer"],gv["MajorMinorPatch"]))
+    print(generate_marlin(gv["SemVer"], gv["MajorMinorPatch"]))
     print(generate_gitversion(gv))
     print(generate_env())
 
     with open(version_file, "w+") as f:
         f.write(generate_header())
-        f.write(generate_marlin(gv["SemVer"],gv["MajorMinorPatch"]))
+        f.write(generate_marlin(gv["SemVer"], gv["MajorMinorPatch"]))
         f.write(generate_gitversion(gv))
         f.write(generate_env())
 
     print("Version file creation script success. Created:")
 
-
-
     with open(version_file, "r") as rf:
         contents = rf.read()
         print(contents)
+
+
 def make_versionjson():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
     if globals().get('USER'):
-            user = os.environ["USER"]
+        user = os.environ["USER"]
     else:
         user = 'nouser'
     if globals().get('BUILD_TAG'):
@@ -208,14 +215,15 @@ def make_versionjson():
         buildtag = "local"
 
     versionfiledict = {
-        "user" : user,
-        "buildtag" : buildtag,
-        "timestamp" : timestamp
-    }   
-    json_object = json.dumps(versionfiledict, indent=4)   
+        "user": user,
+        "buildtag": buildtag,
+        "timestamp": timestamp
+    }
+    json_object = json.dumps(versionfiledict, indent=4)
     # Writing to sample.json
     with open("version.json", "w") as outfile:
         outfile.write(json_object)
+
 
 if __name__ == "__main__":
     try:
@@ -223,15 +231,18 @@ if __name__ == "__main__":
         make_versionjson()
 
     except Exception as e:
-         print("Version file creation script failed. Details:", e)
+        print("Version file creation script failed. Details:")
+        print(traceback.format_exc())
 else:
-        #
+    #
     # From within PlatformIO use the loaded INI file
     #
+    sys.path.append('buildroot/share/PlatformIO/scripts')
     import pioutil
     if pioutil.is_pio_build():
         try:
             make_versionfile()
             make_versionjson()
         except Exception as e:
-            print("Version file creation script failed. Details:", e)
+            print("Version file creation script failed. Details:")
+            print(traceback.format_exc())
