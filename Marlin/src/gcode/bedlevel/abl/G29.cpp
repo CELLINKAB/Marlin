@@ -355,12 +355,6 @@ G29_TYPE GcodeSuite::G29() {
       // G29_RETURN(false, false);
     }
 
-    if (!seen_w && parser.seenval('P') && parser.value_int() == 0) // emulate UBL behavior
-    {
-      reset_bed_level();
-      G29_RETURN(false, false);
-    }
-
     abl.verbose_level = parser.intval('V');
     if (!WITHIN(abl.verbose_level, 0, 4)) {
       SERIAL_ECHOLNPGM("?(V)erbose level implausible (0-4).");
