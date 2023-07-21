@@ -3,6 +3,7 @@
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
+#include "../../module/temperature.h"
 
 #include "chantarelle.h"
 
@@ -53,6 +54,14 @@ inline printhead::Index get_ph_index()
 constexpr printhead::ExtruderDirection extrude_dir_from_bool(bool dir)
 {
     return dir ? printhead::ExtruderDirection::Retract : printhead::ExtruderDirection::Extrude;
+}
+
+bool check_params(const char* const params)
+{
+    const bool seen = parser.seen(params);
+    if (!seen)
+        SERIAL_ECHOLNPGM("BAD_PARAMS:", params);
+    return seen;
 }
 
 //
@@ -111,7 +120,7 @@ void GcodeSuite::G513()
         return static_cast<int32_t>(mm / printhead::MM_PER_MICRO_STEP);
     };
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seenval('P'))
+    if (!check_params("P"))
         return;
     float position = parser.value_float();
     planner.synchronize();
@@ -214,6 +223,8 @@ void GcodeSuite::M770() {}
 void GcodeSuite::M771()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("DP"))
+        return;
     if (parser.seen('D')) { // debug, set PWM directly
         printhead::TemTemps both_tems_pwm;
         const uint16_t tem_pwm = min(parser.ulongval('S'), 4095UL);
@@ -229,10 +240,10 @@ void GcodeSuite::M771()
         ph_controller.set_tem_debug(index, both_tems_pwm);
 
         return;
+    } else if (parser.seenval('P')) {
+        const int16_t temperature = parser.celsiusval('P');
+        ph_controller.set_temperature(index, temperature);
     }
-
-    const int16_t temperature = parser.celsiusval('P');
-    ph_controller.set_temperature(index, temperature);
 }
 
 //GetAllPrintheadsTemps
@@ -245,6 +256,8 @@ void GcodeSuite::M774() {}
 void GcodeSuite::M777()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("PID"))
+        return;
     const float p = parser.floatval('P');
     const float i = parser.floatval('I');
     const float d = parser.floatval('D');
@@ -340,7 +353,11 @@ void GcodeSuite::M796()
 // //GetPrintheadExternalPWM
 // void GcodeSuite::M799() {}
 //DisableBedTempController
-void GcodeSuite::M800() {}
+void GcodeSuite::M800()
+{
+    thermalManager.temp_bed.target = 0;
+    thermalManager.temp_bed.is_set = false;
+}
 //SetBedTempController
 // void GcodeSuite::M801() {}
 // //GetBedTempControllerInfo
@@ -376,7 +393,10 @@ void GcodeSuite::M817() {}
 //ReadDoorStatus
 void GcodeSuite::M818()
 {
-    SERIAL_ECHOLNPGM("DO:", READ(DOOR_PIN), ",INTERLOCK_24V:", READ(FREEZE_PIN));
+    SERIAL_ECHOLNPGM("DO:",
+                     (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING),
+                     ",INTERLOCK_24V:",
+                     (READ(FREEZE_PIN) == FREEZE_STATE));
 }
 //SetBedCoolingFans
 void GcodeSuite::M819()
@@ -475,6 +495,8 @@ void GcodeSuite::M1018()
 //ReadExternalGPIOs
 void GcodeSuite::M1020()
 {
+    if (!check_params("P"))
+        return;
     const uint32_t pin = parser.ulongval('P');
     SERIAL_ECHOLNPGM("PINNAME:", digitalPinToPinName(pin), ",STATE:", READ(pin));
 }
@@ -546,6 +568,8 @@ void GcodeSuite::M1070() {}
 void GcodeSuite::M2020()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("S"))
+        return;
     const int32_t steps = parser.longval('S');
     ph_controller.add_raw_extruder_steps(index, steps);
 }
@@ -553,6 +577,8 @@ void GcodeSuite::M2020()
 void GcodeSuite::M2030()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("F"))
+        return;
     const float feedrate_ul_s = parser.floatval('F');
     const uint32_t feedrate_pl_s = static_cast<uint32_t>(feedrate_ul_s * 1'000'000);
     if (feedrate_ul_s == 0.0f)
@@ -577,7 +603,7 @@ void GcodeSuite::M2033() {}
 void GcodeSuite::M2034()
 {
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seenval('V'))
+    if (!check_params("V"))
         return;
     const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
     ph_controller.set_step_volume(index, picoliters);
@@ -592,6 +618,8 @@ void GcodeSuite::M2035()
 void GcodeSuite::M2036()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("V"))
+        return;
     const uint32_t pL_volume = parser.ulongval('V');
     ph_controller.set_volume_per_fullstep(index, pL_volume);
 }
@@ -601,7 +629,7 @@ void GcodeSuite::M2037() {}
 void GcodeSuite::M2038()
 {
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seen('S'))
+    if (!check_params("S"))
         return;
     const uint8_t microsteps = parser.value_byte();
     ph_controller.set_extruder_microsteps(index, microsteps);
@@ -628,7 +656,7 @@ void GcodeSuite::M2040()
 void GcodeSuite::M2041()
 {
     BIND_INDEX_OR_RETURN(index);
-    if (!parser.seen('S'))
+    if (!check_params("S"))
         return;
     const uint8_t sg_threshold = parser.value_byte();
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
@@ -702,6 +730,8 @@ void GcodeSuite::M2068() {}
 void GcodeSuite::M2069()
 {
     BIND_INDEX_OR_RETURN(index);
+    if (!check_params("C"))
+        return;
     const uint16_t current = parser.ushortval('C');
     ph_controller.set_extruder_rms_current(index, current);
 }
