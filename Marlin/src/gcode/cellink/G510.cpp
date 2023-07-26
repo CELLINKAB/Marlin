@@ -2,6 +2,7 @@
 
 #if ENABLED(OPTICAL_AUTOCAL)
 
+#    include "../../feature/bedlevel/bedlevel.h"
 #    include "../../feature/optical_autocal.h"
 #    include "../../module/motion.h"
 #    include "../gcode.h"
@@ -47,6 +48,10 @@ void GcodeSuite::G510()
 
     if (homing_needed_error())
         return;
+
+    const bool leveling_active = planner.leveling_active;
+    set_bed_leveling_enabled(false);
+    Defer restore_leveling([leveling_active](){set_bed_leveling_enabled(leveling_active);});
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;
