@@ -38,6 +38,12 @@ void GcodeSuite::G515()
     if (homing_needed_error())
         return;
 
+    #if ENABLED(OPTICAL_AUTOCAL)
+    const auto previous_coordinate_system = active_coordinate_system;
+    select_coordinate_system(-1);
+    Defer reset_coordinates([=](){select_coordinate_system(previous_coordinate_system);});
+    #endif
+
     xyz_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     apply_motion_limits(gripper_xy);
     do_blocking_move_to_z(Z_MAX_POS);
