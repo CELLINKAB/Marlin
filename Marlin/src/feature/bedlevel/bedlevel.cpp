@@ -118,6 +118,7 @@ void reset_bed_level() {
   IF_DISABLED(AUTO_BED_LEVELING_UBL, set_bed_leveling_enabled(false));
   TERN_(HAS_MESH, bedlevel.reset());
   TERN_(ABL_PLANAR, planner.bed_level_matrix.set_to_identity());
+  TERN_(ABL_PLANAR, planner.bed_level_z_offset = 0);
 }
 
 #if EITHER(AUTO_BED_LEVELING_BILINEAR, MESH_BED_LEVELING)

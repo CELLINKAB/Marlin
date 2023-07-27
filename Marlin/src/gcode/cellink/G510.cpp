@@ -39,6 +39,9 @@ void GcodeSuite::G510()
         return;
     }
 
+    // use coordinate system to match tool
+    select_coordinate_system(active_extruder);
+
     // clear calibration on current printhead
     if (parser.seen('R')) {
         optical_autocal.reset(active_extruder);
@@ -61,9 +64,6 @@ void GcodeSuite::G510()
 
     const auto feedrate = parser.feedrateval('F', 25.0f);
 
-    // use coordinate system to match tool
-    select_coordinate_system(active_extruder);
-
     if (parser.seen('C')) {
         optical_autocal.calibrate(start_pos, feedrate);
         return;
@@ -79,9 +79,6 @@ void GcodeSuite::G510()
         [[fallthrough]];
     case OpticalAutocal::ErrorCode::OK: {
         update_offset(optical_autocal.offset(active_extruder));
-        xy_pos_t origin{0, 0};
-        toNative(origin);
-        do_blocking_move_to_xy(origin);
         break;
     }
     case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:

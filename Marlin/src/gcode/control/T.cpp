@@ -62,8 +62,8 @@ void GcodeSuite::T(const int8_t tool_index) {
   // Count this command as movement / activity
   reset_stepper_timeout();
 
-  #if ENABLED(OPTICAL_AUTOCAL)
-
+  #if ENABLED(OPTICAL_AUTOCAL)    // use machine native workspace for tool change
+    select_coordinate_system(-1);
   #endif
 
   #if HAS_PRUSA_MMU2
