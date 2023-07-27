@@ -65,14 +65,19 @@ void safe_delay(millis_t ms);           // Delay ensuring that temperatures are 
  * Put operator= on your type to get extended behavior on value change.
  */
 template<typename T>
-class restorer {
+class [[nodiscard]] restorer {
   T& ref_;
   T  val_;
 public:
-  restorer(T& perm) : ref_(perm), val_(perm) {}
-  restorer(T& perm, T temp_val) : ref_(perm), val_(perm) { perm = temp_val; }
+  constexpr explicit restorer(T& perm) : ref_(perm), val_(perm) {}
+  constexpr explicit restorer(T& perm, T temp_val) : ref_(perm), val_(perm) { perm = temp_val; }
   ~restorer() { restore(); }
   inline void restore() { ref_ = val_; }
+
+  restorer(const restorer&) = delete;
+  restorer(restorer&&) = delete;
+  restorer& operator=(const restorer&) = delete;
+  restorer& operator=(restorer&&) = delete;
 };
 
 #define REMEMBER(N,X,V...) restorer<__typeof__(X)> restorer_##N(X, ##V)
@@ -83,12 +88,28 @@ public:
 constexpr uint8_t ui8_to_percent(const uint8_t i) { return (int(i) * 100 + 127) / 255; }
 
 // Axis names for G-code parsing, reports, etc.
-const xyze_char_t axis_codes LOGICAL_AXIS_ARRAY('E', 'X', 'Y', 'Z', AXIS4_NAME, AXIS5_NAME, AXIS6_NAME, AXIS7_NAME, AXIS8_NAME, AXIS9_NAME);
+constexpr xyze_char_t axis_codes LOGICAL_AXIS_ARRAY('E', 'X', 'Y', 'Z', AXIS4_NAME, AXIS5_NAME, AXIS6_NAME, AXIS7_NAME, AXIS8_NAME, AXIS9_NAME);
 #if NUM_AXES <= XYZ && !HAS_EXTRUDERS
   #define AXIS_CHAR(A) ((char)('X' + A))
   #define IAXIS_CHAR AXIS_CHAR
 #else
-  const xyze_char_t iaxis_codes LOGICAL_AXIS_ARRAY('E', 'X', 'Y', 'Z', 'I', 'J', 'K', 'U', 'V', 'W');
+  constexpr xyze_char_t iaxis_codes LOGICAL_AXIS_ARRAY('E', 'X', 'Y', 'Z', 'I', 'J', 'K', 'U', 'V', 'W');
   #define AXIS_CHAR(A) axis_codes[A]
   #define IAXIS_CHAR(A) iaxis_codes[A]
 #endif
+
+/**
+ * @brief Mechanism to defer cleanup operations until function is exited using RAII
+ * 
+ * @tparam F callable
+ */
+template<typename F>
+struct [[nodiscard]] Defer{
+    constexpr explicit Defer(F fn) : deferred_fn(fn) {}
+    F deferred_fn;
+    ~Defer() {deferred_fn();}
+    Defer(const Defer&) = delete;
+    Defer(Defer&&) = delete;
+    Defer & operator=(const Defer&) = delete;
+    Defer & operator=(Defer&&) = delete;
+};

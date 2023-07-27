@@ -122,7 +122,7 @@ void GcodeSuite::G513()
     BIND_INDEX_OR_RETURN(index);
     if (!check_params("P"))
         return;
-    float position = parser.value_float();
+    float position = parser.floatval('P');
     planner.synchronize();
     ph_controller.move_slider_valve(index, steps_from_mm(position));
 
@@ -228,7 +228,7 @@ void GcodeSuite::M771()
     if (parser.seen('D')) { // debug, set PWM directly
         printhead::TemTemps both_tems_pwm;
         const uint16_t tem_pwm = min(parser.ulongval('S'), 4095UL);
-        if (parser.seen('I')) {
+        if (parser.seenval('I')) {
             const uint8_t tem_index = constrain(parser.value_byte(),
                                                 0,
                                                 printhead::constants::CS_FANS - 1);
@@ -240,7 +240,7 @@ void GcodeSuite::M771()
         ph_controller.set_tem_debug(index, both_tems_pwm);
 
         return;
-    } else if (parser.seenval('P')) {
+    } else {
         const int16_t temperature = parser.celsiusval('P');
         ph_controller.set_temperature(index, temperature);
     }
@@ -605,7 +605,7 @@ void GcodeSuite::M2034()
     BIND_INDEX_OR_RETURN(index);
     if (!check_params("V"))
         return;
-    const uint32_t picoliters = static_cast<uint32_t>(parser.value_float() * 1000);
+    const uint32_t picoliters = static_cast<uint32_t>(parser.floatval('V') * 1000);
     ph_controller.set_step_volume(index, picoliters);
 }
 //GetPHExtrusionStepVol
@@ -631,7 +631,7 @@ void GcodeSuite::M2038()
     BIND_INDEX_OR_RETURN(index);
     if (!check_params("S"))
         return;
-    const uint8_t microsteps = parser.value_byte();
+    const uint8_t microsteps = parser.byteval('S');
     ph_controller.set_extruder_microsteps(index, microsteps);
 }
 //GetPHMicrostep
@@ -658,7 +658,7 @@ void GcodeSuite::M2041()
     BIND_INDEX_OR_RETURN(index);
     if (!check_params("S"))
         return;
-    const uint8_t sg_threshold = parser.value_byte();
+    const uint8_t sg_threshold = parser.byteval('S');
     ph_controller.set_extruder_stallguard_threshold(index, sg_threshold);
 }
 //GetPHEndStopThreshold

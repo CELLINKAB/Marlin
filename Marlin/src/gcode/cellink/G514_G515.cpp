@@ -4,6 +4,7 @@
 #if ENABLED(FESTO_PNEUMATICS)
 
 #    include "../../feature/air_system/pneumatics.h"
+#    include "../../feature/bedlevel/bedlevel.h"
 #    include "../../feature/guppi_printhead/chantarelle.h"
 #    include "../../module/planner.h"
 #    include "../gcode.h"
@@ -37,6 +38,17 @@ void GcodeSuite::G515()
 
     if (homing_needed_error())
         return;
+
+#    if ENABLED(OPTICAL_AUTOCAL)
+    const auto previous_coordinate_system = active_coordinate_system;
+    select_coordinate_system(-1);
+    Defer reset_coordinates([=]() { select_coordinate_system(previous_coordinate_system); });
+#    endif
+
+    const bool leveling_was_active = planner.leveling_active;
+    set_bed_leveling_enabled(false);
+    Defer reenable_leveling(
+        [leveling_was_active]() { set_bed_leveling_enabled(leveling_was_active); });
 
     xyz_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     apply_motion_limits(gripper_xy);

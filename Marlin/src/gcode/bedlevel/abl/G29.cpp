@@ -85,7 +85,6 @@ static void pre_g29_return(const bool retry, const bool did) {
 
 #define G29_RETURN(retry, did) do{ \
   pre_g29_return(TERN0(G29_RETRY_AND_RECOVER, retry), did); \
-  TERN_(ALWAYS_MACHINE_NATIVE_ABL, select_coordinate_system(old_workspace)); \
   return TERN_(G29_RETRY_AND_RECOVER, retry); \
 }while(0)
 
@@ -232,6 +231,7 @@ G29_TYPE GcodeSuite::G29() {
   #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
     const auto old_workspace = active_coordinate_system;
     select_coordinate_system(-1);
+    Defer reset_coordinate_space([old_workspace](){select_coordinate_system(old_workspace);});
   #endif
 
   // Leveling state is persistent when done manually with multiple G29 commands
