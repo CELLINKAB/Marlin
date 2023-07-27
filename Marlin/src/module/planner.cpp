@@ -192,6 +192,7 @@ float Planner::mm_per_step[DISTINCT_AXES];      // (mm) Millimeters per step
   bool Planner::leveling_active = false; // Flag that auto bed leveling is enabled
   #if ABL_PLANAR
     matrix_3x3 Planner::bed_level_matrix; // Transform to compensate for bed level
+    float Planner::bed_level_z_offset;
   #endif
   #if ENABLED(ENABLE_LEVELING_FADE_HEIGHT)
     float Planner::z_fade_height,      // Initialized by settings.load()
@@ -1595,8 +1596,7 @@ void Planner::check_axes_activity() {
 #if HAS_LEVELING
 
   constexpr xy_pos_t level_fulcrum = {
-    TERN(Z_SAFE_HOMING, Z_SAFE_HOMING_X_POINT, X_HOME_POS),
-    TERN(Z_SAFE_HOMING, Z_SAFE_HOMING_Y_POINT, Y_HOME_POS)
+    0,0
   };
 
   /**
@@ -1611,6 +1611,7 @@ void Planner::check_axes_activity() {
       xy_pos_t d = raw - level_fulcrum;
       bed_level_matrix.apply_rotation_xyz(d.x, d.y, raw.z);
       raw = d + level_fulcrum;
+      raw.z += bed_level_z_offset;
 
     #elif HAS_MESH
 
