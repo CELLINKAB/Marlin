@@ -1580,13 +1580,13 @@
 #define Z_CLEARANCE_DEPLOY_PROBE   0 // Z Clearance for Deploy/Stow
 #define Z_CLEARANCE_BETWEEN_PROBES 30 // Z Clearance between probe points
 #define Z_CLEARANCE_MULTI_PROBE    8 // Z Clearance between multiple probes
-#define Z_AFTER_PROBING            20 // Z position after probing is done
+#define Z_AFTER_PROBING            30 // Z position after probing is done
 
 #define Z_PROBE_LOW_POINT          -5 // Farthest distance below the trigger-point to go before stopping
 
 // For M851 give a range for adjusting the Z probe offset
-#define Z_PROBE_OFFSET_RANGE_MIN -35
-#define Z_PROBE_OFFSET_RANGE_MAX 20
+#define Z_PROBE_OFFSET_RANGE_MIN -25
+#define Z_PROBE_OFFSET_RANGE_MAX -10
 
 // Enable the M48 repeatability test to test probe accuracy
 #define Z_MIN_PROBE_REPEATABILITY_TEST
