@@ -79,9 +79,6 @@ void GcodeSuite::G510()
         [[fallthrough]];
     case OpticalAutocal::ErrorCode::OK: {
         update_offset(optical_autocal.offset(active_extruder));
-        xy_pos_t origin{0, 0};
-        toNative(origin);
-        do_blocking_move_to_xy(origin);
         break;
     }
     case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
