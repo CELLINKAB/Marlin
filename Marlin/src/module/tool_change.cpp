@@ -1099,6 +1099,7 @@ void tool_change(const uint8_t new_tool, bool no_move/*=false*/) {
   if (TERN0(MAGNETIC_SWITCHING_TOOLHEAD, new_tool == active_extruder))
     return;
 
+
   #if ENABLED(MIXING_EXTRUDER)
 
     UNUSED(no_move);
