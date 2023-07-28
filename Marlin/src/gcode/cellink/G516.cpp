@@ -25,13 +25,19 @@ void GcodeSuite::G516()
     do_blocking_move_to(clipped_eject_pos);
     do_blocking_move_to(eject_pos);
 
+    if (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING)
+        SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
+
     static constexpr millis_t WAIT_TIME = SEC_TO_MS(VESSEL_LOAD_TIMEOUT_SECONDS);
     millis_t timeout = millis() + WAIT_TIME;
     wait_for_user_response(WAIT_TIME, true);
-    if (WAIT_TIME && millis() > timeout)
+    if (WAIT_TIME && millis() >= timeout)
         SERIAL_ECHOLN("ERR_VESSEL_LOAD_TIMEOUT");
 
     do_blocking_move_to(clipped_eject_pos);
+
+    if (!READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING )
+        SERIAL_ECHOLN("ERR_DOOR_DID_NOT_CLOSE");
 }
 
 #endif
