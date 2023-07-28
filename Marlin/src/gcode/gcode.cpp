@@ -504,6 +504,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 515: G515(); break; // G515 lid gripper release
       #endif
 
+      #if ENABLED(WELLPLATE_EJECT)
+        case 516: G516(); break; // G516 load/eject print vessel
+      #endif
+
       #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
         case 529: G529(); break;
       #endif
