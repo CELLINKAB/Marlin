@@ -99,7 +99,7 @@ void GcodeSuite::G515()
         }
     }
     // Since soft endstops are ignored, this fixes cases where Z loses steps 
-    process_subcommands_now("G28Z");
+    process_subcommands_now(F("G28Z"));
 }
 
 #endif // FESTO_PNEUMATICS
