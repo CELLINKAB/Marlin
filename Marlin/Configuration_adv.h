@@ -4290,7 +4290,7 @@
 // add G516 to load/unload print vessel
 #define WELLPLATE_EJECT
 #if ENABLED(WELLPLATE_EJECT)
-  #define VESSEL_LOAD_TIMEOUT_SECONDS 300
+  #define VESSEL_LOAD_TIMEOUT_SECONDS 120
 #endif
 
 // @section develop
