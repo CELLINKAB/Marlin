@@ -880,7 +880,7 @@
 #define HOMING_BUMP_MM      { 0, 0, 0 }       // (mm) Backoff from endstops after first bump
 #define HOMING_BUMP_DIVISOR { 1, 1, 1 }       // Re-Bump Speed Divisor (Divides the Homing Feedrate)
 
-#define HOMING_BACKOFF_POST_MM { 20, 20, 2 }  // (mm) Backoff from endstops after homing
+#define HOMING_BACKOFF_POST_MM { 20, 20, 5 }  // (mm) Backoff from endstops after homing
 
 //#define QUICK_HOME                          // If G28 contains XY do a diagonal move first
 #define HOME_Y_BEFORE_X                     // If G28 contains XY home Y before X
@@ -4274,7 +4274,7 @@
   #define AUTOCAL_START_POSITION {55, 61, 36}
   #define AUTOCAL_DEFAULT_FEEDRATE 1500.0
   #define AUTOCAL_PRINTBED_CENTER_DELTA {-48.75, -73.932, -9.5}
-  #define POST_AUTOCAL_SAFE_Z_HEIGHT (Z_MAX_POS - 5.0f)
+  #define POST_AUTOCAL_SAFE_Z_HEIGHT Z_MAX_POS
 #endif
 
 //#define GLOBAL_INTERVAL_REPORTER
