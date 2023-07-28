@@ -1720,7 +1720,7 @@
 #define Z_MIN_POS -4
 #define X_MAX_POS 130
 #define Y_MAX_POS 85
-#define Z_MAX_POS 35
+#define Z_MAX_POS 38
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
@@ -2092,7 +2092,7 @@
 // For DELTA this is the top-center of the Cartesian print volume.
 //#define MANUAL_X_HOME_POS 0
 //#define MANUAL_Y_HOME_POS 0
-#define MANUAL_Z_HOME_POS (Z_MAX_POS + 5)
+#define MANUAL_Z_HOME_POS (Z_MAX_POS + 2)
 //#define MANUAL_I_HOME_POS 0
 //#define MANUAL_J_HOME_POS 0
 //#define MANUAL_K_HOME_POS 0
