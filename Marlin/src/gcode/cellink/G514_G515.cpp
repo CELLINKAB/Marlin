@@ -98,8 +98,8 @@ void GcodeSuite::G515()
                 SERIAL_ECHOLNPGM("pressure reading: ", reading);
         }
     }
-    // Since soft endstops are ignored, this fixes cases where Z loses steps 
-    process_subcommands_now(F("G28Z"));
+    gripper_pos.z = Z_MAX_POS;
+    clipped_move(gripper_pos);
 }
 
 #endif // FESTO_PNEUMATICS
