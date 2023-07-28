@@ -172,3 +172,5 @@ __pycache__
 
 # Version file automatically generated each build
 Marlin/src/inc/Version.h
+GitVersion.json
+version.json
