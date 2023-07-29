@@ -10,6 +10,12 @@
 #    include "../gcode.h"
 #    include "../parser.h"
 
+void clipped_move(xyz_pos_t pos) {
+    toNative(pos);
+    apply_motion_limits(pos);
+    do_blocking_move_to(pos);
+}
+
 /**
  * @brief mixing extrude / pneumatic move
  * 
@@ -17,11 +23,10 @@
 void GcodeSuite::G514()
 {
     uint8_t tool = get_target_extruder_from_command();
-    get_destination_from_command();
     planner.synchronize();
     auto _ = pneumatics::pump.use_pressure();
     pneumatics::apply_mixing_pressure(tool);
-    prepare_line_to_destination();
+    G0_G1(false);
     planner.synchronize();
     pneumatics::release_mixing_pressure(tool);
 }
@@ -39,36 +44,24 @@ void GcodeSuite::G515()
     if (homing_needed_error())
         return;
 
-#    if ENABLED(OPTICAL_AUTOCAL)
-    const auto previous_coordinate_system = active_coordinate_system;
-    select_coordinate_system(-1);
-    Defer reset_coordinates([=]() { select_coordinate_system(previous_coordinate_system); });
-#    endif
-
-    const bool leveling_was_active = planner.leveling_active;
-    set_bed_leveling_enabled(false);
-    Defer reenable_leveling(
-        [leveling_was_active]() { set_bed_leveling_enabled(leveling_was_active); });
-
-    xyz_pos_t gripper_xy(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
-    apply_motion_limits(gripper_xy);
-    do_blocking_move_to_z(Z_MAX_POS);
-    do_blocking_move_to(gripper_xy);
+    xyz_pos_t gripper_pos(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
+    gripper_pos.z = Z_MAX_POS;
+    clipped_move(gripper_pos);
 
     bool is_releasing = parser.seen('R');
 
     if (is_releasing) {
         {
-            do_blocking_move_to_z(GRIP_Z_HEIGHT);
+            gripper_pos.z = GRIP_Z_HEIGHT;
+            clipped_move(gripper_pos);
             auto _using_pressure = pneumatics::pump.use_pressure();
             set_gripper_valves(GripperState::Release);
             const millis_t timeout = millis() + 8000;
-            current_position.z = RELEASE_Z_HEIGHT;
-            planner.buffer_line(current_position, 8.0f);
+            gripper_pos.z = RELEASE_Z_HEIGHT;
+            clipped_move(gripper_pos);
             while (millis() < timeout && gripper_vacuum.read() < 0)
                 idle();
         }
-        planner.synchronize();
         //Expect pressure down
         set_gripper_valves(GripperState::Close);
 
@@ -86,8 +79,8 @@ void GcodeSuite::G515()
             idle();
         }
         set_gripper_valves(GripperState::Grip);
-        SET_SOFT_ENDSTOP_LOOSE(true);
-        do_blocking_move_to_z(GRIP_Z_HEIGHT);
+        gripper_pos.z = GRIP_Z_HEIGHT;
+        clipped_move(gripper_pos);
         {
             auto _ = pneumatics::pump.use_suction();
             const millis_t timeout = millis() + SEC_TO_MS(10);
@@ -96,8 +89,8 @@ void GcodeSuite::G515()
             }
         }
         set_gripper_valves(GripperState::Close);
-        do_blocking_move_to_z(RELEASE_Z_HEIGHT);
-        SET_SOFT_ENDSTOP_LOOSE(false);
+        gripper_pos.z = RELEASE_Z_HEIGHT;
+        clipped_move(gripper_pos);
 
         if (float reading = gripper_vacuum.read(); reading > GRIP_THRESHOLD + THRESHOLD_HYSTERESIS) {
             SERIAL_ECHOLN("GRIP_FAILED");
@@ -105,7 +98,8 @@ void GcodeSuite::G515()
                 SERIAL_ECHOLNPGM("pressure reading: ", reading);
         }
     }
-    do_blocking_move_to_z(Z_AFTER_PROBING);
+    gripper_pos.z = Z_MAX_POS;
+    clipped_move(gripper_pos);
 }
 
 #endif // FESTO_PNEUMATICS
