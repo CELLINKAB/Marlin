@@ -14,9 +14,8 @@
    */
   void GcodeSuite::M797()
   {
-    parser.subcode = 1;
-    G92();
     optical_autocal.reset_all();
+    process_subcommands_now(F("G510 R"));
   }
 
   /**

@@ -671,7 +671,7 @@ G29_TYPE GcodeSuite::G29() {
 
   #else // !PROBE_MANUALLY
   {
-    const ProbePtRaise raise_after = parser.boolval('E') ? PROBE_PT_STOW : PROBE_PT_RAISE;
+    const ProbePtRaise raise_after = (parser.boolval('E') || parser.seen('J')) ? PROBE_PT_STOW : PROBE_PT_RAISE;
 
     abl.measured_z = 0;
 
