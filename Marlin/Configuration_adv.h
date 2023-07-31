@@ -4284,7 +4284,14 @@
   #define INTERVAL_REPORTER_DEFAULT_INTERVAL 1'000'000
 #endif
 
+// always relative G0 move, restores relative/absolute modes after processing
 #define G7_RELATIVE_MOVE
+
+// add G516 to load/unload print vessel
+#define WELLPLATE_EJECT
+#if ENABLED(WELLPLATE_EJECT)
+  #define VESSEL_LOAD_TIMEOUT_SECONDS 120
+#endif
 
 // @section develop
 

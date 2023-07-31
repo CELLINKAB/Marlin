@@ -289,7 +289,7 @@ bool wait_for_heatup = true;
     wait_for_user = true;
     if (ms) ms += millis(); // expire time
     while (wait_for_user && !(ms && ELAPSED(millis(), ms)))
-      idle(TERN_(ADVANCED_PAUSE_FEATURE, no_sleep));
+      idle(no_sleep);
     wait_for_user = false;
     while (ui.button_pressed()) safe_delay(50);
         planner.quick_resume();

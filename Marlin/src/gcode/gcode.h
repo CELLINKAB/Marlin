@@ -637,6 +637,10 @@ private:
     static void G515(); // G515 lid gripper release
   #endif
 
+  #if ENABLED(WELLPLATE_EJECT)
+    static void G516(); // G516 load/eject print vessel
+  #endif
+
   #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
     static void G529();
   #endif
