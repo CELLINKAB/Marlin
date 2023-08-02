@@ -42,10 +42,10 @@
   );
 #endif
 
-uint32_t LEDColor::to_neopixel_color() {
+uint32_t LEDColor::to_neopixel_color() const {
           return (*this == LEDColorWhite)
                   ? neo.Color(NEO_WHITE)
-                  : neo.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED, incol.w));
+                  : neo.Color(r, g, b OPTARG(HAS_WHITE_LED, w));
     }
 
 LEDColor LEDLights::color;
