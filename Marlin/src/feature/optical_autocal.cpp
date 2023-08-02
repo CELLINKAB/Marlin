@@ -80,7 +80,7 @@ auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedR
  */
 void OpticalAutocal::reset(const uint8_t tool)
 {
-    offsets[tool] = xyz_pos_t{};
+    offsets[tool].reset();
 }
 
 /**

@@ -12,13 +12,21 @@
 
 xyz_pos_t OpticalAutocal::nozzle_calibration_extra_offset{};
 
-static void update_offset(const xyz_pos_t& offset)
+void update_offset(const xyz_pos_t& offset)
 {
     position_shift.x = -(offset.x - OpticalAutocal::nozzle_calibration_extra_offset.x);
     update_workspace_offset(AxisEnum::X_AXIS);
     position_shift.y = -(offset.y - OpticalAutocal::nozzle_calibration_extra_offset.y);
     update_workspace_offset(AxisEnum::Y_AXIS);
     position_shift.z = -(offset.z - OpticalAutocal::nozzle_calibration_extra_offset.z);
+    update_workspace_offset(AxisEnum::Z_AXIS);
+}
+
+void reset_offset()
+{
+    position_shift.reset();
+    update_workspace_offset(AxisEnum::X_AXIS);
+    update_workspace_offset(AxisEnum::Y_AXIS);
     update_workspace_offset(AxisEnum::Z_AXIS);
 }
 
@@ -43,18 +51,15 @@ void GcodeSuite::G510()
     select_coordinate_system(active_extruder);
 
     // clear calibration on current printhead
-    if (parser.seen('R')) {
-        optical_autocal.reset(active_extruder);
-        update_offset(optical_autocal.offset(active_extruder));
-        return;
-    }
+    optical_autocal.reset(active_extruder);
+    reset_offset();
 
-    if (homing_needed_error())
+    if (parser.seen('R') || homing_needed_error()) // 'R' resets offsets and leaves
         return;
 
     const bool leveling_active = planner.leveling_active;
     set_bed_leveling_enabled(false);
-    Defer restore_leveling([leveling_active](){set_bed_leveling_enabled(leveling_active);});
+    Defer restore_leveling([leveling_active]() { set_bed_leveling_enabled(leveling_active); });
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;
@@ -68,10 +73,6 @@ void GcodeSuite::G510()
         optical_autocal.calibrate(start_pos, feedrate);
         return;
     }
-
-    // reset calibration so results are consistent
-    optical_autocal.reset(active_extruder);
-    update_offset(optical_autocal.offset(active_extruder));
 
     switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
     case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
