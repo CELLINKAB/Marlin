@@ -108,13 +108,13 @@ void GcodeSuite::M1510()
         return;
     }
 
-    if (parser.seen('X'))
+    if (parser.seenval('X'))
         OpticalAutocal::nozzle_calibration_extra_offset.x = parser.value_float();
-    if (parser.seen('Y'))
+    if (parser.seenval('Y'))
         OpticalAutocal::nozzle_calibration_extra_offset.y = parser.value_float();
-    if (parser.seen('Z'))
+    if (parser.seenval('Z'))
         OpticalAutocal::nozzle_calibration_extra_offset.z = parser.value_float();
-    if (parser.seen('A'))
+    if (parser.seenval('A'))
         OpticalAutocal::x_offset_factor = (1.0f / std::tan(parser.value_float() / 2));
 }
 
