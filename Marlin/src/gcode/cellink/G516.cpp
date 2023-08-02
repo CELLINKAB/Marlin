@@ -19,7 +19,6 @@ void GcodeSuite::G516()
     Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
 
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
-    toNative(eject_pos);
     xyz_pos_t clipped_eject_pos(eject_pos);
     apply_motion_limits(clipped_eject_pos);
     do_blocking_move_to(clipped_eject_pos);

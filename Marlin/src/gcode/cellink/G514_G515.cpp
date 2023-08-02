@@ -11,7 +11,6 @@
 #    include "../parser.h"
 
 void clipped_move(xyz_pos_t pos) {
-    toNative(pos);
     apply_motion_limits(pos);
     do_blocking_move_to(pos);
 }
