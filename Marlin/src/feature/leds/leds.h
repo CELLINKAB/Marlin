@@ -55,7 +55,7 @@
 /**
  * LEDcolor type for use with leds.set_color
  */
-typedef struct LEDColor
+struct LEDColor
 {
     uint8_t r, g, b OPTARG(HAS_WHITE_LED, w) OPTARG(NEOPIXEL_LED, i);
 
@@ -105,34 +105,30 @@ typedef struct LEDColor
 
     constexpr bool is_off() const { return 3 > r + g + b + TERN0(HAS_WHITE_LED, w); }
 
-    inline uint32_t to_neopixel_color() const {
-          return (LEDColorWhite() == incol)
-                  ? neo.Color(NEO_WHITE)
-                  : neo.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED, incol.w));
-    }
-} LEDColor;
+    uint32_t to_neopixel_color() const;
+};
 
 /**
  * Color presets
  */
 
-#define LEDColorOff() LEDColor(0, 0, 0)
-#define LEDColorRed() LEDColor(255, 0, 0)
+constexpr  LEDColor LEDColorOff(0, 0, 0);
+constexpr  LEDColor LEDColorRed(255, 0, 0);
 #if ENABLED(LED_COLORS_REDUCE_GREEN)
-#    define LEDColorOrange() LEDColor(255, 25, 0)
-#    define LEDColorYellow() LEDColor(255, 75, 0)
+constexpr LEDColor LEDColorOrange(255, 25, 0);
+constexpr LEDColor LEDColorYellow(255, 75, 0);
 #else
-#    define LEDColorOrange() LEDColor(255, 80, 0)
-#    define LEDColorYellow() LEDColor(255, 255, 0)
+constexpr LEDColor LEDColorOrange(255, 80, 0);
+constexpr LEDColor LEDColorYellow(255, 255, 0);
 #endif
-#define LEDColorGreen() LEDColor(0, 255, 0)
-#define LEDColorBlue() LEDColor(0, 0, 255)
-#define LEDColorIndigo() LEDColor(0, 255, 255)
-#define LEDColorViolet() LEDColor(255, 0, 255)
+constexpr LEDColor LEDColorGreen(0, 255, 0);
+constexpr LEDColor LEDColorBlue(0, 0, 255);
+constexpr LEDColor LEDColorIndigo(0, 255, 255);
+constexpr LEDColor LEDColorViolet(255, 0, 255);
 #if HAS_WHITE_LED && DISABLED(RGB_LED)
-#    define LEDColorWhite() LEDColor(0, 0, 0, 255)
+constexpr LEDColor LEDColorWhite(0, 0, 0, 255);
 #else
-#    define LEDColorWhite() LEDColor(255, 255, 255)
+constexpr LEDColor LEDColorWhite(255, 255, 255);
 #endif
 
 class LEDLights
