@@ -53,10 +53,6 @@ constexpr LEDStrip int_to_strip(int16_t index)
 
 void GcodeSuite::M151()
 {
-    if (animation_manager.active_fade.strip != LEDStrip::None) {
-        animation_manager.active_fade.duration = 0;
-        animation_manager.update();
-    }
     if (!parser.seenval('D'))
         return;
     millis_t duration = parser.value_millis_from_seconds();
@@ -95,6 +91,7 @@ void GcodeSuite::M151()
                                                 : neo.brightness()));
 
     animation_manager.active_fade = LedFade(strip, millis(), duration, old_color, new_color, pixel);
+
 }
 
 #endif
