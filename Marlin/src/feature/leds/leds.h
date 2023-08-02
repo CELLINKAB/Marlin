@@ -93,12 +93,10 @@ struct LEDColor
 
     constexpr bool operator==(const LEDColor& right) const
     {
-      return this == &right 
-              || (this->r == right.r 
-                  && this->b == right.b 
-                  && this->g == right.g 
-                  && TERN1(HAS_WHITE_LED, this->w == right.w) 
-                  && TERN1(NEOPIXEL_LED, this->i == right.i));
+        return this == &right
+               || (this->r == right.r && this->b == right.b && this->g == right.g
+                   && TERN1(HAS_WHITE_LED, this->w == right.w)
+                   && TERN1(NEOPIXEL_LED, this->i == right.i));
     }
 
     constexpr bool operator!=(const LEDColor& right) const { return !operator==(right); }
@@ -112,8 +110,8 @@ struct LEDColor
  * Color presets
  */
 
-constexpr  LEDColor LEDColorOff(0, 0, 0);
-constexpr  LEDColor LEDColorRed(255, 0, 0);
+constexpr LEDColor LEDColorOff(0, 0, 0);
+constexpr LEDColor LEDColorRed(255, 0, 0);
 #if ENABLED(LED_COLORS_REDUCE_GREEN)
 constexpr LEDColor LEDColorOrange(255, 25, 0);
 constexpr LEDColor LEDColorYellow(255, 75, 0);
@@ -287,9 +285,9 @@ struct LedFade
             return end_color;
         }
         auto interpolate = [](float proportion, uint8_t start, uint8_t end) {
-            return start
-                   + static_cast<uint8_t>(proportion * static_cast<float>(end)
-                                          - static_cast<float>(start));
+            return static_cast<uint8_t>(
+                static_cast<float>(start)
+                + (proportion * (static_cast<float>(end) - static_cast<float>(start))));
         };
         float animation_state = static_cast<float>(current_time - start_time)
                                 / static_cast<float>(duration);
