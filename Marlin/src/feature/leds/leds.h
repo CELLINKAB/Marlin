@@ -291,7 +291,7 @@ struct LedFade
                    + static_cast<uint8_t>(proportion * static_cast<float>(end)
                                           - static_cast<float>(start));
         };
-        float animation_state = static_cast<float>(millis() - start_time)
+        float animation_state = static_cast<float>(current_time - start_time)
                                 / static_cast<float>(duration);
         return LEDColor(interpolate(animation_state, start_color.r, end_color.r),
                         interpolate(animation_state, start_color.g, end_color.g),
