@@ -154,22 +154,22 @@ public:
                       OPTARG(NEOPIXEL_IS_SEQUENTIAL, isSequence));
     }
 
-    static void set_off() { set_color(LEDColorOff()); }
-    static void set_green() { set_color(LEDColorGreen()); }
-    static void set_white() { set_color(LEDColorWhite()); }
+    static void set_off() { set_color(LEDColorOff); }
+    static void set_green() { set_color(LEDColorGreen); }
+    static void set_white() { set_color(LEDColorWhite); }
 
 #if ENABLED(LED_COLOR_PRESETS)
     static const LEDColor defaultLEDColor;
     static void set_default() { set_color(defaultLEDColor); }
-    static void set_red() { set_color(LEDColorRed()); }
-    static void set_orange() { set_color(LEDColorOrange()); }
-    static void set_yellow() { set_color(LEDColorYellow()); }
-    static void set_blue() { set_color(LEDColorBlue()); }
-    static void set_indigo() { set_color(LEDColorIndigo()); }
-    static void set_violet() { set_color(LEDColorViolet()); }
+    static void set_red() { set_color(LEDColorRed); }
+    static void set_orange() { set_color(LEDColorOrange); }
+    static void set_yellow() { set_color(LEDColorYellow); }
+    static void set_blue() { set_color(LEDColorBlue); }
+    static void set_indigo() { set_color(LEDColorIndigo); }
+    static void set_violet() { set_color(LEDColorViolet); }
 #endif
 
-    static LEDColor get_color() { return lights_on ? color : LEDColorOff(); }
+    static LEDColor get_color() { return lights_on ? color : LEDColorOff; }
 
 #if ENABLED(LED_CONTROL_MENU)
     static void toggle(); // swap "off" with color
@@ -214,19 +214,19 @@ public:
         set_color(LEDColor(r, g, b OPTARG(HAS_WHITE_LED, w) OPTARG(NEOPIXEL_LED, i)));
     }
 
-    static void set_off() { set_color(LEDColorOff()); }
-    static void set_green() { set_color(LEDColorGreen()); }
-    static void set_white() { set_color(LEDColorWhite()); }
+    static void set_off() { set_color(LEDColorOff); }
+    static void set_green() { set_color(LEDColorGreen); }
+    static void set_white() { set_color(LEDColorWhite); }
 
 #    if ENABLED(NEO2_COLOR_PRESETS)
     static const LEDColor defaultLEDColor;
     static void set_default() { set_color(defaultLEDColor); }
-    static void set_red() { set_color(LEDColorRed()); }
-    static void set_orange() { set_color(LEDColorOrange()); }
-    static void set_yellow() { set_color(LEDColorYellow()); }
-    static void set_blue() { set_color(LEDColorBlue()); }
-    static void set_indigo() { set_color(LEDColorIndigo()); }
-    static void set_violet() { set_color(LEDColorViolet()); }
+    static void set_red() { set_color(LEDColorRed); }
+    static void set_orange() { set_color(LEDColorOrange); }
+    static void set_yellow() { set_color(LEDColorYellow); }
+    static void set_blue() { set_color(LEDColorBlue); }
+    static void set_indigo() { set_color(LEDColorIndigo); }
+    static void set_violet() { set_color(LEDColorViolet); }
 #    endif
 
 #    if ENABLED(NEOPIXEL2_SEPARATE)
@@ -234,7 +234,7 @@ public:
     static bool lights_on; // the last set color was "on"
     static void toggle();  // swap "off" with color
     static void update() { set_color(color); }
-    static LEDColor get_color() { return lights_on ? color : LEDColorOff(); }
+    static LEDColor get_color() { return lights_on ? color : LEDColorOff; }
 
 #    endif
 };
