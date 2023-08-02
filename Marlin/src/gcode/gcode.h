@@ -849,6 +849,9 @@ private:
 
   #if HAS_COLOR_LEDS
     static void M150();
+    #if ENABLED(RGB_LED_FADE_COMMAND)
+    static void M151();
+    #endif
   #endif
 
   #if ENABLED(AUTO_REPORT_POSITION)

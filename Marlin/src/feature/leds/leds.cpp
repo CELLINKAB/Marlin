@@ -42,10 +42,8 @@
   );
 #endif
 
-#if ANY(LED_CONTROL_MENU, PRINTER_EVENT_LEDS, CASE_LIGHT_IS_COLOR_LED)
-  LEDColor LEDLights::color;
-  bool LEDLights::lights_on;
-#endif
+LEDColor LEDLights::color;
+bool LEDLights::lights_on;
 
 LEDLights leds;
 
@@ -107,9 +105,7 @@ void LEDLights::set_color(const LEDColor &incol
 
   #if ENABLED(NEOPIXEL_LED)
 
-    const uint32_t neocolor = LEDColorWhite() == incol
-                            ? neo.Color(NEO_WHITE)
-                            : neo.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED, incol.w));
+    const uint32_t neocolor = incol.to_neopixel_color();
 
     #if ENABLED(NEOPIXEL_IS_SEQUENTIAL)
       static uint16_t nextLed = 0;
@@ -173,11 +169,11 @@ void LEDLights::set_color(const LEDColor &incol
   TERN_(PCA9632, PCA9632_set_led_color(incol));
   TERN_(PCA9533, PCA9533_set_rgb(incol.r, incol.g, incol.b));
 
-  #if EITHER(LED_CONTROL_MENU, PRINTER_EVENT_LEDS)
-    // Don't update the color when OFF
-    lights_on = !incol.is_off();
-    if (lights_on) color = incol;
-  #endif
+
+  // Don't update the color when OFF
+  lights_on = !incol.is_off();
+  if (lights_on) color = incol;
+
 }
 
 #if ENABLED(LED_CONTROL_MENU)
@@ -210,10 +206,8 @@ void LEDLights::set_color(const LEDColor &incol
     );
   #endif
 
-  #if ENABLED(LED_CONTROL_MENU)
-    LEDColor LEDLights2::color;
-    bool LEDLights2::lights_on;
-  #endif
+  LEDColor LEDLights2::color;
+  bool LEDLights2::lights_on = true;
 
   LEDLights2 leds2;
 
@@ -223,17 +217,15 @@ void LEDLights::set_color(const LEDColor &incol
   }
 
   void LEDLights2::set_color(const LEDColor &incol) {
-    const uint32_t neocolor = LEDColorWhite() == incol
-                            ? neo2.Color(NEO2_WHITE)
-                            : neo2.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED2, incol.w));
+    const uint32_t neocolor = incol.to_neopixel_color();
     neo2.set_brightness(incol.i);
     neo2.set_color(neocolor);
 
-    #if ENABLED(LED_CONTROL_MENU)
-      // Don't update the color when OFF
-      lights_on = !incol.is_off();
-      if (lights_on) color = incol;
-    #endif
+
+    // Don't update the color when OFF
+    lights_on = !incol.is_off();
+    if (lights_on) color = incol;
+
   }
 
   #if ENABLED(LED_CONTROL_MENU)
