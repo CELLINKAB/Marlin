@@ -3337,10 +3337,15 @@
   //#define NEOPIXEL_BKGD_INDEX_LAST    5 // Index of the last background LED
   //#define NEOPIXEL_BKGD_COLOR { 255, 255, 255, 0 }  // R, G, B, W
   //#define NEOPIXEL_BKGD_ALWAYS_ON       // Keep the backlight on when other NeoPixels are off
+
+
 #endif
 
 // inverts the parameters for RGB control, in case you're using an inverting level-shift
 #define INVERTED_RGB_CONTROL
+
+// enable LED fade command for smooth transitions
+#define RGB_LED_FADE_COMMAND
 
 /**
  * Printer Event LEDs

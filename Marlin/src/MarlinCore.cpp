@@ -910,6 +910,9 @@ void idle(bool no_stepper_sleep/*=false*/) {
     }
   #endif
 
+  // Update LED fade
+  TERN_(RGB_LED_FADE_COMMAND, animation_manager.update());
+
   // Update the Průša MMU2
   TERN_(HAS_PRUSA_MMU2, mmu2.mmu_loop());
 
