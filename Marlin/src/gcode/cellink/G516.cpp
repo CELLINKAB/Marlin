@@ -17,12 +17,11 @@ void GcodeSuite::G516()
     const bool level_state = planner.leveling_active;
     set_bed_leveling_enabled(false);
     Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
-
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
     xyz_pos_t clipped_eject_pos(eject_pos);
     apply_motion_limits(clipped_eject_pos);
-    do_blocking_move_to(clipped_eject_pos);
-    do_blocking_move_to(eject_pos);
+    do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
+    do_blocking_move_to(eject_pos, homing_feedrate(Y_AXIS));
 
     if (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING)
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
@@ -33,7 +32,7 @@ void GcodeSuite::G516()
     if (WAIT_TIME && millis() >= timeout)
         SERIAL_ECHOLN("ERR_VESSEL_LOAD_TIMEOUT");
 
-    do_blocking_move_to(clipped_eject_pos);
+    do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
 
     if (!READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING )
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_CLOSE");
