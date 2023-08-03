@@ -4,9 +4,8 @@
 #if ENABLED(FESTO_PNEUMATICS)
 
 #    include "../../feature/air_system/pneumatics.h"
+#    include "../../feature/cellink_reporter.h"
 #    include "../gcode.h"
-
-#    include "cellink_reporting.h"
 
 // set pressure regulator
 void GcodeSuite::M1036()
@@ -15,7 +14,7 @@ void GcodeSuite::M1036()
     if (parser.seen('K'))
         regulator.set_point(parser.value_float());
     else {
-        SERIAL_ECHOLN_CELLINK_KV("PREG_SET", regulator.set_point());
+        cellink::serial_echoln_kv("PREG_SET", regulator.set_point());
     }
 }
 
@@ -30,9 +29,9 @@ void GcodeSuite::M1036_report(bool for_replay)
 void GcodeSuite::M1062()
 {
     pneumatics::report_sensors();
-    #if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
+#    if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
     pneumatics::reporter.set_interval(parser.byteval('S'));
-    #endif
+#    endif
 }
 
 template<typename SENSOR>
@@ -54,20 +53,28 @@ void GcodeSuite::M1100()
     else if (parser.seen('T'))
         set_sensor_params(pneumatics::tank_pressure);
     else {
-        SERIAL_ECHO_CELLINK_KV("GRIP_S_OFFSET", pneumatics::gripper_vacuum.offset);
-        SERIAL_ECHO_CELLINK_KV("GRIP_S_GAIN", pneumatics::gripper_vacuum.scalar);
-        SERIAL_ECHO_CELLINK_KV("PREG_F_OFFSET", pneumatics::regulator_feedback.offset);
-        SERIAL_ECHO_CELLINK_KV("PREG_F_GAIN", pneumatics::regulator_feedback.scalar);
-        SERIAL_ECHO_CELLINK_KV("TANK_S_OFFSET", pneumatics::tank_pressure.offset);
-        SERIAL_ECHOLN_CELLINK_KV("TANK_S_GAIN", pneumatics::tank_pressure.scalar);
+        cellink::serial_echoln_kv("GRIP_S_OFFSET",
+                                  pneumatics::gripper_vacuum.offset,
+                                  "GRIP_S_GAIN",
+                                  pneumatics::gripper_vacuum.scalar,
+                                  "PREG_F_OFFSET",
+                                  pneumatics::regulator_feedback.offset,
+                                  "PREG_F_GAIN",
+                                  pneumatics::regulator_feedback.scalar,
+                                  "TANK_S_OFFSET",
+                                  pneumatics::tank_pressure.offset,
+                                  "TANK_S_GAIN",
+                                  pneumatics::tank_pressure.scalar);
 
         return;
     }
 }
 
-#define REPORT_M1100(letter, sensor) SERIAL_ECHOLNPGM("M1100 "#letter" O", sensor.offset, " S", sensor.scalar);
+#    define REPORT_M1100(letter, sensor) \
+        SERIAL_ECHOLNPGM("M1100 " #letter " O", sensor.offset, " S", sensor.scalar);
 
-void GcodeSuite::M1100_report(bool for_replay) {
+void GcodeSuite::M1100_report(bool for_replay)
+{
     report_heading_etc(for_replay, F("Air Pressure Sensors"));
     using namespace pneumatics;
     REPORT_M1100(L, gripper_vacuum);
