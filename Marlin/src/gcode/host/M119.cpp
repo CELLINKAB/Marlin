@@ -20,14 +20,21 @@
  *
  */
 
-#include "../gcode.h"
 #include "../../module/endstops.h"
+#include "../gcode.h"
+
+#if ENABLED(CELLINK_REPORTING)
+#    include "../../feature/cellink_reporter.h"
+#endif
 
 /**
  * M119: Output endstop states to serial output
  */
-void GcodeSuite::M119() {
+void GcodeSuite::M119()
+{
+#if ENABLED(CELLINK_REPORTING)
+    cellink::reporter.m119.set_interval(parser.byteval('S'));
+#endif
 
-  endstops.report_states();
-
+    endstops.report_states();
 }
