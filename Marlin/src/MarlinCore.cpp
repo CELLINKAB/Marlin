@@ -907,6 +907,7 @@ void idle(bool no_stepper_sleep/*=false*/) {
       TERN_(AUTO_REPORT_PNEUMATIC_SENSORS, pneumatics::reporter.tick());
       TERN_(AUTO_REPORT_BED_MULTI_SENSOR, bed_multi_sensor_reporter.tick());
       TERN_(AUTO_REPORT_CHANTARELLE, printhead::reporters::tick_all());
+      TERN_(CELLINK_REPORTING, cellink::reporter.tick_all());
     }
   #endif
 
