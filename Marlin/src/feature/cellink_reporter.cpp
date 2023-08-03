@@ -75,5 +75,5 @@ void Reporter::tick_all()
     m1017.tick();
 }
 
-Reporter reporter;
+Reporter cellink::reporter;
 #endif
