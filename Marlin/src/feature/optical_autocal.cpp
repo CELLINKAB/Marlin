@@ -80,7 +80,7 @@ auto OpticalAutocal::full_autocal_routine(const xyz_pos_t start_pos, const feedR
  */
 void OpticalAutocal::reset(const uint8_t tool)
 {
-    offsets[tool] = xyz_pos_t{};
+    offsets[tool].reset();
 }
 
 /**
@@ -177,16 +177,16 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
 
     auto isr1 = [&sensor_1_trigger_y_pos] {
         if (sensor_1_trigger_y_pos == 0.0f)
-            sensor_1_trigger_y_pos = planner.get_axis_positions_mm().y;
+            sensor_1_trigger_y_pos = planner.get_axis_position_mm(Y_AXIS);
     };
     auto isr2 = [&sensor_2_trigger_y_pos] {
         if (sensor_2_trigger_y_pos == 0.0f)
-            sensor_2_trigger_y_pos = planner.get_axis_positions_mm().y;
+            sensor_2_trigger_y_pos = planner.get_axis_position_mm(Y_AXIS);
     };
 
     attachInterrupt(SENSOR_1, isr1, sensor_polarity);
     current_position.y += FULL_Y_RANGE;
-    planner.buffer_line(current_position, feedrate_mm_s);
+    line_to_current_position(feedrate_mm_s);
     while (planner.busy()) {
         idle();
         // sensor 1 triggered, switch sensors
@@ -206,7 +206,7 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
 
     // switch direction
     current_position.y -= FULL_Y_RANGE;
-    planner.buffer_line(current_position, feedrate_mm_s);
+    line_to_current_position(feedrate_mm_s);
     while (planner.busy()) {
         idle();
         // sensor 2 triggered, switch sensors
