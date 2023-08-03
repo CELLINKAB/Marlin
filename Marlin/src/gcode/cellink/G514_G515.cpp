@@ -10,7 +10,8 @@
 #    include "../gcode.h"
 #    include "../parser.h"
 
-void clipped_move(xyz_pos_t pos) {
+void clipped_move(xyz_pos_t pos)
+{
     apply_motion_limits(pos);
     do_blocking_move_to(pos);
 }
@@ -42,6 +43,10 @@ void GcodeSuite::G515()
 
     if (homing_needed_error())
         return;
+
+    const bool level_state = planner.leveling_active;
+    set_bed_leveling_enabled(false);
+    Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
 
     xyz_pos_t gripper_pos(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     gripper_pos.z = Z_MAX_POS;
