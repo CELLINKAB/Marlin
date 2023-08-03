@@ -21,7 +21,7 @@ void Reporter::M798::report()
 }
 void Reporter::M799::report()
 {
-    const auto& offset = optical_autocal.offset(tool);
+    const auto& offset = optical_autocal.offset(active_extruder);
     serial_echoln_kv("AT",
                      active_extruder,
                      "AUTOCAL_XOFF",
@@ -31,7 +31,6 @@ void Reporter::M799::report()
                      "AUTOCAL_ZOFF",
                      offset.z);
 }
-void Reporter::M802::report() {}
 void Reporter::M814::report() {}
 void Reporter::M816::report() {}
 void Reporter::M821::report() {}

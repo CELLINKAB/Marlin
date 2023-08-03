@@ -22,7 +22,7 @@ void serial_echo_kv(K key, V value, Rest... rest)
 }
 
 template<typename K, typename V>
-serial_echoln_kv(K key, V value)
+void serial_echoln_kv(K key, V value)
 {
     serial_echo_kv(key, value);
     SERIAL_EOL();
@@ -35,17 +35,6 @@ void serial_echoln_kv(K key, V value, Rest... rest)
     serial_echo_kv(rest...);
     SERIAL_EOL();
 }
-
-void M119_report();
-void M772_report();
-void M798_report();
-void M799_report();
-void M802_report();
-void M821_report();
-void M825_report();
-void M1015_report();
-void M1016_report();
-void M1017_report();
 
 struct Reporter
 {
@@ -67,8 +56,17 @@ struct Reporter
     } m799;
     struct M802 : AutoReporter<M802>
     {
+        static bool all_sensors;
         static void report();
     } m802;
+    struct M814 : AutoReporter<M814>
+    {
+        static void report();
+    } m814;
+    struct M816 : AutoReporter<M816>
+    {
+        static void report();
+    } m816;
     struct M821 : AutoReporter<M821>
     {
         static void report();

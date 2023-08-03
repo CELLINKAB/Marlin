@@ -3,8 +3,7 @@
 #if ENABLED(FESTO_PNEUMATICS)
 
 #    include "../../module/planner.h"
-
-#    include "../../gcode/cellink/cellink_reporting.h"
+#    include "../cellink_reporter.h"
 
 #    include "pneumatics.h"
 
@@ -101,24 +100,27 @@ void set_gripper_valves(GripperState state)
     }
 }
 
-
 //
 // Reporting
 //
 
-void report_sensors() {
-    SERIAL_ECHO_CELLINK_KV("REG", regulator_feedback.read_avg());
-    SERIAL_ECHO_CELLINK_KV("TANK", tank_pressure.read_avg());
-    SERIAL_ECHOLN_CELLINK_KV("GRIP", gripper_vacuum.read_avg());
+void report_sensors()
+{
+    cellink::serial_echoln_kv("REG",
+                              regulator_feedback.read_avg(),
+                              "TANK",
+                              tank_pressure.read_avg(),
+                              "GRIP",
+                              gripper_vacuum.read_avg());
 }
 
-#if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
-void Reporter::report() 
+#    if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
+void Reporter::report()
 {
     report_sensors();
 }
 Reporter reporter;
-#endif
+#    endif
 
 } // namespace pneumatics
 
