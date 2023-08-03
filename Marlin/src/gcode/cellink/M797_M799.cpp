@@ -5,6 +5,7 @@
 #if ALL(CELLINK_REPORTING, OPTICAL_AUTOCAL)
 
 #    include "../../feature/cellink_reporter.h"
+#    include "../../feature/optical_autocal.h"
 #    include "../gcode.h"
 
 /**
