@@ -35,9 +35,31 @@ void Reporter::M814::report() {}
 void Reporter::M816::report() {}
 void Reporter::M821::report() {}
 void Reporter::M825::report() {}
-void Reporter::M1015::report() {}
-void Reporter::M1016::report() {}
-void Reporter::M1017::report() {}
+void Reporter::M1015::report()
+{
+    const auto pos = current_position.asLogical();
+    serial_echoln_kv("XPOS", pos.x, "YPOS", pos.y, "ZPOS", pos.z);
+}
+void Reporter::M1016::report()
+{
+    const auto pos = planner.get_axis_positions_mm();
+    serial_echoln_kv("XMPOS", pos.x, "YMPOS", pos.y, "ZMPOS", pos.z);
+}
+void Reporter::M1017::report()
+{
+    serial_echoln_kv("AT", active_extruder);
+    EXTRUDER_LOOP()
+    {
+        serial_echoln_kv("T",
+                         e,
+                         "X",
+                         hotend_offset[e].x,
+                         "Y",
+                         hotend_offset[e].y,
+                         "Z",
+                         hotend_offset[e].z);
+    }
+}
 
 void Reporter::tick_all()
 {
