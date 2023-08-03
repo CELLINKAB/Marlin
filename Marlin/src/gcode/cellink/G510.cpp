@@ -74,6 +74,8 @@ void GcodeSuite::G510()
         return;
     }
 
+    process_subcommands_now(F("G28Z"));
+
     switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
     case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
         SERIAL_ECHOLN("AUTOCAL_SANITY_CHECK_FAIL");
