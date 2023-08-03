@@ -268,6 +268,10 @@
   #include "feature/tmp117_printbed.h"
 #endif
 
+#if ENABLED(CELLINK_REPORTING)
+  #include "feature/cellink_reporter.h"
+#endif
+
 #if ENABLED(MARLIN_TEST_BUILD)
   #include "tests/marlin_tests.h"
 #endif
