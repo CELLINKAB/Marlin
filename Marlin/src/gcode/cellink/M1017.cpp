@@ -5,6 +5,7 @@
 #if ENABLED(CELLINK_REPORTING)
 
 #    include "../../feature/cellink_reporter.h"
+#    include "../gcode.h"
 
 /**
    * @brief report tool offesets
