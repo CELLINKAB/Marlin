@@ -671,6 +671,8 @@ G29_TYPE GcodeSuite::G29() {
   {
     const ProbePtRaise raise_after = (parser.boolval('E') || parser.seen('J')) ? PROBE_PT_STOW : PROBE_PT_RAISE;
 
+    if (raise_after == PROBE_PT_STOW) probe.stow();
+    
     abl.measured_z = 0;
 
     #if ABL_USES_GRID
