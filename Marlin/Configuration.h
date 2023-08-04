@@ -715,7 +715,7 @@
 #define MAX_BED_POWER 235 // limits duty cycle to bed; 255=full current
 
 #if ENABLED(PIDTEMPBED)
-  //#define MIN_BED_POWER 0
+  #define MIN_BED_POWER -MAX_BED_POWER
   #define PID_BED_DEBUG // Print Bed PID debug data to the serial port.
 
   // 120V 250W silicone heater into 4mm borosilicate (MendelMax 1.5+)

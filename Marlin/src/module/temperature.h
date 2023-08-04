@@ -193,9 +193,10 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
   template<int MIN_POW, int MAX_POW>
   struct PID_t{
   protected:
-    bool pid_reset = true;
+    static constexpr bool BIDIRECTIONAL = MIN_POW < 0;
     float temp_iState = 0.0f, temp_dState = 0.0f;
     float work_p = 0, work_i = 0, work_d = 0;
+    float last_set_temp;
 
   public:
     float Kp = 0, Ki = 0, Kd = 0;
@@ -216,7 +217,7 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
     void set_Kf(float) {}
     int low() const { return MIN_POW; }
     int high() const { return MAX_POW; }
-    void reset() { pid_reset = true; }
+    void reset() { temp_iState = 0.0; work_d = 0.0; }
     void set(float p, float i, float d, float c=1, float f=0) { set_Kp(p); set_Ki(i); set_Kd(d); set_Kc(c); set_Kf(f); }
     void set(const raw_pid_t &raw) { set(raw.p, raw.i, raw.d); }
     void set(const raw_pidcf_t &raw) { set(raw.p, raw.i, raw.d, raw.c, raw.f); }
@@ -226,32 +227,34 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
     float get_extrusion_scale_output(const bool, const int32_t, const float, const int16_t) { return 0; }
 
     float get_pid_output(const float target, const float current) {
-      const float pid_error = target - current;
-      if (!target || pid_error < -(PID_FUNCTIONAL_RANGE)) {
-        pid_reset = true;
-        return 0;
-      }
-      else if (pid_error > PID_FUNCTIONAL_RANGE) {
-        pid_reset = true;
-        return MAX_POW;
-      }
+        if (last_set_temp != target) {
+          reset();
+          last_set_temp = target;
+          return 0;
+        }
 
-      if (pid_reset) {
-        pid_reset = false;
-        temp_iState = 0.0;
-        work_d = 0.0;
-      }
+        float pid_error = target - current;
+          
+        if (pid_error < -(PID_FUNCTIONAL_RANGE) || pid_error > PID_FUNCTIONAL_RANGE) {
+          reset();
+        }
 
-      const float max_power_over_i_gain = float(MAX_POW) / Ki - float(MIN_POW);
-      temp_iState = constrain(temp_iState + pid_error, 0, max_power_over_i_gain);
+        const float max_power_over_i_gain = static_cast<float>(MAX_POW) / Ki - static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW);
+        temp_iState = constrain(temp_iState + pid_error, (BIDIRECTIONAL ? -max_power_over_i_gain : 0), max_power_over_i_gain);
 
-      work_p = Kp * pid_error;
-      work_i = Ki * temp_iState;
-      work_d = work_d + PID_K2 * (Kd * (temp_dState - current) - work_d);
+        work_pid.Kp = Kp * pid_error;
+        work_pid.Ki = Ki * temp_iState;
+        work_pid.Kd = work_pid.Kd + PID_K2 * (Kd * (temp_dState - current) - work_pid.Kd);
 
-      temp_dState = current;
+        temp_dState = tempinfo.celsius;
 
-      return constrain(work_p + work_i + work_d + float(MIN_POW), 0, MAX_POW);
+        float out_val = constrain(work_pid.Kp 
+                                    + work_pid.Ki 
+                                    + work_pid.Kd
+                                    + static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW),
+                                    MIN_POW, MAX_POW);
+
+        return out_val;
     }
 
   };
