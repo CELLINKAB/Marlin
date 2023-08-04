@@ -765,11 +765,13 @@ G29_TYPE GcodeSuite::G29() {
       }
 
       if (!abl.dryrun && !isnan(abl.measured_z)) {
-        const float avg_z = (points[0].z + points[1].z + points[2].z) / 3;
-        vector_3 planeNormal = vector_3::cross(points[0] - points[1], points[2] - points[1]).get_normal();
+        const float max_z = max({points[0].z, points[1].z, points[2].z});
+        const float avg_z = (points[0].z + points[1].z + points[2].z + max_z) / 4;
+        vector_3 planeCross = vector_3::cross(points[0] - points[1], points[2] - points[1]);
+        vector_3 planeNormal = planeCross.get_normal();
         if (planeNormal.z < 0) planeNormal *= -1;
         planner.bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
-        planner.bed_level_z_offset = avg_z;
+        planner.bed_level_z_offset = (avg_z > 0) ? avg_z : 0;
 
         // Can't re-enable (on error) until the new grid is written
         abl.reenable = false;
