@@ -318,9 +318,7 @@ void unified_bed_leveling::G29() {
     TERN_(HAS_MULTI_HOTEND, if (active_extruder != 0) tool_change(0, true));
 
     // Position bed horizontally and Z probe vertically.
-    #if    defined(SAFE_BED_LEVELING_START_X) || defined(SAFE_BED_LEVELING_START_Y) || defined(SAFE_BED_LEVELING_START_Z) \
-        || defined(SAFE_BED_LEVELING_START_I) || defined(SAFE_BED_LEVELING_START_J) || defined(SAFE_BED_LEVELING_START_K) \
-        || defined(SAFE_BED_LEVELING_START_U) || defined(SAFE_BED_LEVELING_START_V) || defined(SAFE_BED_LEVELING_START_W)
+    #if HAS_SAFE_BED_LEVELING
       xyze_pos_t safe_position = current_position;
       #ifdef SAFE_BED_LEVELING_START_X
         safe_position.x = SAFE_BED_LEVELING_START_X;
@@ -351,7 +349,7 @@ void unified_bed_leveling::G29() {
       #endif
 
       do_blocking_move_to(safe_position);
-    #endif
+    #endif // HAS_SAFE_BED_LEVELING
   }
 
   // Invalidate one or more nearby mesh points, possibly all.
@@ -887,8 +885,32 @@ void set_message_with_feedback(FSTR_P const fstr) {
     ui.capture();
     save_ubl_active_state_and_disable();   // Disable bed level correction for probing
 
-    do_blocking_move_to(0.5f * (MESH_MAX_X - (MESH_MIN_X)), 0.5f * (MESH_MAX_Y - (MESH_MIN_Y)), MANUAL_PROBE_START_Z);
-      //, _MIN(planner.settings.max_feedrate_mm_s[X_AXIS], planner.settings.max_feedrate_mm_s[Y_AXIS]) * 0.5f);
+    do_blocking_move_to(
+      xyz_pos_t({
+        0.5f * ((MESH_MAX_X) - (MESH_MIN_X)),
+        0.5f * ((MESH_MAX_Y) - (MESH_MIN_Y)),
+        MANUAL_PROBE_START_Z
+        #ifdef SAFE_BED_LEVELING_START_I
+          , SAFE_BED_LEVELING_START_I
+        #endif
+        #ifdef SAFE_BED_LEVELING_START_J
+          , SAFE_BED_LEVELING_START_J
+        #endif
+        #ifdef SAFE_BED_LEVELING_START_K
+          , SAFE_BED_LEVELING_START_K
+        #endif
+        #ifdef SAFE_BED_LEVELING_START_U
+          , SAFE_BED_LEVELING_START_U
+        #endif
+        #ifdef SAFE_BED_LEVELING_START_V
+          , SAFE_BED_LEVELING_START_V
+        #endif
+        #ifdef SAFE_BED_LEVELING_START_W
+          , SAFE_BED_LEVELING_START_W
+        #endif
+      })
+      //, _MIN(planner.settings.max_feedrate_mm_s[X_AXIS], planner.settings.max_feedrate_mm_s[Y_AXIS]) * 0.5f
+    );
     planner.synchronize();
 
     SERIAL_ECHOPGM("Place shim under nozzle");
@@ -1467,7 +1489,7 @@ void unified_bed_leveling::smart_fill_mesh() {
     float measured_z;
     bool abort_flag = false;
 
-    #ifdef VALIDATE_MESH_TILT
+    #if ENABLED(VALIDATE_MESH_TILT)
       float z1{};
       float z2{}; 
       float z3{};  // Needed for algorithm validation below
@@ -1485,9 +1507,7 @@ void unified_bed_leveling::smart_fill_mesh() {
         abort_flag = true;
       else {
         measured_z -= get_z_correction(points[0]);
-        #ifdef VALIDATE_MESH_TILT
-          z1 = measured_z;
-        #endif
+        TERN_(VALIDATE_MESH_TILT, z1 = measured_z);
         if (param.V_verbosity > 3) {
           serial_spaces(16);
           SERIAL_ECHOLNPGM("Corrected_Z=", measured_z);
@@ -1500,9 +1520,7 @@ void unified_bed_leveling::smart_fill_mesh() {
         TERN_(HAS_STATUS_MESSAGE, ui.status_printf(0, F(S_FMT " 2/3"), GET_TEXT(MSG_LCD_TILTING_MESH)));
 
         measured_z = probe.probe_at_point(points[1], PROBE_PT_RAISE, param.V_verbosity);
-        #ifdef VALIDATE_MESH_TILT
-          z2 = measured_z;
-        #endif
+        TERN_(VALIDATE_MESH_TILT, z2 = measured_z);
         if (isnan(measured_z))
           abort_flag = true;
         else {
@@ -1520,9 +1538,7 @@ void unified_bed_leveling::smart_fill_mesh() {
         TERN_(HAS_STATUS_MESSAGE, ui.status_printf(0, F(S_FMT " 3/3"), GET_TEXT(MSG_LCD_TILTING_MESH)));
 
         measured_z = probe.probe_at_point(points[2], PROBE_PT_LAST_STOW, param.V_verbosity);
-        #ifdef VALIDATE_MESH_TILT
-          z3 = measured_z;
-        #endif
+        TERN_(VALIDATE_MESH_TILT, z3 = measured_z);
         if (isnan(measured_z))
           abort_flag = true;
         else {
@@ -1669,10 +1685,10 @@ void unified_bed_leveling::smart_fill_mesh() {
        * The Z error between the probed point locations and the get_z_correction()
        * numbers for those locations should be 0.
        */
-      #ifdef VALIDATE_MESH_TILT
-      xy_pos_t safe_homing_xy{Z_SAFE_HOMING_X_POINT,Z_SAFE_HOMING_Y_POINT};
-      xy_pos_t probe_pt[3];
-      Probe::get_three_points(probe_pt);
+      #if ENABLED(VALIDATE_MESH_TILT)
+        xy_pos_t safe_homing_xy{Z_SAFE_HOMING_X_POINT,Z_SAFE_HOMING_Y_POINT};
+        xy_pos_t probe_pt[3];
+        Probe::get_three_points(probe_pt);
         auto d_from = []{ DEBUG_ECHOPGM("D from "); };
         auto normed = [&](const xy_pos_t &pos, const_float_t zadd) {
           return normal.x * pos.x + normal.y * pos.y + zadd;

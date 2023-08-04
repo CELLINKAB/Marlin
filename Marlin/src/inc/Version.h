@@ -7,18 +7,25 @@
 #include <string_view>
     
 #ifndef SHORT_BUILD_VERSION
-    //#define SHORT_MARLIN_VERSION_STRING "2.1.2"
-    #define SHORT_CELLINK_VERSION_STRING "2.1.0-issues-addbuildtage.1"
-    #define SHORT_BUILD_VERSION "2.1.0"
+    #define SHORT_BUILD_VERSION "2.1.2.1"
+    #define SHORT_CELLINK_VERSION_STRING SHORT_BUILD_VERSION "-issues-addbuildtage.1"
 #endif
 #ifndef DETAILED_BUILD_VERSION
     #define DETAILED_BUILD_VERSION "Cellink-Marlin " SHORT_CELLINK_VERSION_STRING
     //# " (Marlin " SHORT_MARLIN_VERSION_STRING ")"
 #endif
 #ifndef STRING_DISTRIBUTION_DATE
-    #define STRING_DISTRIBUTION_DATE "0000-00-00"
+  #define STRING_DISTRIBUTION_DATE "0000-00-00"
 #endif
-#define MARLIN_HEX_VERSION 02010200
+
+/**
+ * Minimum Configuration.h and Configuration_adv.h file versions.
+ * Set based on the release version number. Used to catch an attempt to use
+ * older configurations. Override these if using a custom versioning scheme
+ * to alert users to major changes.
+ */
+
+#define MARLIN_HEX_VERSION 02010201
 #ifndef REQUIRED_CONFIGURATION_H_VERSION
   #define REQUIRED_CONFIGURATION_H_VERSION MARLIN_HEX_VERSION
 #endif
