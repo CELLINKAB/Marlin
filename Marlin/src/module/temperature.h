@@ -193,7 +193,6 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
   template<int MIN_POW, int MAX_POW>
   struct PID_t{
   protected:
-    static constexpr bool BIDIRECTIONAL = MIN_POW < 0;
     float temp_iState = 0.0f, temp_dState = 0.0f;
     float work_p = 0, work_i = 0, work_d = 0;
     float last_set_temp;
@@ -230,7 +229,6 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
         if (last_set_temp != target) {
           reset();
           last_set_temp = target;
-          return 0;
         }
 
         float pid_error = target - current;
@@ -239,8 +237,8 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
           reset();
         }
 
-        const float max_power_over_i_gain = static_cast<float>(MAX_POW) / Ki - static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW);
-        temp_iState = constrain(temp_iState + pid_error, (BIDIRECTIONAL ? -max_power_over_i_gain : 0), max_power_over_i_gain);
+        const float max_power_over_i_gain = MAX_POW / Ki - MIN_POW;
+        temp_iState = constrain(temp_iState + pid_error,  0, max_power_over_i_gain);
 
         work_p = Kp * pid_error;
         work_i = Ki * temp_iState;
@@ -248,7 +246,7 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
 
         temp_dState = current;
 
-        return work_p + work_i + work_d + static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW);
+        return work_p + work_i + work_d + MIN_POW;
     }
 
   };
