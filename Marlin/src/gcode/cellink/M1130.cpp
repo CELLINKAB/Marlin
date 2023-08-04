@@ -1,11 +1,12 @@
 // copyright Cellink 2023 - GPLv3
 
+#include "../../feature/cellink_reporter.h"
 #include "../gcode.h"
-#include "cellink_reporting.h"
 
 #if PINS_EXIST(CS_24V, CS_BED_24V_CS)
 
-void GcodeSuite::M1130() {
+void GcodeSuite::M1130()
+{
     pinMode(CS_24V_PIN, INPUT_ANALOG);
     pinMode(CS_BED_24V_CS_PIN, INPUT_ANALOG);
 
@@ -14,8 +15,7 @@ void GcodeSuite::M1130() {
 
     // TODO: scale these values properly
 
-    SERIAL_ECHO_CELLINK_KV("LOAD_SWITCH_1_CURRENT:", current_1);
-    SERIAL_ECHOLN_CELLINK_KV("LOAD_SWITCH_2_CURRENT:", current_2);
+    cellink::serial_echoln_kv("LOAD_SWITCH_1_CURRENT", current_1, "LOAD_SWITCH_2_CURRENT", current_2);
 }
 
 #endif // PINS_EXIST(CS_24V, CS_BED_24V_CS)

@@ -4,8 +4,7 @@
 
 #if ENABLED(CELLINK_REPORTING)
 
-#    include "../../module/motion.h"
-#    include "../../module/planner.h"
+#include "../../feature/cellink_reporter.h"
 #    include "../gcode.h"
 
 
@@ -15,7 +14,8 @@
    */
 void GcodeSuite::M1015()
 {
-    SERIAL_ECHOLNPGM("XPOS:", current_position.x, ",YPOS:", current_position.y, ",ZPOS:", current_position.z);
+    cellink::reporter.m1015.set_interval(parser.byteval('S'));
+    cellink::reporter.m1015.report();
 }
 
 /**
@@ -24,8 +24,8 @@ void GcodeSuite::M1015()
    */
 void GcodeSuite::M1016()
 {
-    const auto pos = planner.get_axis_positions_mm();
-    SERIAL_ECHOLNPGM("XMPOS:", pos.x, ",YMPOS:", pos.y, ",ZMPOS:", pos.z);
+    cellink::reporter.m1016.set_interval(parser.byteval('S'));
+    cellink::reporter.m1016.report();
 }
 
 #endif // CELLINK_REPORTING

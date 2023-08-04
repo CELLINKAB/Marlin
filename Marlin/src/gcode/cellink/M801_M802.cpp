@@ -3,6 +3,7 @@
 #include "../../inc/MarlinConfig.h"
 
 #if ALL(TEMP_SENSOR_BED_IS_TMP117, CELLINK_REPORTING)
+#    include "../../feature/cellink_reporter.h"
 #    include "../../feature/tmp117/TMP117.h"
 #    include "../../feature/tmp117_printbed.h"
 #    include "../../module/temperature.h"
@@ -13,7 +14,7 @@
 void report_bed_sensors(bool all_sensors)
 {
     if (!all_sensors) {
-        SERIAL_ECHOLNPGM("PBT:",Temperature::degBed());
+        SERIAL_ECHOLNPGM("PBT:", Temperature::degBed());
         return;
     }
     uint8_t sensor_num = 0;
@@ -31,6 +32,12 @@ void report_bed_sensors(bool all_sensors)
     SERIAL_EOL();
 }
 
+bool cellink::Reporter::M802::all_sensors = false;
+void cellink::Reporter::M802::report()
+{
+    report_bed_sensors(all_sensors);
+}
+
 #    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
 bool BedMultiSensorReporter::all_sensors = false;
 void BedMultiSensorReporter::report()
@@ -43,12 +50,9 @@ BedMultiSensorReporter bed_multi_sensor_reporter;
 // get bed temp
 void GcodeSuite::M802()
 {
-    const bool all_sensors = parser.seen_test('D');
-    report_bed_sensors(all_sensors);
-#    if ENABLED(AUTO_REPORT_BED_MULTI_SENSOR)
-    bed_multi_sensor_reporter.all_sensors = all_sensors;
-    bed_multi_sensor_reporter.set_interval(parser.byteval('S'));
-#    endif
+    cellink::reporter.m802.set_interval(parser.byteval('S'));
+    cellink::reporter.m802.all_sensors = parser.seen_test('D');
+    cellink::reporter.m802.report();
 }
 
 void GcodeSuite::M801()
