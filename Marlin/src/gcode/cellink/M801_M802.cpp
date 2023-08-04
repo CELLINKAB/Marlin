@@ -47,6 +47,17 @@ void BedMultiSensorReporter::report()
 BedMultiSensorReporter bed_multi_sensor_reporter;
 #    endif
 
+void GcodeSuite::M800()
+{
+    thermalManager.setTargetBed(0);
+    thermalManager.temp_bed.is_set = false;
+    thermalManager.temp_bed.soft_pwm_amount = 0;
+#    ifdef BED_FAN_INDEX
+    thermalManager.set_fan_speed(BED_FAN_INDEX, 0);
+#    endif
+    WRITE_HEATER_BED(LOW);
+}
+
 // get bed temp
 void GcodeSuite::M802()
 {
@@ -68,7 +79,8 @@ void GcodeSuite::M801()
         }
 
         const auto pwm_val = constrain(parser.intval('P', 0), -255, 255);
-        if (parser.seenval('F')) analogWriteFrequency(parser.value_ulong());
+        if (parser.seenval('F'))
+            analogWriteFrequency(parser.value_ulong());
 
         Temperature::temp_bed.soft_pwm_amount = pwm_val;
         WRITE_HEATER_BED(pwm_val);

@@ -352,12 +352,6 @@ void GcodeSuite::M796()
 // void GcodeSuite::M798() {}
 // //GetPrintheadExternalPWM
 // void GcodeSuite::M799() {}
-//DisableBedTempController
-void GcodeSuite::M800()
-{
-    thermalManager.temp_bed.target = 0;
-    thermalManager.temp_bed.is_set = false;
-}
 //SetBedTempController
 // void GcodeSuite::M801() {}
 // //GetBedTempControllerInfo
