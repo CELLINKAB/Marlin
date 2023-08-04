@@ -3013,7 +3013,9 @@ void Temperature::disable_all_heaters() {
     setTargetBed(0);
     temp_bed.is_set = false;
     temp_bed.soft_pwm_amount = 0;
-    TERN_(BED_FAN_INDEX, set_fan_speed(BED_FAN_INDEX, 0));
+    #ifdef BED_FAN_INDEX
+      set_fan_speed(BED_FAN_INDEX, 0);
+    #endif
     WRITE_HEATER_BED(LOW);
   #endif
 
