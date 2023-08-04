@@ -55,7 +55,7 @@ void GcodeSuite::M806()
                          ", CS_4:",
                          analogRead(UVC_SH_CS_4_PIN),
                          ", CS_5:",
-                         analogRead(UVC_SH_CS_5_PIN), );
+                         analogRead(UVC_SH_CS_5_PIN) );
 #    endif
     };
 
