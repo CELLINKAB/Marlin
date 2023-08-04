@@ -186,17 +186,14 @@ inline void serial_println(FSTR_P const fstr) { serial_println_P(FTOP(fstr)); }
 // SERIAL_ECHO_F prints a floating point value with optional precision
 inline void SERIAL_ECHO_F(EnsureDouble x, int digit=2) { SERIAL_IMPL.print(x, digit); }
 
-#define SERIAL_ECHOPAIR_F_P(P,V...)   do{ serial_print_P(P); SERIAL_ECHO_F(V); }while(0)
-#define SERIAL_ECHOLNPAIR_F_P(P,V...) do{ SERIAL_ECHOPAIR_F_P(P,V); SERIAL_EOL(); }while(0)
+inline void SERIAL_ECHOPAIR_F_P(PGM_P p, EnsureDouble v, int digit=2) { serial_print_P(p); SERIAL_ECHO_F(v, digit); }
+inline void SERIAL_ECHOLNPAIR_F_P(PGM_P p, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_P(p,v,digit); SERIAL_EOL(); }
 
-#define SERIAL_ECHOPAIR_F_F(S,V...)   do{ serial_print(S); SERIAL_ECHO_F(V); }while(0)
-#define SERIAL_ECHOLNPAIR_F_F(S,V...) do{ SERIAL_ECHOPAIR_F_F(S,V); SERIAL_EOL(); }while(0)
+inline void SERIAL_ECHOPAIR_F_F(FSTR_P s, EnsureDouble v, int digit=2) { serial_print(s); SERIAL_ECHO_F(v, digit); }
+inline void SERIAL_ECHOLNPAIR_F_F(FSTR_P s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_F(s,v,digit); SERIAL_EOL(); }
 
-#define SERIAL_ECHOPAIR_F(S,V...)     SERIAL_ECHOPAIR_F_F(F(S),V)
-#define SERIAL_ECHOLNPAIR_F(V...)     do{ SERIAL_ECHOPAIR_F(V); SERIAL_EOL(); }while(0)
-
-#define SERIAL_ECHO_MSG(V...)         do{ SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(V); }while(0)
-#define SERIAL_ERROR_MSG(V...)        do{ SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(V); }while(0)
+inline void SERIAL_ECHOPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_F(F(s),v,digit); }
+inline void SERIAL_ECHOLNPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F(s, v, digit); SERIAL_EOL(); }
 
 #define SERIAL_ECHO_SP(C)             serial_spaces(C)
 
@@ -347,6 +344,11 @@ inline void print_pos(const xyze_pos_t &xyze, FSTR_P const prefix=nullptr, FSTR_
 
 #define SERIAL_POS(SUFFIX,VAR) do { print_pos(VAR, F("  " STRINGIFY(VAR) "="), F(" : " SUFFIX "\n")); }while(0)
 #define SERIAL_XYZ(PREFIX,V...) do { print_pos(V, F(PREFIX)); }while(0)
+
+template<class... Args>
+void SERIAL_ECHO_MSG(Args... args) { SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(args...); }
+template<class... Args>
+void SERIAL_ERROR_MSG(Args... args) { SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(args...); }
 
 //
 // Commonly-used strings in serial output
