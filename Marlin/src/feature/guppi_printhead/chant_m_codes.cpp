@@ -355,8 +355,11 @@ void GcodeSuite::M796()
 //DisableBedTempController
 void GcodeSuite::M800()
 {
-    thermalManager.temp_bed.target = 0;
+    thermalManager.setTargetBed(0);
     thermalManager.temp_bed.is_set = false;
+    thermalManager.temp_bed.soft_pwm_amount = 0;
+    TERN_(BED_FAN_INDEX, thermalManager.set_fan_speed(BED_FAN_INDEX, 0));
+    WRITE_HEATER_BED(LOW);
 }
 //SetBedTempController
 // void GcodeSuite::M801() {}

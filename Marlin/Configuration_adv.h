@@ -209,6 +209,10 @@
   #endif
 #endif
 
+// fan to turn on automatically on bed temperature set
+#define BED_FAN_INDEX 0
+#define BED_FAN_SPEED 255
+
 //
 // Heated Chamber options
 //

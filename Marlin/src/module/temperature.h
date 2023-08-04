@@ -1120,6 +1120,7 @@ public:
     static void setTargetBed(const celsius_t celsius)
     {
         TERN_(AUTO_POWER_CONTROL, if (celsius) powerManager.power_on());
+        TERN_(BED_FAN_INDEX, set_fan_speed(BED_FAN_INDEX, BED_FAN_SPEED));
         temp_bed.target = constrain(celsius, BED_MINTEMP, BED_MAX_TARGET);
         temp_bed.is_set = true;
         start_watching_bed();
