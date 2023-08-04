@@ -149,10 +149,10 @@ template <typename T>
 void SERIAL_ECHO(T x) { SERIAL_IMPL.print(x); }
 
 // Wrapper for ECHO commands to interpret a char
-typedef struct SerialChar { char c; SerialChar(char n) : c(n) { } } serial_char_t;
+typedef struct SerialChar { char c; constexpr explicit SerialChar(char n) : c(n) { } } serial_char_t;
 inline void SERIAL_ECHO(serial_char_t x) { SERIAL_IMPL.write(x.c); }
-#define AS_CHAR(C) serial_char_t(C)
-#define AS_DIGIT(C) AS_CHAR('0' + (C))
+inline serial_char_t AS_CHAR(char c) { return serial_char_t(c); }
+inline serial_char_t AS_DIGIT(char c) { return AS_CHAR('0' + (c)); }
 
 template <typename T>
 void SERIAL_ECHOLN(T x) { SERIAL_IMPL.println(x); }
@@ -168,12 +168,8 @@ void SERIAL_PRINTLN(T x, PrintBase y) { SERIAL_IMPL.println(x, y); }
 inline void SERIAL_FLUSH()    { SERIAL_IMPL.flush(); }
 inline void SERIAL_FLUSHTX()  { SERIAL_IMPL.flushTX(); }
 
-// Serial echo and error prefixes
-#define SERIAL_ECHO_START()           serial_echo_start()
-#define SERIAL_ERROR_START()          serial_error_start()
-
 // Serial end-of-line
-#define SERIAL_EOL()                  SERIAL_CHAR('\n')
+inline void SERIAL_EOL() { SERIAL_CHAR('\n'); }
 
 // Print a single PROGMEM, PGM_P, or PSTR() string.
 void serial_print_P(PGM_P str);
@@ -195,14 +191,12 @@ inline void SERIAL_ECHOLNPAIR_F_F(FSTR_P s, EnsureDouble v, int digit=2) { SERIA
 inline void SERIAL_ECHOPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_F(F(s),v,digit); }
 inline void SERIAL_ECHOLNPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F(s, v, digit); SERIAL_EOL(); }
 
-#define SERIAL_ECHO_SP(C)             serial_spaces(C)
-
-#define SERIAL_ECHO_TERNARY(TF, PRE, ON, OFF, POST) serial_ternary(TF, F(PRE), F(ON), F(OFF), F(POST))
-
 #if SERIAL_FLOAT_PRECISION
-  #define SERIAL_DECIMAL(V) SERIAL_PRINT(V, SERIAL_FLOAT_PRECISION)
+  template <typename T>
+  void SERIAL_DECIMAL(T v) { SERIAL_PRINT(v, SERIAL_FLOAT_PRECISION); }
 #else
-  #define SERIAL_DECIMAL(V) SERIAL_ECHO(V)
+  template <typename T>
+  void SERIAL_DECIMAL(T v) { SERIAL_ECHO(v); }
 #endif
 
 //
@@ -343,7 +337,16 @@ inline void print_pos(const xyze_pos_t &xyze, FSTR_P const prefix=nullptr, FSTR_
 }
 
 #define SERIAL_POS(SUFFIX,VAR) do { print_pos(VAR, F("  " STRINGIFY(VAR) "="), F(" : " SUFFIX "\n")); }while(0)
-#define SERIAL_XYZ(PREFIX,V...) do { print_pos(V, F(PREFIX)); }while(0)
+inline void SERIAL_XYZ(const char * prefix, const xyz_pos_t& v) { print_pos(v, F(prefix)); }
+inline void SERIAL_XYZ(const char * prefix, NUM_AXIS_ARGS(const_float_t)) { print_pos(NUM_AXIS_ARGS(), F(prefix)); }
+
+inline void SERIAL_ECHO_SP(uint8_t c) { serial_spaces(c); }
+
+inline void SERIAL_ECHO_TERNARY(bool tf, const char * pre, const char * on, const char * off, const char * post) { serial_ternary(tf, F(pre), F(on), F(off), F(post)); }
+
+// Serial echo and error prefixes
+inline void SERIAL_ECHO_START() { serial_echo_start(); }
+inline void SERIAL_ERROR_START() { serial_error_start(); }
 
 template<class... Args>
 void SERIAL_ECHO_MSG(Args... args) { SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(args...); }
