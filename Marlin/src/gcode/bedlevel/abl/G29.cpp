@@ -506,10 +506,6 @@ G29_TYPE GcodeSuite::G29() {
       }
     #endif
 
-    const ProbePtRaise raise_after = (parser.boolval('E') || parser.seen('J')) ? PROBE_PT_STOW : PROBE_PT_RAISE;
-
-    if (raise_after == PROBE_PT_STOW) probe.stow();
-
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
       if (!abl.dryrun
         && (abl.gridSpacing != bedlevel.grid_spacing || abl.probe_position_lf != bedlevel.grid_start)
@@ -673,6 +669,10 @@ G29_TYPE GcodeSuite::G29() {
 
   #else // !PROBE_MANUALLY
   {
+    const ProbePtRaise raise_after = (parser.boolval('E') || parser.seen('J')) ? PROBE_PT_STOW : PROBE_PT_RAISE;
+
+    if (raise_after == PROBE_PT_STOW) probe.stow();
+    
     abl.measured_z = 0;
 
     #if ABL_USES_GRID
