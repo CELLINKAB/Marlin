@@ -242,19 +242,13 @@ typedef struct { float p, i, d, c, f; } raw_pidcf_t;
         const float max_power_over_i_gain = static_cast<float>(MAX_POW) / Ki - static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW);
         temp_iState = constrain(temp_iState + pid_error, (BIDIRECTIONAL ? -max_power_over_i_gain : 0), max_power_over_i_gain);
 
-        work_pid.Kp = Kp * pid_error;
-        work_pid.Ki = Ki * temp_iState;
-        work_pid.Kd = work_pid.Kd + PID_K2 * (Kd * (temp_dState - current) - work_pid.Kd);
+        work_p = Kp * pid_error;
+        work_i = Ki * temp_iState;
+        work_d = work_d + PID_K2 * (Kd * (temp_dState - current) - work_d);
 
-        temp_dState = tempinfo.celsius;
+        temp_dState = current;
 
-        float out_val = constrain(work_pid.Kp 
-                                    + work_pid.Ki 
-                                    + work_pid.Kd
-                                    + static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW),
-                                    MIN_POW, MAX_POW);
-
-        return out_val;
+        return work_p + work_i + work_d + static_cast<float>(BIDIRECTIONAL ? 0 : MIN_POW);
     }
 
   };
@@ -769,14 +763,6 @@ public:
 private:
 #if ENABLED(WATCH_HOTENDS)
     static hotend_watch_t watch_hotend[HOTENDS];
-#endif
-
-#if HAS_HEATED_BED
-#    if ENABLED(WATCH_BED)
-    static bed_watch_t watch_bed;
-#    endif
-    IF_DISABLED(PIDTEMPBED, static millis_t next_bed_check_ms);
-    static raw_adc_t mintemp_raw_BED, maxtemp_raw_BED;
 #endif
 
 #if ENABLED(PID_EXTRUSION_SCALING)
