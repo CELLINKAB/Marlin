@@ -11,12 +11,17 @@
 #    include "stepper_retracting_probe.h"
 
 void StepperRetractingProbe::unstick(int32_t velocity){
-    for (size_t i = 0; i < 5; ++i) {
-        stepper().raw_move(velocity / 4);
-        delay(15);
+    int32_t unstick_velocity = (velocity >= 0) ? 8000 : -8000;
+    auto unstick_move = [=](millis_t move_time){
+        stepper().raw_move(unstick_velocity);
+        delay(move_time);
         stepper().stop();
-        safe_delay(5);
+        safe_delay(1);
+    };
+    for (size_t i = 0; i < 5; ++i) {
+        unstick_move(10);
     }
+    unstick_move(50);
 }
 
 void StepperRetractingProbe::deploy()
