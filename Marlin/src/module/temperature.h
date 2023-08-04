@@ -1468,7 +1468,7 @@ private:
                  const_celsius_float_t target,
                  const heater_id_t heater_id,
                  const uint16_t period_seconds,
-                 const celsius_t hysteresis_degc);
+                 const celsius_float_t hysteresis_degc);
     } tr_state_machine_t;
 
     static tr_state_machine_t tr_state_machine[NR_HEATER_RUNAWAY];

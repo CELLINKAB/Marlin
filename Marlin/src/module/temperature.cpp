@@ -1390,7 +1390,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
 
     constexpr explicit PIDRunner(TT &t) : tempinfo(t) { }
 
-    float get_pid_output(const uint8_t extr=0) {
+    float get_pid_output([[maybe_unused]] const uint8_t extr=0) {
       if (!tempinfo.is_set) return 0;
       #if ENABLED(PID_OPENLOOP)
 
