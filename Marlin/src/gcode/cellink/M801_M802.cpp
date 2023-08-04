@@ -68,9 +68,8 @@ void GcodeSuite::M801()
         }
 
         const auto pwm_val = constrain(parser.intval('P', 0), -255, 255);
-        const auto frequency = parser.ulongval('F', 10'000);
+        if (parser.seenval('F')) analogWriteFrequency(parser.value_ulong());
 
-        analogWriteFrequency(frequency);
         Temperature::temp_bed.soft_pwm_amount = pwm_val;
         WRITE_HEATER_BED(pwm_val);
         return;
