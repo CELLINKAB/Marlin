@@ -50,7 +50,6 @@ pipeline {
 
                                 git status
                                 echo "Do Build for ${BOARD}"
-                                cd ./Firmware/Marlin-bugfix-2.0.9.3.x/
                                 python3 -m platformio run --environment  ${BOARD}
                             '''
                         }
@@ -59,14 +58,13 @@ pipeline {
                 post {
                     always {
                         sh '''
-                            cp  ./Firmware/Marlin-bugfix-2.0.9.3.x/.pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
+                            cp  ./.pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
                                                     '''
                         archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
-                        archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/GitVersion.json'
-                        archiveArtifacts artifacts: ' Firmware/Marlin-bugfix-2.0.9.3.x/version.json'
+                        archiveArtifacts artifacts: ' GitVersion.json'
+                        archiveArtifacts artifacts: ' version.json'
 
                         sh '''
-                            cd ./Firmware/Marlin-bugfix-2.0.9.3.x/
                             python3 -m platformio run --target clean --environment ${BOARD}
                         '''
                     // always do this because 'success' is performed after 'always', even if it's listed before..
