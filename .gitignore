@@ -21,35 +21,18 @@
 
 # Generated files
 _Version.h
-bdf2u8g
+bdf2u8g.exe
+genpages.exe
 marlin_config.json
 mczip.h
 *.gen
 *.sublime-workspace
 
-#
 # OS
-#
 applet/
 .DS_Store
 
-#
-# Misc
-#
-*~
-*.orig
-*.rej
-*.bak
-*.idea
-*.i
-*.ii
-*.swp
-tags
-
-#
-# C++
-#
-# Compiled Object files
+# Compiled C++ Object files
 *.slo
 *.lo
 *.o
@@ -80,35 +63,19 @@ tags
 *.out
 *.app
 
-#
-# C
-#
-# Object files
+# Compiled C Object files
 *.o
 *.ko
-*.obj
 *.elf
 
 # Precompiled Headers
-*.gch
-*.pch
 
 # Libraries
-*.lib
-*.a
-*.la
-*.lo
 
 # Shared objects (inc. Windows DLLs)
-*.dll
-*.so
 *.so.*
-*.dylib
 
 # Executables
-*.exe
-*.out
-*.app
 *.i*86
 *.x86_64
 *.hex
@@ -143,12 +110,13 @@ vc-fileutils.settings
 .vscode/*
 !.vscode/extensions.json
 
-#Simulation
+# Simulation files
 imgui.ini
 eeprom.dat
 spi_flash.bin
+fs.img
 
-#cmake
+# CMake
 CMakeLists.txt
 src/CMakeLists.txt
 CMakeListsPrivate.txt
@@ -166,6 +134,24 @@ cmake-build-*
 
 # Python
 __pycache__
+*.pyc
 
 # IOLogger logs
 *_log.csv
+
+# Generated version files
+GitVersion.json
+version.json
+Marlin/src/inc/Version.h
+# Misc.
+*~
+*.orig
+*.rej
+*.bak
+*.idea
+*.i
+*.ii
+*.swp
+tags
+*.logs
+*.bak

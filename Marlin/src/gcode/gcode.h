@@ -487,6 +487,10 @@ private:
     static void G6();
   #endif
 
+  #if ENABLED(G7_RELATIVE_MOVE)
+    static void G7();
+  #endif
+
   #if ENABLED(FWRETRACT)
     static void G10();
     static void G11();
@@ -1233,6 +1237,14 @@ private:
     static void M7110();
     static void M7111();
     static void M7112();
+    static void M7110_report(const bool forReplay=true);
+  #endif
+
+  #if ENABLED(CELLINK_REPORTING)
+    static void M800();
+    static void M801();
+    static void M802();
+    static void M1051();
   #endif
 
   static void T(const int8_t tool_index);

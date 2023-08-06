@@ -248,9 +248,27 @@ void GcodeSuite::G28() {
 
   planner.synchronize();          // Wait for planner moves to finish!
 
+  #if ENABLED(Z_AXIS_CALIBRATION)
+    set_homing_calibration(false);
+    if(parser.seen_test('Z') && parser.seen_test('C')) {
+      if(!axis_was_homed(Z_AXIS)) {
+        SERIAL_ECHOLNPGM("ERR_ZCALIB_NOT_HOMED");
+        return;
+      }
+      set_homing_calibration(true);
+    }
+    SERIAL_ECHOLNPGM("HOME: 0");
+  #endif
+
   #if ENABLED(HX711_WSCALE)
+    float t_output;
     wScale.tare_start();
-    while( wScale.tare_ready() == false ) idle();
+    SERIAL_ECHOLNPGM("echo: wScale: Tare started...");
+    while( wScale.tare_ready(t_output) == false ) {
+      idle();
+    }
+    wScale.enable_out(true);
+    wScale.set_crash_detection(true);
   #endif
 
   SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state

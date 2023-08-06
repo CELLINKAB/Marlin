@@ -601,6 +601,16 @@
 #define BED_OVERSHOOT    10   // (°C) Forbid temperatures over MAXTEMP - OVERSHOOT
 #define COOLER_OVERSHOOT  2   // (°C) Forbid temperatures closer than OVERSHOOT
 
+/**
+ * Bed temperature compensation for heating the vet
+ * 
+ */
+#define BED_TEMP_COMPENSATION
+#if ENABLED(BED_TEMP_COMPENSATION)
+  #define BED_TEMP_OFFSET 8.9422
+  #define BED_TEMP_SCALE 0.6035
+#endif
+
 //===========================================================================
 //============================= PID Settings ================================
 //===========================================================================
@@ -959,7 +969,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_FEEDRATE          { 200, 200, 100, 25 } //Changed z feedrate to 100 from 5 - 2/27/23 BEJ
+#define DEFAULT_MAX_FEEDRATE          { 200, 200, 10, 25 }  // Z Speed limited to 10mm/s due to strain gauge reaction time.
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
 #if ENABLED(LIMITED_MAX_FR_EDITING)
@@ -972,7 +982,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K]]], E0 [, E1[, E2...]]
  */
-#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 100, 10000 }
+#define DEFAULT_MAX_ACCELERATION      { 1000, 1000, 50, 10000 }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
 #if ENABLED(LIMITED_MAX_ACCEL_EDITING)
@@ -1030,6 +1040,11 @@
   #define JD_HANDLE_SMALL_SEGMENTS    // Use curvature estimation instead of just the junction angle
                                       // for small segments (< 1mm) with large junction angles (> 135°).
 #endif
+
+/**
+ * Enable relative movement command.
+ */
+#define G7_RELATIVE_MOVE
 
 /**
  * S-Curve Acceleration
@@ -1390,6 +1405,30 @@
 //#define NO_MOTION_BEFORE_HOMING // Inhibit movement until all axes have been homed. Also enable HOME_AFTER_DEACTIVATE for extra safety.
 //#define HOME_AFTER_DEACTIVATE   // Require rehoming after steppers are deactivated. Also enable NO_MOTION_BEFORE_HOMING for extra safety.
 
+// Foton Homing calibration option
+#define Z_AXIS_CALIBRATION
+
+/**
+ * When the Z axis calibration option is selected, the G28 command is altered with
+ * additional coeficient C (example G28 Z C), that gives the functionality to calibrate
+ * z axis travel. This command should be called after homing to Z-MAX in order to calibrate
+ * z travel down to Z-MIN having a Strain Gauge as a Z-MIN trigger.
+ * 
+ * The procedure is using the two parameters from below to determine where to expect a 0 level:
+ * Z_MAX_POS_CALIB   - is giving the expected position of the 0 level detection, and
+ * Z_HOME_BOUNDARIES - is giving the tolerated boundaries from the Z_MAX_POS_CALIB in both 
+ *                     directions (above/before and below/after).
+ * 
+ * So taking the example (Z_MAX_POS_CALIB=117; Z_HOME_BOUNDARIES=10) the 0 level is expected at
+ * 107 (+10mm) from the Z-MAX all the way down to 127mm (-10mm) from the Z-MAX.
+ * This functionality overall gives the operation range(maximum z-travel) as:
+ *    Z_MAX_POS = Z_MAX_POS_CALIB - Z_HOME_BOUNDARIES
+ */
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #define Z_MAX_POS_CALIB 124
+  #define Z_HOME_BOUNDARIES 15
+#endif
+
 /**
  * Set Z_IDLE_HEIGHT if the Z-Axis moves on its own when steppers are disabled.
  *  - Use a low value (i.e., Z_MIN_POS) if the nozzle falls down to the bed.
@@ -1406,7 +1445,7 @@
 // :[-1,1]
 #define X_HOME_DIR -1
 #define Y_HOME_DIR -1
-#define Z_HOME_DIR -1
+#define Z_HOME_DIR 1
 //#define I_HOME_DIR -1
 //#define J_HOME_DIR -1
 //#define K_HOME_DIR -1
@@ -1423,7 +1462,11 @@
 #define Z_MIN_POS 0
 #define X_MAX_POS X_BED_SIZE
 #define Y_MAX_POS Y_BED_SIZE
-#define Z_MAX_POS 270
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #define Z_MAX_POS Z_MAX_POS_CALIB
+#else
+  #define Z_MAX_POS 117
+#endif
 //#define I_MIN_POS 0
 //#define I_MAX_POS 50
 //#define J_MIN_POS 0
@@ -2952,7 +2995,7 @@
   #define NEOPIXEL_PIXELS     23   // Number of LEDs in the strip. (Longest strip when NEOPIXEL2_SEPARATE is disabled.) BCV - set to use 23 LEDs for the strip.
   #define NEOPIXEL_IS_SEQUENTIAL   // Sequential display for temperature change - LED by LED. Disable to change all LEDs at once.
   #define NEOPIXEL_BRIGHTNESS 255  // Initial brightness (0-255)
-  #define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
+  //#define NEOPIXEL_STARTUP_TEST  // Cycle through colors at startup
 
   // Support for second Adafruit NeoPixel LED driver controlled with M150 S1 ...
   //#define NEOPIXEL2_SEPARATE

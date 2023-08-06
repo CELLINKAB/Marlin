@@ -347,6 +347,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 6: G6(); break;                                      // G6: Direct Stepper Move
       #endif
 
+      #if ENABLED(G7_RELATIVE_MOVE)
+        case 7: G7(); break;
+      #endif
+
       #if ENABLED(FWRETRACT)
         case 10: G10(); break;                                    // G10: Retract / Swap Retract
         case 11: G11(); break;                                    // G11: Recover / Swap Recover
@@ -1064,6 +1068,13 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 7110: M7110(); break;                                // Set the end stop threshold value for HX711.
         case 7111: M7111(); break;                                // Set the HX711 channel/mode.
         case 7112: M7112(); break;                                // Print HX711 raw filtered value.
+      #endif
+
+      #if ENABLED(CELLINK_REPORTING)
+        case 800: M800(); break;                                  // Wrapper for M140 S0
+        case 801: M801(); break;                                  // Wrapper for M140
+        case 802: M802(); break;                                  // Report bed temp. in Cellink format
+        case 1051: M1051(); break;                                // Report firmware branch, version etc.
       #endif
 	  
       #if ENABLED(HAS_MCP3426_ADC)
