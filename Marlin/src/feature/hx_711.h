@@ -60,11 +60,7 @@ public:
 
     void begin();
 
-<<<<<<< HEAD
     void manage_hx_711();
-
-    void tare_start()
-    {
 
     /**
      * @brief Calculate offset for the scale
@@ -120,7 +116,6 @@ public:
 
 
     /* SETTERS and GETTERS */
->>>>>>> upstreaming
 
     /**
      * @brief Set the HX711 Threshold value that will impact status of indication pin.
