@@ -189,44 +189,22 @@ void SERIAL_ECHOLN(T arg1, Args ... args) { SERIAL_ECHO(arg1); SERIAL_ECHO(args 
 //                   all the odd loose string elements as PROGMEM strings.
 //
 
-// Print up to 20 pairs of values. Odd elements must be literal strings.
-#define __SEP_N(N,V...)           _SEP_##N(V)
-#define _SEP_N(N,V...)            __SEP_N(N,V)
-#define _SEP_N_REF()              _SEP_N
-#define _SEP_1(s)                 SERIAL_ECHO(F(s));
-#define _SEP_2(s,v)               SERIAL_ECHO(F(s),v);
-#define _SEP_3(s,v,V...)          _SEP_2(s,v); DEFER2(_SEP_N_REF)()(TWO_ARGS(V),V);
-#define SERIAL_ECHOPGM(V...)      do{ EVAL(_SEP_N(TWO_ARGS(V),V)); }while(0)
+// Print pairs of values. Odd elements must be literal strings. LN variant adds newline.
+inline void SERIAL_ECHOPGM(const char * str) { SERIAL_ECHO(F(str)); }
+template <typename T> void SERIAL_ECHOPGM(const char * str, T value) { SERIAL_ECHO(F(str), value); }
+template <typename T, typename ... Args>
+void SERIAL_ECHOPGM(const char * str, T value, Args ... args) { SERIAL_ECHOPGM(str, value); SERIAL_ECHOPGM(args); }
+template <typename ... Args> void SERIAL_ECHOLNPGM(Args ... args) { SERIAL_ECHOPGM(args); SERIAL_EOL(); }
 
-// Print up to 20 pairs of values followed by newline. Odd elements must be literal strings.
-#define __SELP_N(N,V...)          _SELP_##N(V)
-#define _SELP_N(N,V...)           __SELP_N(N,V)
-#define _SELP_N_REF()             _SELP_N
-#define _SELP_1(s)                SERIAL_ECHO(F(s "\n"));
-#define _SELP_2(s,v)              SERIAL_ECHOLN(F(s),v);
-#define _SELP_3(s,v,V...)         _SEP_2(s,v); DEFER2(_SELP_N_REF)()(TWO_ARGS(V),V);
-#define SERIAL_ECHOLNPGM(V...)    do{ EVAL(_SELP_N(TWO_ARGS(V),V)); }while(0)
+// Print pairs of values. Odd elements must be PSTR pointers. LN variant adds newline.
+inline void SERIAL_ECHOPGM_P(PGM_P str) { SERIAL_ECHO(FPSTR(str)); }
+template <typename T> void SERIAL_ECHOPGM_P(PGM_P str, T value) { SERIAL_ECHO(FPSTR(str), value); }
+template <typename T, typename ... Args>
+void SERIAL_ECHOPGM_P(PGM_P str, T value, Args ... args) { SERIAL_ECHOPGM_P(str, value); SERIAL_ECHOPGM_P(args); }
+template <typename ... Args> void SERIAL_ECHOLNPGM_P(Args ... args) { SERIAL_ECHOPGM_P(args); SERIAL_EOL(); }
 
-// Print up to 20 pairs of values. Odd elements must be PSTR pointers.
-#define __SEP_N_P(N,V...)         _SEP_##N##_P(V)
-#define _SEP_N_P(N,V...)          __SEP_N_P(N,V)
-#define _SEP_N_P_REF()            _SEP_N_P
-#define _SEP_1_P(p)               SERIAL_ECHO(FPSTR(p));
-#define _SEP_2_P(p,v)             SERIAL_ECHO(FPSTR(p),v);
-#define _SEP_3_P(p,v,V...)        _SEP_2_P(p,v); DEFER2(_SEP_N_P_REF)()(TWO_ARGS(V),V);
-#define SERIAL_ECHOPGM_P(V...)    do{ EVAL(_SEP_N_P(TWO_ARGS(V),V)); }while(0)
-
-// Print up to 20 pairs of values followed by newline. Odd elements must be PSTR pointers.
-#define __SELP_N_P(N,V...)        _SELP_##N##_P(V)
-#define _SELP_N_P(N,V...)         __SELP_N_P(N,V)
-#define _SELP_N_P_REF()           _SELP_N_P
-#define _SELP_1_P(p)              SERIAL_ECHOLN(FPSTR(p));
-#define _SELP_2_P(p,v)            SERIAL_ECHOLN(FPSTR(p),v);
-#define _SELP_3_P(p,v,V...)       { _SEP_2_P(p,v); DEFER2(_SELP_N_P_REF)()(TWO_ARGS(V),V); }
-#define SERIAL_ECHOLNPGM_P(V...)  do{ EVAL(_SELP_N_P(TWO_ARGS(V),V)); }while(0)
-
-#define SERIAL_ECHO_MSG(V...)  do{ SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(V); }while(0)
-#define SERIAL_ERROR_MSG(V...) do{ SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(V); }while(0)
+template <typename ... Args> void SERIAL_ECHO_MSG(Args ... args) { SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(args); }
+template <typename ... Args> void SERIAL_ERROR_MSG(Args ... args) { SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(args); }
 
 // Print a prefix, conditional string, and suffix
 void serial_ternary(FSTR_P const pre, const bool onoff, FSTR_P const on, FSTR_P const off, FSTR_P const post=nullptr);
