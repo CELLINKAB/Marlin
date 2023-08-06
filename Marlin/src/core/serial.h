@@ -209,7 +209,7 @@ template <typename ... Args> void SERIAL_ERROR_MSG(Args ... args) { SERIAL_ERROR
 // Print a prefix, conditional string, and suffix
 void serial_ternary(FSTR_P const pre, const bool onoff, FSTR_P const on, FSTR_P const off, FSTR_P const post=nullptr);
 // Shorthand to put loose strings in PROGMEM
-#define SERIAL_ECHO_TERNARY(TF, PRE, ON, OFF, POST) serial_ternary(F(PRE), TF, F(ON), F(OFF), F(POST))
+inline void SERIAL_ECHO_TERNARY(bool onoff, const char * pre, const char * on, const char * off, const char * post) { serial_ternary(F(pre), onoff, F(on), F(off), F(post)); }
 
 // Print up to 255 spaces
 void SERIAL_ECHO_SP(uint8_t count);
