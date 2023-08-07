@@ -1120,9 +1120,9 @@
  * Set DISABLE_INACTIVE_? 'true' to shut down axis steppers after an idle period.
  * The Deactive Time can be overridden with M18 and M84. Set to 0 for No Timeout.
  */
-#define DEFAULT_STEPPER_DEACTIVE_TIME 60
-#define DISABLE_INACTIVE_X false
-#define DISABLE_INACTIVE_Y false
+#define DEFAULT_STEPPER_DEACTIVE_TIME 100
+#define DISABLE_INACTIVE_X true
+#define DISABLE_INACTIVE_Y true
 #define DISABLE_INACTIVE_Z false  // Set 'false' if the nozzle could fall onto your printed part!
 #define DISABLE_INACTIVE_I true
 #define DISABLE_INACTIVE_J true
@@ -1133,7 +1133,8 @@
 #define DISABLE_INACTIVE_E true
 // Apply holding current to steppers at boot.
 // Useful if a 'cold' stepper delivers bad performance
-#define HOLD_STEPPERS_AT_BOOT
+#define PREHEAT_INACTIVE_STEPPERS_FOR_HOME
+#define PREHEAT_STEPPER_SECONDS 30
 
 // Default Minimum Feedrates for printing and travel moves
 #define DEFAULT_MINIMUMFEEDRATE       0.1     // (mm/s. °/s for rotational-only moves) Minimum feedrate. Set with M205 S.
