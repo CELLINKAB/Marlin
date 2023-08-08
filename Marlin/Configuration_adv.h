@@ -1134,7 +1134,7 @@
 // Apply holding current to steppers at boot.
 // Useful if a 'cold' stepper delivers bad performance
 #define PREHEAT_INACTIVE_STEPPERS_FOR_HOME
-#define PREHEAT_STEPPER_SECONDS 30
+#define PREHEAT_STEPPER_SECONDS 15
 
 // Default Minimum Feedrates for printing and travel moves
 #define DEFAULT_MINIMUMFEEDRATE       0.1     // (mm/s. °/s for rotational-only moves) Minimum feedrate. Set with M205 S.
