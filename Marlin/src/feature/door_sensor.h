@@ -1,6 +1,6 @@
 #include "../inc/MarlinConfig.h"
 
-template<pin_t SENSOR, bool PULLUP = false>
+template<pin_t SENSOR, bool INVERTING, bool PULLUP = false>
 struct DoorSensor
 {
     DoorSensor()
@@ -9,22 +9,26 @@ struct DoorSensor
             SET_INPUT_PULLUP(SENSOR);
         } else {
             SET_INPUT_PULLDOWN(SENSOR);
-        }
-        static auto report = []() {
-            static bool debouncing = false;
-            if (debouncing)
-                return;
-            debouncing = true;
-            delay(10);
-            static bool last_door_state = !READ(SENSOR);
-            const bool door_state = READ(SENSOR);
-            if (door_state != last_door_state) {
-                SERIAL_ECHOLNPGM("DO:", DOOR_SENSOR_INVERTING != door_state);
-            }
-            last_door_state = door_state;
-            debouncing = false;
         };
-        attachInterrupt(SENSOR, static_cast<void (*)()>(report), CHANGE);
+        attachInterrupt(SENSOR, report, CHANGE);
+    }
+
+    static bool is_open() { return static_cast<bool>(READ(DOOR_PIN)) ^ INVERTING; }
+
+    static void report()
+    {
+        static bool debouncing = false;
+        if (debouncing)
+            return;
+        debouncing = true;
+        safe_delay(10);
+        static bool last_door_state = is_open();
+        const bool door_state = is_open();
+        if (door_state != last_door_state) {
+            SERIAL_ECHOLNPGM("DO:", door_state);
+        }
+        last_door_state = door_state;
+        debouncing = false;
     }
 
     ~DoorSensor() { detachInterrupt(SENSOR); }
