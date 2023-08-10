@@ -73,10 +73,15 @@ void set_bed_leveling_enabled(const bool enable/*=true*/) {
     }
   };
 
+  _report_leveling();
   planner.synchronize();
 
-  planner.leveling_active = enable;                    // Toggle leveling between apply and unapply
+  // Get the corrected leveled / unleveled position
+  planner.apply_modifiers(current_position, true);    // Physical position with all modifiers
+  planner.leveling_active ^= true;                    // Toggle leveling between apply and unapply
+  planner.unapply_modifiers(current_position, true);  // Logical position with modifiers removed
 
+  sync_plan_position();
   _report_leveling();
   
 }
