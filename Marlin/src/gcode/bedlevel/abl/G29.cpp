@@ -228,11 +228,11 @@ public:
 G29_TYPE GcodeSuite::G29() {
   DEBUG_SECTION(log_G29, "G29", DEBUGGING(LEVELING));
 
-  #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
-    const auto old_workspace = active_coordinate_system;
-    select_coordinate_system(-1);
-    Defer reset_coordinate_space([old_workspace](){select_coordinate_system(old_workspace);});
-  #endif
+  // #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
+  //   const auto old_workspace = active_coordinate_system;
+  //   select_coordinate_system(-1);
+  //   Defer reset_coordinate_space([old_workspace](){select_coordinate_system(old_workspace);});
+  // #endif
 
   // Leveling state is persistent when done manually with multiple G29 commands
   TERN_(PROBE_MANUALLY, static) G29_State abl;

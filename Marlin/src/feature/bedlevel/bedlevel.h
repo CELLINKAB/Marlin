@@ -52,14 +52,14 @@ void reset_bed_level();
 class TemporaryBedLevelingState {
   bool saved;
   public:
-    TemporaryBedLevelingState(const bool enable);
+    explicit TemporaryBedLevelingState(const bool enable);
     ~TemporaryBedLevelingState() { set_bed_leveling_enabled(saved); }
     TemporaryBedLevelingState(const TemporaryBedLevelingState&) = delete;
     TemporaryBedLevelingState(TemporaryBedLevelingState&&) = delete;
     TemporaryBedLevelingState& operator=(const TemporaryBedLevelingState&) = delete;
     TemporaryBedLevelingState& operator=(TemporaryBedLevelingState&&) = delete;
 };
-#define TEMPORARY_BED_LEVELING_STATE(enable) const TemporaryBedLevelingState tbls(enable)
+#define TEMPORARY_BED_LEVELING_STATE(enable) const TemporaryBedLevelingState macro_defined_variable_tbls__(enable)
 
 #if HAS_MESH
 

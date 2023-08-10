@@ -14,9 +14,7 @@ void GcodeSuite::G516()
     if (homing_needed_error())
         return;
 
-    const bool level_state = planner.leveling_active;
-    set_bed_leveling_enabled(false);
-    Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
+    TemporaryBedLevelingState scope_leveling(false);
     
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
     xyz_pos_t clipped_eject_pos(eject_pos);

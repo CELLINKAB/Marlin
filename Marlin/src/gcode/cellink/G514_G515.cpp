@@ -44,9 +44,7 @@ void GcodeSuite::G515()
     if (homing_needed_error())
         return;
 
-    const bool level_state = planner.leveling_active;
-    set_bed_leveling_enabled(false);
-    Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
+    TemporaryBedLevelingState scope_leveling(false);
 
     xyz_pos_t gripper_pos(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     gripper_pos.z = Z_MAX_POS;
