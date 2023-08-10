@@ -3,6 +3,7 @@
 #if ENABLED(WELLPLATE_EJECT)
 
 #    include "../../feature/bedlevel/bedlevel.h"
+#    include "../../feature/door_sensor.h"
 #    include "../../module/planner.h"
 #    include "../gcode.h"
 #    include "../parser.h"
@@ -24,7 +25,7 @@ void GcodeSuite::G516()
     do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
     do_blocking_move_to(eject_pos, homing_feedrate(Y_AXIS));
 
-    if (!(READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING))
+    if (!door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
 
     static constexpr millis_t WAIT_TIME = SEC_TO_MS(VESSEL_LOAD_TIMEOUT_SECONDS);
@@ -35,7 +36,7 @@ void GcodeSuite::G516()
 
     do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
 
-    if (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING)
+    if (door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_CLOSE");
 }
 

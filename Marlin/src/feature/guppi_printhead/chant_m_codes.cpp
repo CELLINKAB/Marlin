@@ -4,6 +4,7 @@
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
 #include "../../module/temperature.h"
+#include "../../feature/door_sensor.h"
 
 #include "chantarelle.h"
 
@@ -388,7 +389,7 @@ void GcodeSuite::M817() {}
 void GcodeSuite::M818()
 {
     SERIAL_ECHOLNPGM("DO:",
-                     (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING),
+                     door.read(),
                      ",INTERLOCK_24V:",
                      (READ(FREEZE_PIN) == FREEZE_STATE));
 }

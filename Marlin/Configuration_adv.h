@@ -4050,7 +4050,8 @@
   // add debouncing to freeze pin
   #define FREEZE_DEBOUNCE
   #if ENABLED(FREEZE_DEBOUNCE)
-    #define FREEZE_DEBOUNCE_COUNT 100
+    // milliseconds to debounce for
+    #define FREEZE_DEBOUNCE_PERIOD 25
   #endif
 #endif
 
