@@ -488,10 +488,6 @@ G29_TYPE GcodeSuite::G29() {
     #if ENABLED(BLTOUCH)
       do_z_clearance(Z_CLEARANCE_DEPLOY_PROBE);
     #elif HAS_BED_PROBE
-      if (probe.deploy()) { // (returns true on deploy failure)
-        set_bed_leveling_enabled(abl.reenable);
-        G29_RETURN(false, true);
-      }
     #endif
 
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
