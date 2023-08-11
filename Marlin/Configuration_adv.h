@@ -4051,7 +4051,8 @@
   // add debouncing to freeze pin
   #define FREEZE_DEBOUNCE
   #if ENABLED(FREEZE_DEBOUNCE)
-    #define FREEZE_DEBOUNCE_COUNT 100
+    // milliseconds to debounce for
+    #define FREEZE_DEBOUNCE_PERIOD 25
   #endif
 #endif
 
@@ -4295,7 +4296,7 @@
 // add G516 to load/unload print vessel
 #define WELLPLATE_EJECT
 #if ENABLED(WELLPLATE_EJECT)
-  #define VESSEL_LOAD_TIMEOUT_SECONDS 120
+  #define VESSEL_LOAD_TIMEOUT_SECONDS 150
 #endif
 
 // @section develop

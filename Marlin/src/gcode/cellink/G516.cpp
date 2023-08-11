@@ -3,6 +3,7 @@
 #if ENABLED(WELLPLATE_EJECT)
 
 #    include "../../feature/bedlevel/bedlevel.h"
+#    include "../../feature/door_sensor.h"
 #    include "../../module/planner.h"
 #    include "../gcode.h"
 #    include "../parser.h"
@@ -17,25 +18,25 @@ void GcodeSuite::G516()
     const bool level_state = planner.leveling_active;
     set_bed_leveling_enabled(false);
     Defer restore_leveling([level_state]() { set_bed_leveling_enabled(level_state); });
-    
+
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
     xyz_pos_t clipped_eject_pos(eject_pos);
     apply_motion_limits(clipped_eject_pos);
     do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
     do_blocking_move_to(eject_pos, homing_feedrate(Y_AXIS));
 
-    if (READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING)
+    if (!door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
 
-    static constexpr millis_t WAIT_TIME = SEC_TO_MS(VESSEL_LOAD_TIMEOUT_SECONDS);
-    millis_t timeout = millis() + WAIT_TIME;
-    wait_for_user_response(WAIT_TIME, true);
-    if (WAIT_TIME && millis() >= timeout)
+    millis_t wait_time = SEC_TO_MS(parser.byteval('S', VESSEL_LOAD_TIMEOUT_SECONDS));
+    millis_t timeout = millis() + wait_time;
+    wait_for_user_response(wait_time, true);
+    if (wait_time && millis() >= timeout)
         SERIAL_ECHOLN("ERR_VESSEL_LOAD_TIMEOUT");
 
     do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
 
-    if (!READ(DOOR_PIN) ^ DOOR_SENSOR_INVERTING )
+    if (door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_CLOSE");
 }
 
