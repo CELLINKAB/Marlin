@@ -11,6 +11,7 @@
 void GcodeSuite::G516()
 {
     static constexpr xyz_pos_t EJECT_POS{-139, 260, Z_MAX_POS};
+    static constexpr feedRate_t EJECT_FEEDRATE = 100.0f;
 
     if (homing_needed_error())
         return;
@@ -20,8 +21,10 @@ void GcodeSuite::G516()
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
     xyz_pos_t clipped_eject_pos(eject_pos);
     apply_motion_limits(clipped_eject_pos);
-    do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
-    do_blocking_move_to(eject_pos, homing_feedrate(Y_AXIS));
+    do_blocking_move_to(clipped_eject_pos, EJECT_FEEDRATE);
+    soft_endstop._enabled = false;
+    do_blocking_move_to(eject_pos, EJECT_FEEDRATE);
+    soft_endstop._enabled = true;
 
     if (!door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
@@ -32,7 +35,7 @@ void GcodeSuite::G516()
     if (wait_time && millis() >= timeout)
         SERIAL_ECHOLN("ERR_VESSEL_LOAD_TIMEOUT");
 
-    do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
+    do_blocking_move_to(clipped_eject_pos, EJECT_FEEDRATE);
 
     if (door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_CLOSE");
