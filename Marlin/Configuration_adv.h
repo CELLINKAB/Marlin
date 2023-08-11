@@ -2140,9 +2140,9 @@
  * For example, after homing a rotational axis the Z probe might not be perpendicular to the bed.
  * Choose values the orient the bed horizontally and the Z-probe vertically.
  */
-#define SAFE_BED_LEVELING_START_X 113.0
-#define SAFE_BED_LEVELING_START_Y 40.0
-#define SAFE_BED_LEVELING_START_Z Z_MAX_POS
+//#define SAFE_BED_LEVELING_START_X 113.0
+//#define SAFE_BED_LEVELING_START_Y 40.0
+//#define SAFE_BED_LEVELING_START_Z Z_MAX_POS
 //#define SAFE_BED_LEVELING_START_I 0.0
 //#define SAFE_BED_LEVELING_START_J 0.0
 //#define SAFE_BED_LEVELING_START_K 0.0
@@ -2184,10 +2184,10 @@
  * the probe to be unable to reach any points.
  */
 #if PROBE_SELECTED && !IS_KINEMATIC
-  #define PROBING_MARGIN_LEFT 10
-  #define PROBING_MARGIN_RIGHT 10
-  #define PROBING_MARGIN_FRONT 6
-  #define PROBING_MARGIN_BACK 6
+  //#define PROBING_MARGIN_LEFT 10
+  //#define PROBING_MARGIN_RIGHT 10
+  //#define PROBING_MARGIN_FRONT 6
+  //#define PROBING_MARGIN_BACK 6
 #endif
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
@@ -2408,7 +2408,7 @@
 
 // The ASCII buffer for serial input
 #define MAX_CMD_SIZE 128
-#define BUFSIZE 32
+#define BUFSIZE 64
 
 // Transmission to Host Buffer Size
 // To save 386 bytes of flash (and TX_BUFFER_SIZE+3 bytes of RAM) set to 0.
@@ -2528,7 +2528,7 @@
  *
  * Note that M207 / M208 / M209 settings are saved to EEPROM.
  */
-#define FWRETRACT
+//#define FWRETRACT
 #if ENABLED(FWRETRACT)
   //#define FWRETRACT_AUTORETRACT             // Override slicer retractions
   #if ENABLED(FWRETRACT_AUTORETRACT)
