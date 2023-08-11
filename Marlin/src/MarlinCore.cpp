@@ -1440,7 +1440,7 @@ void setup() {
 
   SETUP_RUN(stepper.init());          // Init stepper. This enables interrupts!
 
-  #if ENABLED(HOLD_STEPPERS_AT_BOOT)
+  #if ENABLED(PREHEAT_INACTIVE_STEPPERS_FOR_HOME)
     SETUP_RUN(stepper.enable_all_steppers());
   #endif
 
