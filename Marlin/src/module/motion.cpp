@@ -404,7 +404,7 @@ void quickstop_stepper() {
  */
 void sync_plan_position() {
   if (DEBUGGING(LEVELING)) DEBUG_POS("sync_plan_position", current_position);
-  planner.set_position_mm(current_position);
+  planner.set_machine_position_mm(current_position);
 }
 
 #if HAS_EXTRUDERS

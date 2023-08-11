@@ -61,28 +61,22 @@ void set_bed_leveling_enabled(const bool enable/*=true*/) {
 
   const bool can_change = TERN1(AUTO_BED_LEVELING_BILINEAR, !enable || leveling_is_valid());
 
-  if (can_change && enable != planner.leveling_active) {
+  if (!can_change || enable == planner.leveling_active) 
+    return;
 
-    auto _report_leveling = []{
-      if (DEBUGGING(LEVELING)) {
-        if (planner.leveling_active)
-          DEBUG_POS("Leveling ON", current_position);
-        else
-          DEBUG_POS("Leveling OFF", current_position);
-      }
-    };
+  auto _report_leveling = []{
+    if (DEBUGGING(LEVELING)) {
+      if (planner.leveling_active)
+        DEBUG_POS("Leveling ON", current_position);
+      else
+        DEBUG_POS("Leveling OFF", current_position);
+    }
+  };
 
-    _report_leveling();
-    planner.synchronize();
-
-    // Get the corrected leveled / unleveled position
-    planner.apply_modifiers(current_position, true);    // Physical position with all modifiers
-    planner.leveling_active ^= true;                    // Toggle leveling between apply and unapply
-    planner.unapply_modifiers(current_position, true);  // Logical position with modifiers removed
-
-    sync_plan_position();
-    _report_leveling();
-  }
+  planner.synchronize();
+  planner.leveling_active = enable;
+  _report_leveling();
+  
 }
 
 TemporaryBedLevelingState::TemporaryBedLevelingState(const bool enable) : saved(planner.leveling_active) {

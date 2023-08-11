@@ -228,12 +228,6 @@ public:
 G29_TYPE GcodeSuite::G29() {
   DEBUG_SECTION(log_G29, "G29", DEBUGGING(LEVELING));
 
-  #if ENABLED(ALWAYS_MACHINE_NATIVE_ABL)    // use machine native workspace for bed leveling
-    const auto old_workspace = active_coordinate_system;
-    select_coordinate_system(-1);
-    Defer reset_coordinate_space([old_workspace](){select_coordinate_system(old_workspace);});
-  #endif
-
   // Leveling state is persistent when done manually with multiple G29 commands
   TERN_(PROBE_MANUALLY, static) G29_State abl;
 
@@ -345,15 +339,9 @@ G29_TYPE GcodeSuite::G29() {
 
     #else
 
-      constexpr bool seen_w = false;
+      [[maybe_unused]] constexpr bool seen_w = false;
 
     #endif
-
-    //Jettison bed leveling data
-    if (!seen_w && parser.seen_test('J')) {
-      reset_bed_level();
-      // G29_RETURN(false, false);
-    }
 
     abl.verbose_level = parser.intval('V');
     if (!WITHIN(abl.verbose_level, 0, 4)) {
@@ -500,10 +488,6 @@ G29_TYPE GcodeSuite::G29() {
     #if ENABLED(BLTOUCH)
       do_z_clearance(Z_CLEARANCE_DEPLOY_PROBE);
     #elif HAS_BED_PROBE
-      if (probe.deploy()) { // (returns true on deploy failure)
-        set_bed_leveling_enabled(abl.reenable);
-        G29_RETURN(false, true);
-      }
     #endif
 
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
@@ -911,33 +895,22 @@ G29_TYPE GcodeSuite::G29() {
         // Correct the current XYZ position based on the tilted plane.
         //
 
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 uncorrected XYZ", current_position);
-
-        xyze_pos_t converted = current_position;
-        planner.force_unapply_leveling(converted); // use conversion machinery
-
-        // Use the last measured distance to the bed, if possible
-        if ( NEAR(current_position.x, abl.probePos.x - probe.offset_xy.x)
-          && NEAR(current_position.y, abl.probePos.y - probe.offset_xy.y)
-        ) {
-          const float simple_z = current_position.z - abl.measured_z;
-          if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Probed Z", simple_z, "  Matrix Z", converted.z, "  Discrepancy ", simple_z - converted.z);
-          converted.z = simple_z;
+        if (DEBUGGING(LEVELING))
+        { 
+          DEBUG_POS("G29 uncorrected XYZ", current_position);
+          xyze_pos_t converted = current_position;
+          planner.leveling_active = true;
+          planner.apply_leveling(converted);
+          planner.leveling_active = false;
+          DEBUG_POS("G29 corrected XYZ", converted);
         }
-
-        // The rotated XY and corrected Z are now current_position
-        current_position = converted;
-
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 corrected XYZ", current_position);
 
         abl.reenable = true;
       }
 
       // Auto Bed Leveling is complete! Enable if possible.
-      if (abl.reenable) {
+      if (abl.reenable)
         planner.leveling_active = true;
-        sync_plan_position();
-      }
 
     #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 

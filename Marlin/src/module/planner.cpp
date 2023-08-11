@@ -1637,6 +1637,8 @@ void Planner::check_axes_activity() {
       xy_pos_t d = raw - level_fulcrum;
       inverse.apply_rotation_xyz(d.x, d.y, raw.z);
       raw = d + level_fulcrum;
+      raw.z -= bed_level_z_offset;
+
 
     #elif HAS_MESH
 

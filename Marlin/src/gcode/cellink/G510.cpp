@@ -57,9 +57,7 @@ void GcodeSuite::G510()
     if (parser.seen('R') || homing_needed_error()) // 'R' resets offsets and leaves
         return;
 
-    const bool leveling_active = planner.leveling_active;
-    set_bed_leveling_enabled(false);
-    Defer restore_leveling([leveling_active]() { set_bed_leveling_enabled(leveling_active); });
+    TemporaryBedLevelingState scope_leveling(false);
 
     static constexpr xyz_pos_t DEFAULT_START_POS = AUTOCAL_START_POSITION;
     xyz_pos_t start_pos;
@@ -73,8 +71,6 @@ void GcodeSuite::G510()
         optical_autocal.calibrate(start_pos, feedrate);
         return;
     }
-
-    process_subcommands_now(F("G28Z"));
 
     switch (optical_autocal.full_autocal_routine(start_pos, feedrate)) {
     case OpticalAutocal::ErrorCode::SANITY_CHECK_FAILED:
