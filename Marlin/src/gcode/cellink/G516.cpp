@@ -28,10 +28,10 @@ void GcodeSuite::G516()
     if (!door.read())
         SERIAL_ECHOLN("ERR_DOOR_DID_NOT_OPEN");
 
-    static constexpr millis_t WAIT_TIME = SEC_TO_MS(VESSEL_LOAD_TIMEOUT_SECONDS);
-    millis_t timeout = millis() + WAIT_TIME;
-    wait_for_user_response(WAIT_TIME, true);
-    if (WAIT_TIME && millis() >= timeout)
+    millis_t wait_time = SEC_TO_MS(parser.byteval('S', VESSEL_LOAD_TIMEOUT_SECONDS));
+    millis_t timeout = millis() + wait_time;
+    wait_for_user_response(wait_time, true);
+    if (wait_time && millis() >= timeout)
         SERIAL_ECHOLN("ERR_VESSEL_LOAD_TIMEOUT");
 
     do_blocking_move_to(clipped_eject_pos, homing_feedrate(Y_AXIS));
