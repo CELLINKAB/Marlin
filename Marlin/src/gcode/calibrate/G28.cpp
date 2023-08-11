@@ -262,6 +262,13 @@ void GcodeSuite::G28() {
   // Reset to the XY plane
   TERN_(CNC_WORKSPACE_PLANES, workspace_plane = PLANE_XY);
 
+  #if ENABLED(PREHEAT_INACTIVE_STEPPERS_FOR_HOME)
+    stepper.enable_all_steppers();
+    millis_t preheat_timeout = millis() + SEC_TO_MS(PREHEAT_STEPPER_SECONDS);
+    while (millis() < preheat_timeout)
+      idle_no_sleep();
+  #endif
+
   // Count this command as movement / activity
   reset_stepper_timeout();
 

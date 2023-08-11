@@ -174,6 +174,10 @@
   #include "feature/guppi_printhead/chantarelle.h"
 #endif
 
+#if ENABLED(FREEZE_DEBOUNCE)
+  #include "feature/debouncer.h"
+#endif
+
 #if ENABLED(DELTA)
   #include "module/delta.h"
 #elif ENABLED(POLARGRAPH)
@@ -519,18 +523,15 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   #endif
 
   #if ENABLED(FREEZE_FEATURE)
-    bool new_freeze = (READ(FREEZE_PIN) == FREEZE_STATE);
+    #if ENABLED(FREEZE_DEBOUNCE)
+      static Debounced<FREEZE_PIN> freeze_debounced(FREEZE_DEBOUNCE_PERIOD);
+      freeze_debounced.update(ms);
+      bool new_freeze = freeze_debounced.read();
+    #else
+      bool new_freeze = (READ(FREEZE_PIN) == FREEZE_STATE);
+    #endif
     if (new_freeze != stepper.frozen)
     {
-      #if ENABLED(FREEZE_DEBOUNCE)
-        static bool debouncing = true;
-        if (debouncing) {
-          static int debounce_counter = FREEZE_DEBOUNCE_COUNT;
-          --debounce_counter;
-          debouncing = (debounce_counter <= 0);
-          debounce_counter += ((!debouncing) * FREEZE_DEBOUNCE_COUNT);
-        } else 
-      #endif
       {
         #if defined(FREEZE_MSG)
         SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
@@ -541,13 +542,24 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
     } 
   #endif
 
+  #if PIN_EXISTS(DOOR)
+  {
+    bool door_state = door.read();
+    static bool last_door_state = !door_state;
+    door.update(ms);
+    if (door_state != last_door_state) {
+      SERIAL_ECHOPGM("DO:", door_state);
+      last_door_state = door_state;
+    }
+  }
+  #endif
+
   #if HAS_HOME
     // Handle a standalone HOME button
     constexpr millis_t HOME_DEBOUNCE_DELAY = 1000UL;
-    static millis_t next_home_key_ms; // = 0
-    if (!IS_SD_PRINTING() && !READ(HOME_PIN)) { // HOME_PIN goes LOW when pressed
-      if (ELAPSED(ms, next_home_key_ms)) {
-        next_home_key_ms = ms + HOME_DEBOUNCE_DELAY;
+    static Debounced<HOME_PIN> home_button(HOME_DEBOUNCE_DELAY, true, true);
+    home_button.update(ms);
+    if (!IS_SD_PRINTING() && home_button.read()) { // HOME_PIN goes LOW when pressed
         LCD_MESSAGE(MSG_AUTO_HOME);
         queue.inject_P(G28_STR);
       }
@@ -1269,10 +1281,6 @@ void setup() {
     OUT_WRITE(SUICIDE_PIN, !SUICIDE_PIN_STATE);
   #endif
 
-  #if PIN_EXISTS(DOOR)
-    static DoorSensor<DOOR_PIN> door_sensor;
-  #endif
-
   #ifdef JTAGSWD_RESET
     SETUP_LOG("JTAGSWD_RESET");
     JTAGSWD_RESET();
@@ -1440,7 +1448,7 @@ void setup() {
 
   SETUP_RUN(stepper.init());          // Init stepper. This enables interrupts!
 
-  #if ENABLED(HOLD_STEPPERS_AT_BOOT)
+  #if ENABLED(PREHEAT_INACTIVE_STEPPERS_FOR_HOME)
     SETUP_RUN(stepper.enable_all_steppers());
   #endif
 
