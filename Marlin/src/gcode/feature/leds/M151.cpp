@@ -2,10 +2,14 @@
 
 #if HAS_COLOR_LEDS && ENABLED(RGB_LED_FADE_COMMAND)
 
+#    include "../../../MarlinCore.h"
 #    include "../../../feature/leds/leds.h"
 #    include "../../gcode.h"
 
-
+bool AnimationManager::running() const
+{
+    return remaining_cycles > 0 && millis() <= active_fade.expiration();
+}
 
 void AnimationManager::update()
 {
@@ -31,8 +35,20 @@ void AnimationManager::update()
         break;
 #    endif
     }
-    if (current_time >= active_fade.expiration())
-        active_fade.strip = LEDStrip::None;
+    if (current_time >= active_fade.expiration()) {
+        if (remaining_cycles > 0) {
+            LedFade next_fade(active_fade.strip,
+                              millis(),
+                              active_fade.duration,
+                              active_fade.end_color,
+                              active_fade.start_color,
+                              active_fade.pixel);
+            active_fade = next_fade;
+            --remaining_cycles;
+        } else {
+            active_fade.strip = LEDStrip::None;
+        }
+    }
     next_tick = millis() + MIN_FADE_TICK;
 }
 
@@ -91,7 +107,12 @@ void GcodeSuite::M151()
                                                 : neo.brightness()));
 
     animation_manager.active_fade = LedFade(strip, millis(), duration, old_color, new_color, pixel);
+    animation_manager.remaining_cycles = parser.ulongval('C');
 
+    if (parser.boolval('N')) {
+        while (animation_manager.running())
+            idle();
+    }
 }
 
 #endif
