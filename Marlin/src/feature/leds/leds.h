@@ -303,7 +303,7 @@ struct AnimationManager
     LedFade active_fade;
     millis_t next_tick;
     size_t remaining_cycles;
-    static constexpr millis_t MIN_FADE_TICK = 15;
+    static constexpr millis_t MIN_FADE_TICK = 25;
     bool running() const;
     void update();
 };

@@ -8,7 +8,7 @@
 
 bool AnimationManager::running() const
 {
-    return remaining_cycles > 0 && millis() <= active_fade.expiration();
+    return remaining_cycles > 0 || millis() <= active_fade.expiration();
 }
 
 void AnimationManager::update()
