@@ -85,26 +85,16 @@ void GcodeSuite::M151()
     }
 #    endif
 
-    const LEDColor new_color(TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.r),
-                             TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.g),
-                             TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.b)
-                                 OPTARG(HAS_WHITE_LED,
-                                        parser.seen('W')
-                                            ? (parser.has_value() ? parser.value_byte() : 255)
-                                            : old_color.w)
-                                     OPTARG(NEOPIXEL_LED,
-                                            parser.seen('P')
-                                                ? parser.has_value()
-                                                      ? (TERN_(INVERTED_RGB_CONTROL, 255 -)
-                                                             parser.value_byte())
-                                                      : TERN(INVERTED_RGB_CONTROL, 0, 255)
-                                                : neo.brightness()));
+    const LEDColor
+        new_color((parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.r),
+                  (parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.g),
+                  (parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.b)
+                      OPTARG(HAS_WHITE_LED,
+                             parser.seen('W') ? (parser.has_value() ? parser.value_byte() : 255)
+                                              : old_color.w)
+                          OPTARG(NEOPIXEL_LED,
+                                 parser.seen('P') ? parser.has_value() ? (parser.value_byte()) : 255
+                                                  : neo.brightness()));
 
     animation_manager.active_fade = LedFade(strip, millis(), duration, old_color, new_color, pixel);
     animation_manager.remaining_cycles = parser.ulongval('C');

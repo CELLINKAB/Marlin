@@ -35,7 +35,11 @@
 
 #include "../../inc/MarlinConfig.h"
 
+#if ENABLED(INVERTED_RGB_CONTROL)
+#include "inverted_adafruit_neopixel.h"
+#else
 #include <Adafruit_NeoPixel.h>
+#endif
 #include <stdint.h>
 
 // ------------------------
