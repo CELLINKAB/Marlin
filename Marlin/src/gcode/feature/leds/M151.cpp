@@ -2,10 +2,14 @@
 
 #if HAS_COLOR_LEDS && ENABLED(RGB_LED_FADE_COMMAND)
 
+#    include "../../../MarlinCore.h"
 #    include "../../../feature/leds/leds.h"
 #    include "../../gcode.h"
 
-
+bool AnimationManager::running() const
+{
+    return remaining_cycles > 0 && millis() <= active_fade.expiration();
+}
 
 void AnimationManager::update()
 {
@@ -31,8 +35,20 @@ void AnimationManager::update()
         break;
 #    endif
     }
-    if (current_time >= active_fade.expiration())
-        active_fade.strip = LEDStrip::None;
+    if (current_time >= active_fade.expiration()) {
+        if (remaining_cycles > 0) {
+            LedFade next_fade(active_fade.strip,
+                              millis(),
+                              active_fade.duration,
+                              active_fade.end_color,
+                              active_fade.start_color,
+                              active_fade.pixel);
+            active_fade = next_fade;
+            --remaining_cycles;
+        } else {
+            active_fade.strip = LEDStrip::None;
+        }
+    }
     next_tick = millis() + MIN_FADE_TICK;
 }
 
@@ -69,29 +85,24 @@ void GcodeSuite::M151()
     }
 #    endif
 
-    const LEDColor new_color(TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.r),
-                             TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.g),
-                             TERN_(INVERTED_RGB_CONTROL, 255 -)(
-                                 parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255)
-                                                  : old_color.b)
-                                 OPTARG(HAS_WHITE_LED,
-                                        parser.seen('W')
-                                            ? (parser.has_value() ? parser.value_byte() : 255)
-                                            : old_color.w)
-                                     OPTARG(NEOPIXEL_LED,
-                                            parser.seen('P')
-                                                ? parser.has_value()
-                                                      ? (TERN_(INVERTED_RGB_CONTROL, 255 -)
-                                                             parser.value_byte())
-                                                      : TERN(INVERTED_RGB_CONTROL, 0, 255)
-                                                : neo.brightness()));
+    const LEDColor
+        new_color((parser.seen('R') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.r),
+                  (parser.seen('U') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.g),
+                  (parser.seen('B') ? (parser.has_value() ? parser.value_byte() : 255) : old_color.b)
+                      OPTARG(HAS_WHITE_LED,
+                             parser.seen('W') ? (parser.has_value() ? parser.value_byte() : 255)
+                                              : old_color.w)
+                          OPTARG(NEOPIXEL_LED,
+                                 parser.seen('P') ? parser.has_value() ? (parser.value_byte()) : 255
+                                                  : neo.brightness()));
 
     animation_manager.active_fade = LedFade(strip, millis(), duration, old_color, new_color, pixel);
+    animation_manager.remaining_cycles = parser.ulongval('C');
 
+    if (parser.boolval('N')) {
+        while (animation_manager.running())
+            idle();
+    }
 }
 
 #endif

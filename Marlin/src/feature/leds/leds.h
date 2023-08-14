@@ -302,7 +302,9 @@ struct AnimationManager
 {
     LedFade active_fade;
     millis_t next_tick;
+    size_t remaining_cycles;
     static constexpr millis_t MIN_FADE_TICK = 15;
+    bool running() const;
     void update();
 };
 extern AnimationManager animation_manager;
