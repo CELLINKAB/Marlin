@@ -4304,7 +4304,7 @@
 //#define DOOR_PIN 99
 //#define DOOR_PIN_INVERTING
 //#define DOOR_PIN_DEBOUNCE_PERIOD 100
-#define DOOR_OPEN_EXTRA_HOMING_MOVE {0, -100, 0};
+#define DOOR_OPEN_EXTRA_HOMING_MOVE {0, -200, 0};
 #endif
 
 // @section develop
