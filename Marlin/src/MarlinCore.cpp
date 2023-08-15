@@ -548,7 +548,7 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
     bool door_state = door.read();
     static bool last_door_state = door_state;
     if (door_state != last_door_state) {
-      SERIAL_ECHOPGM("DO:", door_state);
+      SERIAL_ECHOLNPGM("DO:", door_state);
       last_door_state = door_state;
     }
   }
