@@ -279,6 +279,7 @@ void GcodeSuite::G28() {
     if (door.read()) {
       xyz_pos_t door_safe_homing_pos = DOOR_OPEN_EXTRA_HOMING_MOVE;
       current_position += door_safe_homing_pos;
+      restorer soft_endstop_enabled(soft_endstop._enabled, false);
       do_blocking_move_to(current_position);
     }
   #endif
