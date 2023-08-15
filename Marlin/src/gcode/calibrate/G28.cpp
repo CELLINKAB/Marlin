@@ -64,6 +64,10 @@
   #include "../../feature/spindle_laser.h"
 #endif
 
+#if ENABLED(DOOR_SENSOR)
+  #include "../../feature/door_sensor.h"
+#endif
+
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
@@ -262,11 +266,22 @@ void GcodeSuite::G28() {
   // Reset to the XY plane
   TERN_(CNC_WORKSPACE_PLANES, workspace_plane = PLANE_XY);
 
+  #ifdef DOOR_OPEN_EXTRA_HOMING_MOVE
+    if (door.read()) {
+      xyz_pos_t door_safe_homing_pos = DOOR_OPEN_EXTRA_HOMING_MOVE;
+      current_position += door_safe_homing_pos;
+      restorer soft_endstop_enabled(soft_endstop._enabled, false);
+      do_blocking_move_to(current_position);
+    }
+  #endif
+
   #if ENABLED(PREHEAT_INACTIVE_STEPPERS_FOR_HOME)
-    stepper.enable_all_steppers();
-    millis_t preheat_timeout = millis() + SEC_TO_MS(PREHEAT_STEPPER_SECONDS);
-    while (millis() < preheat_timeout)
-      idle_no_sleep();
+    if (!all_axes_trusted()) {
+      stepper.enable_all_steppers();
+      millis_t preheat_timeout = millis() + SEC_TO_MS(PREHEAT_STEPPER_SECONDS);
+      while (millis() < preheat_timeout)
+        idle_no_sleep();
+    }
   #endif
 
   // Count this command as movement / activity
