@@ -242,7 +242,7 @@ void GcodeSuite::M771()
 
         return;
     } else {
-        const int16_t temperature = parser.celsiusval('P');
+        const celsius_float_t temperature = parser.floatval('P');
         ph_controller.set_temperature(index, temperature);
     }
 }
