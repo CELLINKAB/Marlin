@@ -46,20 +46,7 @@ void Reporter::M1016::report()
     serial_echoln_kv("XMPOS", pos.x, "YMPOS", pos.y, "ZMPOS", pos.z);
 }
 void Reporter::M1017::report()
-{
-    serial_echoln_kv("AT", active_extruder);
-    EXTRUDER_LOOP()
-    {
-        serial_echoln_kv("T",
-                         e,
-                         "X",
-                         hotend_offset[e].x,
-                         "Y",
-                         hotend_offset[e].y,
-                         "Z",
-                         hotend_offset[e].z);
-    }
-}
+{/*unused in com-module, not needed*/}
 
 void Reporter::tick_all()
 {
@@ -72,7 +59,6 @@ void Reporter::tick_all()
     m825.tick();
     m1015.tick();
     m1016.tick();
-    m1017.tick();
 }
 
 Reporter cellink::reporter;
