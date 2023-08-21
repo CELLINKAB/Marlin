@@ -42,9 +42,14 @@ pipeline {
                     }
                 axes {
                     axis {
+                        name 'DEVICE'
+                        values 'Exocyte'
+                    }
+                    axis {
                         name 'BOARD'
                         values 'MYCORRHIZA_V1_1'
                     }
+
                 }
                 stages {
                     stage('Building Firmware') {
@@ -52,6 +57,9 @@ pipeline {
                             sh '''
                                 git clean -Xdf
                                 git status
+                                echo "Using config for ${DEVICE}"
+                                cp -f config/${DEVICE}_Configuration.h Marlin/Configuration.h
+                                cp -f config/${DEVICE}_Configuration_adv.h Marlin/Configuration_adv.h
                                 echo "Do Build for ${BOARD}"
                                 python3 -m platformio run --environment  ${BOARD}  -a "--build_tag=${ART_NAME_NOSLASH}"
                             '''
