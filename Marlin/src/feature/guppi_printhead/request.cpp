@@ -211,9 +211,9 @@ bool Controller::slider_busy(Index index)
     return state.status.slider_is_stepping;
 }
 
-Response<uint16_t> Controller::set_temperature(Index index, celsius_t temperature)
+Response<uint16_t> Controller::set_temperature(Index index, celsius_float_t temperature)
 {
-    uint16_t chant_temp = (temperature * 100) + 30'000;
+    uint16_t chant_temp = static_cast<uint16_t>((temperature * 100.0f) + 30'000);
     Packet request(index, Command::SET_TEMP, chant_temp);
     return send_and_receive<uint16_t>(request, bus);
 }
