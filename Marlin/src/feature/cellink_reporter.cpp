@@ -45,8 +45,6 @@ void Reporter::M1016::report()
     const auto pos = planner.get_axis_positions_mm();
     serial_echoln_kv("XMPOS", pos.x, "YMPOS", pos.y, "ZMPOS", pos.z);
 }
-void Reporter::M1017::report()
-{/*unused in com-module, not needed*/}
 
 void Reporter::tick_all()
 {

@@ -83,10 +83,6 @@ struct Reporter
     {
         static void report();
     } m1016;
-    struct M1017 : AutoReporter<M1017>
-    {
-        static void report();
-    } m1017;
     void tick_all();
 };
 
