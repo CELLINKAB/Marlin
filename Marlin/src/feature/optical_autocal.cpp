@@ -141,7 +141,6 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
         SERIAL_ERROR_MSG("Sensor Y-intercepts do not match! Cannot calculate intersection point.");
     }
     nozzle_calibration_extra_offset.x = END_POSITION_PRINTBED_DELTA.x + sensor_x_intercept;
-    nozzle_calibration_extra_offset.y = -(END_POSITION_PRINTBED_DELTA.y + sensor_y_intercept);
     SERIAL_ECHOLNPGM("sensor 1 slope: ",
                      sensor1_slope,
                      ", sensor 2 slope: ",
@@ -355,7 +354,8 @@ void OpticalAutocal::report_sensors() const
     while (!condition && dest.z > soft_endstop.min.z) {
         dest.y += rel_y;
         dest.z -= inc;
-        do_blocking_move_to(dest, feedrate);
+        do_blocking_move_to_z(dest.z,feedrate);
+        do_blocking_move_to_y(dest.y,feedrate);
         rel_y = -rel_y;
     }
     dest.y = initial_y;
