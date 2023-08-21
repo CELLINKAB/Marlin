@@ -141,7 +141,6 @@ void OpticalAutocal::calibrate(xyz_pos_t start_pos, feedRate_t feedrate)
         SERIAL_ERROR_MSG("Sensor Y-intercepts do not match! Cannot calculate intersection point.");
     }
     nozzle_calibration_extra_offset.x = END_POSITION_PRINTBED_DELTA.x + sensor_x_intercept;
-    nozzle_calibration_extra_offset.y = END_POSITION_PRINTBED_DELTA.y + sensor_y_intercept;
     SERIAL_ECHOLNPGM("sensor 1 slope: ",
                      sensor1_slope,
                      ", sensor 2 slope: ",
@@ -348,12 +347,20 @@ void OpticalAutocal::report_sensors() const
                                                  bool& condition,
                                                  const float feedrate) const
 {
-    while (!condition && z > soft_endstop.min.z) {
-        do_blocking_move_to_z(z, feedrate);
-        do_blocking_move_to_y(current_position.y + SHORT_Y_RANGE, feedrate);
-        do_blocking_move_to_y(current_position.y - SHORT_Y_RANGE, feedrate);
-        z -= inc;
+    float rel_y = SHORT_Y_RANGE;
+    const float initial_y = current_position.y;
+    xyze_pos_t dest = current_position;
+    dest.z = z;
+    while (!condition && dest.z > soft_endstop.min.z) {
+        dest.y += rel_y;
+        dest.z -= inc;
+        do_blocking_move_to_z(dest.z,feedrate);
+        do_blocking_move_to_y(dest.y,feedrate);
+        rel_y = -rel_y;
     }
+    dest.y = initial_y;
+    dest.z += inc;    
+    do_blocking_move_to(dest);
 
     if (DEBUGGING(ERRORS) && z <= soft_endstop.min.z)
         SERIAL_ERROR_MSG("No nozzle found during Z sweep!");
@@ -361,7 +368,7 @@ void OpticalAutocal::report_sensors() const
         SERIAL_ECHOLNPGM("Z sweep increment=", inc, "; found nozzle at z=", z);
 
     condition = false;
-    return (z + inc) + inc; // report position before interrupt triggered
+    return current_position.z + inc; // report position before interrupt triggered
 }
 
 /**
