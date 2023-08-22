@@ -1,6 +1,6 @@
 #include "../inc/MarlinConfig.h"
 
-#if ENABLED(TMP117_PRINTBED)
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
 
 #include "tmp117_printbed.h"
 
