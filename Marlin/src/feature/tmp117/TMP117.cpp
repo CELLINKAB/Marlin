@@ -11,7 +11,7 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(CUSTOM_TMP117)
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
 
 #include "TMP117.h"
 
