@@ -1446,7 +1446,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id) {
       typedef PIDRunner<hotend_info_t> PIDRunnerHotend;
 
       static PIDRunnerHotend hotend_pid[HOTENDS] = {
-        #define _HOTENDPID(E) temp_hotend[E],
+        #define _HOTENDPID(E) PIDRunnerHotend(temp_hotend[E]),
         REPEAT(HOTENDS, _HOTENDPID)
       };
 
