@@ -14,7 +14,14 @@ void Reporter::M119::report()
 {
     endstops.report_states();
 }
-void Reporter::M772::report() {}
+void Reporter::M772::report()
+{
+    EXTRUDER_LOOP()
+    {
+        SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
+    }
+    SERIAL_EOL();
+}
 void Reporter::M798::report()
 {
     serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
