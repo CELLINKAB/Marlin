@@ -1,5 +1,9 @@
 // copyright Cellink 2022 GPLv3
 
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(CHANTARELLE_SUPPORT)
+
 #include "../../gcode/gcode.h"
 #include "../../gcode/parser.h"
 #include "../../module/planner.h"
@@ -7,8 +11,6 @@
 #include "../../feature/door_sensor.h"
 
 #include "chantarelle.h"
-
-#if ENABLED(CHANTARELLE_SUPPORT)
 
 printhead::Controller ph_controller(CHANT_SERIAL);
 

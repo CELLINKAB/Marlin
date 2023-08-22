@@ -1,8 +1,8 @@
+#include "../../MarlinCore.h"
 
+#if ENABLED(CHANTARELLE_SUPPORT)
 
 #include "request.h"
-
-#include "../../MarlinCore.h"
 
 using namespace printhead;
 
@@ -458,3 +458,5 @@ Response<TemTemps> Controller::debug_get_temperature(Index index, bool debug)
     Packet packet(index, Command::DEBUG_GET_TEMPERATURE);
     return send_and_receive<TemTemps>(packet, bus, debug);
 }
+
+#endif // CHANTARELLE_SUPPORT
