@@ -1,3 +1,7 @@
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(CHANTARELLE_SUPPORT)
+
 #include "packet.h"
 #include "test.h"
 
@@ -50,3 +54,5 @@ void void_packet_bytes()
 }
 
 } // namespace test
+
+#endif // CHANTARELLE_SUPPORT

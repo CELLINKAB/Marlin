@@ -1,7 +1,8 @@
+#include "../inc/MarlinConfig.h"
+
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
 
 #include "tmp117_printbed.h"
-
-#include "../inc/MarlinConfig.h"
 
 BedKalmanFilter bed_kalman_filter(25, 0);
 
@@ -124,3 +125,5 @@ double BedKalmanFilter::offset_temp() const
 {
     return m_mean(indexOT);
 }
+
+#endif // TMP117_PRINTBED

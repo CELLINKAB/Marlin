@@ -4,7 +4,6 @@
    * 
    */
 #pragma once
-#include <string_view>
     
 #ifndef SHORT_BUILD_VERSION
     #define SHORT_BUILD_VERSION "2.1.2.1"

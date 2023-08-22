@@ -188,8 +188,8 @@ inline void SERIAL_ECHOLNPAIR_F_P(PGM_P p, EnsureDouble v, int digit=2) { SERIAL
 inline void SERIAL_ECHOPAIR_F_F(FSTR_P s, EnsureDouble v, int digit=2) { serial_print(s); SERIAL_ECHO_F(v, digit); }
 inline void SERIAL_ECHOLNPAIR_F_F(FSTR_P s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_F(s,v,digit); SERIAL_EOL(); }
 
-inline void SERIAL_ECHOPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F_F(F(s),v,digit); }
-inline void SERIAL_ECHOLNPAIR_F(const char * s, EnsureDouble v, int digit=2) { SERIAL_ECHOPAIR_F(s, v, digit); SERIAL_EOL(); }
+#define SERIAL_ECHOPAIR_F(S,V...)     SERIAL_ECHOPAIR_F_F(F(S),V)
+#define SERIAL_ECHOLNPAIR_F(V...)     do{ SERIAL_ECHOPAIR_F(V); SERIAL_EOL(); }while(0)
 
 #if SERIAL_FLOAT_PRECISION
   template <typename T>
@@ -203,24 +203,23 @@ inline void SERIAL_ECHOLNPAIR_F(const char * s, EnsureDouble v, int digit=2) { S
 // SERIAL_ECHOPGM... macros are used to output string-value pairs.
 //
 
-// Print pairs of values, odd elements must be string literals
-inline void SERIAL_ECHOPGM(const char* str) {
-  serial_print(F(str));
-}
-template<typename V>
-void SERIAL_ECHOPGM(const char* str, V value) {
-  serial_echopair(F(str), value);
-}
-template<typename V, class... Rest>
-void SERIAL_ECHOPGM(const char * str, V value, Rest... rest) {
-  SERIAL_ECHOPGM(str, value);
-  SERIAL_ECHOPGM(rest...);
-}
-template<class... Args>
-void SERIAL_ECHOLNPGM(Args... args) {
-  SERIAL_ECHOPGM(args...);
-  SERIAL_EOL();
-}
+// Print up to 20 pairs of values. Odd elements must be literal strings.
+#define __SEP_N(N,V...)           _SEP_##N(V)
+#define _SEP_N(N,V...)            __SEP_N(N,V)
+#define _SEP_N_REF()              _SEP_N
+#define _SEP_1(s)                 serial_print(F(s));
+#define _SEP_2(s,v)               serial_echopair(F(s),v);
+#define _SEP_3(s,v,V...)          _SEP_2(s,v); DEFER2(_SEP_N_REF)()(TWO_ARGS(V),V);
+#define SERIAL_ECHOPGM(V...)      do{ EVAL(_SEP_N(TWO_ARGS(V),V)); }while(0)
+
+// Print up to 20 pairs of values followed by newline. Odd elements must be literal strings.
+#define __SELP_N(N,V...)          _SELP_##N(V)
+#define _SELP_N(N,V...)           __SELP_N(N,V)
+#define _SELP_N_REF()             _SELP_N
+#define _SELP_1(s)                serial_print(F(s "\n"));
+#define _SELP_2(s,v)              serial_echolnpair(F(s),v);
+#define _SELP_3(s,v,V...)         _SEP_2(s,v); DEFER2(_SELP_N_REF)()(TWO_ARGS(V),V);
+#define SERIAL_ECHOLNPGM(V...)    do{ EVAL(_SELP_N(TWO_ARGS(V),V)); }while(0)
 
 // Print pairs of values. Odd elements must be FSTR_P, F(), or FPSTR().
 inline void SERIAL_ECHOF(FSTR_P str) {
@@ -342,21 +341,19 @@ inline void print_pos(const xyze_pos_t &xyze, FSTR_P const prefix=nullptr, FSTR_
 }
 
 #define SERIAL_POS(SUFFIX,VAR) do { print_pos(VAR, F("  " STRINGIFY(VAR) "="), F(" : " SUFFIX "\n")); }while(0)
-inline void SERIAL_XYZ(const char * prefix, const xyz_pos_t& v) { print_pos(v, F(prefix)); }
-inline void SERIAL_XYZ(const char * prefix, NUM_AXIS_ARGS(const_float_t)) { print_pos(NUM_AXIS_ARGS(), F(prefix)); }
+#define SERIAL_XYZ(PREFIX,V...) do { print_pos(V, F(PREFIX)); }while(0)
+
 
 inline void SERIAL_ECHO_SP(uint8_t c) { serial_spaces(c); }
 
-inline void SERIAL_ECHO_TERNARY(bool tf, const char * pre, const char * on, const char * off, const char * post) { serial_ternary(tf, F(pre), F(on), F(off), F(post)); }
+#define SERIAL_ECHO_TERNARY(TF, PRE, ON, OFF, POST) serial_ternary(TF, F(PRE), F(ON), F(OFF), F(POST))
 
 // Serial echo and error prefixes
 inline void SERIAL_ECHO_START() { serial_echo_start(); }
 inline void SERIAL_ERROR_START() { serial_error_start(); }
 
-template<class... Args>
-void SERIAL_ECHO_MSG(Args... args) { SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(args...); }
-template<class... Args>
-void SERIAL_ERROR_MSG(Args... args) { SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(args...); }
+#define SERIAL_ECHO_MSG(V...)         do{ SERIAL_ECHO_START();  SERIAL_ECHOLNPGM(V); }while(0)
+#define SERIAL_ERROR_MSG(V...)        do{ SERIAL_ERROR_START(); SERIAL_ECHOLNPGM(V); }while(0)
 
 //
 // Commonly-used strings in serial output

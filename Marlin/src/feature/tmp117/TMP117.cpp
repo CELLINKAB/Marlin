@@ -9,6 +9,10 @@
  * 
  */
 
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
+
 #include "TMP117.h"
 
 #include <Wire.h>
@@ -536,3 +540,5 @@ bool TMP117<Bus>::EEPROMisBusy(void)
 
 template class TMP117<TwoWire>;
 template class TMP117<SoftWire>;
+
+#endif // CUSTOM_TMP117

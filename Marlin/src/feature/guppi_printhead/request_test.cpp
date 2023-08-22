@@ -1,3 +1,7 @@
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(CHANTARELLE_SUPPORT)
+
 #include "request.h"
 #include "test.h"
 
@@ -21,3 +25,5 @@ void status_raw_conversions()
 }
 
 }
+
+#endif // CHANTARELLE_SUPPORT
