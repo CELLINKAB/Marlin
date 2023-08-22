@@ -90,13 +90,19 @@ void GcodeSuite::M801()
     M140();
 }
 
-void GcodeSuite::M772()
+void cellink::Reporter::M772::report()
 {
     EXTRUDER_LOOP()
     {
         SERIAL_ECHOPGM(",PH", e, "T:", Temperature::degHotend(e));
     }
     SERIAL_EOL();
+}
+
+void GcodeSuite::M772()
+{
+    cellink::reporter.m772.set_interval(parser.byteval('S'));
+    cellink::reporter.m772.report();
 }
 
 //SetBedThermisterParams
