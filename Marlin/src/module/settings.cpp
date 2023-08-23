@@ -1829,7 +1829,7 @@ void MarlinSettings::postprocess() {
     // Printbed temperature correction
     //
     #if ENABLED(BED_TEMP_COMPENSATION)
-      _FIELD_TEST(bed_temp_correction);
+      _FIELD_TEST(bed_temp_compensation);
       EEPROM_WRITE(thermalManager.temp_bed.offset);
       EEPROM_WRITE(thermalManager.temp_bed.scale);
     #endif
@@ -2987,7 +2987,7 @@ void MarlinSettings::postprocess() {
     // Printbed temperature correction
     //
     #if ENABLED(BED_TEMP_COMPENSATION)
-      _FIELD_TEST(bed_temp_correction);
+      _FIELD_TEST(bed_temp_compensation);
       EEPROM_READ(thermalManager.temp_bed.offset);
       EEPROM_READ(thermalManager.temp_bed.scale);
     #endif
