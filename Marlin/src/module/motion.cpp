@@ -2429,7 +2429,7 @@ void homeaxis(const AxisEnum axis){
 
     if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("<<< homeaxis(", AS_CHAR(AXIS_CHAR(axis)), ")");
 
-    #if ENABLED(CELLINK_REPORTING)
+    #if ENABLED(Z_AXIS_CALIBRATION)
       if(homing_calibration)
         SERIAL_ECHOLNPGM("Z_AXIS_CALIB_DONE");
       else
