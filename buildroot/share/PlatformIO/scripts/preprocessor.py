@@ -3,6 +3,7 @@
 #
 import subprocess
 
+nocache = 1
 verbose = 0
 
 def blab(str):
