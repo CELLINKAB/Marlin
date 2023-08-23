@@ -443,12 +443,20 @@
  * 
  */
 #define HX711_WSCALE
+#if ENABLED(HX711_WSCALE)
+  #define HX711_INDICATION_PIN       EXP1_04_PIN
+  #define HX711_CLCK_PIN             EXP1_02_PIN
+  #define HX711_DATA_PIN             EXP1_01_PIN
+#endif
 
 /**
  * UV LED Sterilization on H1 output
  * 
  */
 #define UV_LED_STERILIZATION
+#if ENABLED(UV_LED_STERILIZATION)
+  #define UV_LED_OUTPUT_PIN          HEATER_1_PIN
+#endif
 
 //===========================================================================
 //============================= Thermal Settings ============================
