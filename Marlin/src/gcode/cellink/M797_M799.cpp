@@ -8,6 +8,24 @@
 #    include "../../feature/optical_autocal.h"
 #    include "../gcode.h"
 
+void Reporter::M798::report()
+{
+    serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
+}
+
+void Reporter::M799::report()
+{
+    const auto& offset = optical_autocal.offset(active_extruder);
+    serial_echoln_kv("AT",
+                     active_extruder,
+                     "AUTOCAL_XOFF",
+                     offset.x,
+                     "AUTOCAL_YOFF",
+                     offset.y,
+                     "AUTOCAL_ZOFF",
+                     offset.z);
+}
+
 /**
    * @brief Reset nozzle calibration status, aliases G92.1
    * 
