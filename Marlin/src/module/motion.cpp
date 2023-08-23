@@ -2252,7 +2252,7 @@ void homeaxis(const AxisEnum axis){
         }
       #endif
 
-      #if ENABLED(Z_MULTI_ENDSTOPS)
+      #if ENABLED(Z_MULTI_ENDSTOPS) && NUM_Z_STEPPERS > 1
         if (axis == Z_AXIS) {
 
           #if NUM_Z_STEPPERS == 2
