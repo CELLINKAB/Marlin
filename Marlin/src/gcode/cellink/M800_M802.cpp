@@ -49,7 +49,7 @@ void GcodeSuite::M800()
 // get bed temp
 void GcodeSuite::M802()
 {
-    TERN_(TEMP_SENSOR_BED_IS_TMP117, if (parser.boolval('D') report_bed_sensors()));
+    TERN_(TEMP_SENSOR_BED_IS_TMP117, if (parser.boolval('D')) report_bed_sensors());
     cellink::reporter.m802.set_interval(parser.byteval('S'));
     cellink::reporter.m802.report();
 }
