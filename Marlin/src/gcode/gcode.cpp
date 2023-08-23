@@ -1174,10 +1174,14 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(CELLINK_REPORTING)
+        case 771: M771(); break; // set hotend temp
+        case 772: M772(); break; // get hotend temp
+
         case 797: M797(); break; // reset nozzle calibration
         case 798: M798(); break; // get nozzle calibration status
         case 799: M799(); break; // get nozzle calibration offsets
 
+        case 800: M800(); break; // disable bed temp control
         case 801: M801(); break; // set bed temperature
         case 802: M802(); break; // get bed temperature
 
@@ -1211,8 +1215,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 752: M752(); break;
         case 753: M753(); break;
         case 770: M770(); break;
-        case 771: M771(); break;
-        case 772: M772(); break;
         case 777: M777(); break;
         case 778: M778(); break;
         case 779: M779(); break;
@@ -1235,7 +1237,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         // case 797: M797(); break;
         // case 798: M798(); break;
         // case 799: M799(); break;
-        case 800: M800(); break;
         // case 801: M801(); break;
         // case 802: M802(); break;
         case 803: M803(); break;

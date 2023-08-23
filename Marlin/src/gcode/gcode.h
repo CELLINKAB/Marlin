@@ -1310,10 +1310,13 @@ private:
   #endif
 
   #if ENABLED(CELLINK_REPORTING)
+    static void M771(); // set hotend temp
+    static void M772(); // get hotend temp
     static void M797(); // reset nozzle calibration
     static void M798(); // get tool calibration status
     static void M799(); // get tool calibration offsets
 
+    static void M800(); // disable bed temp control
     static void M801(); // set printbed temp
     static void M802(); // get printbed temp
 
