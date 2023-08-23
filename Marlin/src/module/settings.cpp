@@ -1018,8 +1018,6 @@ void MarlinSettings::postprocess() {
           sizeof(bedlevel.z_values) == (GRID_MAX_POINTS) * sizeof(bedlevel.z_values[0][0]),
           "Bilinear Z array is the wrong size."
         );
-      #else
-        const xy_pos_t bilinear_start{0}, bilinear_grid_spacing{0};
       #endif
 
       const uint8_t grid_max_x = TERN(AUTO_BED_LEVELING_BILINEAR, GRID_MAX_POINTS_X, 3),
