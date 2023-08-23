@@ -1194,6 +1194,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
         case 1017:M1017(); break; // multi-line status report
 
+        case 1051: M1051(); break; // version report
+
+
       #endif
 
       #if ENABLED(EXOCYTE_UV_CROSSLINKING)
@@ -1299,7 +1302,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1047: M1047(); break;
         case 1048: M1048(); break;
         case 1050: M1050(); break;
-        case 1051: M1051(); break;
   
         case 1063: M1063(); break;
         case 1064: M1064(); break;

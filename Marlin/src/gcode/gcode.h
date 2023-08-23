@@ -1328,6 +1328,8 @@ private:
     static void M1016(); // get current machine position
 
     static void M1017(); // multi-line status report
+
+    static void M1051(); // report version
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
@@ -1456,7 +1458,6 @@ private:
     static void M1047();
     static void M1048();
     static void M1050();
-    static void M1051();
     static void M1063();
     static void M1064();
     static void M1065();
