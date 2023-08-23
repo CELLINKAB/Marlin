@@ -55,6 +55,8 @@
 
 #define START_OF_UTF8_CHAR(C) (((C) & 0xC0u) != 0x80U)
 
+typedef bool (*statusResetFunc_t)();
+
 #if HAS_WIRED_LCD
 
   enum LCDViewAction : uint8_t {
@@ -370,6 +372,10 @@ public:
     static char status_message[];
     static uint8_t alert_level; // Higher levels block lower levels
 
+    #if HAS_STATUS_MESSAGE_TIMEOUT
+      static millis_t status_message_expire_ms; // Reset some status messages after a timeout
+    #endif
+
     #if ENABLED(STATUS_MESSAGE_SCROLLING)
       static uint8_t status_scroll_offset;
       static void advance_status_scroll();
@@ -380,16 +386,20 @@ public:
     static void reset_status(const bool no_welcome=false);
     static void set_alert_status(FSTR_P const fstr);
     static void reset_alert_level() { alert_level = 0; }
+
+    static statusResetFunc_t status_reset_callback;
+    static void set_status_reset_fn(const statusResetFunc_t fn=nullptr) { status_reset_callback = fn; }
   #else
     static constexpr bool has_status() { return false; }
     static void reset_status(const bool=false) {}
     static void set_alert_status(FSTR_P const) {}
     static void reset_alert_level() {}
+    static void set_status_reset_fn(const statusResetFunc_t=nullptr) {}
   #endif
 
   static void set_status(const char * const cstr, const bool persist=false);
   static void set_status(FSTR_P const fstr, const int8_t level=0);
-  static void status_printf(const uint8_t level, FSTR_P const fmt, ...);
+  static void status_printf(int8_t level, FSTR_P const fmt, ...);
 
   #if HAS_DISPLAY
 
@@ -756,8 +766,11 @@ public:
   #else
 
     static void update_buttons() {}
+    static bool hw_button_pressed() { return false; }
 
   #endif
+
+  static bool button_pressed() { return hw_button_pressed() || TERN0(TOUCH_SCREEN, touch_pressed()); }
 
   #if ENABLED(TOUCH_SCREEN_CALIBRATION)
     static void touch_calibration_screen();
