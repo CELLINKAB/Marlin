@@ -1390,16 +1390,8 @@ private:
     static void M794();
     static void M795();
     static void M796();
-    // static void M797();
-    // static void M798();
-    // static void M799();
-    static void M800();
-    // static void M801();
-    // static void M802();
     static void M803();
     static void M804();
-    // static void M805(); // UV crosslinking
-    // static void M806(); // UVC sterilization
     static void M807();
     static void M808();
     static void M810();
@@ -1409,10 +1401,8 @@ private:
     static void M817();
     static void M818();
     static void M819();
-    // static void M821();
     static void M822();
     static void M823();
-    // static void M824();
     static void M825();
     static void M826();
     static void M830();
@@ -1434,9 +1424,6 @@ private:
     static void M1006();
     static void M1008();
     static void M1012();
-    // static void M1015();
-    // static void M1016();
-    // static void M1017();
     static void M1018();
     static void M1020();
     static void M1023();
@@ -1446,7 +1433,6 @@ private:
     static void M1034();
     static void M1035();
     static void M1035_report(bool for_replay);
-    //static void M1036();
     static void M1037();
     static void M1038();
     static void M1039();
