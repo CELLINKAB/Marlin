@@ -12,11 +12,11 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug",
-            "executable": "C:/Users/sccel/projects/AnglerFish/Firmware/Marlin-bugfix-2.0.9.3.x/.pio/build/STM32H743Vx_btt/firmware.elf",
+            "executable": "C:/Users/sccel/projects/Marlin-1/.pio/build/STM32H743Vx_btt/firmware.elf",
             "projectEnvName": "STM32H743Vx_btt",
             "toolchainBinDir": "C:/Users/sccel/.platformio/packages/toolchain-gccarmnoneeabi@1.90201.191206/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32@14.1.0/misc/svd/STM32H7x3.svd",
+            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32/misc/svd/STM32H7x3.svd",
             "preLaunchTask": {
                 "type": "PlatformIO",
                 "task": "Pre-Debug (STM32H743Vx_btt)"
@@ -26,21 +26,21 @@
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (skip Pre-Debug)",
-            "executable": "C:/Users/sccel/projects/AnglerFish/Firmware/Marlin-bugfix-2.0.9.3.x/.pio/build/STM32H743Vx_btt/firmware.elf",
+            "executable": "C:/Users/sccel/projects/Marlin-1/.pio/build/STM32H743Vx_btt/firmware.elf",
             "projectEnvName": "STM32H743Vx_btt",
             "toolchainBinDir": "C:/Users/sccel/.platformio/packages/toolchain-gccarmnoneeabi@1.90201.191206/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32@14.1.0/misc/svd/STM32H7x3.svd"
+            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32/misc/svd/STM32H7x3.svd"
         },
         {
             "type": "platformio-debug",
             "request": "launch",
             "name": "PIO Debug (without uploading)",
-            "executable": "C:/Users/sccel/projects/AnglerFish/Firmware/Marlin-bugfix-2.0.9.3.x/.pio/build/STM32H743Vx_btt/firmware.elf",
+            "executable": "C:/Users/sccel/projects/Marlin-1/.pio/build/STM32H743Vx_btt/firmware.elf",
             "projectEnvName": "STM32H743Vx_btt",
             "toolchainBinDir": "C:/Users/sccel/.platformio/packages/toolchain-gccarmnoneeabi@1.90201.191206/bin",
             "internalConsoleOptions": "openOnSessionStart",
-            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32@14.1.0/misc/svd/STM32H7x3.svd",
+            "svdPath": "C:/Users/sccel/.platformio/platforms/ststm32/misc/svd/STM32H7x3.svd",
             "loadMode": "manual"
         }
     ]
