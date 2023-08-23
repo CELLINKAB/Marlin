@@ -1234,7 +1234,7 @@ void Endstops::update() {
       }
     }
     #if ENABLED(Z_AXIS_CALIBRATION)
-      wScale.set_z_min_status(TEST32(live_state, Z_MIN));
+      wScale.set_z_min_status(TEST(live_state, EndstopEnum::Z_MIN));
     #endif
   #endif
 
