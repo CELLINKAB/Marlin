@@ -1,7 +1,11 @@
 pipeline {
     agent { label 'onpremise-node' }
+    environment {
+        ART_NAME = "${BRANCH_NAME}-${env.BUILD_NUMBER}"
+        ART_NAME_NOSLASH = ART_NAME.replaceAll("/", "-")
+    }
     stages {
-            stage('Git') {
+            stage('Git fetch') {
             steps {
                 cleanWs()
                 checkout([
@@ -28,7 +32,7 @@ pipeline {
                             '''
             }
             }
-        stage('Build') {
+        stage('Building firmwares') {
             matrix {
                     agent {
                         dockerfile {
@@ -37,20 +41,26 @@ pipeline {
                       }
                     }
                 axes {
+                        name 'DEVICE'
+                        values 'Exocyte', 'Foton'
+                    }
                     axis {
                         name 'BOARD'
-                        values 'STM32H743Vx_btt', 'STM32H723Vx_btt'
+                        values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
+
                 }
                 stages {
                     stage('Building Firmware') {
                         steps {
                             sh '''
                                 git clean -Xdf
-
                                 git status
+                                echo "Using config for ${DEVICE}"
+                                cp -f config/${DEVICE}_Configuration.h Marlin/Configuration.h
+                                cp -f config/${DEVICE}_Configuration_adv.h Marlin/Configuration_adv.h
                                 echo "Do Build for ${BOARD}"
-                                python3 -m platformio run --environment  ${BOARD}
+                                python3 -m platformio run --environment  ${BOARD}  -a "--build_tag=${ART_NAME_NOSLASH}"
                             '''
                         }
                     }
@@ -58,9 +68,9 @@ pipeline {
                 post {
                     always {
                         sh '''
-                            cp  ./.pio/build/${BOARD}/firmware.bin ./${BOARD}-${BUILD_NUMBER}.bin
+                            cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${ART_NAME_NOSLASH}.bin
                                                     '''
-                        archiveArtifacts artifacts: " ${BOARD}-${BUILD_NUMBER}.bin"
+                        archiveArtifacts artifacts: " ${BOARD}-${ART_NAME_NOSLASH}.bin"
                         archiveArtifacts artifacts: ' GitVersion.json'
                         archiveArtifacts artifacts: ' version.json'
 

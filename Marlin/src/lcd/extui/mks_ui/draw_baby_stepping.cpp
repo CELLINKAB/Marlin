@@ -60,7 +60,7 @@ static uint8_t has_adjust_z = 0;
 
 static void event_handler(lv_obj_t *obj, lv_event_t event) {
   if (event != LV_EVENT_RELEASED) return;
-  char baby_buf[30] = { 0 };
+  char baby_buf[30]{};
   char str_1[16];
   switch (obj->mks_obj_id) {
     case ID_BABYSTEP_X_P:

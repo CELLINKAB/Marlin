@@ -37,6 +37,21 @@
 #ifndef USART5
   #define USART5 UART5
 #endif
+#ifndef USART6
+  #define USART6 UART6
+#endif
+#ifndef USART7
+  #define USART7 UART7
+#endif
+#ifndef USART8
+  #define USART8 UART8
+#endif
+#ifndef USART9
+  #define USART9 UART9
+#endif
+#ifndef USART10
+  #define USART10 UART10
+#endif
 
 #define DECLARE_SERIAL_PORT(ser_num) \
   void _rx_complete_irq_ ## ser_num (serial_t * obj); \
@@ -47,22 +62,46 @@
   DECLARE_SERIAL_PORT(1)
 #endif
 #if USING_HW_SERIAL2
-  DECLARE_SERIAL_PORT(2)
+  #ifdef CUSTOM_MSERIAL2_PINS
+    HardwareSerial MSerial2(MSERIAL2_RX_PIN, MSERIAL2_TX_PIN);
+  #else 
+    DECLARE_SERIAL_PORT(2)
+  #endif
 #endif
 #if USING_HW_SERIAL3
-  DECLARE_SERIAL_PORT(3)
+  #ifdef CUSTOM_MSERIAL3_PINS
+      HardwareSerial MSerial3(MSERIAL3_RX_PIN, MSERIAL3_TX_PIN);
+  #else
+    DECLARE_SERIAL_PORT(3)
+  #endif
 #endif
 #if USING_HW_SERIAL4
-  DECLARE_SERIAL_PORT(4)
+    #ifdef CUSTOM_MSERIAL4_PINS
+    HardwareSerial MSerial4(MSERIAL4_RX_PIN, MSERIAL4_TX_PIN);
+  #else
+    DECLARE_SERIAL_PORT(4)
+  #endif
 #endif
 #if USING_HW_SERIAL5
-  DECLARE_SERIAL_PORT(5)
+  #ifdef CUSTOM_MSERIAL5_PINS
+    HardwareSerial MSerial5(MSERIAL5_RX_PIN, MSERIAL5_TX_PIN);
+  #else
+    DECLARE_SERIAL_PORT(5)
+  #endif
 #endif
 #if USING_HW_SERIAL6
-  DECLARE_SERIAL_PORT(6)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial6(PG9, PG14);
+  #else 
+    DECLARE_SERIAL_PORT(6)
+  #endif
 #endif
 #if USING_HW_SERIAL7
-  DECLARE_SERIAL_PORT(7)
+  #ifdef I_DONT_TRUST_MSERIAL
+    HardwareSerial MSerial7(PE7, PE8);
+  #else
+    DECLARE_SERIAL_PORT(7)
+  #endif
 #endif
 #if USING_HW_SERIAL8
   DECLARE_SERIAL_PORT(8)

@@ -52,10 +52,14 @@ void reset_bed_level();
 class TemporaryBedLevelingState {
   bool saved;
   public:
-    TemporaryBedLevelingState(const bool enable);
+    explicit TemporaryBedLevelingState(const bool enable);
     ~TemporaryBedLevelingState() { set_bed_leveling_enabled(saved); }
+    TemporaryBedLevelingState(const TemporaryBedLevelingState&) = delete;
+    TemporaryBedLevelingState(TemporaryBedLevelingState&&) = delete;
+    TemporaryBedLevelingState& operator=(const TemporaryBedLevelingState&) = delete;
+    TemporaryBedLevelingState& operator=(TemporaryBedLevelingState&&) = delete;
 };
-#define TEMPORARY_BED_LEVELING_STATE(enable) const TemporaryBedLevelingState tbls(enable)
+#define TEMPORARY_BED_LEVELING_STATE(enable) const TemporaryBedLevelingState macro_defined_variable_tbls__(enable)
 
 #if HAS_MESH
 
@@ -68,9 +72,6 @@ class TemporaryBedLevelingState {
   #elif ENABLED(MESH_BED_LEVELING)
     #include "mbl/mesh_bed_leveling.h"
   #endif
-
-  #define Z_VALUES(X,Y) Z_VALUES_ARR[X][Y]
-  #define _GET_MESH_POS(M) { _GET_MESH_X(M.a), _GET_MESH_Y(M.b) }
 
   #if EITHER(AUTO_BED_LEVELING_BILINEAR, MESH_BED_LEVELING)
 
@@ -92,7 +93,7 @@ class TemporaryBedLevelingState {
     bool valid() const { return pos.x >= 0 && pos.y >= 0; }
     #if ENABLED(AUTO_BED_LEVELING_UBL)
       xy_pos_t meshpos() {
-        return { ubl.mesh_index_to_xpos(pos.x), ubl.mesh_index_to_ypos(pos.y) };
+        return { bedlevel.get_mesh_x(pos.x), bedlevel.get_mesh_y(pos.y) };
       }
     #endif
     operator xy_int8_t&() { return pos; }

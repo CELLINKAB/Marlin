@@ -156,20 +156,21 @@ void GcodeSuite::D(const int16_t dcode) {
     } break;
 
     case 5: { // D5 Read / Write onboard Flash
-      #define FLASH_SIZE 1024
+              // This will overwrite program and data, so don't use it.
+      #define ONBOARD_FLASH_SIZE 1024 // 0x400
       uint8_t *pointer = parser.hex_adr_val('A');
       uint16_t len = parser.ushortval('C', 1);
       uintptr_t addr = (uintptr_t)pointer;
-      NOMORE(addr, size_t(FLASH_SIZE - 1));
-      NOMORE(len, FLASH_SIZE - addr);
+      NOMORE(addr, size_t(ONBOARD_FLASH_SIZE - 1));
+      NOMORE(len, ONBOARD_FLASH_SIZE - addr);
       if (parser.seenval('X')) {
         // TODO: Write the hex bytes after the X
         //while (len--) {}
       }
       else {
         //while (len--) {
-        //// TODO: Read bytes from EEPROM
-        //  print_hex_byte(eeprom_read_byte(adr++));
+        //// TODO: Read bytes from FLASH
+        //  print_hex_byte(flash_read_byte(adr++));
         //}
         SERIAL_EOL();
       }
@@ -214,7 +215,7 @@ void GcodeSuite::D(const int16_t dcode) {
 
         c = 1024 * 4;
         while (c--) {
-          TERN_(USE_WATCHDOG, watchdog_refresh());
+          hal.watchdog_refresh();
           card.write(buf, COUNT(buf));
         }
         SERIAL_ECHOLNPGM(" done");
@@ -231,7 +232,7 @@ void GcodeSuite::D(const int16_t dcode) {
         __attribute__((aligned(sizeof(size_t)))) uint8_t buf[512];
         uint16_t c = 1024 * 4;
         while (c--) {
-          TERN_(USE_WATCHDOG, watchdog_refresh());
+          hal.watchdog_refresh();
           card.read(buf, COUNT(buf));
           bool error = false;
           for (uint16_t i = 0; i < COUNT(buf); i++) {
@@ -264,7 +265,7 @@ void GcodeSuite::D(const int16_t dcode) {
           case 1: default: *(int*)0 = 451; break; // Write at bad address
           case 2: { volatile int a = 0; volatile int b = 452 / a; *(int*)&a = b; } break; // Divide by zero (some CPUs accept this, like ARM)
           case 3: { *(uint32_t*)&type[1] = 453; volatile int a = *(int*)&type[1]; type[0] = a / 255; } break; // Unaligned access (some CPUs accept this)
-          case 4: { volatile void (*func)() = (volatile void (*)()) 0xE0000000; func(); } break; // Invalid instruction
+          case 4: { void (*func)() = (void (*)()) 0xE0000000; func(); } break; // Invalid instruction
         }
         break;
       }

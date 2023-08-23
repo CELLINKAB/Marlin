@@ -90,7 +90,7 @@ static void btn_ok_event_cb(lv_obj_t *btn, lv_event_t event) {
         char *cur_name;
         cur_name = strrchr(list_file.file_name[sel_id], '/');
 
-        SdFile file, *curDir;
+        MediaFile file, *curDir;
         card.abortFilePrintNow();
         const char * const fname = card.diveToFile(false, curDir, cur_name);
         if (!fname) return;
@@ -469,7 +469,7 @@ void lv_draw_dialog(uint8_t type) {
 }
 
 void filament_sprayer_temp() {
-  char buf[20] = {0};
+  char buf[20]{};
   sprintf(buf, preheat_menu.value_state, thermalManager.wholeDegHotend(uiCfg.extruderIndex), thermalManager.degTargetHotend(uiCfg.extruderIndex));
 
   strcpy(public_buf_l, uiCfg.extruderIndex < 1 ? extrude_menu.ext1 : extrude_menu.ext2);

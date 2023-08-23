@@ -30,18 +30,6 @@
 
 #include "leds.h"
 
-#if ENABLED(BLINKM)
-  #include "blinkm.h"
-#endif
-
-#if ENABLED(PCA9632)
-  #include "pca9632.h"
-#endif
-
-#if ENABLED(PCA9533)
-  #include "pca9533.h"
-#endif
-
 #if EITHER(CASE_LIGHT_USE_RGB_LED, CASE_LIGHT_USE_NEOPIXEL)
   #include "../../feature/caselight.h"
 #endif
@@ -54,10 +42,14 @@
   );
 #endif
 
-#if ANY(LED_CONTROL_MENU, PRINTER_EVENT_LEDS, CASE_LIGHT_IS_COLOR_LED)
-  LEDColor LEDLights::color;
-  bool LEDLights::lights_on;
-#endif
+uint32_t LEDColor::to_neopixel_color() const {
+          return (*this == LEDColorWhite)
+                  ? neo.Color(NEO_WHITE)
+                  : neo.Color(r, g, b OPTARG(HAS_WHITE_LED, w));
+    }
+
+LEDColor LEDLights::color;
+bool LEDLights::lights_on;
 
 LEDLights leds;
 
@@ -69,6 +61,44 @@ void LEDLights::setup() {
     #if ENABLED(RGBW_LED)
       if (PWM_PIN(RGB_LED_W_PIN)) SET_PWM(RGB_LED_W_PIN); else SET_OUTPUT(RGB_LED_W_PIN);
     #endif
+
+    #if ENABLED(RGB_STARTUP_TEST)
+      int8_t led_pin_count = 0;
+      if (PWM_PIN(RGB_LED_R_PIN) && PWM_PIN(RGB_LED_G_PIN) && PWM_PIN(RGB_LED_B_PIN)) led_pin_count = 3;
+      #if ENABLED(RGBW_LED)
+        if (PWM_PIN(RGB_LED_W_PIN) && led_pin_count) led_pin_count++;
+      #endif
+      // Startup animation
+      if (led_pin_count) {
+        // blackout
+        if (PWM_PIN(RGB_LED_R_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_R_PIN), 0); else WRITE(RGB_LED_R_PIN, LOW);
+        if (PWM_PIN(RGB_LED_G_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_G_PIN), 0); else WRITE(RGB_LED_G_PIN, LOW);
+        if (PWM_PIN(RGB_LED_B_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_B_PIN), 0); else WRITE(RGB_LED_B_PIN, LOW);
+        #if ENABLED(RGBW_LED)
+          if (PWM_PIN(RGB_LED_W_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_W_PIN), 0);
+          else WRITE(RGB_LED_W_PIN, LOW);
+        #endif
+        delay(200);
+
+        LOOP_L_N(i, led_pin_count) {
+          LOOP_LE_N(b, 200) {
+            const uint16_t led_pwm = b <= 100 ? b : 200 - b;
+            if (i == 0 && PWM_PIN(RGB_LED_R_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_R_PIN), led_pwm); else WRITE(RGB_LED_R_PIN, b < 100 ? HIGH : LOW);
+            if (i == 1 && PWM_PIN(RGB_LED_G_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_G_PIN), led_pwm); else WRITE(RGB_LED_G_PIN, b < 100 ? HIGH : LOW);
+            if (i == 2 && PWM_PIN(RGB_LED_B_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_B_PIN), led_pwm); else WRITE(RGB_LED_B_PIN, b < 100 ? HIGH : LOW);
+            #if ENABLED(RGBW_LED)
+              if (i == 3){
+                if (PWM_PIN(RGB_LED_W_PIN)) hal.set_pwm_duty(pin_t(RGB_LED_W_PIN), led_pwm);
+                else WRITE(RGB_LED_W_PIN, b < 100 ? HIGH : LOW);
+                delay(RGB_STARTUP_TEST_INNER_MS);//More slowing for ending
+              }
+            #endif
+            delay(RGB_STARTUP_TEST_INNER_MS);
+          }
+        }
+        delay(500);
+      }
+    #endif // RGB_STARTUP_TEST
   #endif
   TERN_(NEOPIXEL_LED, neo.init());
   TERN_(PCA9533, PCA9533_init());
@@ -81,9 +111,7 @@ void LEDLights::set_color(const LEDColor &incol
 
   #if ENABLED(NEOPIXEL_LED)
 
-    const uint32_t neocolor = LEDColorWhite() == incol
-                            ? neo.Color(NEO_WHITE)
-                            : neo.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED, incol.w));
+    const uint32_t neocolor = incol.to_neopixel_color();
 
     #if ENABLED(NEOPIXEL_IS_SEQUENTIAL)
       static uint16_t nextLed = 0;
@@ -147,11 +175,11 @@ void LEDLights::set_color(const LEDColor &incol
   TERN_(PCA9632, PCA9632_set_led_color(incol));
   TERN_(PCA9533, PCA9533_set_rgb(incol.r, incol.g, incol.b));
 
-  #if EITHER(LED_CONTROL_MENU, PRINTER_EVENT_LEDS)
-    // Don't update the color when OFF
-    lights_on = !incol.is_off();
-    if (lights_on) color = incol;
-  #endif
+
+  // Don't update the color when OFF
+  lights_on = !incol.is_off();
+  if (lights_on) color = incol;
+
 }
 
 #if ENABLED(LED_CONTROL_MENU)
@@ -184,10 +212,8 @@ void LEDLights::set_color(const LEDColor &incol
     );
   #endif
 
-  #if ENABLED(LED_CONTROL_MENU)
-    LEDColor LEDLights2::color;
-    bool LEDLights2::lights_on;
-  #endif
+  LEDColor LEDLights2::color;
+  bool LEDLights2::lights_on = true;
 
   LEDLights2 leds2;
 
@@ -197,17 +223,15 @@ void LEDLights::set_color(const LEDColor &incol
   }
 
   void LEDLights2::set_color(const LEDColor &incol) {
-    const uint32_t neocolor = LEDColorWhite() == incol
-                            ? neo2.Color(NEO2_WHITE)
-                            : neo2.Color(incol.r, incol.g, incol.b OPTARG(HAS_WHITE_LED2, incol.w));
+    const uint32_t neocolor = incol.to_neopixel_color();
     neo2.set_brightness(incol.i);
     neo2.set_color(neocolor);
 
-    #if ENABLED(LED_CONTROL_MENU)
-      // Don't update the color when OFF
-      lights_on = !incol.is_off();
-      if (lights_on) color = incol;
-    #endif
+
+    // Don't update the color when OFF
+    lights_on = !incol.is_off();
+    if (lights_on) color = incol;
+
   }
 
   #if ENABLED(LED_CONTROL_MENU)

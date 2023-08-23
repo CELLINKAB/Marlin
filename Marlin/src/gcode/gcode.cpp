@@ -21,7 +21,7 @@
  */
 
 /**
- * gcode.cpp - Temporary container for all gcode handlers
+ * gcode.cpp - Temporary container for all G-code handlers
  *             Most will migrate to classes, by feature.
  */
 
@@ -53,7 +53,7 @@ GcodeSuite gcode;
   #include "../feature/cancel_object.h"
 #endif
 
-#if ENABLED(LASER_MOVE_POWER)
+#if ENABLED(LASER_FEATURE)
   #include "../feature/spindle_laser.h"
 #endif
 
@@ -65,6 +65,10 @@ GcodeSuite gcode;
   #include "../feature/password/password.h"
 #endif
 
+#if ENABLED(CHANTARELLE_SUPPORT)
+#include "../feature/guppi_printhead/chantarelle.h"
+#endif
+
 #if HAS_FANCHECK
   #include "../feature/fancheck.h"
 #endif
@@ -73,8 +77,11 @@ GcodeSuite gcode;
 
 // Inactivity shutdown
 millis_t GcodeSuite::previous_move_ms = 0,
-         GcodeSuite::max_inactive_time = 0,
-         GcodeSuite::stepper_inactive_time = SEC_TO_MS(DEFAULT_STEPPER_DEACTIVE_TIME);
+         GcodeSuite::max_inactive_time = 0;
+
+#if HAS_DISABLE_INACTIVE_AXIS
+  millis_t GcodeSuite::stepper_inactive_time = SEC_TO_MS(DEFAULT_STEPPER_DEACTIVE_TIME);
+#endif
 
 // Relative motion mode for each logical axis
 static constexpr xyze_bool_t ar_init = AXIS_RELATIVE_MODES;
@@ -85,7 +92,10 @@ axis_bits_t GcodeSuite::axis_relative = 0 LOGICAL_AXIS_GANG(
   | (ar_init.z << REL_Z),
   | (ar_init.i << REL_I),
   | (ar_init.j << REL_J),
-  | (ar_init.k << REL_K)
+  | (ar_init.k << REL_K),
+  | (ar_init.u << REL_U),
+  | (ar_init.v << REL_V),
+  | (ar_init.w << REL_W)
 );
 
 #if EITHER(HAS_AUTO_REPORTING, HOST_KEEPALIVE_FEATURE)
@@ -167,7 +177,7 @@ int8_t GcodeSuite::get_target_e_stepper_from_command(const int8_t dval/*=-1*/) {
  *  - Set the feedrate, if included
  */
 void GcodeSuite::get_destination_from_command() {
-  xyze_bool_t seen{false};
+  xyze_bool_t seen{};
 
   #if ENABLED(CANCEL_OBJECTS)
     const bool &skip_move = cancelable.skipping;
@@ -176,7 +186,7 @@ void GcodeSuite::get_destination_from_command() {
   #endif
 
   // Get new XYZ position, whether absolute or relative
-  LOOP_LINEAR_AXES(i) {
+  LOOP_NUM_AXES(i) {
     if ( (seen[i] = parser.seenval(AXIS_CHAR(i))) ) {
       const float v = parser.value_axis_units((AxisEnum)i);
       if (skip_move)
@@ -204,8 +214,11 @@ void GcodeSuite::get_destination_from_command() {
       recovery.save();
   #endif
 
-  if (parser.floatval('F') > 0)
+  if (parser.floatval('F') > 0) {
     feedrate_mm_s = parser.value_feedrate();
+    // Update the cutter feed rate for use by M4 I set inline moves.
+    TERN_(LASER_FEATURE, cutter.feedrate_mm_m = MMS_TO_MMM(feedrate_mm_s));
+  }
 
   #if ENABLED(PRINTCOUNTER)
     if (!DEBUGGING(DRYRUN) && !skip_move)
@@ -217,15 +230,29 @@ void GcodeSuite::get_destination_from_command() {
     M165();
   #endif
 
-  #if ENABLED(LASER_MOVE_POWER)
-    // Set the laser power in the planner to configure this move
-    if (parser.seen('S')) {
-      const float spwr = parser.value_float();
-      cutter.inline_power(TERN(SPINDLE_LASER_USE_PWM, cutter.power_to_range(cutter_power_t(round(spwr))), spwr > 0 ? 255 : 0));
+  #if ENABLED(LASER_FEATURE)
+    if (cutter.cutter_mode == CUTTER_MODE_CONTINUOUS || cutter.cutter_mode == CUTTER_MODE_DYNAMIC) {
+      // Set the cutter power in the planner to configure this move
+      cutter.last_feedrate_mm_m = 0;
+      if (WITHIN(parser.codenum, 1, TERN(ARC_SUPPORT, 3, 1)) || TERN0(BEZIER_CURVE_SUPPORT, parser.codenum == 5)) {
+        planner.laser_inline.status.isPowered = true;
+        if (parser.seen('I')) cutter.set_enabled(true);       // This is set for backward LightBurn compatibility.
+        if (parser.seenval('S')) {
+          const float v = parser.value_float(),
+                      u = TERN(LASER_POWER_TRAP, v, cutter.power_to_range(v));
+          cutter.menuPower = cutter.unitPower = u;
+          cutter.inline_power(TERN(SPINDLE_LASER_USE_PWM, cutter.upower_to_ocr(u), u > 0 ? 255 : 0));
+        }
+      }
+      else if (parser.codenum == 0) {
+        // For dynamic mode we need to flag isPowered off, dynamic power is calculated in the stepper based on feedrate.
+        if (cutter.cutter_mode == CUTTER_MODE_DYNAMIC) planner.laser_inline.status.isPowered = false;
+        cutter.inline_power(0); // This is planner-based so only set power and do not disable inline control flags.
+      }
     }
-    else if (ENABLED(LASER_MOVE_G0_OFF) && parser.codenum == 0) // G0
-      cutter.set_inline_enabled(false);
-  #endif
+    else if (parser.codenum == 0)
+      cutter.apply_power(0);
+  #endif // LASER_FEATURE
 }
 
 /**
@@ -448,8 +475,41 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       case 92: G92(); break;                                      // G92: Set current axis position(s)
 
+      #if ENABLED(SENSORLESS_HOMING)
+        case 914: G914(); break;
+      #endif
+
       #if ENABLED(CALIBRATION_GCODE)
         case 425: G425(); break;                                  // G425: Perform calibration with calibration cube
+      #endif
+
+      #if ENABLED(LID_GRIPPER_STATION)                            // TODO: make sure these Gcode names are viable
+        case 500: G500(); break;                                  // G500: calibrate lid-gripper step range
+        case 501: G501(); break;                                  // G501: Remove lid from inserted vessel
+        case 502: G502(); break;                                  // G502: Replace lid from inserted vessel
+      #endif
+
+      #if ENABLED(OPTICAL_AUTOCAL)
+        case 510: G510(); break;                                  // Perform autocalibration routine
+      #endif
+
+      #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
+        case 511: G511(); break; // G511 home extruder
+        case 512: G512(); break; // G512 home slider valve
+        case 513: G513(); break; // G513 move slider valve
+      #endif
+
+      #if ENABLED(FESTO_PNEUMATICS)
+        case 514: G514(); break; // G514 pneumatic move/mixing extrude
+        case 515: G515(); break; // G515 lid gripper release
+      #endif
+
+      #if ENABLED(WELLPLATE_EJECT)
+        case 516: G516(); break; // G516 load/eject print vessel
+      #endif
+
+      #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
+        case 529: G529(); break;
       #endif
 
       #if ENABLED(DEBUG_GCODE_PARSER)
@@ -542,8 +602,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 48: M48(); break;                                    // M48: Z probe repeatability test
       #endif
 
-      #if ENABLED(LCD_SET_PROGRESS_MANUALLY)
-        case 73: M73(); break;                                    // M73: Set progress percentage (for display on LCD)
+      #if ENABLED(SET_PROGRESS_MANUALLY)
+        case 73: M73(); break;                                    // M73: Set progress percentage
       #endif
 
       case 75: M75(); break;                                      // M75: Start print timer
@@ -556,6 +616,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if ENABLED(M100_FREE_MEMORY_WATCHER)
         case 100: M100(); break;                                  // M100: Free Memory Report
+      #endif
+
+      #if ENABLED(BD_SENSOR)
+        case 102: M102(); break;                                  // M102: Configure Bed Distance Sensor
       #endif
 
       #if HAS_EXTRUDERS
@@ -577,7 +641,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 108: M108(); break;                                  // M108: Cancel Waiting
         case 112: M112(); break;                                  // M112: Full Shutdown
         case 410: M410(); break;                                  // M410: Quickstop - Abort all the planned moves.
-        TERN_(HOST_PROMPT_SUPPORT, case 876:)                     // M876: Handle Host prompt responses
+        #if ENABLED(HOST_PROMPT_SUPPORT)
+          case 876: M876(); break;                                // M876: Handle Host prompt responses
+        #endif
       #else
         case 108: case 112: case 410:
         TERN_(HOST_PROMPT_SUPPORT, case 876:)
@@ -671,6 +737,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 150: M150(); break;                                  // M150: Set Status LED Color
       #endif
 
+      #if ENABLED(RGB_LED_FADE_COMMAND)
+        case 151: M151(); break;
+      #endif
+
       #if ENABLED(MIXING_EXTRUDER)
         case 163: M163(); break;                                  // M163: Set a component weight for mixing extruder
         case 164: M164(); break;                                  // M164: Save current mix as a virtual extruder
@@ -695,6 +765,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       case 203: M203(); break;                                    // M203: Set max feedrate (units/sec)
       case 204: M204(); break;                                    // M204: Set acceleration
       case 205: M205(); break;                                    // M205: Set advanced settings
+      case 213: M213(); break;                                    // M213: Set homing feedrate
 
       #if HAS_M206_COMMAND
         case 206: M206(); break;                                  // M206: Set home offsets
@@ -746,7 +817,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 290: M290(); break;                                  // M290: Babystepping
       #endif
 
-      #if HAS_BUZZER
+      #if HAS_SOUND
         case 300: M300(); break;                                  // M300: Play beep tone
       #endif
 
@@ -770,6 +841,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 250: M250(); break;                                  // M250: Set LCD contrast
       #endif
 
+      #if HAS_GCODE_M255
+        case 255: M255(); break;                                  // M255: Set LCD Sleep/Backlight Timeout (Minutes)
+      #endif
+
       #if HAS_LCD_BRIGHTNESS
         case 256: M256(); break;                                  // M256: Set LCD brightness
       #endif
@@ -789,6 +864,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if HAS_USER_THERMISTORS
         case 305: M305(); break;                                  // M305: Set user thermistor parameters
+      #endif
+
+      #if ENABLED(MPCTEMP)
+        case 306: M306(); break;                                  // M306: MPC autotune
       #endif
 
       #if ENABLED(REPETIER_GCODE_M360)
@@ -840,6 +919,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
       #if HAS_MESH
         case 421: M421(); break;                                  // M421: Set a Mesh Bed Leveling Z coordinate
+      #endif
+
+      #if ENABLED(X_AXIS_TWIST_COMPENSATION)
+        case 423: M423(); break;                                  // M423: Reset, modify, or report X-Twist Compensation data
       #endif
 
       #if ENABLED(BACKLASH_GCODE)
@@ -896,6 +979,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 575: M575(); break;                                  // M575: Set serial baudrate
       #endif
 
+      #if HAS_SHAPING
+        case 593: M593(); break;                                  // M593: Set Input Shaping parameters
+      #endif
+
       #if ENABLED(ADVANCED_PAUSE_FEATURE)
         case 600: M600(); break;                                  // M600: Pause for Filament Change
         case 603: M603(); break;                                  // M603: Configure Filament Change
@@ -906,7 +993,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if IS_KINEMATIC
-        case 665: M665(); break;                                  // M665: Set Delta/SCARA parameters
+        case 665: M665(); break;                                  // M665: Set Kinematics parameters
       #endif
 
       #if ENABLED(DELTA) || HAS_EXTRA_ENDSTOPS
@@ -978,16 +1065,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         #endif
         #if USE_SENSORLESS
           case 914: M914(); break;                                // M914: Set StallGuard sensitivity.
+          case 916: M916(); break;                                // M914: Set sensorless homing current
         #endif
         case 919: M919(); break;                                  // M919: Set stepper Chopper Times
-      #endif
-
-      #if HAS_L64XX
-        case 122: M122(); break;                                   // M122: Report status
-        case 906: M906(); break;                                   // M906: Set or get motor drive level
-        case 916: M916(); break;                                   // M916: L6470 tuning: Increase drive level until thermal warning
-        case 917: M917(); break;                                   // M917: L6470 tuning: Find minimum current thresholds
-        case 918: M918(); break;                                   // M918: L6470 tuning: Increase speed until max or error
       #endif
 
       #if HAS_MICROSTEPS
@@ -1028,7 +1108,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 422: M422(); break;                                  // M422: Set Z Stepper automatic alignment position using probe
       #endif
 
-      #if ALL(HAS_SPI_FLASH, SDSUPPORT, MARLIN_DEV_MODE)
+      #if ALL(SPI_FLASH, SDSUPPORT, MARLIN_DEV_MODE)
         case 993: M993(); break;                                  // M993: Backup SPI Flash to SD
         case 994: M994(); break;                                  // M994: Load a Backup from SD to SPI Flash
       #endif
@@ -1069,16 +1149,233 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 7111: M7111(); break;                                // Set the HX711 channel/mode.
         case 7112: M7112(); break;                                // Print HX711 raw filtered value.
       #endif
+	                                 // M3426: Read MCP3426 ADC (over i2c)
+      #if ENABLED(HAS_MCP3426_ADC)                                // M3426: Read MCP3426 ADC (over i2c)
+        case 3426: M3426(); break;   
+      #endif
+
+      #if ENABLED(STEPPER_RETRACTING_PROBE)
+        case 1029: M1029(); break;
+      #endif
+
+      #if ENABLED(DYNAMIC_3POINT_LEVELING)
+          case 1030: M1030(); break;
+      #endif
+
+      #if ENABLED(FESTO_PNEUMATICS)
+        case 1036: M1036(); break; // set pressure regulator
+        case 1062: M1062(); break; // get pressure sensors
+        case 1100: M1100(); break; // set pressure sensor offset/gain
+        case 1101: M1101(); break; // debug set pump
+      #endif
+
+      #if PINS_EXIST(LOAD_24_CS, CS_BED_24V_CS)
+        case 1130: M1130(); break;// report load switch current
+      #endif
 
       #if ENABLED(CELLINK_REPORTING)
-        case 800: M800(); break;                                  // Wrapper for M140 S0
-        case 801: M801(); break;                                  // Wrapper for M140
-        case 802: M802(); break;                                  // Report bed temp. in Cellink format
-        case 1051: M1051(); break;                                // Report firmware branch, version etc.
+        case 797: M797(); break; // reset nozzle calibration
+        case 798: M798(); break; // get nozzle calibration status
+        case 799: M799(); break; // get nozzle calibration offsets
+
+        case 801: M801(); break; // set bed temperature
+        case 802: M802(); break; // get bed temperature
+
+        case 821: M821(); break; // get home status
+
+        case 824: M824(); break; // get active tool
+
+        case 1015: M1015(); break; // get current position
+        case 1016: M1016(); break; // get current machine position
+
+        case 1017:M1017(); break; // multi-line status report
+
       #endif
-	  
-      #if ENABLED(HAS_MCP3426_ADC)
-        case 3426: M3426(); break;                                // M3426: Read MCP3426 ADC (over i2c)
+
+      #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+        case 805: M805(); break;
+      #endif
+
+      #if ENABLED(UVC_STERILIZATION)
+        case 806: M806(); break;
+      #endif
+
+      #if ENABLED(OPTICAL_AUTOCAL)
+        case 1510: M1510(); break;                                  // Perform autocalibration routine
+      #endif
+
+      #if ENABLED(CHANTARELLE_SUPPORT)
+      // TODO: check for conflicts
+        case 750: M750(); break;
+        case 751: M751(); break;
+        case 752: M752(); break;
+        case 753: M753(); break;
+        case 770: M770(); break;
+        case 771: M771(); break;
+        case 772: M772(); break;
+        case 777: M777(); break;
+        case 778: M778(); break;
+        case 779: M779(); break;
+        case 780: M780(); break;
+        case 781: M781(); break;
+        case 782: M782(); break;
+        case 783: M783(); break;
+        case 784: M784(); break;
+        case 785: M785(); break;
+        case 786: M786(); break;
+        case 787: M787(); break;
+        case 788: M788(); break;
+        case 790: M790(); break;
+        case 791: M791(); break;
+        case 792: M792(); break;
+        case 793: M793(); break;
+        case 794: M794(); break;
+        case 795: M795(); break;
+        case 796: M796(); break;
+        // case 797: M797(); break;
+        // case 798: M798(); break;
+        // case 799: M799(); break;
+        case 800: M800(); break;
+        // case 801: M801(); break;
+        // case 802: M802(); break;
+        case 803: M803(); break;
+        case 804: M804(); break;
+        // case 805: M805(); break; // UV crosslinking
+        // case 806: M806(); break; // UVC sterilization
+        case 807: M807(); break;
+        case 808: M808(); break;
+        case 810: M810(); break;
+        case 811: M811(); break;
+        case 814: M814(); break;
+        case 816: M816(); break;
+        case 817: M817(); break;
+        case 818: M818(); break;
+        case 819: M819(); break;
+        // case 821: M821(); break;
+        case 822: M822(); break;
+        case 823: M823(); break;
+        // case 824: M824(); break;
+        case 825: M825(); break;
+        case 826: M826(); break;
+        case 830: M830(); break;
+        case 842: M842(); break;
+        case 848: M848(); break;
+        case 849: M849(); break;
+        case 855: M855(); break;
+        case 856: M856(); break;
+        case 857: M857(); break;
+        case 858: M858(); break;
+        case 860: M860(); break;
+        //case 900: M900(); break; CONFLICT - linear advance
+        case 908: M908(); break;
+        case 910: M910(); break;
+        case 1001: M1001(); break;
+        case 1002: M1002(); break;
+        case 1004: M1004(); break;
+        case 1005: M1005(); break;
+        case 1006: M1006(); break;
+        case 1008: M1008(); break;
+        case 1012: M1012(); break;
+        // case 1015: M1015(); break;
+        // case 1016: M1016(); break;
+        // case 1017: M1017(); break;
+        case 1018: M1018(); break;
+        case 1020: M1020(); break;
+        case 1023: M1023(); break;
+        case 1024: M1024(); break;
+        case 1025: M1025(); break;
+        case 1028: M1028(); break;
+        case 1034: M1034(); break;
+        case 1035: M1035(); break;
+
+        case 1037: M1037(); break;
+        case 1038: M1038(); break;
+        case 1039: M1039(); break;
+        case 1040: M1040(); break;
+        case 1042: M1042(); break;
+        case 1045: M1045(); break;
+        case 1046: M1046(); break;
+        case 1047: M1047(); break;
+        case 1048: M1048(); break;
+        case 1050: M1050(); break;
+        case 1051: M1051(); break;
+  
+        case 1063: M1063(); break;
+        case 1064: M1064(); break;
+        case 1065: M1065(); break;
+        case 1066: M1066(); break;
+        case 1070: M1070(); break;
+        case 1069: M1069(); break;
+
+        //syringe pump commands
+        case 2020: M2020(); break;
+        case 2030: M2030(); break;
+        case 2031: M2031(); break;
+        case 2032: M2032(); break;
+        case 2033: M2033(); break;
+        case 2034: M2034(); break;
+        case 2035: M2035(); break;
+        case 2036: M2036(); break;
+        case 2037: M2037(); break;
+        case 2038: M2038(); break;
+        case 2039: M2039(); break;
+        case 2040: M2040(); break;
+        case 2041: M2041(); break;
+        case 2042: M2042(); break;
+        case 2043: M2043(); break;
+        case 2044: M2044(); break;
+        case 2045: M2045(); break;
+        case 2046: M2046(); break;
+        case 2047: M2047(); break;
+        case 2048: M2048(); break;
+        case 2049: M2049(); break;
+        case 2050: M2050(); break;
+        case 2051: M2051(); break;
+        case 2052: M2052(); break;
+        case 2053: M2053(); break;
+        case 2054: M2054(); break;
+        case 2055: M2055(); break;
+        case 2056: M2056(); break;
+        case 2057: M2057(); break;
+        case 2058: M2058(); break;
+        case 2059: M2059(); break;
+        case 2060: M2060(); break;
+        case 2061: M2061(); break;
+        case 2063: M2063(); break;
+        case 2064: M2064(); break;
+        case 2065: M2065(); break;
+        case 2066: M2066(); break;
+        case 2067: M2067(); break;
+        case 2068: M2068(); break;
+        case 2069: M2069(); break;
+        case 2070: M2070(); break;
+        case 2071: M2071(); break;
+        case 2072: M2072(); break;
+        case 2073: M2073(); break;
+        case 2075: M2075(); break;
+        case 2076: M2076(); break;
+        case 2080: M2080(); break;
+        case 2081: M2081(); break;
+        case 2082: M2082(); break;
+        case 2083: M2083(); break;
+        case 2084: M2084(); break;
+        case 2085: M2085(); break;
+        case 2086: M2086(); break;
+        case 2087: M2087(); break;
+        case 2090: M2090(); break;
+        case 2091: M2091(); break;
+        case 2092: M2092(); break;
+        case 2093: M2093(); break;
+        case 2095: M2095(); break;
+        case 2096: M2096(); break;
+        case 2097: M2097(); break;
+        case 2098: M2098(); break;
+        case 2099: M2099(); break;
+        case 2100: M2100(); break;
+        case 2110: M2110(); break;
+        case 2111: M2111(); break;
+        case 2200: M2200(); break;
+        case 2201: M2201(); break;
       #endif
 
       default: parser.unknown_command_warning(); break;

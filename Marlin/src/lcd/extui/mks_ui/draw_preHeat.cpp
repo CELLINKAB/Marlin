@@ -260,7 +260,7 @@ void disp_temp_type() {
 }
 
 void disp_desire_temp() {
-  char buf[20] = { 0 };
+  char buf[20]{};
   public_buf_l[0] = '\0';
 
   if (uiCfg.curTempType == 0) {

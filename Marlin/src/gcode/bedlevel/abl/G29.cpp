@@ -32,7 +32,6 @@
 #include "../../../feature/bedlevel/bedlevel.h"
 #include "../../../module/motion.h"
 #include "../../../module/planner.h"
-#include "../../../module/stepper.h"
 #include "../../../module/probe.h"
 #include "../../queue.h"
 
@@ -74,10 +73,18 @@
   #endif
 #endif
 
-#define G29_RETURN(retry) do{ \
-  if (TERN(G29_RETRY_AND_RECOVER, !retry, true)) { \
-    TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(M_IDLE, false)); \
-  } \
+static void pre_g29_return(const bool retry, const bool did) {
+  if (!retry) {
+    TERN_(FULL_REPORT_TO_HOST_FEATURE, set_and_report_grblstate(M_IDLE, false));
+  }
+  if (did) {
+    TERN_(HAS_DWIN_E3V2_BASIC, DWIN_LevelingDone());
+    TERN_(EXTENSIBLE_UI, ExtUI::onLevelingDone());
+  }
+}
+
+#define G29_RETURN(retry, did) do{ \
+  pre_g29_return(TERN0(G29_RETRY_AND_RECOVER, retry), did); \
   return TERN_(G29_RETRY_AND_RECOVER, retry); \
 }while(0)
 
@@ -308,8 +315,8 @@ G29_TYPE GcodeSuite::G29() {
 
         if (!isnan(rx) && !isnan(ry)) {
           // Get nearest i / j from rx / ry
-          i = (rx - bilinear_start.x + 0.5 * abl.gridSpacing.x) / abl.gridSpacing.x;
-          j = (ry - bilinear_start.y + 0.5 * abl.gridSpacing.y) / abl.gridSpacing.y;
+          i = (rx - bedlevel.grid_start.x) / bedlevel.grid_spacing.x + 0.5f;
+          j = (ry - bedlevel.grid_start.y) / bedlevel.grid_spacing.y + 0.5f;
           LIMIT(i, 0, (GRID_MAX_POINTS_X) - 1);
           LIMIT(j, 0, (GRID_MAX_POINTS_Y) - 1);
         }
@@ -318,18 +325,20 @@ G29_TYPE GcodeSuite::G29() {
 
         if (WITHIN(i, 0, (GRID_MAX_POINTS_X) - 1) && WITHIN(j, 0, (GRID_MAX_POINTS_Y) - 1)) {
           set_bed_leveling_enabled(false);
-          z_values[i][j] = rz;
-          TERN_(ABL_BILINEAR_SUBDIVISION, bed_level_virt_interpolate());
+          bedlevel.z_values[i][j] = rz;
+          bedlevel.refresh_bed_level();
           TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(i, j, rz));
-          set_bed_leveling_enabled(abl.reenable);
-          if (abl.reenable) report_current_position();
+          if (abl.reenable) {
+            set_bed_leveling_enabled(true);
+            report_current_position();
+          }
         }
         G29_RETURN(false);
       } // parser.seen_test('W')
 
     #else
 
-      constexpr bool seen_w = false;
+      [[maybe_unused]] constexpr bool seen_w = false;
 
     #endif
 
@@ -399,7 +408,7 @@ G29_TYPE GcodeSuite::G29() {
       if (!probe.good_bounds(abl.probe_position_lf, abl.probe_position_rb)) {
         if (DEBUGGING(LEVELING)) {
           DEBUG_ECHOLNPGM("G29 L", abl.probe_position_lf.x, " R", abl.probe_position_rb.x,
-                              " F", abl.probe_position_lf.y, " B", abl.probe_position_rb.y);
+                             " F", abl.probe_position_lf.y, " B", abl.probe_position_rb.y);
         }
         SERIAL_ECHOLNPGM("? (L,R,F,B) out of bounds.");
         G29_RETURN(false);
@@ -407,7 +416,7 @@ G29_TYPE GcodeSuite::G29() {
 
       // Probe at the points of a lattice grid
       abl.gridSpacing.set((abl.probe_position_rb.x - abl.probe_position_lf.x) / (abl.grid_points.x - 1),
-                            (abl.probe_position_rb.y - abl.probe_position_lf.y) / (abl.grid_points.y - 1));
+                          (abl.probe_position_rb.y - abl.probe_position_lf.y) / (abl.grid_points.y - 1));
 
     #endif // ABL_USES_GRID
 
@@ -425,7 +434,7 @@ G29_TYPE GcodeSuite::G29() {
       if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("> 3-point Leveling");
       points[0].z = points[1].z = points[2].z = 0;  // Probe at 3 arbitrary points
     #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      TERN_(DWIN_CREALITY_LCD_ENHANCED, DWIN_LevelingStart());
+      TERN_(DWIN_LCD_PROUI, DWIN_LevelingStart());
     #endif
 
     if (!faux) {
@@ -436,6 +445,40 @@ G29_TYPE GcodeSuite::G29() {
       #endif
     }
 
+    // Position bed horizontally and Z probe vertically.
+    #if HAS_SAFE_BED_LEVELING
+      xyze_pos_t safe_position = current_position;
+      #ifdef SAFE_BED_LEVELING_START_X
+        safe_position.x = SAFE_BED_LEVELING_START_X;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_Y
+        safe_position.y = SAFE_BED_LEVELING_START_Y;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_Z
+        safe_position.z = SAFE_BED_LEVELING_START_Z;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_I
+        safe_position.i = SAFE_BED_LEVELING_START_I;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_J
+        safe_position.j = SAFE_BED_LEVELING_START_J;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_K
+        safe_position.k = SAFE_BED_LEVELING_START_K;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_U
+        safe_position.u = SAFE_BED_LEVELING_START_U;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_V
+        safe_position.v = SAFE_BED_LEVELING_START_V;
+      #endif
+      #ifdef SAFE_BED_LEVELING_START_W
+        safe_position.w = SAFE_BED_LEVELING_START_W;
+      #endif
+
+      do_blocking_move_to(safe_position);
+    #endif // HAS_SAFE_BED_LEVELING
+
     // Disable auto bed leveling during G29.
     // Be formal so G29 can be done successively without G28.
     if (!no_action) set_bed_leveling_enabled(false);
@@ -444,15 +487,11 @@ G29_TYPE GcodeSuite::G29() {
     #if ENABLED(BLTOUCH)
       do_z_clearance(Z_CLEARANCE_DEPLOY_PROBE);
     #elif HAS_BED_PROBE
-      if (probe.deploy()) { // (returns true on deploy failure)
-        set_bed_leveling_enabled(abl.reenable);
-        G29_RETURN(false);
-      }
     #endif
 
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
-      if (TERN1(PROBE_MANUALLY, !no_action)
-        && (abl.gridSpacing != bilinear_grid_spacing || abl.probe_position_lf != bilinear_start)
+      if (!abl.dryrun
+        && (abl.gridSpacing != bedlevel.grid_spacing || abl.probe_position_lf != bedlevel.grid_start)
       ) {
         // Reset grid to 0.0 or "not probed". (Also disables ABL)
         reset_bed_level();
@@ -464,6 +503,10 @@ G29_TYPE GcodeSuite::G29() {
         // Can't re-enable (on error) until the new grid is written
         abl.reenable = false;
       }
+
+      // Pre-populate local Z values from the stored mesh
+      TERN_(IS_KINEMATIC, COPY(abl.z_values, bedlevel.z_values));
+
     #endif // AUTO_BED_LEVELING_BILINEAR
 
   } // !g29_in_progress
@@ -616,8 +659,10 @@ G29_TYPE GcodeSuite::G29() {
 
   #else // !PROBE_MANUALLY
   {
-    const ProbePtRaise raise_after = parser.boolval('E') ? PROBE_PT_STOW : PROBE_PT_RAISE;
+    const ProbePtRaise raise_after = (parser.boolval('E') || parser.seen('J')) ? PROBE_PT_STOW : PROBE_PT_RAISE;
 
+    if (raise_after == PROBE_PT_STOW) probe.stow();
+    
     abl.measured_z = 0;
 
     #if ABL_USES_GRID
@@ -687,7 +732,7 @@ G29_TYPE GcodeSuite::G29() {
 
           #endif
 
-          abl.reenable = false;
+          abl.reenable = false; // Don't re-enable after modifying the mesh
           idle_no_sleep();
 
         } // inner
@@ -712,9 +757,13 @@ G29_TYPE GcodeSuite::G29() {
       }
 
       if (!abl.dryrun && !isnan(abl.measured_z)) {
-        vector_3 planeNormal = vector_3::cross(points[0] - points[1], points[2] - points[1]).get_normal();
+        const float max_z = max({points[0].z, points[1].z, points[2].z});
+        const float avg_z = (points[0].z + points[1].z + points[2].z + max_z) / 4;
+        vector_3 planeCross = vector_3::cross(points[0] - points[1], points[2] - points[1]);
+        vector_3 planeNormal = planeCross.get_normal();
         if (planeNormal.z < 0) planeNormal *= -1;
         planner.bed_level_matrix = matrix_3x3::create_look_at(planeNormal);
+        planner.bed_level_z_offset = (avg_z > 0) ? avg_z : 0;
 
         // Can't re-enable (on error) until the new grid is written
         abl.reenable = false;
@@ -753,12 +802,16 @@ G29_TYPE GcodeSuite::G29() {
   if (!isnan(abl.measured_z)) {
     #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
-      if (!abl.dryrun) extrapolate_unprobed_bed_level();
-      print_bilinear_leveling_grid();
+      if (abl.dryrun)
+        bedlevel.print_leveling_grid(&abl.z_values);
+      else {
+        bedlevel.set_grid(abl.gridSpacing, abl.probe_position_lf);
+        COPY(bedlevel.z_values, abl.z_values);
+        TERN_(IS_KINEMATIC, bedlevel.extrapolate_unprobed_bed_level());
+        bedlevel.refresh_bed_level();
 
-      refresh_bed_level();
-
-      TERN_(ABL_BILINEAR_SUBDIVISION, print_bilinear_leveling_grid_virt());
+        bedlevel.print_leveling_grid();
+      }
 
     #elif ENABLED(AUTO_BED_LEVELING_LINEAR)
 
@@ -850,50 +903,34 @@ G29_TYPE GcodeSuite::G29() {
         // Correct the current XYZ position based on the tilted plane.
         //
 
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 uncorrected XYZ", current_position);
-
-        xyze_pos_t converted = current_position;
-        planner.force_unapply_leveling(converted); // use conversion machinery
-
-        // Use the last measured distance to the bed, if possible
-        if ( NEAR(current_position.x, abl.probePos.x - probe.offset_xy.x)
-          && NEAR(current_position.y, abl.probePos.y - probe.offset_xy.y)
-        ) {
-          const float simple_z = current_position.z - abl.measured_z;
-          if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("Probed Z", simple_z, "  Matrix Z", converted.z, "  Discrepancy ", simple_z - converted.z);
-          converted.z = simple_z;
+        if (DEBUGGING(LEVELING))
+        { 
+          DEBUG_POS("G29 uncorrected XYZ", current_position);
+          xyze_pos_t converted = current_position;
+          planner.leveling_active = true;
+          planner.apply_leveling(converted);
+          planner.leveling_active = false;
+          DEBUG_POS("G29 corrected XYZ", converted);
         }
 
-        // The rotated XY and corrected Z are now current_position
-        current_position = converted;
-
-        if (DEBUGGING(LEVELING)) DEBUG_POS("G29 corrected XYZ", current_position);
+        abl.reenable = true;
       }
+
+      // Auto Bed Leveling is complete! Enable if possible.
+      if (abl.reenable)
+        planner.leveling_active = true;
 
     #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
 
-      if (!abl.dryrun) {
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM("G29 uncorrected Z:", current_position.z);
+      // Auto Bed Leveling is complete! Enable if possible.
+      if (!abl.dryrun || abl.reenable) set_bed_leveling_enabled(true);
 
-        // Unapply the offset because it is going to be immediately applied
-        // and cause compensation movement in Z
-        const float fade_scaling_factor = TERN(ENABLE_LEVELING_FADE_HEIGHT, planner.fade_scaling_factor_for_z(current_position.z), 1);
-        current_position.z -= fade_scaling_factor * bilinear_z_offset(current_position);
+    #endif
 
-        if (DEBUGGING(LEVELING)) DEBUG_ECHOLNPGM(" corrected Z:", current_position.z);
-      }
-
-    #endif // ABL_PLANAR
-
-    // Auto Bed Leveling is complete! Enable if possible.
-    planner.leveling_active = !abl.dryrun || abl.reenable;
   } // !isnan(abl.measured_z)
 
   // Restore state after probing
   if (!faux) restore_feedrate_and_scaling();
-
-  // Sync the planner from the current_position
-  if (planner.leveling_active) sync_plan_position();
 
   TERN_(HAS_BED_PROBE, probe.move_z_after_probing());
 

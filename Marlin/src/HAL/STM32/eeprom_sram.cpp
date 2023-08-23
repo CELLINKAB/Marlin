@@ -44,7 +44,7 @@ bool PersistentStore::write_data(int &pos, const uint8_t *value, size_t size, ui
     uint8_t v = *value;
 
     // Save to Backup SRAM
-    *(__IO uint8_t *)(BKPSRAM_BASE + (uint8_t * const)pos) = v;
+    *(__IO uint8_t *)(BKPSRAM_BASE + (uint8_t *)pos) = v;
 
     crc16(crc, &v, 1);
     pos++;

@@ -149,7 +149,7 @@ void disp_filament_type() {
 }
 
 void disp_filament_temp() {
-  char buf[20] = {0};
+  char buf[20]{};
 
   public_buf_l[0] = '\0';
 

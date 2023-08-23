@@ -107,7 +107,7 @@ void disp_det_error() {
 
 lv_obj_t *e1, *e2, *e3, *bed;
 void mks_disp_test() {
-  char buf[30] = {0};
+  char buf[30]{};
   #if HAS_HOTEND
     sprintf_P(buf, PSTR("e1:%d"), thermalManager.wholeDegHotend(0));
     lv_label_set_text(e1, buf);
@@ -123,7 +123,7 @@ void mks_disp_test() {
 }
 
 void lv_draw_ready_print() {
-  char buf[30] = {0};
+  char buf[30]{};
   lv_obj_t *buttonTool;
 
   disp_state_stack._disp_index = 0;

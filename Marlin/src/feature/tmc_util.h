@@ -41,6 +41,8 @@
   #define MONITOR_DRIVER_STATUS_INTERVAL_MS 500U
 #endif
 
+#define HAS_CURRENT_HOME(N) (defined(N##_CURRENT_HOME) && N##_CURRENT_HOME != N##_CURRENT)
+
 constexpr uint16_t _tmc_thrs(const uint16_t msteps, const uint32_t thrs, const uint32_t spmm) {
   return 12650000UL * msteps / (256 * thrs * spmm);
 }
@@ -110,7 +112,7 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
 
     #if HAS_STEALTHCHOP
       bool get_stealthChop()                { return this->en_pwm_mode(); }
-      bool get_stored_stealthChop()         { return this->stored.stealthChop_enabled; }
+      bool get_stored_stealthChop() const   { return this->stored.stealthChop_enabled; }
       void refresh_stepping_mode()          { this->en_pwm_mode(this->stored.stealthChop_enabled); }
       void set_stealthChop(const bool stch) { this->stored.stealthChop_enabled = stch; refresh_stepping_mode(); }
       bool toggle_stepping_mode()           { set_stealthChop(!this->stored.stealthChop_enabled); return get_stealthChop(); }
@@ -123,7 +125,7 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
     }
 
     #if ENABLED(HYBRID_THRESHOLD)
-      uint32_t get_pwm_thrs() {
+      uint32_t get_pwm_thrs() const {
         return _tmc_thrs(this->microsteps(), this->TPWMTHRS(), planner.settings.axis_steps_per_mm[AXIS_ID]);
       }
       void set_pwm_thrs(const uint32_t thrs) {
@@ -133,11 +135,18 @@ class TMCMarlin : public TMC, public TMCStorage<AXIS_LETTER, DRIVER_ID> {
     #endif
 
     #if USE_SENSORLESS
-      int16_t homing_threshold() { return TMC::sgt(); }
+      int16_t homing_threshold() const { return TMC::sgt(); }
       void homing_threshold(int16_t sgt_val) {
         sgt_val = (int16_t)constrain(sgt_val, sgt_min, sgt_max);
         TMC::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
+      }
+      uint16_t homing_current = 0;
+      uint16_t apply_homing_current() {
+        if (homing_current == 0) return 0;
+        uint16_t move_current = this->getMilliamps();
+        rms_current(homing_current);
+        return move_current;
       }
       #if ENABLED(SPI_ENDSTOPS)
         bool test_stall_status();
@@ -267,6 +276,14 @@ class TMCMarlin<TMC2209Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC220
         TMC2209Stepper::SGTHRS(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
+      uint16_t homing_current = 0;
+      // apply homing current to steppers and return the previously applied current
+      uint16_t apply_homing_current() {
+        if (homing_current == 0) return 0;
+        uint16_t move_current = this->getMilliamps();
+        rms_current(homing_current);
+        return move_current;
+      }
     #endif
 
     #if HAS_MARLINUI_MENU
@@ -313,6 +330,13 @@ class TMCMarlin<TMC2660Stepper, AXIS_LETTER, DRIVER_ID, AXIS_ID> : public TMC266
         TMC2660Stepper::sgt(sgt_val);
         TERN_(HAS_MARLINUI_MENU, this->stored.homing_thrs = sgt_val);
       }
+      uint16_t homing_current = 0;
+      uint16_t apply_homing_current() {
+        if (homing_current == 0) return 0;
+        uint16_t move_current = this->getMilliamps();
+        rms_current(homing_current);
+        return move_current;
+      }
     #endif
 
     #if HAS_MARLINUI_MENU
@@ -348,11 +372,11 @@ void test_tmc_connection(LOGICAL_AXIS_DECL(const bool, true));
 #if USE_SENSORLESS
 
   // Track enabled status of stealthChop and only re-enable where applicable
-  struct sensorless_t { bool LINEAR_AXIS_ARGS(), x2, y2, z2, z3, z4; };
+  struct sensorless_t { bool NUM_AXIS_ARGS(), x2, y2, z2, z3, z4; };
 
   #if ENABLED(IMPROVE_HOMING_RELIABILITY)
     extern millis_t sg_guard_period;
-    constexpr uint16_t default_sg_guard_duration = 400;
+    constexpr uint16_t default_sg_guard_duration = TERN(SENSORLESS_STALLGUARD_DELAY, SENSORLESS_STALLGUARD_DELAY, 400);
   #endif
 
   bool tmc_enable_stallguard(TMC2130Stepper &st);
@@ -371,7 +395,7 @@ void test_tmc_connection(LOGICAL_AXIS_DECL(const bool, true));
       this->switchCSpin(LOW);
 
       // read stallGuard flag from TMC library, will handle HW and SW SPI
-      TMC2130_n::DRV_STATUS_t drv_status{0};
+      TMC2130_n::DRV_STATUS_t drv_status{};
       drv_status.sr = this->DRV_STATUS();
 
       this->switchCSpin(HIGH);

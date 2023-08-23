@@ -25,7 +25,7 @@
 #if ENABLED(BEZIER_CURVE_SUPPORT)
 
 #if AXIS_COLLISION('I') || AXIS_COLLISION('J')
-  #error "G5 parameter collision with axis name."
+  #error "G5 parameter 'I' or 'J' collision with axis name."
 #endif
 
 #include "../../module/motion.h"
@@ -61,7 +61,7 @@ void GcodeSuite::G5() {
       { parser.linearval('P'), parser.linearval('Q') }
     };
 
-    cubic_b_spline(current_position, destination, offsets, MMS_SCALED(feedrate_mm_s), active_extruder);
+    cubic_b_spline(current_position, destination, offsets, MMS_SCALED(feedrate_mm_s));
     current_position = destination;
   }
 }

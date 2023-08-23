@@ -178,7 +178,7 @@ void disp_speed_step() {
 }
 
 void disp_print_speed() {
-  char buf[30] = { 0 };
+  char buf[30]{};
 
   public_buf_l[0] = '\0';
 

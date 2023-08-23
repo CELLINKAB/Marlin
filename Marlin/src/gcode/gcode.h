@@ -71,6 +71,11 @@
  * G90  - Use Absolute Coordinates
  * G91  - Use Relative Coordinates
  * G92  - Set current position to coordinates given
+ * G500 - calibrate lid gripper range
+ * G501 - Remove lid from inserted vessel
+ * G502 - Replace lid from inserted vessel
+ * G510 - perform optical autocalibration routine
+ 
  *
  * "M" Codes
  *
@@ -110,11 +115,11 @@
  * M33  - Get the longname version of a path. (Requires LONG_FILENAME_HOST_SUPPORT)
  * M34  - Set SD Card sorting options. (Requires SDCARD_SORT_ALPHA)
  *
- * M42  - Change pin status via gcode: M42 P<pin> S<value>. LED pin assumed if P is omitted. (Requires DIRECT_PIN_CONTROL)
+ * M42  - Change pin status via G-code: M42 P<pin> S<value>. LED pin assumed if P is omitted. (Requires DIRECT_PIN_CONTROL)
  * M43  - Display pin status, watch pins for changes, watch endstops & toggle LED, Z servo probe test, toggle pins (Requires PINS_DEBUGGING)
  * M48  - Measure Z Probe repeatability: M48 P<points> X<pos> Y<pos> V<level> E<engage> L<legs> S<chizoid>. (Requires Z_MIN_PROBE_REPEATABILITY_TEST)
  *
- * M73  - Set the progress percentage. (Requires LCD_SET_PROGRESS_MANUALLY)
+ * M73  - Set the progress percentage. (Requires SET_PROGRESS_MANUALLY)
  * M75  - Start the print job timer.
  * M76  - Pause the print job timer.
  * M77  - Stop the print job timer.
@@ -131,6 +136,8 @@
  * M92  - Set planner.settings.axis_steps_per_mm for one or more axes.
  *
  * M100 - Watch Free Memory (for debugging) (Requires M100_FREE_MEMORY_WATCHER)
+ *
+ * M102 - Configure Bed Distance Sensor. (Requires BD_SENSOR)
  *
  * M104 - Set extruder target temp.
  * M105 - Report current temperatures.
@@ -155,7 +162,7 @@
  * M120 - Enable endstops detection.
  * M121 - Disable endstops detection.
  *
- * M122 - Debug stepper (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660 or L6470)
+ * M122 - Debug stepper (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M123 - Report fan tachometers. (Requires En_FAN_TACHO_PIN) Optionally set auto-report interval. (Requires AUTO_REPORT_FANS)
  * M125 - Save current position and move to filament change position. (Requires PARK_HEAD_ON_PAUSE)
  *
@@ -202,6 +209,7 @@
  * M226 - Wait until a pin is in a given state: "M226 P<pin> S<state>" (Requires DIRECT_PIN_CONTROL)
  * M240 - Trigger a camera to take a photograph. (Requires PHOTO_GCODE)
  * M250 - Set LCD contrast: "M250 C<contrast>" (0-63). (Requires LCD support)
+ * M255 - Set LCD sleep time: "M255 S<minutes>" (0-99). (Requires an LCD with brightness or sleep/wake)
  * M256 - Set LCD brightness: "M256 B<brightness>" (0-255). (Requires an LCD with brightness control)
  * M260 - i2c Send Data (Requires EXPERIMENTAL_I2CBUS)
  * M261 - i2c Request Data (Requires EXPERIMENTAL_I2CBUS)
@@ -215,6 +223,7 @@
  * M303 - PID relay autotune S<temperature> sets the target temperature. Default 150C. (Requires PIDTEMP)
  * M304 - Set bed PID parameters P I and D. (Requires PIDTEMPBED)
  * M305 - Set user thermistor parameters R T and P. (Requires TEMP_SENSOR_x 1000)
+ * M306 - MPC autotune. (Requires MPCTEMP)
  * M309 - Set chamber PID parameters P I and D. (Requires PIDTEMPCHAMBER)
  * M350 - Set microstepping mode. (Requires digital microstepping pins.)
  * M351 - Toggle MS1 MS2 pins directly. (Requires digital microstepping pins.)
@@ -255,11 +264,13 @@
  * M554 - Get or set IP gateway. (Requires enabled Ethernet port)
  * M569 - Enable stealthChop on an axis. (Requires at least one _DRIVER_TYPE to be TMC2130/2160/2208/2209/5130/5160)
  * M575 - Change the serial baud rate. (Requires BAUD_RATE_GCODE)
+ * M593 - Get or set input shaping parameters. (Requires INPUT_SHAPING_[XY])
  * M600 - Pause for filament change: "M600 X<pos> Y<pos> Z<raise> E<first_retract> L<later_retract>". (Requires ADVANCED_PAUSE_FEATURE)
  * M603 - Configure filament change: "M603 T<tool> U<unload_length> L<load_length>". (Requires ADVANCED_PAUSE_FEATURE)
  * M605 - Set Dual X-Carriage movement mode: "M605 S<mode> [X<x_offset>] [R<temp_offset>]". (Requires DUAL_X_CARRIAGE)
  * M665 - Set delta configurations: "M665 H<delta height> L<diagonal rod> R<delta radius> S<segments/s> B<calibration radius> X<Alpha angle trim> Y<Beta angle trim> Z<Gamma angle trim> (Requires DELTA)
  *        Set SCARA configurations: "M665 S<segments-per-second> P<theta-psi-offset> T<theta-offset> Z<z-offset> (Requires MORGAN_SCARA or MP_SCARA)
+ *        Set Polargraph draw area and belt length: "M665 S<segments-per-second> L<draw-area-left> R<draw-area-right> T<draw-area-top> B<draw-area-bottom> H<max-belt-length>"
  * M666 - Set/get offsets for delta (Requires DELTA) or dual endstops. (Requires [XYZ]_DUAL_ENDSTOPS)
  * M672 - Set/Reset Duet Smart Effector's sensitivity. (Requires DUET_SMART_EFFECTOR and SMART_EFFECTOR_MOD_PIN)
  * M701 - Load filament (Requires FILAMENT_LOAD_UNLOAD_GCODES)
@@ -284,7 +295,7 @@
  * M871 - Print/reset/clear first layer temperature offset values. (Requires PTC_PROBE, PTC_BED, or PTC_HOTEND)
  * M876 - Handle Prompt Response. (Requires HOST_PROMPT_SUPPORT and not EMERGENCY_PARSER)
  * M900 - Get or Set Linear Advance K-factor. (Requires LIN_ADVANCE)
- * M906 - Set or get motor current in milliamps using axis codes XYZE, etc. Report values if no axis codes given. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660 or L6470)
+ * M906 - Set or get motor current in milliamps using axis codes XYZE, etc. Report values if no axis codes given. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M907 - Set digital trimpot motor current using axis codes. (Requires a board with digital trimpots)
  * M908 - Control digital trimpot directly. (Requires HAS_MOTOR_CURRENT_DAC or DIGIPOTSS_PIN)
  * M909 - Print digipot/DAC current value. (Requires HAS_MOTOR_CURRENT_DAC)
@@ -293,9 +304,6 @@
  * M912 - Clear stepper driver overtemperature pre-warn condition flag. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M913 - Set HYBRID_THRESHOLD speed. (Requires HYBRID_THRESHOLD)
  * M914 - Set StallGuard sensitivity. (Requires SENSORLESS_HOMING or SENSORLESS_PROBING)
- * M916 - L6470 tuning: Increase KVAL_HOLD until thermal warning. (Requires at least one _DRIVER_TYPE L6470)
- * M917 - L6470 tuning: Find minimum current thresholds. (Requires at least one _DRIVER_TYPE L6470)
- * M918 - L6470 tuning: Increase speed until max or error. (Requires at least one _DRIVER_TYPE L6470)
  * M919 - Get or Set motor Chopper Times (time_off, hysteresis_end, hysteresis_start) using axis codes XYZE, etc. If no parameters are given, report. (Requires at least one _DRIVER_TYPE defined as TMC2130/2160/5130/5160/2208/2209/2660)
  * M951 - Set Magnetic Parking Extruder parameters. (Requires MAGNETIC_PARKING_EXTRUDER)
  * M3426 - Read MCP3426 ADC over I2C. (Requires HAS_MCP3426_ADC)
@@ -316,7 +324,7 @@
  * M995 - Touch screen calibration for TFT display
  * M997 - Perform in-application firmware update
  * M999 - Restart after being stopped by error
- *
+ * M1100 - Read optical surface probe
  * D... - Custom Development G-code. Add hooks to 'gcode_D.cpp' for developers to test features. (Requires MARLIN_DEV_MODE)
  *        D576 - Set buffer monitoring options. (Requires BUFFER_MONITORING)
  *
@@ -337,7 +345,7 @@
 #endif
 
 enum AxisRelative : uint8_t {
-  LOGICAL_AXIS_LIST(REL_E, REL_X, REL_Y, REL_Z, REL_I, REL_J, REL_K)
+  LOGICAL_AXIS_LIST(REL_E, REL_X, REL_Y, REL_Z, REL_I, REL_J, REL_K, REL_U, REL_V, REL_W)
   #if HAS_EXTRUDERS
     , E_MODE_ABS, E_MODE_REL
   #endif
@@ -363,7 +371,8 @@ public:
     axis_relative = rel ? (0 LOGICAL_AXIS_GANG(
       | _BV(REL_E),
       | _BV(REL_X), | _BV(REL_Y), | _BV(REL_Z),
-      | _BV(REL_I), | _BV(REL_J), | _BV(REL_K)
+      | _BV(REL_I), | _BV(REL_J), | _BV(REL_K),
+      | _BV(REL_U), | _BV(REL_V), | _BV(REL_W)
     )) : 0;
   }
   #if HAS_EXTRUDERS
@@ -393,14 +402,20 @@ public:
     static bool select_coordinate_system(const int8_t _new);
   #endif
 
-  static millis_t previous_move_ms, max_inactive_time, stepper_inactive_time;
-  FORCE_INLINE static void reset_stepper_timeout(const millis_t ms=millis()) { previous_move_ms = ms; }
+  static millis_t previous_move_ms, max_inactive_time;
   FORCE_INLINE static bool stepper_max_timed_out(const millis_t ms=millis()) {
     return max_inactive_time && ELAPSED(ms, previous_move_ms + max_inactive_time);
   }
-  FORCE_INLINE static bool stepper_inactive_timeout(const millis_t ms=millis()) {
-    return ELAPSED(ms, previous_move_ms + stepper_inactive_time);
-  }
+  FORCE_INLINE static void reset_stepper_timeout(const millis_t ms=millis()) { previous_move_ms = ms; }
+
+  #if HAS_DISABLE_INACTIVE_AXIS
+    static millis_t stepper_inactive_time;
+    FORCE_INLINE static bool stepper_inactive_timeout(const millis_t ms=millis()) {
+      return ELAPSED(ms, previous_move_ms + stepper_inactive_time);
+    }
+  #else
+    static bool stepper_inactive_timeout(const millis_t) { return false; }
+  #endif
 
   static void report_echo_start(const bool forReplay);
   static void report_heading(const bool forReplay, FSTR_P const fstr, const bool eol=true);
@@ -595,6 +610,41 @@ private:
     static void G425();
   #endif
 
+  #if ENABLED(SENSORLESS_HOMING)
+    static void G914();
+  #endif
+
+  #if ENABLED(LID_GRIPPER_STATION)
+    static void G500();
+    static void G501();
+    static void G502();
+  #endif
+
+  #if ENABLED(OPTICAL_AUTOCAL)
+    static void G510();
+    static void M1510();
+    static void M1510_report(bool forReplay=true);
+  #endif
+
+  #if HAS_E_BOTTOMOUT || ENABLED(CHANTARELLE_SUPPORT)
+    static void G511();
+    static void G512();
+    static void G513();
+  #endif
+
+  #if ENABLED(FESTO_PNEUMATICS)
+    static void G514(); // G514 pneumatic move/mixing extrude
+    static void G515(); // G515 lid gripper release
+  #endif
+
+  #if ENABLED(WELLPLATE_EJECT)
+    static void G516(); // G516 load/eject print vessel
+  #endif
+
+  #if ENABLED(RETRACTING_DISPLACEMENT_PROBE)
+    static void G529();
+  #endif
+
   #if HAS_RESUME_CONTINUE
     static void M0_M1();
   #endif
@@ -672,7 +722,7 @@ private:
     static void M48();
   #endif
 
-  #if ENABLED(LCD_SET_PROGRESS_MANUALLY)
+  #if ENABLED(SET_PROGRESS_MANUALLY)
     static void M73();
   #endif
 
@@ -700,6 +750,11 @@ private:
 
   #if ENABLED(M100_FREE_MEMORY_WATCHER)
     static void M100();
+  #endif
+
+  #if ENABLED(BD_SENSOR)
+    static void M102();
+    static void M102_report(const bool forReplay=true);
   #endif
 
   #if HAS_EXTRUDERS
@@ -794,6 +849,9 @@ private:
 
   #if HAS_COLOR_LEDS
     static void M150();
+    #if ENABLED(RGB_LED_FADE_COMMAND)
+    static void M151();
+    #endif
   #endif
 
   #if ENABLED(AUTO_REPORT_POSITION)
@@ -832,6 +890,8 @@ private:
   static void M204_report(const bool forReplay=true);
   static void M205();
   static void M205_report(const bool forReplay=true);
+  static void M213();
+  static void M213_report(const bool forReplay=true);
 
   #if HAS_M206_COMMAND
     static void M206();
@@ -881,6 +941,11 @@ private:
     static void M250_report(const bool forReplay=true);
   #endif
 
+  #if HAS_GCODE_M255
+    static void M255();
+    static void M255_report(const bool forReplay=true);
+  #endif
+
   #if HAS_LCD_BRIGHTNESS
     static void M256();
     static void M256_report(const bool forReplay=true);
@@ -906,7 +971,7 @@ private:
     static void M290();
   #endif
 
-  #if HAS_BUZZER
+  #if HAS_SOUND
     static void M300();
   #endif
 
@@ -930,6 +995,11 @@ private:
 
   #if HAS_USER_THERMISTORS
     static void M305();
+  #endif
+
+  #if ENABLED(MPCTEMP)
+    static void M306();
+    static void M306_report(const bool forReplay=true);
   #endif
 
   #if ENABLED(PIDTEMPCHAMBER)
@@ -1060,6 +1130,11 @@ private:
     static void M575();
   #endif
 
+  #if HAS_SHAPING
+    static void M593();
+    static void M593_report(const bool forReplay=true);
+  #endif
+
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
     static void M600();
     static void M603();
@@ -1148,16 +1223,10 @@ private:
     #if USE_SENSORLESS
       static void M914();
       static void M914_report(const bool forReplay=true);
+      static void M916();
+      static void M916_report(const bool forReplay=true);
     #endif
     static void M919();
-  #endif
-
-  #if HAS_L64XX
-    static void M122();
-    static void M906();
-    static void M916();
-    static void M917();
-    static void M918();
   #endif
 
   #if HAS_MOTOR_CURRENT_SPI || HAS_MOTOR_CURRENT_PWM || HAS_MOTOR_CURRENT_I2C || HAS_MOTOR_CURRENT_DAC
@@ -1186,7 +1255,7 @@ private:
     static void M995();
   #endif
 
-  #if BOTH(HAS_SPI_FLASH, SDSUPPORT)
+  #if BOTH(SPI_FLASH, SDSUPPORT)
     static void M993();
     static void M994();
   #endif
@@ -1241,11 +1310,231 @@ private:
   #endif
 
   #if ENABLED(CELLINK_REPORTING)
-    static void M800();
-    static void M801();
-    static void M802();
-    static void M1051();
+    static void M797(); // reset nozzle calibration
+    static void M798(); // get tool calibration status
+    static void M799(); // get tool calibration offsets
+
+    static void M801(); // set printbed temp
+    static void M802(); // get printbed temp
+
+    static void M821(); // get homing status
+
+    static void M824(); // get active tool
+
+    static void M1015(); // get current position
+    static void M1016(); // get current machine position
+
+    static void M1017(); // multi-line status report
   #endif
+
+  #if ENABLED(STEPPER_RETRACTING_PROBE)
+    static void M1029();
+    static void M1029_report(bool for_replay);
+  #endif
+
+  #if ENABLED(DYNAMIC_3POINT_LEVELING)
+    static void M1030();
+  #endif
+
+  #if ENABLED(FESTO_PNEUMATICS)
+    static void M1036(); // set pressure regulator
+    static void M1036_report(bool for_replay);
+    static void M1062(); // get pressure sensors
+    static void M1100(); // pressure regulator offset
+    static void M1100_report(bool for_replay);
+    static inline void M1101() {OUT_WRITE(PRESSURE_PUMP_EN_PIN, parser.boolval('P'));}
+  #endif
+
+  #if PINS_EXIST(CS_24V, CS_BED_24V_CS)
+    static void M1130(); // report load switch current
+  #endif
+
+  #if ENABLED(EXOCYTE_UV_CROSSLINKING)
+    static void M805();
+  #endif
+
+  #if ENABLED(UVC_STERILIZATION)
+    static void M806();
+  #endif
+    
+  #if ENABLED(CHANTARELLE_SUPPORT)
+    static void M750();
+    static void M751();
+    static void M752();
+    static void M753();
+    static void M770();
+    static void M771();
+    static void M772();
+    static void M773();
+    static void M774();
+    static void M777();
+    static void M778();
+    static void M779();
+    static void M780();
+    static void M781();
+    static void M782();
+    static void M783();
+    static void M784();
+    static void M785();
+    static void M786();
+    static void M787();
+    static void M788();
+    static void M790();
+    static void M791();
+    static void M792();
+    static void M793();
+    static void M794();
+    static void M795();
+    static void M796();
+    // static void M797();
+    // static void M798();
+    // static void M799();
+    static void M800();
+    // static void M801();
+    // static void M802();
+    static void M803();
+    static void M804();
+    // static void M805(); // UV crosslinking
+    // static void M806(); // UVC sterilization
+    static void M807();
+    static void M808();
+    static void M810();
+    static void M811();
+    static void M814();
+    static void M816();
+    static void M817();
+    static void M818();
+    static void M819();
+    // static void M821();
+    static void M822();
+    static void M823();
+    // static void M824();
+    static void M825();
+    static void M826();
+    static void M830();
+    static void M842();
+    static void M848();
+    static void M849();
+    static void M855();
+    static void M856();
+    static void M857();
+    static void M858();
+    static void M860();
+    // static void M900(); // CONFLICT - linear advance
+    static void M908();
+    static void M910();
+    static void M1001();
+    static void M1002();
+    static void M1004();
+    static void M1005();
+    static void M1006();
+    static void M1008();
+    static void M1012();
+    // static void M1015();
+    // static void M1016();
+    // static void M1017();
+    static void M1018();
+    static void M1020();
+    static void M1023();
+    static void M1024();
+    static void M1025();
+    static void M1028();
+    static void M1034();
+    static void M1035();
+    static void M1035_report(bool for_replay);
+    //static void M1036();
+    static void M1037();
+    static void M1038();
+    static void M1039();
+    static void M1040();
+    static void M1042();
+    static void M1045();
+    static void M1046();
+    static void M1047();
+    static void M1048();
+    static void M1050();
+    static void M1051();
+    static void M1063();
+    static void M1064();
+    static void M1065();
+    static void M1066();
+    static void M1070();
+    static void M1069();
+
+    // syringe pump commands
+    static void M2020();
+    static void M2030();
+    static void M2031();
+    static void M2032();
+    static void M2033();
+    static void M2034();
+    static void M2035();
+    static void M2036();
+    static void M2037();
+    static void M2038();
+    static void M2039();
+    static void M2040();
+    static void M2041();
+    static void M2042();
+    static void M2043();
+    static void M2044();
+    static void M2045();
+    static void M2046();
+    static void M2047();
+    static void M2048();
+    static void M2049();
+    static void M2050();
+    static void M2051();
+    static void M2052();
+    static void M2053();
+    static void M2054();
+    static void M2055();
+    static void M2056();
+    static void M2057();
+    static void M2058();
+    static void M2059();
+    static void M2060();
+    static void M2061();
+    static void M2063();
+    static void M2064();
+    static void M2065();
+    static void M2066();
+    static void M2067();
+    static void M2068();
+    static void M2069();
+    static void M2070();
+    static void M2071();
+    static void M2072();
+    static void M2073();
+    static void M2075();
+    static void M2076();
+    static void M2080();
+    static void M2081();
+    static void M2082();
+    static void M2083();
+    static void M2084();
+    static void M2085();
+    static void M2086();
+    static void M2087();
+    static void M2090();
+    static void M2091();
+    static void M2092();
+    static void M2093();
+    static void M2095();
+    static void M2096();
+    static void M2097();
+    static void M2098();
+    static void M2099();
+    static void M2100();
+    static void M2110();
+    static void M2111();
+    static void M2200();
+    static void M2201();
+  #endif
+
+  // TODO: gate or change these
+  // slider valve move
+  static void M1112();
 
   static void T(const int8_t tool_index);
 

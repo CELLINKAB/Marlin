@@ -94,6 +94,7 @@ namespace DirectStepping {
           case '\n':
           case '\r':
             state = State::NEWLINE;
+            [[fallthrough]];
           default:
             return false;
         }
@@ -143,14 +144,16 @@ namespace DirectStepping {
           // special case for 8-bit, check if rolled back to 0
           if (Cfg::DIRECTIONAL || !write_page_size) { // full 256 bytes
             if (write_byte_idx) return true;
-          } else {
-            if (write_byte_idx < write_page_size) return true;
           }
-        } else if (Cfg::DIRECTIONAL) {
-          if (write_byte_idx != Cfg::PAGE_SIZE) return true;
-        } else {
-          if (write_byte_idx < write_page_size) return true;
+          else if (write_byte_idx < write_page_size)
+            return true;
         }
+        else if (Cfg::DIRECTIONAL) {
+          if (write_byte_idx != Cfg::PAGE_SIZE)
+            return true;
+        }
+        else if (write_byte_idx < write_page_size)
+          return true;
 
         state = State::CHECKSUM;
         return true;
@@ -161,11 +164,10 @@ namespace DirectStepping {
         return true;
       }
       case State::UNFAIL:
-        if (c == 0) {
+        if (c == 0)
           set_page_state(write_page_idx, PageState::FREE);
-        } else {
+        else
           fatal_error = true;
-        }
         state = State::MONITOR;
         return true;
     }
@@ -183,8 +185,9 @@ namespace DirectStepping {
 
     SERIAL_CHAR(Cfg::CONTROL_CHAR);
     constexpr int state_bits = 2;
+
     constexpr int n_bytes = Cfg::PAGE_COUNT >> state_bits;
-    volatile uint8_t bits_b[n_bytes] = { 0 };
+    volatile uint8_t bits_b[n_bytes] = {};
 
     for (page_idx_t i = 0 ; i < Cfg::PAGE_COUNT ; i++) {
       bits_b[i >> state_bits] |= page_states[i] << ((i * state_bits) & 0x7);
@@ -243,7 +246,7 @@ const uint8_t segment_table[DirectStepping::Config::NUM_SEGMENTS][DirectStepping
     { 1, 1, 1, 0, 1, 0, 1 }, // 12 =  5
     { 1, 1, 1, 0, 1, 1, 1 }, // 13 =  6
     { 1, 1, 1, 1, 1, 1, 1 }, // 14 =  7
-    { 0 }
+  {}
 
   #elif STEPPER_PAGE_FORMAT == SP_4x2_256
 
@@ -254,7 +257,7 @@ const uint8_t segment_table[DirectStepping::Config::NUM_SEGMENTS][DirectStepping
 
   #elif STEPPER_PAGE_FORMAT == SP_4x1_512
 
-    {0} // Uncompressed format, table not used
+  {} // Uncompressed format, table not used
 
   #endif
 

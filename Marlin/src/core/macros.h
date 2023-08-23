@@ -21,7 +21,7 @@
  */
 #pragma once
 
-#if !defined(__has_include)
+#ifndef __has_include
   #define __has_include(...) 1
 #endif
 
@@ -39,24 +39,36 @@
 #define _ISTOP_  0x04
 #define _JSTOP_  0x05
 #define _KSTOP_  0x06
+#define _USTOP_  0x07
+#define _VSTOP_  0x08
+#define _WSTOP_  0x09
 #define _XMIN_   0x11
 #define _YMIN_   0x12
 #define _ZMIN_   0x13
 #define _IMIN_   0x14
 #define _JMIN_   0x15
 #define _KMIN_   0x16
+#define _UMIN_   0x17
+#define _VMIN_   0x18
+#define _WMIN_   0x19
 #define _XMAX_   0x21
 #define _YMAX_   0x22
 #define _ZMAX_   0x23
 #define _IMAX_   0x24
 #define _JMAX_   0x25
 #define _KMAX_   0x26
+#define _UMAX_   0x27
+#define _VMAX_   0x28
+#define _WMAX_   0x29
 #define _XDIAG_  0x31
 #define _YDIAG_  0x32
 #define _ZDIAG_  0x33
 #define _IDIAG_  0x34
 #define _JDIAG_  0x35
 #define _KDIAG_  0x36
+#define _UDIAG_  0x37
+#define _VDIAG_  0x38
+#define _WDIAG_  0x39
 #define _E0DIAG_ 0xE0
 #define _E1DIAG_ 0xE1
 #define _E2DIAG_ 0xE2
@@ -167,6 +179,7 @@
 #endif
 
 // Macros to chain up to 40 conditions
+#define _DO_0(W,C,A)
 #define _DO_1(W,C,A)       (_##W##_1(A))
 #define _DO_2(W,C,A,B)     (_##W##_1(A) C _##W##_1(B))
 #define _DO_3(W,C,A,V...)  (_##W##_1(A) C _DO_2(W,C,V))
@@ -278,7 +291,7 @@
 #define NUMERIC_SIGNED(a)   (NUMERIC(a) || (a) == '-' || (a) == '+')
 #define DECIMAL_SIGNED(a)   (DECIMAL(a) || (a) == '-' || (a) == '+')
 #define COUNT(a)            (sizeof(a)/sizeof(*a))
-#define ZERO(a)             memset(a,0,sizeof(a))
+#define ZERO(a)             memset((void*)a,0,sizeof(a))
 #define COPY(a,b) do{ \
     static_assert(sizeof(a[0]) == sizeof(b[0]), "COPY: '" STRINGIFY(a) "' and '" STRINGIFY(b) "' types (sizes) don't match!"); \
     memcpy(&a[0],&b[0],_MIN(sizeof(a),sizeof(b))); \
@@ -326,6 +339,12 @@
 #define GANG_N_1(N,K) _GANG_N(N,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K)
 
 // Macros for initializing arrays
+#define LIST_26(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z
+#define LIST_25(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y
+#define LIST_24(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X
+#define LIST_23(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W
+#define LIST_22(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V
+#define LIST_21(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U
 #define LIST_20(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T
 #define LIST_19(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S
 #define LIST_18(A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,...) A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R
@@ -350,7 +369,7 @@
 
 #define _LIST_N(N,V...) LIST_##N(V)
 #define LIST_N(N,V...) _LIST_N(N,V)
-#define LIST_N_1(N,K) _LIST_N(N,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K)
+#define LIST_N_1(N,K) _LIST_N(N,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K,K)
 #define ARRAY_N(N,V...) { _LIST_N(N,V) }
 #define ARRAY_N_1(N,K)  { LIST_N_1(N,K) }
 
@@ -616,7 +635,9 @@
 #define DEFER4(M) M EMPTY EMPTY EMPTY EMPTY()()()()
 
 // Force define expansion
-#define EVAL(V...)     EVAL16(V)
+#define EVAL           EVAL16
+#define EVAL4096(V...) EVAL2048(EVAL2048(V))
+#define EVAL2048(V...) EVAL1024(EVAL1024(V))
 #define EVAL1024(V...) EVAL512(EVAL512(V))
 #define EVAL512(V...)  EVAL256(EVAL256(V))
 #define EVAL256(V...)  EVAL128(EVAL128(V))
@@ -632,8 +653,8 @@
 #define IS_PROBE(V...) SECOND(V, 0)     // Get the second item passed, or 0
 #define PROBE() ~, 1                    // Second item will be 1 if this is passed
 #define _NOT_0 PROBE()
-#define NOT(x) IS_PROBE(_CAT(_NOT_, x)) // NOT('0') gets '1'. Anything else gets '0'.
-#define _BOOL(x) NOT(NOT(x))            // NOT('0') gets '0'. Anything else gets '1'.
+#define NOT(x) IS_PROBE(_CAT(_NOT_, x)) //   NOT('0') gets '1'. Anything else gets '0'.
+#define _BOOL(x) NOT(NOT(x))            // _BOOL('0') gets '0'. Anything else gets '1'.
 
 #define IF_ELSE(TF) _IF_ELSE(_BOOL(TF))
 #define _IF_ELSE(TF) _CAT(_IF_, TF)
@@ -646,7 +667,6 @@
 
 #define HAS_ARGS(V...) _BOOL(FIRST(_END_OF_ARGUMENTS_ V)())
 #define _END_OF_ARGUMENTS_() 0
-
 
 // Simple Inline IF Macros, friendly to use in other macro definitions
 #define IF(O, A, B) ((O) ? (A) : (B))
@@ -695,18 +715,34 @@
     ( DEFER2(__RREPEAT2)()(ADD1(_RPT_I),SUB1(_RPT_N),_RPT_OP,V) ) \
     ( /* Do nothing */ )
 #define __RREPEAT2() _RREPEAT2
-#define RREPEAT_S(S,N,OP)        EVAL1024(_RREPEAT(S,SUB##S(N),OP))
-#define RREPEAT(N,OP)            RREPEAT_S(0,N,OP)
-#define RREPEAT2_S(S,N,OP,V...)  EVAL1024(_RREPEAT2(S,SUB##S(N),OP,V))
-#define RREPEAT2(N,OP,V...)      RREPEAT2_S(0,N,OP,V)
+#define RREPEAT_S(S,N,OP)       EVAL1024(_RREPEAT(S,SUB##S(N),OP))
+#define RREPEAT(N,OP)           RREPEAT_S(0,N,OP)
+#define RREPEAT_1(N,OP)         RREPEAT_S(1,INCREMENT(N),OP)
+#define RREPEAT2_S(S,N,OP,V...) EVAL1024(_RREPEAT2(S,SUB##S(N),OP,V))
+#define RREPEAT2(N,OP,V...)     RREPEAT2_S(0,N,OP,V)
 
-// See https://github.com/swansontec/map-macro
-#define MAP_OUT
-#define MAP_END(...)
-#define MAP_GET_END() 0, MAP_END
-#define MAP_NEXT0(test, next, ...) next MAP_OUT
-#define MAP_NEXT1(test, next) MAP_NEXT0 (test, next, 0)
-#define MAP_NEXT(test, next)  MAP_NEXT1 (MAP_GET_END test, next)
-#define MAP0(f, x, peek, ...) f(x) MAP_NEXT (peek, MAP1) (f, peek, __VA_ARGS__)
-#define MAP1(f, x, peek, ...) f(x) MAP_NEXT (peek, MAP0) (f, peek, __VA_ARGS__)
-#define MAP(f, ...) EVAL512 (MAP1 (f, __VA_ARGS__, (), 0))
+// Call OP(A) with each item as an argument
+#define _MAP(_MAP_OP,A,V...)       \
+  _MAP_OP(A)                       \
+  IF_ELSE(HAS_ARGS(V))             \
+    ( DEFER2(__MAP)()(_MAP_OP,V) ) \
+    ( /* Do nothing */ )
+#define __MAP() _MAP
+
+#define MAP(OP,V...) EVAL(_MAP(OP,V))
+
+// Emit a list of OP(A) with the given items
+#define _MAPLIST(_MAP_OP,A,V...)         \
+  _MAP_OP(A)                             \
+  IF_ELSE(HAS_ARGS(V))                   \
+    ( , DEFER2(__MAPLIST)()(_MAP_OP,V) ) \
+    ( /* Do nothing */ )
+#define __MAPLIST() _MAPLIST
+
+#define MAPLIST(OP,V...) EVAL(_MAPLIST(OP,V))
+
+// Temperature Sensor Config
+#define TEMP_SENSOR(N) TEMP_SENSOR_##N
+#define _HAS_E_TEMP(N) || TEMP_SENSOR(N)
+#define HAS_E_TEMP_SENSOR (0 REPEAT(EXTRUDERS, _HAS_E_TEMP))
+#define TEMP_SENSOR_IS_MAX_TC(T) (TEMP_SENSOR(T) == -5 || TEMP_SENSOR(T) == -3 || TEMP_SENSOR(T) == -2)

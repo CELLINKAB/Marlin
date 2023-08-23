@@ -52,12 +52,12 @@ public:
   }
 
   // Instantiate all items with the same divisor
-  Bresenham(const T &inDivisor, const int8_t (&inDir)[Cfg::SIZE], const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]={0}) {
+  Bresenham(const T &inDivisor, const int8_t (&inDir)[Cfg::SIZE], const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]{}) {
     init(inDivisor, inDir, inDividend, inValue);
   }
 
   // Instantiate all items with the same divisor and direction
-  Bresenham(const T &inDivisor, const int8_t &inDir, const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]={0}) {
+  Bresenham(const T &inDivisor, const int8_t &inDir, const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]{}) {
     init(inDivisor, inDir, inDividend, inValue);
   }
 
@@ -71,7 +71,7 @@ public:
   }
 
   // Init all items with the same divisor
-  FORCE_INLINE static void init(const T &inDivisor, const int8_t (&inDir)[Cfg::SIZE], const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]={0}) {
+  FORCE_INLINE static void init(const T &inDivisor, const int8_t (&inDir)[Cfg::SIZE], const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]{}) {
     divisor = inDivisor;
     for (uint8_t i = 0; i < Cfg::SIZE; i++) {
       dir[i]      = inDir[i];
@@ -82,7 +82,7 @@ public:
   }
 
   // Init all items with the same divisor and direction
-  FORCE_INLINE static void init(const T &inDivisor, const int8_t &inDir, const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]={0}) {
+  FORCE_INLINE static void init(const T &inDivisor, const int8_t &inDir, const T (&inDividend)[Cfg::SIZE], const T (&inValue)[Cfg::SIZE]{}) {
     divisor = inDivisor;
     for (uint8_t i = 0; i < Cfg::SIZE; i++) {
       dir[i]      = inDir;

@@ -31,7 +31,7 @@
 #include "Servo.h"
 
 static uint_fast8_t servoCount = 0;
-static libServo *servos[NUM_SERVOS] = {0};
+static libServo *servos[NUM_SERVOS]{};
 constexpr millis_t servoDelay[] = SERVO_DELAY;
 static_assert(COUNT(servoDelay) == NUM_SERVOS, "SERVO_DELAY must be an array NUM_SERVOS long.");
 

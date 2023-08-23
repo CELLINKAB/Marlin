@@ -3,17 +3,17 @@
     "core": "stm32",
     "cpu": "cortex-m7",
     "extra_flags": "-DSTM32H7xx -DSTM32H723xx",
-    "f_cpu": "400000000L",
-    "mcu": "stm32h723vgt6",
+    "f_cpu": "550000000L",
+    "mcu": "stm32h723vet6",
     "product_line": "STM32H723xx",
     "variant": "MARLIN_H723Vx"
-  },  
+  },
   "connectivity": [
     "can",
     "ethernet"
-  ],  
+  ],
   "debug": {
-    "jlink_device": "STM32H723VG",
+    "jlink_device": "STM32H723VE",
     "openocd_target": "stm32h7x",
     "svd_path": "STM32H7x3.svd",
     "tools": {
@@ -39,11 +39,11 @@
     "arduino",
     "stm32cube"
   ],
-  "name": "STM32H723VG (560k RAM. 1024k Flash)",
+  "name": "STM32H723VE (564k RAM. 512k Flash)",
   "upload": {
     "disable_flushing": false,
-    "maximum_ram_size": 573440,
-    "maximum_size": 1048576,
+    "maximum_ram_size": 577536,
+    "maximum_size": 524288,
     "protocol": "stlink",
     "protocols": [
       "stlink",
@@ -56,6 +56,6 @@
     "use_1200bps_touch": false,
     "wait_for_upload_port": false
   },
-  "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32h743vi.html",
+  "url": "https://www.st.com/en/microcontrollers-microprocessors/stm32h723ze.html",
   "vendor": "ST"
 }

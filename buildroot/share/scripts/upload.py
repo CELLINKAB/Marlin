@@ -180,21 +180,6 @@ def Upload(source, target, env):
     # "upload_random_name": generate a random 8.3 firmware filename to upload
     upload_random_filename = upload_delete_old_bins and not marlin_long_filename_host_support
 
-    # Heatshrink module is needed (only) for compression
-    if upload_compression:
-        if sys.version_info[0] > 2:
-            try:
-               import heatshrink2
-            except ImportError:
-               print("Installing 'heatshrink2' python module...")
-               env.Execute(env.subst("$PYTHONEXE -m pip install heatshrink2"))
-        else:
-            try:
-               import heatshrink
-            except ImportError:
-               print("Installing 'heatshrink' python module...")
-               env.Execute(env.subst("$PYTHONEXE -m pip install heatshrink"))
-
     try:
 
         # Start upload job

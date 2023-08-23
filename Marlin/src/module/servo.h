@@ -40,14 +40,14 @@
     constexpr uint16_t sase[] = SWITCHING_EXTRUDER_SERVO_ANGLES;
     static_assert(COUNT(sase) == REQ_ANGLES, "SWITCHING_EXTRUDER_SERVO_ANGLES needs " STRINGIFY(REQ_ANGLES) " angles.");
   #else
-    constexpr uint16_t sase[4] = { 0 };
+    constexpr uint16_t sase[4]{};
   #endif
 
   #if ENABLED(SWITCHING_NOZZLE)
     constexpr uint16_t sasn[] = SWITCHING_NOZZLE_SERVO_ANGLES;
     static_assert(COUNT(sasn) == 2, "SWITCHING_NOZZLE_SERVO_ANGLES needs 2 angles.");
   #else
-    constexpr uint16_t sasn[2] = { 0 };
+    constexpr uint16_t sasn[2]{};
   #endif
 
   #ifdef Z_PROBE_SERVO_NR
@@ -59,7 +59,7 @@
     constexpr uint16_t sazp[] = Z_SERVO_ANGLES;
     static_assert(COUNT(sazp) == 2, "Z_SERVO_ANGLES needs 2 angles.");
   #else
-    constexpr uint16_t sazp[2] = { 0 };
+    constexpr uint16_t sazp[2]{};
   #endif
 
   #ifndef SWITCHING_EXTRUDER_SERVO_NR
@@ -103,14 +103,11 @@
   };
 
   #if HAS_Z_SERVO_PROBE
-    #define DEPLOY_Z_SERVO() MOVE_SERVO(Z_PROBE_SERVO_NR, servo_angles[Z_PROBE_SERVO_NR][0])
-    #define STOW_Z_SERVO() MOVE_SERVO(Z_PROBE_SERVO_NR, servo_angles[Z_PROBE_SERVO_NR][1])
+    #define DEPLOY_Z_SERVO() servo[Z_PROBE_SERVO_NR].move(servo_angles[Z_PROBE_SERVO_NR][0])
+    #define STOW_Z_SERVO() servo[Z_PROBE_SERVO_NR].move(servo_angles[Z_PROBE_SERVO_NR][1])
   #endif
 
 #endif // HAS_SERVO_ANGLES
-
-#define MOVE_SERVO(I, P) servo[I].move(P)
-#define DETACH_SERVO(I) servo[I].detach()
 
 extern hal_servo_t servo[NUM_SERVOS];
 void servo_init();

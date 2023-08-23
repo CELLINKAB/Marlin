@@ -1,6 +1,6 @@
 mode: ContinuousDelivery
-tag-prefix: 'fotonmarlin/v'
-next-version: 1.0.0
+tag-prefix: 'cellinkmarlin/v'
+next-version: 2.1.0
 
 branches:
   master:

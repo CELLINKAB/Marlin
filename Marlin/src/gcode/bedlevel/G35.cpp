@@ -63,7 +63,7 @@ void GcodeSuite::G35() {
 
   if (DEBUGGING(LEVELING)) log_machine_info();
 
-  float z_measured[G35_PROBE_COUNT] = { 0 };
+  float z_measured[G35_PROBE_COUNT]{};
 
   const uint8_t screw_thread = parser.byteval('S', TRAMMING_SCREW_THREAD);
   if (!WITHIN(screw_thread, 30, 51) || screw_thread % 10 > 1) {
