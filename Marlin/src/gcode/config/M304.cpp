@@ -65,8 +65,6 @@ void GcodeSuite::M304_report(const bool forReplay /*=true*/)
     TERN(BED_TEMP_COMPENSATION,
          SERIAL_ECHOLNPGM(" O", thermalManager.temp_bed.offset, " S", thermalManager.temp_bed.scale),
          SERIAL_EOL());
-
-  );
 }
 
 #endif // PIDTEMPBED
