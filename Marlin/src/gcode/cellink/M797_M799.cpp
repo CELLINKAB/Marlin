@@ -8,15 +8,15 @@
 #    include "../../feature/optical_autocal.h"
 #    include "../gcode.h"
 
-void Reporter::M798::report()
+void cellink::Reporter::M798::report()
 {
-    serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
+    cellink::serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
 }
 
-void Reporter::M799::report()
+void cellink::Reporter::M799::report()
 {
     const auto& offset = optical_autocal.offset(active_extruder);
-    serial_echoln_kv("AT",
+    cellink::serial_echoln_kv("AT",
                      active_extruder,
                      "AUTOCAL_XOFF",
                      offset.x,
