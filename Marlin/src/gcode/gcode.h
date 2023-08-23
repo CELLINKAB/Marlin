@@ -1310,8 +1310,8 @@ private:
   #endif
 
   #if ENABLED(CELLINK_REPORTING)
-    static void M771(); // set hotend temp
     static void M772(); // get hotend temp
+
     static void M797(); // reset nozzle calibration
     static void M798(); // get tool calibration status
     static void M799(); // get tool calibration offsets
@@ -1369,7 +1369,6 @@ private:
     static void M753();
     static void M770();
     static void M771();
-    static void M772();
     static void M773();
     static void M774();
     static void M777();

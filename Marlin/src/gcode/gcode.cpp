@@ -1174,7 +1174,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(CELLINK_REPORTING)
-        case 771: M771(); break; // set hotend temp
         case 772: M772(); break; // get hotend temp
 
         case 797: M797(); break; // reset nozzle calibration
@@ -1195,8 +1194,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1017:M1017(); break; // multi-line status report
 
         case 1051: M1051(); break; // version report
-
-
       #endif
 
       #if ENABLED(EXOCYTE_UV_CROSSLINKING)
@@ -1218,6 +1215,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 752: M752(); break;
         case 753: M753(); break;
         case 770: M770(); break;
+        case 771: M771(); break; // set hotend temp
         case 777: M777(); break;
         case 778: M778(); break;
         case 779: M779(); break;

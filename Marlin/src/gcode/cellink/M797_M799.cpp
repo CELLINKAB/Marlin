@@ -56,4 +56,15 @@ void GcodeSuite::M799()
     cellink::reporter.m799.report();
 }
 
+#elif ENABLED(CELLINK_REPORTING)
+
+#    include "../../feature/cellink_reporter.h"
+#    include "../gcode.h"
+
+void cellink::Reporter::M798::report() {}
+void cellink::Reporter::M799::report() {}
+
+void GcodeSuite::M797() {}
+void GcodeSuite::M798() {}
+void GcodeSuite::M799() {}
 #endif // CELLINK_REPORTING && OPTICAL_AUTOCAL
