@@ -220,7 +220,7 @@ void GcodeSuite::get_destination_from_command() {
     TERN_(LASER_FEATURE, cutter.feedrate_mm_m = MMS_TO_MMM(feedrate_mm_s));
   }
 
-  #if BOTH(PRINTCOUNTER, HAS_EXTRUDERS)
+  #if ENABLED(PRINTCOUNTER)
     if (!DEBUGGING(DRYRUN) && !skip_move)
       print_job_timer.incFilamentUsed(destination.e - current_position.e);
   #endif
@@ -1013,6 +1013,10 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 710: M710(); break;                                  // M710: Set Controller Fan settings
       #endif
 
+      #if ENABLED(UV_LED_STERILIZATION)
+        case 806: M806(); break;
+      #endif
+
       #if ENABLED(GCODE_MACROS)
         case 810: case 811: case 812: case 813: case 814:
         case 815: case 816: case 817: case 818: case 819:
@@ -1140,6 +1144,12 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 7219: M7219(); break;                                // M7219: Set LEDs, columns, and rows
       #endif
 
+      #if ENABLED(HX711_WSCALE)
+        case 7110: M7110(); break;                                // Set the end stop threshold value for HX711.
+        case 7111: M7111(); break;                                // Set the HX711 channel/mode.
+        case 7112: M7112(); break;                                // Print HX711 raw filtered value.
+      #endif
+	                                 // M3426: Read MCP3426 ADC (over i2c)
       #if ENABLED(HAS_MCP3426_ADC)                                // M3426: Read MCP3426 ADC (over i2c)
         case 3426: M3426(); break;   
       #endif
@@ -1164,10 +1174,13 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
       #endif
 
       #if ENABLED(CELLINK_REPORTING)
+        case 772: M772(); break; // get hotend temp
+
         case 797: M797(); break; // reset nozzle calibration
         case 798: M798(); break; // get nozzle calibration status
         case 799: M799(); break; // get nozzle calibration offsets
 
+        case 800: M800(); break; // disable bed temp control
         case 801: M801(); break; // set bed temperature
         case 802: M802(); break; // get bed temperature
 
@@ -1180,6 +1193,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
 
         case 1017:M1017(); break; // multi-line status report
 
+        case 1051: M1051(); break; // version report
       #endif
 
       #if ENABLED(EXOCYTE_UV_CROSSLINKING)
@@ -1201,8 +1215,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 752: M752(); break;
         case 753: M753(); break;
         case 770: M770(); break;
-        case 771: M771(); break;
-        case 772: M772(); break;
+        case 771: M771(); break; // set hotend temp
         case 777: M777(); break;
         case 778: M778(); break;
         case 779: M779(); break;
@@ -1225,7 +1238,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         // case 797: M797(); break;
         // case 798: M798(); break;
         // case 799: M799(); break;
-        case 800: M800(); break;
         // case 801: M801(); break;
         // case 802: M802(); break;
         case 803: M803(); break;
@@ -1288,7 +1300,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1047: M1047(); break;
         case 1048: M1048(); break;
         case 1050: M1050(); break;
-        case 1051: M1051(); break;
   
         case 1063: M1063(); break;
         case 1064: M1064(); break;

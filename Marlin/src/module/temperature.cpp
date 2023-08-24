@@ -538,8 +538,8 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
     bool flag_cooler_state;
     //bool flag_cooler_excess = false;
     celsius_float_t previous_temp = 9999;
-    raw_adc_t Temperature::mintemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_LO_TEMP,
-              Temperature::maxtemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_HI_TEMP;
+    int16_t Temperature::mintemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_LO_TEMP,
+            Temperature::maxtemp_raw_COOLER = TEMP_SENSOR_COOLER_RAW_HI_TEMP;
     #if WATCH_COOLER
       cooler_watch_t Temperature::watch_cooler{};
     #endif
@@ -554,15 +554,9 @@ PGMSTR(str_t_heating_failed, STR_T_HEATING_FAILED);
 #if HAS_TEMP_BOARD
   board_info_t Temperature::temp_board; // = { 0 }
   #if ENABLED(THERMAL_PROTECTION_BOARD)
-    raw_adc_t Temperature::mintemp_raw_BOARD = TEMP_SENSOR_BOARD_RAW_LO_TEMP,
-              Temperature::maxtemp_raw_BOARD = TEMP_SENSOR_BOARD_RAW_HI_TEMP;
+    int16_t Temperature::mintemp_raw_BOARD = TEMP_SENSOR_BOARD_RAW_LO_TEMP,
+            Temperature::maxtemp_raw_BOARD = TEMP_SENSOR_BOARD_RAW_HI_TEMP;
   #endif
-#endif
-
-#if BOTH(HAS_MARLINUI_MENU, PREVENT_COLD_EXTRUSION) && E_MANUAL > 0
-  bool Temperature::allow_cold_extrude_override = false;
-#else
-  constexpr bool Temperature::allow_cold_extrude_override;
 #endif
 
 #if ENABLED(PREVENT_COLD_EXTRUSION)
@@ -591,7 +585,6 @@ volatile bool Temperature::raw_temps_ready = false;
 #endif
 
 #define TEMPDIR(N) ((TEMP_SENSOR_##N##_RAW_LO_TEMP) < (TEMP_SENSOR_##N##_RAW_HI_TEMP) ? 1 : -1)
-#define TP_CMP(S,A,B) (TEMPDIR(S) < 0 ? ((A)<(B)) : ((A)>(B)))
 
 #if HAS_HOTEND
   // Init mintemp and maxtemp with extreme values to prevent false errors during startup
@@ -1985,8 +1978,8 @@ void Temperature::task() {
     m = (l + r) >> 1;                                                     \
     if (!m) return celsius_t(pgm_read_word(&TBL[0].celsius));             \
     if (m == l || m == r) return celsius_t(pgm_read_word(&TBL[LEN-1].celsius)); \
-    raw_adc_t v00 = pgm_read_word(&TBL[m-1].value),                       \
-              v10 = pgm_read_word(&TBL[m-0].value);                       \
+    int16_t v00 = pgm_read_word(&TBL[m-1].value),                         \
+            v10 = pgm_read_word(&TBL[m-0].value);                         \
          if (raw < v00) r = m;                                            \
     else if (raw > v10) l = m;                                            \
     else {                                                                \
@@ -2080,7 +2073,7 @@ void Temperature::task() {
     SERIAL_EOL();
   }
 
-  celsius_float_t Temperature::user_thermistor_to_deg_c(const uint8_t t_index, const raw_adc_t raw) {
+  celsius_float_t Temperature::user_thermistor_to_deg_c(const uint8_t t_index, const int16_t raw) {
 
     if (!WITHIN(t_index, 0, COUNT(user_thermistor) - 1)) return 25;
 
@@ -2132,11 +2125,11 @@ void Temperature::task() {
         #elif TEMP_SENSOR_IS_MAX_TC(0)
           #if TEMP_SENSOR_0_IS_MAX31865
             return TERN(LIB_INTERNAL_MAX31865,
-              max31865_0.temperature(raw),
+              max31865_0.temperature((uint16_t)raw),
               max31865_0.temperature(MAX31865_SENSOR_OHMS_0, MAX31865_CALIBRATION_OHMS_0)
             );
           #else
-            return (int16_t)raw * 0.25;
+            return raw * 0.25;
           #endif
         #elif TEMP_SENSOR_0_IS_AD595
           return TEMP_AD595(raw);
@@ -2151,11 +2144,11 @@ void Temperature::task() {
         #elif TEMP_SENSOR_IS_MAX_TC(1)
           #if TEMP_SENSOR_0_IS_MAX31865
             return TERN(LIB_INTERNAL_MAX31865,
-              max31865_1.temperature(raw),
+              max31865_1.temperature((uint16_t)raw),
               max31865_1.temperature(MAX31865_SENSOR_OHMS_1, MAX31865_CALIBRATION_OHMS_1)
             );
           #else
-            return (int16_t)raw * 0.25;
+            return raw * 0.25;
           #endif
         #elif TEMP_SENSOR_1_IS_AD595
           return TEMP_AD595(raw);
@@ -2394,7 +2387,13 @@ void Temperature::updateTemperaturesFromRawValues() {
     HOTEND_LOOP() temp_hotend[e].celsius = TERN(CHANTARELLE_SUPPORT, ph_controller.get_latest_extruder_temp(static_cast<printhead::Index>(e)), analog_to_celsius_hotend(temp_hotend[e].getraw(), e));
   #endif
 
-  TERN_(HAS_HEATED_BED,     temp_bed.celsius       = TERN(TEMP_SENSOR_BED_IS_TMP117, get_tmp117_bed_temp(), analog_to_celsius_bed(temp_bed.getraw())));
+  #if ALL(BED_TEMP_COMPENSATION, HAS_HEATED_BED)
+    temp_bed.celsius       = analog_to_celsius_bed(temp_bed.getraw()) * temp_bed.scale + temp_bed.offset;
+  #elif ALL(TEMP_SENSOR_BED_IS_TMP117, HAS_HEATED_BED)
+    temp_bed.celsius       = TEMP_SENSOR_BED_IS_TMP117, get_tmp117_bed_temp();
+  #elif ENABLED(HAS_HEATED_BED)
+    temp_bed.celsius       = analog_to_celsius_bed(temp_bed.getraw());
+  #endif
   TERN_(HAS_TEMP_CHAMBER,   temp_chamber.celsius   = analog_to_celsius_chamber(temp_chamber.getraw()));
   TERN_(HAS_TEMP_COOLER,    temp_cooler.celsius    = analog_to_celsius_cooler(temp_cooler.getraw()));
   TERN_(HAS_TEMP_PROBE,     temp_probe.celsius     = analog_to_celsius_probe(temp_probe.getraw()));
@@ -3107,7 +3106,7 @@ void Temperature::disable_all_heaters() {
    * @param  hindex  the hotend we're referencing (if MULTI_MAX_TC)
    * @return         integer representing the board's buffer, to be converted later if needed
    */
-  raw_adc_t Temperature::read_max_tc(TERN_(HAS_MULTI_MAX_TC, const uint8_t hindex/*=0*/)) {
+  int16_t Temperature::read_max_tc(TERN_(HAS_MULTI_MAX_TC, const uint8_t hindex/*=0*/)) {
     #define MAXTC_HEAT_INTERVAL 250UL
 
     #if HAS_MAX31855
@@ -3164,7 +3163,7 @@ void Temperature::disable_all_heaters() {
     // Return last-read value between readings
     const millis_t ms = millis();
     if (PENDING(ms, next_max_tc_ms[hindex]))
-      return THERMO_TEMP(hindex);
+      return (int16_t)THERMO_TEMP(hindex);
 
     next_max_tc_ms[hindex] = ms + MAXTC_HEAT_INTERVAL;
 
@@ -3261,7 +3260,7 @@ void Temperature::disable_all_heaters() {
 
     THERMO_TEMP(hindex) = max_tc_temp;
 
-    return max_tc_temp;
+    return (int16_t)max_tc_temp;
   }
 
 #endif // HAS_MAX_TC
@@ -3419,7 +3418,7 @@ void Temperature::isr() {
   uint8_t pwm_count_tmp = pwm_count;
 
   #if HAS_ADC_BUTTONS
-    static raw_adc_t raw_ADCKey_value = 0;
+    static unsigned int raw_ADCKey_value = 0;
     static bool ADCKey_pressed = false;
   #endif
 
@@ -4004,7 +4003,7 @@ void Temperature::isr() {
       print_heater_state(H_NONE, degHotend(target_extruder), degTargetHotend(target_extruder) OPTARG(SHOW_TEMP_ADC_VALUES, rawHotendTemp(target_extruder)));
     #endif
     #if HAS_HEATED_BED
-      print_heater_state(H_BED, degBed(), degTargetBed() OPTARG(SHOW_TEMP_ADC_VALUES, rawBedTemp()));
+        print_heater_state(H_BED, degBed(), degTargetBed() OPTARG(SHOW_TEMP_ADC_VALUES, rawBedTemp()));
     #endif
     #if HAS_TEMP_CHAMBER
       print_heater_state(H_CHAMBER, degChamber(), TERN0(HAS_HEATED_CHAMBER, degTargetChamber()) OPTARG(SHOW_TEMP_ADC_VALUES, rawChamberTemp()));
@@ -4052,7 +4051,7 @@ void Temperature::isr() {
   #endif
 
   #if HAS_HOTEND && HAS_STATUS_MESSAGE
-    void Temperature::set_heating_message(const uint8_t e, const bool isM104/*=false*/) {
+    void Temperature::set_heating_message(const uint8_t e) {
       const bool heating = isHeatingHotend(e);
       ui.status_printf(0,
         #if HAS_MULTI_HOTEND
@@ -4062,14 +4061,6 @@ void Temperature::isr() {
         #endif
         , heating ? GET_TEXT(MSG_HEATING) : GET_TEXT(MSG_COOLING)
       );
-
-      if (isM104) {
-        static uint8_t wait_e; wait_e = e;
-        ui.set_status_reset_fn([]{
-          const celsius_t c = degTargetHotend(wait_e);
-          return c < 30 || degHotendNear(wait_e, c);
-        });
-      }
     }
   #endif
 

@@ -219,8 +219,21 @@ void _lcd_ubl_edit_mesh() {
         #define VALIDATE_MESH_GCODE_ITEM(M) \
           GCODES_ITEM_N_f(M, ui.get_preheat_label(M), MSG_UBL_VALIDATE_MESH_M, F("G28\nG26CPB0I" STRINGIFY(M)));
       #endif
-      REPEAT(PREHEAT_COUNT, VALIDATE_MESH_GCODE_ITEM)
-    #endif
+
+      VALIDATE_MESH_GCODE_ITEM(0);
+      #if PREHEAT_COUNT > 1
+        VALIDATE_MESH_GCODE_ITEM(1);
+        #if PREHEAT_COUNT > 2
+          VALIDATE_MESH_GCODE_ITEM(2);
+          #if PREHEAT_COUNT > 3
+            VALIDATE_MESH_GCODE_ITEM(3);
+            #if PREHEAT_COUNT > 4
+              VALIDATE_MESH_GCODE_ITEM(4);
+            #endif
+          #endif
+        #endif
+      #endif
+    #endif // HAS_PREHEAT
     ACTION_ITEM(MSG_UBL_VALIDATE_CUSTOM_MESH, _lcd_ubl_validate_custom_mesh);
     ACTION_ITEM(MSG_INFO_SCREEN, ui.return_to_status);
     END_MENU();

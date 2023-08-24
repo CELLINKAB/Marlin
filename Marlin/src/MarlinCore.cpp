@@ -264,6 +264,10 @@
   #include "feature/easythreed_ui.h"
 #endif
 
+#if ENABLED(HX711_WSCALE)
+  #include "feature/hx_711.h"
+#endif
+
 #if PIN_EXISTS(DOOR)
   #include "feature/door_sensor.h"
 #endif
@@ -946,6 +950,9 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   // Update the LVGL interface
   TERN_(HAS_TFT_LVGL_UI, LV_TASK_HANDLER());
 
+  // Manage Scale
+  TERN_(HX711_WSCALE, wScale.manage_hx_711());
+
   // update pneumatics
   TERN_(FESTO_PNEUMATICS, pneumatics::update());
 
@@ -1267,13 +1274,9 @@ void setup() {
     #endif
   #endif
 
-  #if ENABLED(FREEZE_FEATURE)
+  #if HAS_FREEZE_PIN
     SETUP_LOG("FREEZE_PIN");
-    #if FREEZE_STATE
-      SET_INPUT_PULLDOWN(FREEZE_PIN);
-    #else
-      SET_INPUT_PULLUP(FREEZE_PIN);
-    #endif
+    SET_INPUT_PULLUP(FREEZE_PIN);
   #endif
 
   #if HAS_SUICIDE
@@ -1724,6 +1727,10 @@ void setup() {
 
   #if ENABLED(EASYTHREED_UI)
     SETUP_RUN(easythreed_ui.init());
+  #endif
+
+  #if ENABLED(HX711_WSCALE)
+    wScale.begin();
   #endif
 
    #if PIN_EXISTS(PC_ENABLE)

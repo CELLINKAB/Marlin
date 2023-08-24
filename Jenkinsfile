@@ -43,16 +43,38 @@ pipeline {
                 axes {
                     axis {
                         name 'DEVICE'
-                        values 'Exocyte'
+                        values 'Exocyte', 'Foton'
                     }
                     axis {
                         name 'BOARD'
-                        values 'MYCORRHIZA_V1_1'
+                        values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
-
+                }
+                excludes {
+                    exclude {
+                        axis {
+                            name 'DEVICE'
+                            values 'Exocyte'
+                        }
+                        axis {
+                            name 'BOARD'
+                            values 'STM32H743Vx_btt', 'STM32H723Vx_btt'
+                        }
+                    }
+                    exclude {
+                        axis {
+                            name 'DEVICE'
+                            values 'Foton'
+                        }
+                        axis {
+                            name 'BOARD'
+                            values 'MYCORRHIZA_V1_1'
+                        }
+                    }
+                    
                 }
                 stages {
-                    stage('Building Firmware') {
+                    stage("fw build") {
                         steps {
                             sh '''
                                 git clean -Xdf
@@ -69,9 +91,9 @@ pipeline {
                 post {
                     always {
                         sh '''
-                            cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${ART_NAME_NOSLASH}.bin
+                            cp  .pio/build/${BOARD}/firmware.bin ./${DEVICE}-${BOARD}-${ART_NAME_NOSLASH}.bin
                                                     '''
-                        archiveArtifacts artifacts: " ${BOARD}-${ART_NAME_NOSLASH}.bin"
+                        archiveArtifacts artifacts: " ${DEVICE}-${BOARD}-${ART_NAME_NOSLASH}.bin"
                         archiveArtifacts artifacts: ' GitVersion.json'
                         archiveArtifacts artifacts: ' version.json'
 

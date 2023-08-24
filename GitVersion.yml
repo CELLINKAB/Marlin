@@ -1,5 +1,5 @@
 mode: ContinuousDelivery
-tag-prefix: 'exomarlin/v'
+tag-prefix: 'cellinkmarlin/v'
 next-version: 2.1.0
 
 branches:

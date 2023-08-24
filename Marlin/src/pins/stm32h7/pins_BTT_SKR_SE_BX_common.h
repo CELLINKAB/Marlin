@@ -27,7 +27,7 @@
 
 // Onboard I2C EEPROM
 #define I2C_EEPROM
-#define MARLIN_EEPROM_SIZE                0x1000  // 4K (24C32)
+#define MARLIN_EEPROM_SIZE                0x1000  // 4KB (24C32 ... 32Kb = 4KB)
 
 #define HAS_OTG_USB_HOST_SUPPORT                  // USB Flash Drive support
 //#define SWD_DEBUG                               // Use pins PA13 and PA14 on STM32H7 for the SWD debugger

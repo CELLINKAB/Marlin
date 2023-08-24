@@ -782,7 +782,6 @@ void unified_bed_leveling::shift_mesh_height() {
           ui.quick_feedback();
           ui.release();
           probe.stow(); // Release UI before stow to allow for PAUSE_BEFORE_DEPLOY_STOW
-          TERN_(EXTENSIBLE_UI, ExtUI::onLevelingDone());
           return restore_ubl_active_state_and_leave();
         }
       #endif
@@ -948,7 +947,6 @@ void set_message_with_feedback(FSTR_P const fstr) {
    */
   void unified_bed_leveling::manually_probe_remaining_mesh(const xy_pos_t &pos, const_float_t z_clearance, const_float_t thick, const bool do_ubl_mesh_map) {
     ui.capture();
-    TERN_(EXTENSIBLE_UI, ExtUI::onLevelingStart());
 
     save_ubl_active_state_and_disable();  // No bed level correction so only raw data is obtained
     do_blocking_move_to_xy_z(current_position, z_clearance);
@@ -1008,8 +1006,6 @@ void set_message_with_feedback(FSTR_P const fstr) {
 
     restore_ubl_active_state_and_leave();
     do_blocking_move_to_xy_z(pos, Z_CLEARANCE_DEPLOY_PROBE);
-
-    TERN_(EXTENSIBLE_UI, ExtUI::onLevelingDone());
   }
 
   /**

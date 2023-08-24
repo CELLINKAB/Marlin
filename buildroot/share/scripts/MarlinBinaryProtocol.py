@@ -11,11 +11,14 @@ import sys
 import datetime
 import random
 try:
-    import heatshrink
+    import heatshrink2 as heatshrink
     heatshrink_exists = True
 except ImportError:
-    heatshrink_exists = False
-
+    try:
+        import heatshrink
+        heatshrink_exists = True
+    except ImportError:
+        heatshrink_exists = False
 
 def millis():
     return time.perf_counter() * 1000
@@ -393,18 +396,19 @@ class FileTransferProtocol(object):
     def copy(self, filename, dest_filename, compression, dummy):
         self.connect()
 
-        compression_support = heatshrink_exists and self.compression['algorithm'] == 'heatshrink' and compression
-        if compression and (not heatshrink_exists or not self.compression['algorithm'] == 'heatshrink'):
-            print("Compression not supported by client")
-        #compression_support = False
+        has_heatshrink = heatshrink_exists and self.compression['algorithm'] == 'heatshrink'
+        if compression and not has_heatshrink:
+            hs = '2' if sys.version_info[0] > 2 else ''
+            print("Compression not supported by client. Use 'pip install heatshrink%s' to fix." % hs)
+            compression = False
 
         data = open(filename, "rb").read()
         filesize = len(data)
 
-        self.open(dest_filename, compression_support, dummy)
+        self.open(dest_filename, compression, dummy)
 
         block_size = self.protocol.block_size
-        if compression_support:
+        if compression:
             data = heatshrink.encode(data, window_sz2=self.compression['window'], lookahead_sz2=self.compression['lookahead'])
 
         cratio = filesize / len(data)

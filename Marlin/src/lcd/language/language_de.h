@@ -91,6 +91,7 @@ namespace Language_de {
   LSTR MSG_HOME_OFFSET_Y                  = _UxGT("Homeversatz Y");
   LSTR MSG_HOME_OFFSET_Z                  = _UxGT("Homeversatz Z");
   LSTR MSG_HOME_OFFSETS_APPLIED           = _UxGT("Homeversatz aktiv");
+  LSTR MSG_SET_ORIGIN                     = _UxGT("Setze Nullpunkte"); //"G92 X0 Y0 Z0" commented out in marlinui.cpp
   LSTR MSG_TRAMMING_WIZARD                = _UxGT("Tramming Assistent");
   LSTR MSG_SELECT_ORIGIN                  = _UxGT("Wählen Sie Ursprung");
   LSTR MSG_LAST_VALUE_SP                  = _UxGT("Letzter Wert ");

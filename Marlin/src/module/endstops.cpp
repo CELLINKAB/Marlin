@@ -50,7 +50,11 @@
   #include "../feature/joystick.h"
 #endif
 
-#if HAS_BED_PROBE && DISABLED(OPTICAL_SURFACE_PROBE)
+#if ENABLED(Z_AXIS_CALIBRATION)
+  #include "../feature/hx_711.h"
+#endif
+
+#if HAS_BED_PROBE
   #include "probe.h"
 #endif
 
@@ -578,7 +582,7 @@ static void print_es_state(const bool is_hit, FSTR_P const flabel=nullptr) {
 
 #pragma GCC diagnostic pop
 
-void __O2 Endstops::report_states() {
+void _O2 Endstops::report_states() {
   TERN_(BLTOUCH, bltouch._set_SW_mode());
   SERIAL_ECHOLNPGM(STR_M119_REPORT);
   #define ES_REPORT(S) print_es_state(READ_ENDSTOP(S##_PIN) != S##_ENDSTOP_INVERTING, F(STR_##S))
@@ -725,7 +729,7 @@ void Endstops::update() {
   #define X_MAX_TEST() TERN1(DUAL_X_CARRIAGE, TERN0(X_HOME_TO_MAX, stepper.last_moved_extruder == 0) || TERN0(X2_HOME_TO_MAX, stepper.last_moved_extruder != 0))
 
   // Use HEAD for core axes, AXIS for others
-  #if ANY(CORE_IS_XY, CORE_IS_XZ, MARKFORGED_XY, MARKFORGED_YX)
+  #if ANY(CORE_IS_XY, CORE_IS_XZ, MARKFORGED_XY, MARKFORGED_XY)
     #define X_AXIS_HEAD X_HEAD
   #else
     #define X_AXIS_HEAD X_AXIS
@@ -1229,6 +1233,9 @@ void Endstops::update() {
         #endif
       }
     }
+    #if ENABLED(Z_AXIS_CALIBRATION)
+      wScale.set_z_min_status(TEST(live_state, EndstopEnum::Z_MIN));
+    #endif
   #endif
 
   #if HAS_I_AXIS

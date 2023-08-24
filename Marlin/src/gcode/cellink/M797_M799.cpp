@@ -8,6 +8,24 @@
 #    include "../../feature/optical_autocal.h"
 #    include "../gcode.h"
 
+void cellink::Reporter::M798::report()
+{
+    cellink::serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
+}
+
+void cellink::Reporter::M799::report()
+{
+    const auto& offset = optical_autocal.offset(active_extruder);
+    cellink::serial_echoln_kv("AT",
+                     active_extruder,
+                     "AUTOCAL_XOFF",
+                     offset.x,
+                     "AUTOCAL_YOFF",
+                     offset.y,
+                     "AUTOCAL_ZOFF",
+                     offset.z);
+}
+
 /**
    * @brief Reset nozzle calibration status, aliases G92.1
    * 
@@ -38,4 +56,15 @@ void GcodeSuite::M799()
     cellink::reporter.m799.report();
 }
 
+#elif ENABLED(CELLINK_REPORTING)
+
+#    include "../../feature/cellink_reporter.h"
+#    include "../gcode.h"
+
+void cellink::Reporter::M798::report() {}
+void cellink::Reporter::M799::report() {}
+
+void GcodeSuite::M797() {}
+void GcodeSuite::M798() {}
+void GcodeSuite::M799() {}
 #endif // CELLINK_REPORTING && OPTICAL_AUTOCAL

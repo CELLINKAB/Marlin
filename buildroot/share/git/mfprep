@@ -11,7 +11,6 @@
 
 SED=$(which gsed sed | head -n1)
 SELF=`basename "$0"`
-DRYRUN=0
 
 [[ $# < 1 || $# > 2 ]] && { echo "Usage $SELF tag1 [tag2]" ; exit 1 ; }
 
@@ -60,6 +59,7 @@ cat "$LOG2" | while read line; do
     PATT=$( $SED -E 's/^\[[0-9a-f]{10}\]( . )?(.+)$/\2/' <<<"$line" )
     [[ -n "$PATT" ]] && { grep -v "$PATT" "$LOGB" >"$TMPF" ; cp "$TMPF" "$LOGB" ; }
   fi
+  [[ -n $PATT ]] && { grep -v "$PATT" "$LOGB" >"$TMPF" ; cp "$TMPF" "$LOGB" ; }
 done
 
 # Convert remaining commits into git commands
@@ -77,4 +77,4 @@ done
 mv "$TMPF" "$SCRF"
 chmod +x "$SCRF"
 
-((DRYRUN)) && rm -r "$TMPDIR" || open "$TMPDIR"
+open "$TMPDIR"

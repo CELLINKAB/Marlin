@@ -542,8 +542,6 @@ void GcodeSuite::M1047() {}
 void GcodeSuite::M1048() {}
 //ChangeSerialBaudrate
 void GcodeSuite::M1050() {}
-//CheckCurrentCompileVersion
-void GcodeSuite::M1051() {}
 //GetPressureAndExtrusionData
 //void GcodeSuite::M1062() {} - MOVED
 //MovePrintheadsUpDownDBG

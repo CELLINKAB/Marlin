@@ -84,7 +84,6 @@ void MarlinUI::init_lcd() { DWIN_Startup(); }
 // This LCD should clear where it will draw anew
 void MarlinUI::clear_lcd() {
   DWIN_ICON_AnimationControl(0x0000); // disable all icon animations
-  DWIN_JPG_ShowAndCache(3);
   DWIN_Frame_Clear(Color_Bg_Black);
   DWIN_UpdateLCD();
 
@@ -94,11 +93,8 @@ void MarlinUI::clear_lcd() {
 #if ENABLED(SHOW_BOOTSCREEN)
 
   void MarlinUI::show_bootscreen() {
+    clear_lcd();
     dwin_string.set(F(SHORT_BUILD_VERSION));
-
-    #if ENABLED(SHOW_CUSTOM_BOOTSCREEN) && !defined(CUSTOM_BOOTSCREEN_TIMEOUT)
-      #define CUSTOM_BOOTSCREEN_TIMEOUT 3000
-    #endif
 
     #if ENABLED(DWIN_MARLINUI_PORTRAIT)
       #define LOGO_CENTER ((LCD_PIXEL_WIDTH) / 2)
@@ -121,6 +117,9 @@ void MarlinUI::clear_lcd() {
       DWIN_ICON_Show(BOOT_ICON, ICON_MarlinURL,  LOGO_CENTER - 100 / 2, 440);
       DWIN_ICON_Show(BOOT_ICON, ICON_Copyright,  LOGO_CENTER - 126 / 2, 460);
     #else
+      #define LOGO_CENTER (280 / 2)
+      #define INFO_CENTER ((LCD_PIXEL_WIDTH) - 200 / 2)
+      #define VERSION_Y   84
       DWIN_ICON_Show(BOOT_ICON, ICON_MarlinBoot, LOGO_CENTER - 266 / 2,  15);
       DWIN_ICON_Show(BOOT_ICON, ICON_OpenSource, INFO_CENTER - 174 / 2,  60);
       DWIN_ICON_Show(BOOT_ICON, ICON_GitHubURL,  INFO_CENTER - 180 / 2, 130);

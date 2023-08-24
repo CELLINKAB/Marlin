@@ -343,12 +343,12 @@ void GcodeSuite::M43() {
       can_watch = true;
       pinMode(pin, INPUT_PULLUP);
       delay(1);
-      /*
-      if (IS_ANALOG(pin))
-        pin_state[pin - first_pin] = analogRead(DIGITAL_PIN_TO_ANALOG_PIN(pin)); // int16_t pin_state[...]
-      else
-      //*/
-        pin_state[i - first_pin] = extDigitalRead(pin);
+        /*
+        if (IS_ANALOG(pin))
+          pin_state[pin - first_pin] = analogRead(DIGITAL_PIN_TO_ANALOG_PIN(pin)); // int16_t pin_state[...]
+        else
+        //*/
+          pin_state[i - first_pin] = extDigitalRead(pin);
     }
 
     const bool multipin = (pin_count > 1);

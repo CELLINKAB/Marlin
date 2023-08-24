@@ -2376,7 +2376,7 @@ void TramC () { Tram(4); }
 
   void Trammingwizard() {
     if (HMI_data.FullManualTramming) {
-      LCD_MESSAGE_F("Disable manual tramming");
+      ui.set_status(F("Disable manual tramming"));
       return;
     }
     bed_mesh_t zval = {0};

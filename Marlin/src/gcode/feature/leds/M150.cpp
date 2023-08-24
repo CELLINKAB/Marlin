@@ -40,7 +40,7 @@
  *  K         Keep all unspecified values unchanged instead of setting to 0.
  *
  * With NEOPIXEL2_SEPARATE:
- *  S<index>  The NeoPixel strip to set. Default: All.
+ *  S<index>  The NeoPixel strip to set. Default is index 0.
  *
  * Examples:
  *

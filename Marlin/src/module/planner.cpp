@@ -1332,7 +1332,7 @@ void Planner::check_axes_activity() {
 
   #if HAS_FAN && DISABLED(LASER_SYNCHRONOUS_M106_M107)
     #define HAS_TAIL_FAN_SPEED 1
-    static uint8_t tail_fan_speed[FAN_COUNT] = ARRAY_N_1(FAN_COUNT, 13);
+    static uint8_t tail_fan_speed[FAN_COUNT] = ARRAY_N_1(FAN_COUNT, 128);
     bool fans_need_update = false;
   #endif
 
@@ -1368,7 +1368,7 @@ void Planner::check_axes_activity() {
 
     #if ANY(DISABLE_X, DISABLE_Y, DISABLE_Z, DISABLE_I, DISABLE_J, DISABLE_K, DISABLE_E)
       for (uint8_t b = block_buffer_tail; b != block_buffer_head; b = next_block_index(b)) {
-        block_t * const bnext = &block_buffer[b];
+        block_t *block = &block_buffer[b];
         LOGICAL_AXIS_CODE(
           if (TERN0(DISABLE_E, bnext->steps.e)) axis_active.e = true,
           if (TERN0(DISABLE_X, bnext->steps.x)) axis_active.x = true,
@@ -1478,12 +1478,12 @@ void Planner::check_axes_activity() {
    * currently in the planner.
    */
   void Planner::autotemp_task() {
-    static float oldt = 0.0f;
+    static float oldt = 0;
 
     if (!autotemp_enabled) return;
     if (thermalManager.degTargetHotend(active_extruder) < autotemp_min - 2) return; // Below the min?
 
-    float high = 0.0f;
+    float high = 0.0;
     for (uint8_t b = block_buffer_tail; b != block_buffer_head; b = next_block_index(b)) {
       const block_t * const block = &block_buffer[b];
       if (NUM_AXIS_GANG(block->steps.x, || block->steps.y, || block->steps.z, || block->steps.i, || block->steps.j, || block->steps.k, || block->steps.u, || block->steps.v, || block->steps.w)) {
@@ -1541,7 +1541,7 @@ void Planner::check_axes_activity() {
     volumetric_extruder_feedrate_limit[e] = (lim && siz) ? lim / CIRCLE_AREA(siz * 0.5f) : 0;
   }
   void Planner::calculate_volumetric_extruder_limits() {
-    EXTRUDER_LOOP() calculate_volumetric_extruder_limit(e);
+    LOOP_L_N(e, EXTRUDERS) calculate_volumetric_extruder_limit(e);
   }
 
 #endif

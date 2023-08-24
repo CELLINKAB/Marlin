@@ -65,7 +65,7 @@ def generate_marlin(semver, majorminiopatch):
  * Define a generic printer name to be output to the LCD after booting Marlin.
  */
 #ifndef MACHINE_NAME
-    #define MACHINE_NAME "Bio Cell X"
+    #define MACHINE_NAME "Cellink Generic Printer"
 #endif
 #ifndef PROTOCOL_VERSION
   #define PROTOCOL_VERSION "1.0"
@@ -158,14 +158,12 @@ def generate_gitversionempty(gv):
     #define VER_CURRENT_COMMIT 0
                     """
 
-
 def generate_env():
     timestamp = datetime.now().strftime("%Y-%m-%d %H.%M")
     if os.getenv('USER'):
         user = os.getenv('USER')
     else:
         user = 'nouser'
-
     if os.getenv('BUILD_TAG'):
         buildtag = os.getenv('BUILD_TAG')
     else:
@@ -223,7 +221,6 @@ def make_versionjson():
     # Writing to sample.json
     with open("version.json", "w") as outfile:
         outfile.write(json_object)
-
 
 if __name__ == "__main__":
     try:

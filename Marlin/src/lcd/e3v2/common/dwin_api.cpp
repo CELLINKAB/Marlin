@@ -25,7 +25,6 @@
 
 #include "dwin_api.h"
 #include "dwin_set.h"
-#include "dwin_font.h"
 
 #include "../../../inc/MarlinConfig.h"
 
@@ -89,40 +88,6 @@ bool DWIN_Handshake() {
     DWIN_Send(i);
   }
 #endif
-
-// Get font character width
-uint8_t fontWidth(uint8_t cfont) {
-  switch (cfont) {
-    case font6x12 : return 6;
-    case font8x16 : return 8;
-    case font10x20: return 10;
-    case font12x24: return 12;
-    case font14x28: return 14;
-    case font16x32: return 16;
-    case font20x40: return 20;
-    case font24x48: return 24;
-    case font28x56: return 28;
-    case font32x64: return 32;
-    default: return 0;
-  }
-}
-
-// Get font character height
-uint8_t fontHeight(uint8_t cfont) {
-  switch (cfont) {
-    case font6x12 : return 12;
-    case font8x16 : return 16;
-    case font10x20: return 20;
-    case font12x24: return 24;
-    case font14x28: return 28;
-    case font16x32: return 32;
-    case font20x40: return 40;
-    case font24x48: return 48;
-    case font28x56: return 56;
-    case font32x64: return 64;
-    default: return 0;
-  }
-}
 
 // Set screen display direction
 //  dir: 0=0°, 1=90°, 2=180°, 3=270°

@@ -623,7 +623,7 @@
 #elif defined(NOZZLE_PARK_X_ONLY)
   #error "NOZZLE_PARK_X_ONLY is now NOZZLE_PARK_MOVE 1."
 #elif defined(NOZZLE_PARK_Y_ONLY)
-  #error "NOZZLE_PARK_Y_ONLY is now NOZZLE_PARK_MOVE 2."
+  #error "NOZZLE_PARK_X_ONLY is now NOZZLE_PARK_MOVE 2."
 #elif defined(Z_STEPPER_ALIGN_KNOWN_STEPPER_POSITIONS)
   #error "Z_STEPPER_ALIGN_KNOWN_STEPPER_POSITIONS is now just Z_STEPPER_ALIGN_STEPPER_XY."
 #elif defined(DWIN_CREALITY_LCD_ENHANCED)
@@ -860,6 +860,15 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
   #endif
 #endif
 
+#if !defined(TARGET_LPC1768) && ANY( \
+    ENDSTOPPULLDOWNS, \
+    ENDSTOPPULLDOWN_XMAX, ENDSTOPPULLDOWN_YMAX, \
+    ENDSTOPPULLDOWN_ZMAX, ENDSTOPPULLDOWN_XMIN, \
+    ENDSTOPPULLDOWN_YMIN, ENDSTOPPULLDOWN_ZMIN \
+  )
+  #error "PULLDOWN pin mode is not available on the selected board."
+#endif
+
 #if BOTH(ENDSTOPPULLUPS, ENDSTOPPULLDOWNS)
   #error "Enable only one of ENDSTOPPULLUPS or ENDSTOPPULLDOWNS."
 #elif BOTH(FIL_RUNOUT_PULLUP, FIL_RUNOUT_PULLDOWN)
@@ -949,7 +958,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
 /**
  * Custom Boot and Status screens
  */
-#if ENABLED(SHOW_CUSTOM_BOOTSCREEN) && NONE(HAS_MARLINUI_U8GLIB, TOUCH_UI_FTDI_EVE, IS_DWIN_MARLINUI)
+#if ENABLED(SHOW_CUSTOM_BOOTSCREEN) && NONE(HAS_MARLINUI_U8GLIB, TOUCH_UI_FTDI_EVE)
   #error "SHOW_CUSTOM_BOOTSCREEN requires Graphical LCD or TOUCH_UI_FTDI_EVE."
 #elif ENABLED(SHOW_CUSTOM_BOOTSCREEN) && DISABLED(SHOW_BOOTSCREEN)
   #error "SHOW_CUSTOM_BOOTSCREEN requires SHOW_BOOTSCREEN."
@@ -1132,8 +1141,8 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
 /**
  * Instant Freeze
  */
-#if ENABLED(FREEZE_FEATURE) && !(PIN_EXISTS(FREEZE) && defined(FREEZE_STATE))
-  #error "FREEZE_FEATURE requires both FREEZE_PIN and FREEZE_STATE."
+#if ENABLED(FREEZE_FEATURE) && !PIN_EXISTS(FREEZE)
+  #error "FREEZE_FEATURE requires a FREEZE_PIN to be defined."
 #endif
 
 /**
@@ -1243,9 +1252,6 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
 #elif ENABLED(SINGLENOZZLE)
 
   #error "SINGLENOZZLE requires 2 or more EXTRUDERS."
-  #if ENABLED(PID_PARAMS_PER_HOTEND)
-    #error "PID_PARAMS_PER_HOTEND must be disabled when using any SINGLENOZZLE extruder."
-  #endif
 
 #endif
 
@@ -1257,8 +1263,6 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
     #error "SWITCHING_NOZZLE and DUAL_X_CARRIAGE are incompatible."
   #elif ENABLED(SINGLENOZZLE)
     #error "SWITCHING_NOZZLE and SINGLENOZZLE are incompatible."
-  #elif HAS_PRUSA_MMU2
-    #error "SWITCHING_NOZZLE and PRUSA_MMU2(S) are incompatible."
   #elif EXTRUDERS != 2
     #error "SWITCHING_NOZZLE requires exactly 2 EXTRUDERS."
   #elif NUM_SERVOS < 1
@@ -1410,14 +1414,6 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
       #error "PARKING_EXTRUDER_SOLENOIDS_DELAY must be between 0 and 2000 (ms)."
     #endif
   #endif
-#endif
-
-/**
- * Generic Switching Toolhead requirements
- */
-#if ANY(SWITCHING_TOOLHEAD, MAGNETIC_SWITCHING_TOOLHEAD, ELECTROMAGNETIC_SWITCHING_TOOLHEAD)
-  constexpr float thpx[] = SWITCHING_TOOLHEAD_X_POS;
-  static_assert(COUNT(thpx) == EXTRUDERS, "SWITCHING_TOOLHEAD_X_POS must be an array EXTRUDERS long.");
 #endif
 
 /**
@@ -2661,7 +2657,7 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
 #endif
 
 /**
- * FYSETC/MKS/BTT Mini Panel Requirements
+ * FYSETC LCD Requirements
  */
 #if EITHER(FYSETC_242_OLED_12864, FYSETC_MINI_12864_2_1)
   #ifndef NEO_RGB
@@ -2669,15 +2665,15 @@ static_assert(X_MAX_LENGTH >= X_BED_SIZE, "Movement bounds (X_MIN_POS, X_MAX_POS
     #define FAUX_RGB 1
   #endif
   #if defined(NEOPIXEL_TYPE) && NEOPIXEL_TYPE != NEO_RGB
-    #error "Your FYSETC/MKS/BTT Mini Panel requires NEOPIXEL_TYPE to be NEO_RGB."
+    #error "Your FYSETC Mini Panel requires NEOPIXEL_TYPE to be NEO_RGB."
   #elif defined(NEOPIXEL_PIXELS) && NEOPIXEL_PIXELS < 3
-    #error "Your FYSETC/MKS/BTT Mini Panel requires NEOPIXEL_PIXELS >= 3."
+    #error "Your FYSETC Mini Panel requires NEOPIXEL_PIXELS >= 3."
   #endif
   #if FAUX_RGB
     #undef NEO_RGB
     #undef FAUX_RGB
   #endif
-#elif EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0) && DISABLED(RGB_LED)
+#elif EITHER(FYSETC_MINI_12864_1_2, FYSETC_MINI_12864_2_0) && !DISABLED(RGB_LED)
   #error "Your FYSETC Mini Panel requires RGB_LED."
 #endif
 

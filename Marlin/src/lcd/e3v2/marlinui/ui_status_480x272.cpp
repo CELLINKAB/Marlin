@@ -175,16 +175,16 @@ FORCE_INLINE void _draw_heater_status(const heater_id_t heater, const uint16_t x
       #define HOTEND_STATS 3
     #elif HOTENDS > 1
       #define HOTEND_STATS 2
-    #else
+    #elif HAS_HOTEND
       #define HOTEND_STATS 1
     #endif
-    static celsius_t old_temp[HOTEND_STATS] = { 0 },
-                   old_target[HOTEND_STATS] = { 0 };
-    static bool old_on[HOTEND_STATS] = { false };
+    static celsius_t old_temp[HOTEND_STATS] = ARRAY_N_1(HOTEND_STATS, 500),
+                     old_target[HOTEND_STATS] = ARRAY_N_1(HOTEND_STATS, 500);
+    static bool old_on[HOTEND_STATS] = ARRAY_N_1(HOTEND_STATS, false);
   #endif
 
   #if HAS_HEATED_BED
-    static celsius_t old_bed_temp = 0, old_bed_target = 0;
+    static celsius_t old_bed_temp = 500, old_bed_target = 500;
     static bool old_bed_on = false;
     #if HAS_LEVELING
       static bool old_leveling_on = false;
@@ -391,30 +391,29 @@ void MarlinUI::draw_status_screen() {
   //
   // Progress Bar
   //
-  #if HAS_PRINT_PROGRESS
-    constexpr int16_t pb_margin = 5,
-                      pb_left = pb_margin + TERN(DWIN_MARLINUI_PORTRAIT, 0, 90),
-                      pb_height = TERN(DWIN_MARLINUI_PORTRAIT, 60, 20),
-                      pb_right = LCD_PIXEL_WIDTH - pb_margin,
-                      pb_bottom = TERN(DWIN_MARLINUI_PORTRAIT, 410, 220),
-                      pb_top = pb_bottom - pb_height,
-                      pb_width = pb_right - pb_left;
+  constexpr int16_t pb_margin = 5,
+                    pb_left = pb_margin + TERN(DWIN_MARLINUI_PORTRAIT, 0, 90),
+                    pb_height = TERN(DWIN_MARLINUI_PORTRAIT, 60, 20),
+                    pb_right = LCD_PIXEL_WIDTH - pb_margin,
+                    pb_bottom = TERN(DWIN_MARLINUI_PORTRAIT, 410, 220),
+                    pb_top = pb_bottom - pb_height,
+                    pb_width = pb_right - pb_left;
 
-    const progress_t progress = TERN(HAS_PRINT_PROGRESS_PERMYRIAD, get_progress_permyriad, get_progress_percent)();
+  const progress_t progress = TERN(HAS_PRINT_PROGRESS_PERMYRIAD, get_progress_permyriad, get_progress_percent)();
 
-    if (!ui.did_first_redraw)
-      DWIN_Draw_Rectangle(0, Select_Color, pb_left, pb_top, pb_right, pb_bottom);   // Outline
+  if (!ui.did_first_redraw)
+    DWIN_Draw_Rectangle(0, Select_Color, pb_left, pb_top, pb_right, pb_bottom);   // Outline
 
-    static uint16_t old_solid = 50;
-    const uint16_t pb_solid = (pb_width - 2) * (progress / (PROGRESS_SCALE)) * 0.01f;
-    const bool p_draw = !ui.did_first_redraw || old_solid != pb_solid;
+  static uint16_t old_solid = 50;
+  const uint16_t pb_solid = (pb_width - 2) * (progress / (PROGRESS_SCALE)) * 0.01f;
+  const bool p_draw = !ui.did_first_redraw || old_solid != pb_solid;
 
-    if (p_draw) {
-      //if (pb_solid)
-        DWIN_Draw_Rectangle(1, Select_Color, pb_left + 1, pb_top + 1, pb_left + pb_solid, pb_bottom - 1); // Fill the solid part
+  if (p_draw) {
+    //if (pb_solid)
+      DWIN_Draw_Rectangle(1, Select_Color, pb_left + 1, pb_top + 1, pb_left + pb_solid, pb_bottom - 1); // Fill the solid part
 
-      //if (pb_solid < old_solid)
-        DWIN_Draw_Rectangle(1, Color_Bg_Black, pb_left + 1 + pb_solid, pb_top + 1, pb_right - 1, pb_bottom - 1); // Erase the rest
+    //if (pb_solid < old_solid)
+      DWIN_Draw_Rectangle(1, Color_Bg_Black, pb_left + 1 + pb_solid, pb_top + 1, pb_right - 1, pb_bottom - 1); // Erase the rest
 
       #if ENABLED(SHOW_PROGRESS_PERCENT)
         dwin_string.set(TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
@@ -427,9 +426,8 @@ void MarlinUI::draw_status_screen() {
         );
       #endif
 
-      old_solid = pb_solid;
-    }
-  #endif // HAS_PRINT_PROGRESS
+    old_solid = pb_solid;
+  }
 
   //
   // Status Message

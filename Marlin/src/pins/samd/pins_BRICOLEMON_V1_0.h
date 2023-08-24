@@ -48,7 +48,7 @@
  */
 //#define FLASH_EEPROM_EMULATION
 #define I2C_EEPROM                                // EEPROM on I2C-0
-#define MARLIN_EEPROM_SIZE               0x10000  // 64K (CAT24C512)
+#define MARLIN_EEPROM_SIZE               0x70000  // 512K (CAT24C512)
 
 //This its another option to emulate an EEPROM, but its more efficient to dont loose the data the first One.
 //#define SDCARD_EEPROM_EMULATION
@@ -490,7 +490,7 @@
 
       #elif ENABLED(FYSETC_MINI_12864)
 
-        // From https://wiki.fysetc.com/Mini12864_Panel/
+        // From https://wiki.fysetc.com/Mini12864_Panel/?fbclid=IwAR1FyjuNdVOOy9_xzky3qqo_WeM5h-4gpRnnWhQr_O1Ef3h0AFnFXmCehK8
 
         // TO TEST
         //#define DOGLCD_A0                   16

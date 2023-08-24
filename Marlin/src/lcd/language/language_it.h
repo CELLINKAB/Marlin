@@ -71,7 +71,6 @@ namespace Language_it {
   LSTR MSG_DISABLE_STEPPERS               = _UxGT("Disabilita Motori");
   LSTR MSG_DEBUG_MENU                     = _UxGT("Menu di debug");
   LSTR MSG_PROGRESS_BAR_TEST              = _UxGT("Test barra avanzam.");
-  LSTR MSG_HOMING                         = _UxGT("Azzeramento");
   LSTR MSG_AUTO_HOME                      = _UxGT("Auto Home");
   LSTR MSG_AUTO_HOME_A                    = _UxGT("Home @");
   LSTR MSG_AUTO_HOME_X                    = _UxGT("Home X");
@@ -156,17 +155,14 @@ namespace Language_it {
   LSTR MSG_MOVE_AXIS                      = _UxGT("Muovi Asse");
   LSTR MSG_BED_LEVELING                   = _UxGT("Livella piano");
   LSTR MSG_LEVEL_BED                      = _UxGT("Livella piano");
-  LSTR MSG_BED_TRAMMING                   = _UxGT("Tarat.fine piano");
-  LSTR MSG_BED_TRAMMING_MANUAL            = _UxGT("Tarat.fine Manuale");
+  LSTR MSG_BED_TRAMMING                   = _UxGT("Tramming piano");
   LSTR MSG_BED_TRAMMING_RAISE             = _UxGT("Regola la vite finché la sonda non rileva il piano.");
   LSTR MSG_BED_TRAMMING_IN_RANGE          = _UxGT("Tolleranza raggiunta su tutti gli angoli. Piano livellato!");
   LSTR MSG_BED_TRAMMING_GOOD_POINTS       = _UxGT("Punti buoni: ");
   LSTR MSG_BED_TRAMMING_LAST_Z            = _UxGT("Ultimo Z: ");
   LSTR MSG_NEXT_CORNER                    = _UxGT("Prossimo punto");
   LSTR MSG_MESH_EDITOR                    = _UxGT("Editor Mesh");
-  LSTR MSG_MESH_VIEWER                    = _UxGT("Visualiz. Mesh");
   LSTR MSG_EDIT_MESH                      = _UxGT("Modifica Mesh");
-  LSTR MSG_MESH_VIEW                      = _UxGT("Visualizza Mesh");
   LSTR MSG_EDITING_STOPPED                = _UxGT("Modif. Mesh Fermata");
   LSTR MSG_NO_VALID_MESH                  = _UxGT("Mesh non valida");
   LSTR MSG_ACTIVATE_MESH                  = _UxGT("Attiva livellamento");
@@ -257,7 +253,7 @@ namespace Language_it {
   LSTR MSG_UBL_MESH_INVALID               = _UxGT("Mesh non valida");
   LSTR MSG_UBL_INVALIDATE_ALL             = _UxGT("Invalida Tutto");
   LSTR MSG_UBL_INVALIDATE_CLOSEST         = _UxGT("Invalid.Punto Vicino");
-  LSTR MSG_UBL_FINE_TUNE_ALL              = _UxGT("Ritocca Tutto");
+  LSTR MSG_UBL_FINE_TUNE_ALL              = _UxGT("Ritocca All");
   LSTR MSG_UBL_FINE_TUNE_CLOSEST          = _UxGT("Ritocca Punto Vicino");
   LSTR MSG_UBL_STORAGE_MESH_MENU          = _UxGT("Mesh Salvate");
   LSTR MSG_UBL_STORAGE_SLOT               = _UxGT("Slot di memoria");
@@ -358,7 +354,7 @@ namespace Language_it {
   LSTR MSG_LCD_ON                         = _UxGT("On");
   LSTR MSG_LCD_OFF                        = _UxGT("Off");
   LSTR MSG_PID_AUTOTUNE                   = _UxGT("Calibrazione PID");
-  LSTR MSG_PID_AUTOTUNE_E                 = _UxGT("Calib.PID *");
+  LSTR MSG_PID_AUTOTUNE_E                 = _UxGT("Calibraz. PID *");
   LSTR MSG_PID_CYCLE                      = _UxGT("Ciclo PID");
   LSTR MSG_PID_AUTOTUNE_DONE              = _UxGT("Calibr.PID eseguita");
   LSTR MSG_PID_AUTOTUNE_FAILED            = _UxGT("Calibr.PID fallito!");
@@ -476,8 +472,6 @@ namespace Language_it {
   LSTR MSG_BUTTON_RESET                   = _UxGT("Resetta");
   LSTR MSG_BUTTON_IGNORE                  = _UxGT("Ignora");
   LSTR MSG_BUTTON_CANCEL                  = _UxGT("Annulla");
-  LSTR MSG_BUTTON_CONFIRM                 = _UxGT("Conferma");
-  LSTR MSG_BUTTON_CONTINUE                = _UxGT("Continua");
   LSTR MSG_BUTTON_DONE                    = _UxGT("Fatto");
   LSTR MSG_BUTTON_BACK                    = _UxGT("Indietro");
   LSTR MSG_BUTTON_PROCEED                 = _UxGT("Procedi");
@@ -491,7 +485,6 @@ namespace Language_it {
   LSTR MSG_BUTTON_PURGE                   = _UxGT("Spurga");
   LSTR MSG_PAUSING                        = _UxGT("Messa in pausa...");
   LSTR MSG_PAUSE_PRINT                    = _UxGT("Pausa stampa");
-  LSTR MSG_ADVANCED_PAUSE                 = _UxGT("Pausa Avanzata");
   LSTR MSG_RESUME_PRINT                   = _UxGT("Riprendi stampa");
   LSTR MSG_HOST_START_PRINT               = _UxGT("Host Avvio");
   LSTR MSG_STOP_PRINT                     = _UxGT("Arresta stampa");
@@ -500,15 +493,12 @@ namespace Language_it {
   LSTR MSG_CANCEL_OBJECT                  = _UxGT("Cancella Oggetto");
   LSTR MSG_CANCEL_OBJECT_N                = _UxGT("Canc. Oggetto =");
   LSTR MSG_OUTAGE_RECOVERY                = _UxGT("Ripresa da PowerLoss");
-  LSTR MSG_CONTINUE_PRINT_JOB             = _UxGT("Cont.proc.stampa");
   LSTR MSG_MEDIA_MENU                     = _UxGT("Stampa da media");
   LSTR MSG_NO_MEDIA                       = _UxGT("Media non presente");
   LSTR MSG_DWELL                          = _UxGT("Sospensione...");
   LSTR MSG_USERWAIT                       = _UxGT("Premi tasto..");
   LSTR MSG_PRINT_PAUSED                   = _UxGT("Stampa sospesa");
   LSTR MSG_PRINTING                       = _UxGT("Stampa...");
-  LSTR MSG_STOPPING                       = _UxGT("Fermata...");
-  LSTR MSG_REMAINING_TIME                 = _UxGT("Rimanente");
   LSTR MSG_PRINT_ABORTED                  = _UxGT("Stampa Annullata");
   LSTR MSG_PRINT_DONE                     = _UxGT("Stampa Eseguita");
   LSTR MSG_PRINTER_KILLED                 = _UxGT("Stampante uccisa!");
@@ -563,7 +553,6 @@ namespace Language_it {
   LSTR MSG_BLTOUCH_RESET                  = _UxGT("Resetta BLTouch");
   LSTR MSG_BLTOUCH_DEPLOY                 = _UxGT("Estendi BLTouch");
   LSTR MSG_BLTOUCH_SW_MODE                = _UxGT("BLTouch modo SW");
-  LSTR MSG_BLTOUCH_SPEED_MODE             = _UxGT("Alta Velocità");
   LSTR MSG_BLTOUCH_5V_MODE                = _UxGT("BLTouch modo 5V");
   LSTR MSG_BLTOUCH_OD_MODE                = _UxGT("BLTouch modo OD");
   LSTR MSG_BLTOUCH_MODE_STORE             = _UxGT("BLTouch modo mem.");
@@ -600,7 +589,6 @@ namespace Language_it {
   LSTR MSG_HEATING_FAILED_LCD             = _UxGT("Risc.Fallito");   // Max 12 characters
   LSTR MSG_ERR_REDUNDANT_TEMP             = _UxGT("Err: TEMP RIDONDANTE");
   LSTR MSG_THERMAL_RUNAWAY                = _UxGT("TEMP FUORI CONTROLLO");
-  LSTR MSG_TEMP_MALFUNCTION               = _UxGT("MALFUNZIONAMENTO TEMP");
   LSTR MSG_THERMAL_RUNAWAY_BED            = _UxGT("TEMP PIAT.FUORI CTRL");
   LSTR MSG_THERMAL_RUNAWAY_CHAMBER        = _UxGT("T.CAMERA FUORI CTRL");
   LSTR MSG_THERMAL_RUNAWAY_COOLER         = _UxGT("RAFFREDAM.FUORI CTRL");
@@ -608,7 +596,6 @@ namespace Language_it {
   LSTR MSG_ERR_MAXTEMP                    = _UxGT("Err: TEMP MASSIMA");
   LSTR MSG_ERR_MINTEMP                    = _UxGT("Err: TEMP MINIMA");
   LSTR MSG_HALTED                         = _UxGT("STAMPANTE FERMATA");
-  LSTR MSG_PLEASE_WAIT                    = _UxGT("Attendere prego...");
   LSTR MSG_PLEASE_RESET                   = _UxGT("Riavviare prego");
   LSTR MSG_PREHEATING                     = _UxGT("Preriscaldamento...");
   LSTR MSG_HEATING                        = _UxGT("Riscaldamento...");
@@ -829,10 +816,6 @@ namespace Language_it {
   LSTR MSG_PROBE_WIZARD                   = _UxGT("Wizard Z offset");
   LSTR MSG_PROBE_WIZARD_PROBING           = _UxGT("Altezza di riferimento sonda");
   LSTR MSG_PROBE_WIZARD_MOVING            = _UxGT("Spostati in posizione di rilevazione");
-
-  LSTR MSG_XATC                           = _UxGT("Proc.guid.X-Twist");
-  LSTR MSG_XATC_DONE                      = _UxGT("Proc.guid.X-Twist eseg.!");
-  LSTR MSG_XATC_UPDATE_Z_OFFSET           = _UxGT("Agg.Offset-Z sonda a ");
 
   LSTR MSG_SOUND                          = _UxGT("Suoni");
 

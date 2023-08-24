@@ -228,8 +228,8 @@
  * M350 - Set microstepping mode. (Requires digital microstepping pins.)
  * M351 - Toggle MS1 MS2 pins directly. (Requires digital microstepping pins.)
  * M355 - Set Case Light on/off and set brightness. (Requires CASE_LIGHT_PIN)
- * M380 - Activate solenoid on active tool (Requires EXT_SOLENOID) or the tool specified by 'S' (Requires MANUAL_SOLENOID_CONTROL).
- * M381 - Disable solenoids on all tools (Requires EXT_SOLENOID) or the tool specified by 'S' (Requires MANUAL_SOLENOID_CONTROL).
+ * M380 - Activate solenoid on active extruder. (Requires EXT_SOLENOID)
+ * M381 - Disable all solenoids. (Requires EXT_SOLENOID)
  * M400 - Finish all moves.
  * M401 - Deploy and activate Z probe. (Requires a probe)
  * M402 - Deactivate and stow Z probe. (Requires a probe)
@@ -1164,6 +1164,10 @@ private:
     static void M702();
   #endif
 
+  #if ENABLED(UV_LED_STERILIZATION)
+    static void M806();
+  #endif
+
   #if ENABLED(GCODE_REPEAT_MARKERS)
     static void M808();
   #endif
@@ -1298,11 +1302,21 @@ private:
     static void M710_report(const bool forReplay=true);
   #endif
 
+  #if ENABLED(HX711_WSCALE)
+    static void M7110();
+    static void M7111();
+    static void M7112();
+    static void M7110_report(const bool forReplay=true);
+  #endif
+
   #if ENABLED(CELLINK_REPORTING)
+    static void M772(); // get hotend temp
+
     static void M797(); // reset nozzle calibration
     static void M798(); // get tool calibration status
     static void M799(); // get tool calibration offsets
 
+    static void M800(); // disable bed temp control
     static void M801(); // set printbed temp
     static void M802(); // get printbed temp
 
@@ -1314,6 +1328,8 @@ private:
     static void M1016(); // get current machine position
 
     static void M1017(); // multi-line status report
+
+    static void M1051(); // report version
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
@@ -1353,7 +1369,6 @@ private:
     static void M753();
     static void M770();
     static void M771();
-    static void M772();
     static void M773();
     static void M774();
     static void M777();
@@ -1375,16 +1390,8 @@ private:
     static void M794();
     static void M795();
     static void M796();
-    // static void M797();
-    // static void M798();
-    // static void M799();
-    static void M800();
-    // static void M801();
-    // static void M802();
     static void M803();
     static void M804();
-    // static void M805(); // UV crosslinking
-    // static void M806(); // UVC sterilization
     static void M807();
     static void M808();
     static void M810();
@@ -1394,10 +1401,8 @@ private:
     static void M817();
     static void M818();
     static void M819();
-    // static void M821();
     static void M822();
     static void M823();
-    // static void M824();
     static void M825();
     static void M826();
     static void M830();
@@ -1419,9 +1424,6 @@ private:
     static void M1006();
     static void M1008();
     static void M1012();
-    // static void M1015();
-    // static void M1016();
-    // static void M1017();
     static void M1018();
     static void M1020();
     static void M1023();
@@ -1431,7 +1433,6 @@ private:
     static void M1034();
     static void M1035();
     static void M1035_report(bool for_replay);
-    //static void M1036();
     static void M1037();
     static void M1038();
     static void M1039();
@@ -1442,7 +1443,6 @@ private:
     static void M1047();
     static void M1048();
     static void M1050();
-    static void M1051();
     static void M1063();
     static void M1064();
     static void M1065();

@@ -74,7 +74,6 @@
 // Types
 // ------------------------
 
-typedef double isr_float_t;   // FPU ops are used for single-precision, so use double for ISRs.
 typedef int16_t pin_t;
 
 typedef struct pwm_pin {
@@ -95,8 +94,8 @@ typedef Servo hal_servo_t;
 //
 void tone(const pin_t _pin, const unsigned int frequency, const unsigned long duration=0);
 void noTone(const pin_t _pin);
-int8_t get_pwm_channel(const pin_t pin, const uint32_t freq, const uint16_t res);
-void analogWrite(const pin_t pin, const uint16_t value, const uint32_t freq=PWM_FREQUENCY, const uint16_t res=8);
+
+void analogWrite(pin_t pin, int value);
 
 //
 // Pin Mapping for M42, M43, M226
@@ -218,7 +217,7 @@ public:
   // Called by Temperature::init for each sensor at startup
   static void adc_enable(const pin_t pin) {}
 
-  // Begin ADC sampling on the given pin. Called from Temperature::isr!
+  // Begin ADC sampling on the given channel
   static void adc_start(const pin_t pin);
 
   // Is the ADC ready for reading?
@@ -228,17 +227,12 @@ public:
   static uint16_t adc_value() { return adc_result; }
 
   /**
-   * If not already allocated, allocate a hardware PWM channel
-   * to the pin and set the duty cycle..
-   * Optionally invert the duty cycle [default = false]
-   * Optionally change the scale of the provided value to enable finer PWM duty control [default = 255]
+   * Set the PWM duty cycle for the pin to the given value.
+   * No inverting the duty cycle in this HAL.
+   * No changing the maximum size of the provided value to enable finer PWM duty control in this HAL.
    */
-  static void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t v_size=255, const bool invert=false);
-
-  /**
-   * Allocate and set the frequency of a hardware PWM pin
-   * Returns -1 if no pin available.
-   */
-  static int8_t set_pwm_frequency(const pin_t pin, const uint32_t f_desired);
+  static void set_pwm_duty(const pin_t pin, const uint16_t v, const uint16_t=255, const bool=false) {
+    analogWrite(pin, v);
+  }
 
 };

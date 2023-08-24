@@ -7,17 +7,6 @@ import serial
 
 Import("env")
 
-# Needed (only) for compression, but there are problems with pip install heatshrink
-#try:
-#    import heatshrink
-#except ImportError:
-#    # Install heatshrink
-#    print("Installing 'heatshrink' python module...")
-#    env.Execute(env.subst("$PYTHONEXE -m pip install heatshrink"))
-#
-# Not tested: If it's safe to install python libraries in PIO python try:
-#    env.Execute(env.subst("$PYTHONEXE -m pip install https://github.com/p3p/pyheatshrink/releases/download/0.3.3/pyheatshrink-pip.zip"))
-
 import MarlinBinaryProtocol
 
 #-----------------#

@@ -71,6 +71,10 @@
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
+#if ENABLED(HX711_WSCALE)
+  #include "../../feature/hx_711.h"
+#endif
+
 #if ENABLED(QUICK_HOME)
 
   static void quick_home_xy() {
@@ -104,10 +108,14 @@
     current_position.set(0.0, 0.0);
 
     #if ENABLED(SENSORLESS_HOMING) && DISABLED(ENDSTOPS_ALWAYS_ON_DEFAULT)
-      TERN_(X_SENSORLESS, tmc_disable_stallguard(stepperX, stealth_states.x));
-      TERN_(X2_SENSORLESS, tmc_disable_stallguard(stepperX2, stealth_states.x2));
-      TERN_(Y_SENSORLESS, tmc_disable_stallguard(stepperY, stealth_states.y));
-      TERN_(Y2_SENSORLESS, tmc_disable_stallguard(stepperY2, stealth_states.y2));
+      tmc_disable_stallguard(stepperX, stealth_states.x);
+      tmc_disable_stallguard(stepperY, stealth_states.y);
+      #if AXIS_HAS_STALLGUARD(X2)
+        tmc_disable_stallguard(stepperX2, stealth_states.x2);
+      #endif
+      #if AXIS_HAS_STALLGUARD(Y2)
+        tmc_disable_stallguard(stepperY2, stealth_states.y2);
+      #endif
     #endif
   }
 
@@ -249,6 +257,29 @@ void GcodeSuite::G28() {
   TERN_(EXTENSIBLE_UI, ExtUI::onHomingStart());
 
   planner.synchronize();          // Wait for planner moves to finish!
+
+  #if ENABLED(Z_AXIS_CALIBRATION)
+    set_homing_calibration(false);
+    if(parser.seen_test('Z') && parser.seen_test('C')) {
+      if(!axis_was_homed(Z_AXIS)) {
+        SERIAL_ECHOLNPGM("ERR_ZCALIB_NOT_HOMED");
+        return;
+      }
+      set_homing_calibration(true);
+    }
+    SERIAL_ECHOLNPGM("HOME: 0");
+  #endif
+
+  #if ENABLED(HX711_WSCALE)
+    float t_output;
+    wScale.tare_start();
+    SERIAL_ECHOLNPGM("echo: wScale: Tare started...");
+    while( wScale.tare_ready(t_output) == false ) {
+      idle();
+    }
+    wScale.enable_out(true);
+    wScale.set_crash_detection(true);
+  #endif
 
   SET_SOFT_ENDSTOP_LOOSE(false);  // Reset a leftover 'loose' motion state
 

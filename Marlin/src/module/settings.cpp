@@ -172,6 +172,10 @@
   #include "../lcd/extui/dgus/DGUSDisplayDef.h"
 #endif
 
+#if ENABLED(HX711_WSCALE)
+  #include "../feature/hx_711.h"
+#endif
+
 #pragma pack(push, 1) // No padding between variables
 
 #if HAS_ETHERNET
@@ -304,9 +308,7 @@ typedef struct SettingsDataStruct {
   // X_AXIS_TWIST_COMPENSATION
   //
   #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-    float xatc_spacing;                                 // M423 X Z
-    float xatc_start;
-    xatc_array_t xatc_z_offset;
+    XATC xatc;                                          // M423 X Z
   #endif
 
   //
@@ -429,7 +431,7 @@ typedef struct SettingsDataStruct {
   uint8_t lcd_brightness;                               // M256 B
 
   //
-  // Display Sleep
+  // LCD_BACKLIGHT_TIMEOUT
   //
   #if LCD_BACKLIGHT_TIMEOUT_MINS
     uint8_t backlight_timeout_minutes;                  // M255 S
@@ -586,7 +588,7 @@ typedef struct SettingsDataStruct {
   // MKS UI controller
   //
   #if ENABLED(DGUS_LCD_UI_MKS)
-    MKS_Language mks_language_index;                    // Display Language
+    uint8_t mks_language_index;                         // Display Language
     xy_int_t mks_corner_offsets[5];                     // Bed Tramming
     xyz_int_t mks_park_pos;                             // Custom Parking (without NOZZLE_PARK)
     celsius_t mks_min_extrusion_temp;                   // Min E Temp (shadow M302 value)
@@ -596,10 +598,33 @@ typedef struct SettingsDataStruct {
     uint8_t ui_language;                                // M414 S
   #endif
 
+  //
+  // Strain Gauge
+  //
+  #if ENABLED(HX711_WSCALE)
+    float wscale_scale;                                 // Slope/scale parameter
+    float wscale_th_weigth;                             // Threshold
+    uint8_t wscale_channel;                             // ADC channel/gain
+    int8_t wscale_scaledir;                             // Direction of the force
+  #endif
+
+  //
+  // Printbed temperature correction
+  //
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    float bed_temp_compensation[2];
+  #endif
+
+  //
+  // Stepper Retracting Probe
+  //
   #if ENABLED(STEPPER_RETRACTING_PROBE)
     StepperRetractingProbe::Config srp_conf;
   #endif
 
+  //
+  // Pneumatics
+  //
   #if ENABLED(FESTO_PNEUMATICS)
     float vacuum_sensor_offset;
     float vacuum_sensor_gain;
@@ -1025,7 +1050,7 @@ void MarlinSettings::postprocess() {
     // X Axis Twist Compensation
     //
     #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-      _FIELD_TEST(xatc_spacing);
+      _FIELD_TEST(xatc);
       EEPROM_WRITE(xatc.spacing);
       EEPROM_WRITE(xatc.start);
       EEPROM_WRITE(xatc.z_offset);
@@ -1239,7 +1264,7 @@ void MarlinSettings::postprocess() {
     }
 
     //
-    // LCD Backlight / Sleep Timeout
+    // LCD Backlight Timeout
     //
     #if LCD_BACKLIGHT_TIMEOUT_MINS
       EEPROM_WRITE(ui.backlight_timeout_minutes);
@@ -1255,7 +1280,7 @@ void MarlinSettings::postprocess() {
       #if ENABLED(USE_CONTROLLER_FAN)
         const controllerFan_settings_t &cfs = controllerFan.settings;
       #else
-        constexpr controllerFan_settings_t cfs = controllerFan_defaults;
+        controllerFan_settings_t cfs = controllerFan_defaults;
       #endif
       EEPROM_WRITE(cfs);
     }
@@ -1779,6 +1804,36 @@ void MarlinSettings::postprocess() {
     #endif
 
     //
+    // Strain Gauge
+    //
+    #if ENABLED(HX711_WSCALE)
+      _FIELD_TEST(wscale_scale);
+      float wsc_scale, wsc_threshold;
+      uint8_t wsc_channel;
+      int8_t wsc_scaledir;
+      // read settings
+      wsc_scale = wScale.getScale();
+      wsc_threshold = wScale.getThreshold();
+      wsc_channel = wScale.getChannel();
+      wsc_scaledir = wScale.getScaleDir();
+      // write settings
+      EEPROM_WRITE(wsc_scale);
+      EEPROM_WRITE(wsc_threshold);
+      EEPROM_WRITE(wsc_channel);
+      EEPROM_WRITE(wsc_scaledir);
+    #endif
+
+    //
+    // Printbed temperature correction
+    //
+    #if ENABLED(BED_TEMP_COMPENSATION)
+      _FIELD_TEST(bed_temp_compensation);
+      EEPROM_WRITE(thermalManager.temp_bed.offset);
+      EEPROM_WRITE(thermalManager.temp_bed.scale);
+    #endif
+
+
+    //
     // Report final CRC and Data Size
     //
     if (eeprom_error == ERR_EEPROM_NOERR) {
@@ -2083,6 +2138,9 @@ void MarlinSettings::postprocess() {
         #endif // AUTO_BED_LEVELING_BILINEAR
           {
             // Skip past disabled (or stale) Bilinear Grid data
+            xy_pos_t bgs, bs;
+            EEPROM_READ(bgs);
+            EEPROM_READ(bs);
             for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_READ(dummyf);
           }
       }
@@ -2091,7 +2149,7 @@ void MarlinSettings::postprocess() {
       // X Axis Twist Compensation
       //
       #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-        _FIELD_TEST(xatc_spacing);
+        _FIELD_TEST(xatc);
         EEPROM_READ(xatc.spacing);
         EEPROM_READ(xatc.start);
         EEPROM_READ(xatc.z_offset);
@@ -2323,7 +2381,7 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // LCD Backlight / Sleep Timeout
+      // LCD Backlight Timeout
       //
       #if LCD_BACKLIGHT_TIMEOUT_MINS
         EEPROM_READ(ui.backlight_timeout_minutes);
@@ -2901,6 +2959,36 @@ void MarlinSettings::postprocess() {
         stepper.set_shaping_damping_ratio(Y_AXIS, _data[1]);
       }
       #endif
+
+      //
+      // Strain Gauge
+      //
+      #if ENABLED(HX711_WSCALE)
+        _FIELD_TEST(wscale_scale);
+        float wscale_scale,wscale_th_weight;
+        uint8_t wscale_cahnnel;
+        int8_t wscale_scaledir;
+        EEPROM_READ(wscale_scale);
+        EEPROM_READ(wscale_th_weight);
+        EEPROM_READ(wscale_cahnnel);
+        EEPROM_READ(wscale_scaledir);
+        if(!validating && !isnan(wscale_scale))
+          {
+            wScale.setScale(wscale_scale);
+            wScale.setThreshold(wscale_th_weight);
+            wScale.setChannel(wscale_cahnnel);
+            wScale.setScaleDir(wscale_scaledir);
+          }
+      #endif
+
+    //
+    // Printbed temperature correction
+    //
+    #if ENABLED(BED_TEMP_COMPENSATION)
+      _FIELD_TEST(bed_temp_compensation);
+      EEPROM_READ(thermalManager.temp_bed.offset);
+      EEPROM_READ(thermalManager.temp_bed.scale);
+    #endif
 
       //
       // Validate Final Size and CRC
@@ -3525,7 +3613,7 @@ void MarlinSettings::reset() {
   TERN_(HAS_LCD_BRIGHTNESS, ui.brightness = LCD_BRIGHTNESS_DEFAULT);
 
   //
-  // LCD Backlight / Sleep Timeout
+  // LCD Backlight Timeout
   //
   #if LCD_BACKLIGHT_TIMEOUT_MINS
     ui.backlight_timeout_minutes = LCD_BACKLIGHT_TIMEOUT_MINS;
@@ -3623,7 +3711,7 @@ void MarlinSettings::reset() {
   // Advanced Pause filament load & unload lengths
   //
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    EXTRUDER_LOOP() {
+    LOOP_L_N(e, EXTRUDERS) {
       fc_settings[e].unload_length = FILAMENT_CHANGE_UNLOAD_LENGTH;
       fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     }
@@ -3647,6 +3735,24 @@ void MarlinSettings::reset() {
   // MKS UI controller
   //
   TERN_(DGUS_LCD_UI_MKS, MKS_reset_settings());
+
+  //
+  // Strain Gauge
+  //
+  #if ENABLED(HX711_WSCALE)
+    wScale.setScale(HX711_DEFAULT_SCALE);
+    wScale.setThreshold(HX711_ENDSTOP_THRESHOLD);
+    wScale.setChannel(HX711_DEFAULT_CHANNEL);
+    wScale.setScaleDir(HX711_DEFAULT_SCALE_DIR);
+  #endif
+
+  //
+  // Printbed temperature correction
+  //
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    thermalManager.temp_bed.offset = BED_TEMP_OFFSET;
+    thermalManager.temp_bed.scale = BED_TEMP_SCALE;
+  #endif
 
   //
   // Ender-3 V2 with ProUI
@@ -4017,6 +4123,8 @@ void MarlinSettings::reset() {
     #endif
 
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
+
+    TERN_(HX711_WSCALE,gcode.M7110_report(forReplay));
 
     TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
 

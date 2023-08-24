@@ -41,7 +41,7 @@
   #include "../../module/probe.h"
 #endif
 
-#if ANY(PIDTEMP, PIDTEMPBED, PIDTEMPCHAMBER)
+#if ENABLED(PIDTEMP)
   #include "../../module/temperature.h"
 #endif
 
@@ -122,16 +122,16 @@ void menu_backlash();
       #if ENABLED(VOLUMETRIC_EXTRUDER_LIMIT)
         EDIT_ITEM_FAST(float42_52, MSG_VOLUMETRIC_LIMIT, &planner.volumetric_extruder_limit[active_extruder], 0.0f, 20.0f, planner.calculate_volumetric_extruder_limits);
         #if HAS_MULTI_EXTRUDER
-          EXTRUDER_LOOP()
-            EDIT_ITEM_FAST_N(float42_52, e, MSG_VOLUMETRIC_LIMIT_E, &planner.volumetric_extruder_limit[e], 0.0f, 20.00f, planner.calculate_volumetric_extruder_limits);
+          LOOP_L_N(n, EXTRUDERS)
+            EDIT_ITEM_FAST_N(float42_52, n, MSG_VOLUMETRIC_LIMIT_E, &planner.volumetric_extruder_limit[n], 0.0f, 20.00f, planner.calculate_volumetric_extruder_limits);
         #endif
       #endif
 
       if (parser.volumetric_enabled) {
         EDIT_ITEM_FAST(float43, MSG_FILAMENT_DIAM, &planner.filament_size[active_extruder], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
         #if HAS_MULTI_EXTRUDER
-          EXTRUDER_LOOP()
-            EDIT_ITEM_FAST_N(float43, e, MSG_FILAMENT_DIAM_E, &planner.filament_size[e], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
+          LOOP_L_N(n, EXTRUDERS)
+            EDIT_ITEM_FAST_N(float43, n, MSG_FILAMENT_DIAM_E, &planner.filament_size[n], 1.5f, 3.25f, planner.calculate_volumetric_multipliers);
         #endif
       }
     #endif
@@ -141,14 +141,14 @@ void menu_backlash();
 
       EDIT_ITEM_FAST(float4, MSG_FILAMENT_UNLOAD, &fc_settings[active_extruder].unload_length, 0, extrude_maxlength);
       #if HAS_MULTI_EXTRUDER
-        EXTRUDER_LOOP()
-          EDIT_ITEM_FAST_N(float4, e, MSG_FILAMENTUNLOAD_E, &fc_settings[e].unload_length, 0, extrude_maxlength);
+        LOOP_L_N(n, EXTRUDERS)
+          EDIT_ITEM_FAST_N(float4, n, MSG_FILAMENTUNLOAD_E, &fc_settings[n].unload_length, 0, extrude_maxlength);
       #endif
 
       EDIT_ITEM_FAST(float4, MSG_FILAMENT_LOAD, &fc_settings[active_extruder].load_length, 0, extrude_maxlength);
       #if HAS_MULTI_EXTRUDER
-        EXTRUDER_LOOP()
-          EDIT_ITEM_FAST_N(float4, e, MSG_FILAMENTLOAD_E, &fc_settings[e].load_length, 0, extrude_maxlength);
+        LOOP_L_N(n, EXTRUDERS)
+          EDIT_ITEM_FAST_N(float4, n, MSG_FILAMENTLOAD_E, &fc_settings[n].load_length, 0, extrude_maxlength);
       #endif
     #endif
 
@@ -192,12 +192,7 @@ void menu_backlash();
       #if ENABLED(PIDTEMPCHAMBER)
         case H_CHAMBER: tune_temp = autotune_temp_chamber; break;
       #endif
-      default:
-        #if ENABLED(PIDTEMP)
-          tune_temp = autotune_temp[hid]; break;
-        #else
-          return;
-        #endif
+      default: tune_temp = autotune_temp[hid]; break;
     }
     sprintf_P(cmd, PSTR("M303 U1 E%i S%i"), hid, tune_temp);
     queue.inject(cmd);

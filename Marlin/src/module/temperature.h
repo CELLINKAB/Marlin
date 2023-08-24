@@ -426,8 +426,12 @@ private:
 public:
   celsius_float_t celsius;
   inline void reset() { acc = 0; }
-  inline void sample(const raw_adc_t s) { acc += s; }
+  inline void sample(const uint16_t s) { acc += s; }
   inline void update() { raw = acc; }
+  #if ENABLED(BED_TEMP_COMPENSATION)
+    float offset = BED_TEMP_OFFSET;
+    float scale = BED_TEMP_SCALE;
+  #endif
   void setraw(const raw_adc_t r) { raw = r; }
   raw_adc_t getraw() const { return raw; }
 } temp_info_t;
@@ -801,7 +805,7 @@ private:
         static cooler_watch_t watch_cooler;
       #endif
       static millis_t next_cooler_check_ms, cooler_fan_flush_ms;
-      static raw_adc_t mintemp_raw_COOLER, maxtemp_raw_COOLER;
+      static int16_t mintemp_raw_COOLER, maxtemp_raw_COOLER;
     #endif
 
 #if MAX_CONSECUTIVE_LOW_TEMPERATURE_ERROR_ALLOWED > 1
@@ -1100,7 +1104,7 @@ public:
 #if HAS_HEATED_BED
 
       #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        static raw_adc_t rawBedTemp()  { return temp_bed.getraw(); }
+        static int16_t rawBedTemp()    { return temp_bed.raw; }
       #endif
       static celsius_float_t degBed()  { return temp_bed.celsius; }
       static celsius_t wholeDegBed()   { return static_cast<celsius_t>(degBed() + 0.5f); }
@@ -1165,7 +1169,7 @@ public:
 
     #if HAS_TEMP_CHAMBER
       #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        static raw_adc_t rawChamberTemp()    { return temp_chamber.getraw(); }
+        static int16_t rawChamberTemp()      { return temp_chamber.raw; }
       #endif
       static celsius_float_t degChamber()    { return temp_chamber.celsius; }
       static celsius_t wholeDegChamber()     { return static_cast<celsius_t>(degChamber() + 0.5f); }
@@ -1193,7 +1197,7 @@ public:
 
     #if HAS_TEMP_COOLER
       #if ENABLED(SHOW_TEMP_ADC_VALUES)
-        static raw_adc_t rawCoolerTemp()   { return temp_cooler.getraw(); }
+        static int16_t rawCoolerTemp()     { return temp_cooler.raw; }
       #endif
       static celsius_float_t degCooler()   { return temp_cooler.celsius; }
       static celsius_t wholeDegCooler()    { return static_cast<celsius_t>(temp_cooler.celsius + 0.5f); }
@@ -1394,7 +1398,7 @@ private:
       #else
         #define READ_MAX_TC(N) read_max_tc()
       #endif
-      static raw_adc_t read_max_tc(TERN_(HAS_MULTI_MAX_TC, const uint8_t hindex=0));
+      static int16_t read_max_tc(TERN_(HAS_MULTI_MAX_TC, const uint8_t hindex=0));
     #endif
 
 #if HAS_AUTO_FAN

@@ -35,7 +35,7 @@
  * Define a generic printer name to be output to the LCD after booting Marlin.
  */
 #ifndef MACHINE_NAMEmajorminiopatch
-    #define MACHINE_NAME "Bio Cell X"
+    #define MACHINE_NAME "Cellink Generic"
 #endif
 #ifndef PROTOCOL_VERSION
   #define PROTOCOL_VERSION "1.0"

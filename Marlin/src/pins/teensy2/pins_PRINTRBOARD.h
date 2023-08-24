@@ -130,7 +130,7 @@
 //
 // LCD / Controller
 //
-#if HAS_WIRED_LCD && IS_NEWPANEL
+#if IS_ULTRA_LCD && IS_NEWPANEL
 
   #define LCD_PINS_RS                          9  // E1       JP11-11
   #define LCD_PINS_ENABLE                      8  // E0       JP11-10
@@ -172,7 +172,7 @@
 
   #endif
 
-#endif // HAS_WIRED_LCD && IS_NEWPANEL
+#endif // IS_ULTRA_LCD && IS_NEWPANEL
 
 #ifndef SDSS
   #define SDSS                                26  // B6 SDCS

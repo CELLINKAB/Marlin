@@ -191,7 +191,7 @@ bool Stepper::abort_current_block;
 uint32_t Stepper::acceleration_time, Stepper::deceleration_time;
 uint8_t Stepper::steps_per_isr;
 
-#if ENABLED(FREEZE_FEATURE)
+#if HAS_FREEZE_PIN
   bool Stepper::frozen; // = false
 #endif
 
@@ -1646,7 +1646,7 @@ void Stepper::pulse_phase_isr() {
   if (!current_block || step_events_completed >= step_event_count) return;
 
   // Skipping step processing causes motion to freeze
-  if (TERN0(FREEZE_FEATURE, frozen)) return;
+  if (TERN0(HAS_FREEZE_PIN, frozen)) return;
 
   // Count of pending loops and events for this iteration
   const uint32_t pending_events = step_event_count - step_events_completed;
@@ -3309,12 +3309,7 @@ void Stepper::report_positions() {
   #else
     #define CYCLES_EATEN_BABYSTEP 0
   #endif
-
-  #if CYCLES_EATEN_BABYSTEP < STEP_PULSE_CYCLES
-    #define EXTRA_CYCLES_BABYSTEP (STEP_PULSE_CYCLES - (CYCLES_EATEN_BABYSTEP))
-  #else
-    #define EXTRA_CYCLES_BABYSTEP 0
-  #endif
+  #define EXTRA_CYCLES_BABYSTEP (STEP_PULSE_CYCLES - (CYCLES_EATEN_BABYSTEP))
 
   #if EXTRA_CYCLES_BABYSTEP > 20
     #define _SAVE_START() const hal_timer_t pulse_start = HAL_timer_get_count(MF_TIMER_PULSE)
