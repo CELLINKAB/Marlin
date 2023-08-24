@@ -174,5 +174,7 @@ Marlin/src/inc/Version.h
 tags
 *.logs
 *.bak
-Marlin/Configuration_adv.h
+
+# Ignore configuration to force copying of correct files for device
 Marlin/Configuration.h
+Marlin/Configuration_adv.h
