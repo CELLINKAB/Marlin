@@ -36,16 +36,15 @@ def generate_header():
    * 
    */
 #pragma once
-#include <string_view>
     """
 
 
 def generate_marlin(semver, majorminiopatch):
-    return """
+    return f"""
 #ifndef SHORT_BUILD_VERSION
     //#define SHORT_MARLIN_VERSION_STRING "2.1.2"
-    #define SHORT_CELLINK_VERSION_STRING "{}"
-    #define SHORT_BUILD_VERSION "{}"
+    #define SHORT_CELLINK_VERSION_STRING "{semver}"
+    #define SHORT_BUILD_VERSION "{majorminiopatch}"
 #endif
 #ifndef DETAILED_BUILD_VERSION
     #define DETAILED_BUILD_VERSION "Cellink-Marlin " SHORT_CELLINK_VERSION_STRING
@@ -86,7 +85,7 @@ def generate_marlin(semver, majorminiopatch):
 #ifndef WEBSITE_URL
   #define WEBSITE_URL "cellink.com"
 #endif
-""".format(semver, majorminiopatch)
+"""
 
 
 def process_gitversion():
