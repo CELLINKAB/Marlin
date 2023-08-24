@@ -2390,7 +2390,7 @@ void Temperature::updateTemperaturesFromRawValues() {
   #if ALL(BED_TEMP_COMPENSATION, HAS_HEATED_BED)
     temp_bed.celsius       = analog_to_celsius_bed(temp_bed.getraw()) * temp_bed.scale + temp_bed.offset;
   #elif ALL(TEMP_SENSOR_BED_IS_TMP117, HAS_HEATED_BED)
-    temp_bed.celsius       = TEMP_SENSOR_BED_IS_TMP117, get_tmp117_bed_temp();
+    temp_bed.celsius       = get_tmp117_bed_temp();
   #elif ENABLED(HAS_HEATED_BED)
     temp_bed.celsius       = analog_to_celsius_bed(temp_bed.getraw());
   #endif
