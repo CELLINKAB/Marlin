@@ -239,6 +239,8 @@ public:
 
 extern LEDLights2 leds2;
 
+#endif // NEOPIXEL2_SEPARATE
+
 #    if ENABLED(RGB_LED_FADE_COMMAND)
 enum class LEDStrip {
     None,
@@ -308,6 +310,6 @@ struct AnimationManager
     void update();
 };
 extern AnimationManager animation_manager;
-#    endif
 
-#endif // NEOPIXEL2_SEPARATE
+#    endif  // RGB_LED_FADE_COMMAND
+
