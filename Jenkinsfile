@@ -41,6 +41,7 @@ pipeline {
                       }
                     }
                 axes {
+                    axis {
                         name 'DEVICE'
                         values 'Exocyte', 'Foton'
                     }
@@ -48,7 +49,28 @@ pipeline {
                         name 'BOARD'
                         values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
-
+                }
+                excludes {
+                    exclude {
+                        axis {
+                            name 'DEVICE'
+                            values 'Exocyte'
+                        }
+                        axis {
+                            name 'BOARD'
+                            values 'STM32H743Vx_btt', 'STM32H723Vx_btt'
+                        }
+                    }
+                    exclude {
+                        axis {
+                            name 'DEVICE'
+                            values 'Foton'
+                        }
+                        axis {
+                            name 'BOARD'
+                            values 'MYCORRHIZA_V1_1'
+                        }
+                    }
                 }
                 stages {
                     stage('Building Firmware') {
