@@ -73,7 +73,7 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('${DEVICE} ${BOARD}') {
+                    stage("fw build") {
                         steps {
                             sh '''
                                 git clean -Xdf
