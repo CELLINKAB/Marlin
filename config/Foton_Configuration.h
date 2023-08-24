@@ -3388,6 +3388,9 @@
   //#define NEOPIXEL_BKGD_ALWAYS_ON                   // Keep the backlight on when other NeoPixels are off
 #endif
 
+// enable LED fade command for smooth transitions
+#define RGB_LED_FADE_COMMAND
+
 /**
  * Printer Event LEDs
  *
