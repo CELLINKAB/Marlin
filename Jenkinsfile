@@ -43,11 +43,11 @@ pipeline {
                 axes {
                     axis {
                         name 'DEVICE'
-                        values 'Exocyte', 'Foton', 'Generic'
+                        values 'Exocyte', 'Foton'
                     }
                     axis {
                         name 'BOARD'
-                        values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt', 'mega2560'
+                        values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
                 }
                 excludes {
@@ -58,7 +58,7 @@ pipeline {
                         }
                         axis {
                             name 'BOARD'
-                            values 'STM32H743Vx_btt', 'STM32H723Vx_btt', 'mega2560'
+                            values 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                         }
                     }
                     exclude {
@@ -68,17 +68,7 @@ pipeline {
                         }
                         axis {
                             name 'BOARD'
-                            values 'MYCORRHIZA_V1_1', 'mega2560'
-                        }
-                    }
-                    exclude {
-                        axis {
-                            name 'DEVICE'
-                            values 'Generic'
-                        }
-                        axis {
-                            name 'BOARD'
-                            values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
+                            values 'MYCORRHIZA_V1_1'
                         }
                     }
                     
