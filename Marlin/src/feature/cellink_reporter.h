@@ -56,7 +56,6 @@ struct Reporter
     } m799;
     struct M802 : AutoReporter<M802>
     {
-        static bool all_sensors;
         static void report();
     } m802;
     struct M814 : AutoReporter<M814>
