@@ -29,9 +29,8 @@
 #include "stepper.h"
 #include "planner.h"
 #include "temperature.h"
-
 #include "../gcode/gcode.h"
-
+#include "../lcd/marlinui.h"
 #include "../inc/MarlinConfig.h"
 
 #if IS_SCARA
@@ -49,10 +48,6 @@
 
 #if ENABLED(BLTOUCH)
   #include "../feature/bltouch.h"
-#endif
-
-#if HAS_STATUS_MESSAGE
-  #include "../lcd/marlinui.h"
 #endif
 
 #if HAS_FILAMENT_SENSOR
