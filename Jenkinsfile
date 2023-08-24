@@ -90,9 +90,9 @@ pipeline {
                 post {
                     always {
                         sh '''
-                            cp  .pio/build/${BOARD}/firmware.bin ./${BOARD}-${ART_NAME_NOSLASH}.bin
+                            cp  .pio/build/${BOARD}/firmware.bin ./${DEVICE}-${BOARD}-${ART_NAME_NOSLASH}.bin
                                                     '''
-                        archiveArtifacts artifacts: " ${BOARD}-${ART_NAME_NOSLASH}.bin"
+                        archiveArtifacts artifacts: " ${DEVICE}-${BOARD}-${ART_NAME_NOSLASH}.bin"
                         archiveArtifacts artifacts: ' GitVersion.json'
                         archiveArtifacts artifacts: ' version.json'
 
