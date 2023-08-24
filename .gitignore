@@ -174,3 +174,5 @@ Marlin/src/inc/Version.h
 tags
 *.logs
 *.bak
+Marlin/Configuration_adv.h
+Marlin/Configuration.h

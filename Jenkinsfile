@@ -73,11 +73,12 @@ pipeline {
                     }
                 }
                 stages {
-                    stage('Building Firmware') {
+                    stage('Building Firmware ${DEVICE}') {
                         steps {
                             sh '''
                                 git clean -Xdf
                                 git status
+                                 python3 -m  platformio run --target clean
                                 echo "Using config for ${DEVICE}"
                                 cp -f config/${DEVICE}_Configuration.h Marlin/Configuration.h
                                 cp -f config/${DEVICE}_Configuration_adv.h Marlin/Configuration_adv.h
