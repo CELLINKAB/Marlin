@@ -28,8 +28,8 @@ def link_files():
         shutil.copy(device_config, config_h)
         shutil.copy(device_config_adv, config_adv_h)
     else:
-        config_h.symlink_to(device_config)
-        config_adv_h.symlink_to(device_config_adv)
+        config_h.symlink_to(device_config.resolve())
+        config_adv_h.symlink_to(device_config_adv.resolve())
 
 if __name__ == "__main__":
     link_files()

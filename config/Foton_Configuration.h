@@ -1084,7 +1084,7 @@
 //#define USE_WMAX_PLUG
 
 // forces both Z_MAX and Z_MIN to be used
-#define Z_MULTI_ENDSTOPS
+// #define Z_MULTI_ENDSTOPS
 
 // Enable pullup for all endstops to prevent a floating state
 #define ENDSTOPPULLUPS

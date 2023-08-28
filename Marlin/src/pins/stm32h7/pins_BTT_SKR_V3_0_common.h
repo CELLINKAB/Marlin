@@ -115,8 +115,16 @@
     #define Z_MAX_PIN                       PC15  // PWRDET
   #endif
 #else
-  #ifndef Z_STOP_PIN
-    #define Z_STOP_PIN                      PC0   // Z-STOP
+  // #ifndef Z_STOP_PIN
+  //   #define Z_STOP_PIN                      PC0   // Z-STOP
+  // #endif
+
+  // Foton requires both Z stops to be used, but not with Z_MULTI_ENDSTOPS
+  #ifndef Z_MIN_PIN
+    #define Z_MIN_PIN                       PC0   // Z-STOP
+  #endif
+  #ifndef Z_MAX_PIN
+    #define Z_MAX_PIN                       PC15  // PWRDET
   #endif
 #endif
 
@@ -450,7 +458,7 @@
     #define LCD_PINS_ENABLE          EXP1_08_PIN
     #define LCD_PINS_D4              EXP1_06_PIN
 
-  #elif ENABLED(MKS_MINI_12864)
+#elif ENABLED(MKS_MINI_12864)
 
     #define DOGLCD_A0                EXP1_07_PIN
     #define DOGLCD_CS                EXP1_06_PIN
@@ -525,14 +533,14 @@
   #define TFT_MISO_PIN               EXP2_01_PIN
   #define TFT_MOSI_PIN               EXP2_06_PIN
 
-  #define TOUCH_INT_PIN              EXP1_07_PIN
+#define TOUCH_INT_PIN              EXP1_07_PIN
   #define TOUCH_MISO_PIN             EXP1_06_PIN
   #define TOUCH_MOSI_PIN             EXP1_03_PIN
-  #define TOUCH_SCK_PIN              EXP1_05_PIN
+#define TOUCH_SCK_PIN              EXP1_05_PIN
   #define TOUCH_CS_PIN               EXP1_04_PIN
 
-  #define BTN_EN1                    EXP2_03_PIN
-  #define BTN_EN2                    EXP2_05_PIN
+#define BTN_EN1                    EXP2_03_PIN
+#define BTN_EN2                    EXP2_05_PIN
   #define BTN_ENC                    EXP1_02_PIN
 #endif
 
@@ -544,26 +552,26 @@
 #endif
 
 #if ENABLED(WIFISUPPORT)
-  //
-  // WIFI
-  //
+//
+// WIFI
+//
 
-  /**
-   *                      -------
-   *            GND | 9  |       | 8 | 3.3V
-   *  (ESP-CS) PB12 | 10 |       | 7 | PB15 (ESP-MOSI)
-   *           3.3V | 11 |       | 6 | PB14 (ESP-MISO)
-   * (ESP-IO0) PB10 | 12 |       | 5 | PB13 (ESP-CLK)
-   * (ESP-IO4) PB11 | 13 |       | 4 | --
-   *             -- | 14 |       | 3 | 3.3V (ESP-EN)
-   *  (ESP-RX)  PD8 | 15 |       | 2 | --
-   *  (ESP-TX)  PD9 | 16 |       | 1 | PC14 (ESP-RST)
-   *                      -------
-   *                       WIFI
-   */
-  #define ESP_WIFI_MODULE_COM                  3  // Must also set either SERIAL_PORT or SERIAL_PORT_2 to this
-  #define ESP_WIFI_MODULE_BAUDRATE      BAUDRATE  // Must use same BAUDRATE as SERIAL_PORT & SERIAL_PORT_2
-  #define ESP_WIFI_MODULE_RESET_PIN         PC14
-  #define ESP_WIFI_MODULE_GPIO0_PIN         PB10
-  #define ESP_WIFI_MODULE_GPIO4_PIN         PB11
+/**
+ *                      -------
+ *            GND | 9  |       | 8 | 3.3V
+ *  (ESP-CS) PB12 | 10 |       | 7 | PB15 (ESP-MOSI)
+ *           3.3V | 11 |       | 6 | PB14 (ESP-MISO)
+ * (ESP-IO0) PB10 | 12 |       | 5 | PB13 (ESP-CLK)
+ * (ESP-IO4) PB11 | 13 |       | 4 | --
+ *             -- | 14 |       | 3 | 3.3V (ESP-EN)
+ *  (ESP-RX)  PD8 | 15 |       | 2 | --
+ *  (ESP-TX)  PD9 | 16 |       | 1 | PC14 (ESP-RST)
+ *                      -------
+ *                       WIFI
+ */
+#define ESP_WIFI_MODULE_COM                  3  // Must also set either SERIAL_PORT or SERIAL_PORT_2 to this
+#define ESP_WIFI_MODULE_BAUDRATE      BAUDRATE  // Must use same BAUDRATE as SERIAL_PORT & SERIAL_PORT_2
+#define ESP_WIFI_MODULE_RESET_PIN         PC14
+#define ESP_WIFI_MODULE_GPIO0_PIN         PB10
+#define ESP_WIFI_MODULE_GPIO4_PIN         PB11
 #endif
