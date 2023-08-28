@@ -458,7 +458,7 @@
     #define LCD_PINS_ENABLE          EXP1_08_PIN
     #define LCD_PINS_D4              EXP1_06_PIN
 
-#elif ENABLED(MKS_MINI_12864)
+  #elif ENABLED(MKS_MINI_12864)
 
     #define DOGLCD_A0                EXP1_07_PIN
     #define DOGLCD_CS                EXP1_06_PIN
