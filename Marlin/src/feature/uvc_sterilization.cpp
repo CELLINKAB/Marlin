@@ -89,7 +89,7 @@ void UVCController::start(uint8_t intensity)
     analogWrite(UVC_PWM_PIN, intensity);
 }
 
-void UVCController::update(millis_t now = millis())
+void UVCController::update(millis_t now)
 {
     if ((auto_off_time > 0 && auto_off_time < now) || ot_prewarn()) {
         stop();
