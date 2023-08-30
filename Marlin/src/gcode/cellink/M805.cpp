@@ -125,6 +125,9 @@ void GcodeSuite::M805()
         return;
     }
 
+    planner.synchronize();
+    planner.quick_pause();
+
     rainbow.set_hold(true);
     if (parser.seenval('D'))
         rainbow.move(CuringLed{led.pin, parser.value_float()});
@@ -136,6 +139,8 @@ void GcodeSuite::M805()
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
     rainbow.set_hold(false);
+
+    planner.quick_resume();
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING
