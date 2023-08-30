@@ -115,8 +115,16 @@
     #define Z_MAX_PIN                       PC15  // PWRDET
   #endif
 #else
-  #ifndef Z_STOP_PIN
-    #define Z_STOP_PIN                      PC0   // Z-STOP
+  // #ifndef Z_STOP_PIN
+  //   #define Z_STOP_PIN                      PC0   // Z-STOP
+  // #endif
+
+  // Foton requires both Z stops to be used, but not with Z_MULTI_ENDSTOPS
+  #ifndef Z_MIN_PIN
+    #define Z_MIN_PIN                       PC0   // Z-STOP
+  #endif
+  #ifndef Z_MAX_PIN
+    #define Z_MAX_PIN                       PC15  // PWRDET
   #endif
 #endif
 
