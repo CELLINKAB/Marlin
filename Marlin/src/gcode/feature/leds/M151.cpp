@@ -59,9 +59,10 @@ constexpr LEDStrip int_to_strip(int16_t index)
     switch (index) {
     case 0:
         return LEDStrip::StripOne;
+#    if ENABLED(NEOPIXEL2_SEPARATE)
     case 1:
         return LEDStrip::StripTwo;
-
+#    endif
     default:
         return LEDStrip::All;
     }
