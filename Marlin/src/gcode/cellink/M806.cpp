@@ -7,6 +7,12 @@
 #    include "../../feature/uvc_sterilization.h"
 #    include "../gcode.h"
 
+/**
+ * @brief UVC sterilization all-in-one command.
+ * @brief params: I(intensity) S(seconds)
+ * @brief options:  O(override flag) A(async flag) V(verbosity flag)
+ * 
+ */
 void GcodeSuite::M806()
 {
     const uint8_t intensity = parser.byteval('I', 255);
