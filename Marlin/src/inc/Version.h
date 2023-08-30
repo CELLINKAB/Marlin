@@ -7,7 +7,7 @@
     
 #ifndef SHORT_BUILD_VERSION
     #define SHORT_BUILD_VERSION "2.1.2.1"
-    #define SHORT_CELLINK_VERSION_STRING SHORT_BUILD_VERSION "-issues-addbuildtage.1"
+    #define SHORT_CELLINK_VERSION_STRING SHORT_BUILD_VERSION "-buildversionfailure"
 #endif
 #ifndef DETAILED_BUILD_VERSION
     #define DETAILED_BUILD_VERSION "Cellink-Marlin " SHORT_CELLINK_VERSION_STRING
@@ -24,7 +24,7 @@
  * to alert users to major changes.
  */
 
-#define MARLIN_HEX_VERSION 02010201
+#define MARLIN_HEX_VERSION 00000000
 #ifndef REQUIRED_CONFIGURATION_H_VERSION
   #define REQUIRED_CONFIGURATION_H_VERSION MARLIN_HEX_VERSION
 #endif
@@ -57,16 +57,16 @@
   #define WEBSITE_URL "cellink.com"
 #endif
 
-#define VER_COMMIT_DATE "YYYY-MM-DD"
-#define VER_FULL_BUILD_META_DATA "gitversion.FullBuildMetaData" 
-#define VER_SEM_VER "gitversion.SemVer" 
+#define VER_COMMIT_DATE ""
+#define VER_FULL_BUILD_META_DATA "" 
+#define VER_SEM_VER "" 
 #define VER_MAJOR 0
 #define VER_MINOR 0
 #define VER_PATCH 0
-#define VER_BUILD_VERSION "git_describe" 
-#define VER_BRANCH "git HEAD" 
-#define VER_CURRENT_COMMIT "ffffffffffffffffffffffffffffffffffffffff" 
+#define VER_BUILD_VERSION "" 
+#define VER_BRANCH "" 
+#define VER_CURRENT_COMMIT "versionfailure" 
 
-#define VER_TIMESTAMP "YYYY-MM-DD HH.MM"
-#define VER_USER "default" 
-#define VER_BUILDTAG "default" 
+#define VER_TIMESTAMP ""
+#define VER_USER "" 
+#define VER_BUILDTAG "" 

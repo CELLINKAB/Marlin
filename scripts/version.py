@@ -178,7 +178,7 @@ def generate_env():
 def make_versionfile():
 
     source_dir = path.join('Marlin', 'src', 'inc',)
-    version_file = path.join(source_dir, 'Version.h')
+    version_file = path.join(source_dir, '_Version.h')
     gv = process_gitversion()
 
     print("Current working dir: " + getcwd())

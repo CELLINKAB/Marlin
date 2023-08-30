@@ -178,9 +178,7 @@ tags
 # Ignore configuration to force copying of correct files for device
 Marlin/Configuration.h
 Marlin/Configuration_adv.h
-# Ignore Versoning files to force getting the correct version
-Marlin/src/inc/version.h
-Marlin/src/inc/Version.h
+
 
 
 
