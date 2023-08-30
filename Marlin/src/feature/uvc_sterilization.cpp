@@ -40,7 +40,7 @@ void UVCController::init()
     is_init = true;
 }
 
-void write_uvc_switches(bool state)
+void UVCController::write_uvc_switches(bool state)
 {
 #    if PIN_EXISTS(UVC_RELAY)
     WRITE(UVC_RELAY_PIN, state);
