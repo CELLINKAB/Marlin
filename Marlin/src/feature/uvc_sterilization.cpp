@@ -11,7 +11,9 @@ void UVCController::init()
     if (is_init)
         return;
 
+#    if PIN_EXISTS(UVC_RELAY)
     OUT_WRITE(UVC_RELAY_PIN, LOW);
+#    endif
 
     OUT_WRITE(UVC_PWM_PIN, LOW);
 
@@ -31,14 +33,18 @@ void UVCController::init()
     pinMode(UVC_SH_CS_5_PIN, MODE_ANALOG);
 #    endif
 
+#    if PIN_EXISTS(UVC_TFAULT)
     SET_INPUT_PULLDOWN(UVC_TFAULT_PIN);
+#    endif
 
     is_init = true;
 }
 
 void write_uvc_switches(bool state)
 {
+#    if PIN_EXISTS(UVC_RELAY)
     WRITE(UVC_RELAY_PIN, state);
+#    endif
 #    if PINS_EXIST(UVC_SH_CS_1, UVC_SH_CS_2, UVC_SH_CS_3, UVC_SH_CS_4, UVC_SH_CS_5)
     WRITE(UVC_SWITCH_1_PIN, state);
     WRITE(UVC_SWITCH_2_PIN, state);
@@ -88,7 +94,7 @@ void UVCController::update(millis_t now = millis())
     if ((auto_off_time > 0 && auto_off_time < now) || ot_prewarn()) {
         stop();
     }
-    
+
     static millis_t next_report = now;
     if (send_reports && now >= next_report) {
         report_current_sense();
