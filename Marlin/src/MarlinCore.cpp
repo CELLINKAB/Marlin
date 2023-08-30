@@ -562,6 +562,10 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   }
   #endif
 
+  #if ENABLED(UVC_STERLIZATION)
+    uvc_controller.update(ms);
+  #endif
+
   #if HAS_HOME
     // Handle a standalone HOME button
     constexpr millis_t HOME_DEBOUNCE_DELAY = 1000UL;
