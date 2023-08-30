@@ -11,6 +11,7 @@ struct UVCController
 
     millis_t auto_off_time;
     bool safety_override;
+    bool send_reports;
 
     /**
      * @brief One time setup for pin configuration. No-op if called multiple times

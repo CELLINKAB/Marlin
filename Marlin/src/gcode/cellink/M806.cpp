@@ -20,6 +20,7 @@ void GcodeSuite::M806()
     uvc_controller.auto_off_time = SEC_TO_MS(
         min(parser.ulongval('S', UVCController::DEFAULT_EXPOSURE_SECONDS),
             UVCController::MAX_EXPOSURE_SECONDS));
+    uvc_controller.send_reports = parser.boolval('V');
 
     const bool async = parser.boolval('A');
 

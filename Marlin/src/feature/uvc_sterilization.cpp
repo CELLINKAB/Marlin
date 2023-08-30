@@ -85,8 +85,14 @@ void UVCController::start(uint8_t intensity)
 
 void UVCController::update(millis_t now = millis())
 {
-    if (ot_prewarn() || (auto_off_time > 0 && auto_off_time < now)) {
+    if ((auto_off_time > 0 && auto_off_time < now) || ot_prewarn()) {
         stop();
+    }
+    
+    static millis_t next_report = now;
+    if (send_reports && now >= next_report) {
+        report_current_sense();
+        next_report += 1000;
     }
 }
 
