@@ -82,7 +82,7 @@ void GcodeSuite::M806()
 
     write_uvc_switches(HIGH);
     //TODO: this logic seems messy
-    while ((safety_override || (READ(UVC_TFAULT_PIN) == UVC_TFAULT_ACTIVE_STATE)) && millis() < end_time) {
+    while ((safety_override || (READ(UVC_TFAULT_PIN) != UVC_TFAULT_ACTIVE_STATE)) && millis() < end_time) {
         if (intensity > 0)
             WRITE(UVC_PWM_PIN, HIGH);
         if (intensity >= 128)
