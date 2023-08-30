@@ -453,9 +453,9 @@
  * UV LED Sterilization on H1 output
  * 
  */
-#define UV_LED_STERILIZATION
-#if ENABLED(UV_LED_STERILIZATION)
-  #define UV_LED_OUTPUT_PIN          HEATER_1_PIN
+#define UVC_STERILIZATION
+#if ENABLED(UVC_STERILIZATION)
+  #define UVC_PWM_PIN          HEATER_1_PIN
 #endif
 
 //===========================================================================
