@@ -87,7 +87,12 @@ struct Rainbow
         move_degs(led.deg);
     }
 
-    void set_hold(bool hold) { stepper.set_hold(hold); }
+    void set_hold(bool hold)
+    {
+        stepper.set_hold(hold);
+        if (hold == false)
+            stepper.stop();
+    }
 };
 
 void GcodeSuite::M805()
