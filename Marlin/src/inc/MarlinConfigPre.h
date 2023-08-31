@@ -41,6 +41,8 @@
 #ifdef CUSTOM_VERSION_FILE
   #if __has_include(STRINGIFY(../../CUSTOM_VERSION_FILE))
     #include STRINGIFY(../../CUSTOM_VERSION_FILE)
+  #elif ENABLED(CUSTOM_VERSION_STRICT_CHECK)
+    #error "Custom version file not present"
   #endif
 #endif
 
