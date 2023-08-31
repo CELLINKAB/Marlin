@@ -80,6 +80,7 @@ constexpr auto update_state_to_str(UpdateState current_state)
         [[fallthrough]];
     case UpdateState::STATUS_3:
         return "STATUS";
+    case UpdateState::NUM_STATES: break;
     }
     return "UNREACHABLE";
 }
