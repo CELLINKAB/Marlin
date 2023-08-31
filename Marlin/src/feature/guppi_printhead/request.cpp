@@ -95,7 +95,7 @@ void Controller::update()
         static size_t retries = 0;
         if (++retries > MAX_RETRIES) {
             ph_state.status = {};
-            next_update_state(update_state);
+            update_state = next_update_state(update_state);
             retries = 0;
             if (DEBUGGING(ERRORS))
                 SERIAL_ECHOLNPGM("Retries exceeded for updating ", update_state_to_str(update_state));
@@ -109,7 +109,7 @@ void Controller::update()
         if (temp_res.result == Result::OK) {
             // TODO: change back when get_temp is fixed on printhead
             state.raw_temperature = temp_res.packet.payload;
-            next_update_state(update_state);
+            update_state = next_update_state(update_state);
         } else
             retry(state);
     };
