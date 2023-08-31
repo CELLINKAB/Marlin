@@ -174,6 +174,10 @@
   #include "feature/guppi_printhead/chantarelle.h"
 #endif
 
+#if ENABLED(UVC_STERLIZATION)
+  #include "feature/uvc_sterilization.h"
+#endif
+
 #if ENABLED(FREEZE_DEBOUNCE)
   #include "feature/debouncer.h"
 #endif
@@ -556,6 +560,10 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
       last_door_state = door_state;
     }
   }
+  #endif
+
+  #if ENABLED(UVC_STERLIZATION)
+    uvc_controller.update(ms);
   #endif
 
   #if HAS_HOME
@@ -953,11 +961,13 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   // Manage Scale
   TERN_(HX711_WSCALE, wScale.manage_hx_711());
 
-  // update pneumatics
+  // Update pneumatics
   TERN_(FESTO_PNEUMATICS, pneumatics::update());
 
-  // update chantarelle status
+  // Update chantarelle status
   TERN_(CHANTARELLE_SUPPORT, ph_controller.update());
+
+  // Update UVC
 
   IDLE_DONE:
   TERN_(MARLIN_DEV_MODE, idle_depth--);
@@ -1653,6 +1663,10 @@ void setup() {
 
   #if ENABLED(CHANTARELLE_SUPPORT)
     ph_controller.init();
+  #endif
+
+  #if ENABLED(UVC_STERLIZATION)
+    uvc_controller.init();
   #endif
 
   #if ENABLED(USE_WATCHDOG)
