@@ -2,7 +2,6 @@
 
 import argparse
 import pathlib
-import os
 
 def link_files():
     parser = argparse.ArgumentParser(description="Sets up Configuration.h and Configuration_adv.h for given device")
@@ -23,13 +22,8 @@ def link_files():
     config_adv_h = marlin_path / "Configuration_adv.h"
     config_h.unlink(True)
     config_adv_h.unlink(True)
-    if 'nt' in os.name:
-        import shutil
-        shutil.copy(device_config, config_h)
-        shutil.copy(device_config_adv, config_adv_h)
-    else:
-        config_h.symlink_to(device_config.resolve())
-        config_adv_h.symlink_to(device_config_adv.resolve())
+    config_h.symlink_to(device_config.resolve())
+    config_adv_h.symlink_to(device_config_adv.resolve())
 
 if __name__ == "__main__":
     link_files()
