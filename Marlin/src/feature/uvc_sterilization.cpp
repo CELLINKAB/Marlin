@@ -107,6 +107,7 @@ void UVCController::stop()
     WRITE(UVC_PWM_PIN, LOW);
     write_uvc_switches(false);
     auto_off_time = 0;
+    send_reports = false;
 }
 
 UVCController uvc_controller;
