@@ -89,10 +89,11 @@ void Controller::update()
     static millis_t next_update = 0;
     static UpdateState update_state = UpdateState::ENCODERS;
 
-    static auto retry = []() {
+    static auto retry = [](PrintheadState& ph_state) {
         static constexpr size_t MAX_RETRIES = 3;
         static size_t retries = 0;
         if (++retries > MAX_RETRIES) {
+            ph_state.status = {};
             next_update_state(update_state);
             retries = 0;
             if (DEBUGGING(ERRORS))
@@ -109,7 +110,7 @@ void Controller::update()
             state.raw_temperature = temp_res.packet.payload;
             next_update_state(update_state);
         } else
-            retry();
+            retry(state);
     };
 
     if (millis() < next_update)
@@ -133,7 +134,8 @@ void Controller::update()
                                                             EncoderIndex::SliderThree);
             update_state = next_update_state(update_state);
         } else {
-            retry();
+            PrintheadState ignore;
+            retry(ignore);
         }
 
         break;
@@ -174,7 +176,7 @@ void Controller::update()
                 update_state = next_update_state(update_state);
             }
         } else
-            retry();
+            retry(state);
     } break;
 
     default:
