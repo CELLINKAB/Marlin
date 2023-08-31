@@ -2,7 +2,7 @@
 
 #if ENABLED(CHANTARELLE_SUPPORT)
 
-#include "request.h"
+#    include "request.h"
 
 using namespace printhead;
 
@@ -45,23 +45,20 @@ void Controller::init()
 
 enum class UpdateState {
     ENCODERS,
-    TEMPERATURE,
-    STATUS,
+    STATUS_0,
+    TEMPERATURE_0,
+    STATUS_1,
+    TEMPERATURE_1,
+    STATUS_2,
+    TEMPERATURE_2,
+    STATUS_3,
+    NUM_STATES
 };
 
-constexpr void next_update_state(UpdateState& current_state)
+constexpr UpdateState next_update_state(UpdateState current_state)
 {
-    switch (current_state) {
-    case UpdateState::ENCODERS:
-        current_state = UpdateState::TEMPERATURE;
-        break;
-    case UpdateState::TEMPERATURE:
-        current_state = UpdateState::STATUS;
-        break;
-    case UpdateState::STATUS:
-        current_state = UpdateState::ENCODERS;
-        break;
-    }
+    return static_cast<UpdateState>((static_cast<uint>(current_state) + 1)
+                                    % static_cast<uint>(UpdateState::NUM_STATES));
 }
 
 constexpr auto update_state_to_str(UpdateState current_state)
@@ -69,9 +66,19 @@ constexpr auto update_state_to_str(UpdateState current_state)
     switch (current_state) {
     case UpdateState::ENCODERS:
         return "ENCODERS";
-    case UpdateState::TEMPERATURE:
+    case UpdateState::TEMPERATURE_0:
+        [[fallthrough]];
+    case UpdateState::TEMPERATURE_1:
+        [[fallthrough]];
+    case UpdateState::TEMPERATURE_2:
         return "TEMPERATURE";
-    case UpdateState::STATUS:
+    case UpdateState::STATUS_0:
+        [[fallthrough]];
+    case UpdateState::STATUS_1:
+        [[fallthrough]];
+    case UpdateState::STATUS_2:
+        [[fallthrough]];
+    case UpdateState::STATUS_3:
         return "STATUS";
     }
     return "UNREACHABLE";
@@ -80,13 +87,12 @@ constexpr auto update_state_to_str(UpdateState current_state)
 void Controller::update()
 {
     static millis_t next_update = 0;
-    static uint8_t tool_index = 0;
     static UpdateState update_state = UpdateState::ENCODERS;
 
     static auto retry = []() {
         static constexpr size_t MAX_RETRIES = 3;
         static size_t retries = 0;
-        if (retries++ > MAX_RETRIES) {
+        if (++retries > MAX_RETRIES) {
             next_update_state(update_state);
             retries = 0;
             if (DEBUGGING(ERRORS))
@@ -94,39 +100,9 @@ void Controller::update()
         }
     };
 
-    if (millis() < next_update)
-        return;
-
-    auto& state = ph_states[tool_index];
-    Index index = static_cast<Index>(tool_index);
-
-    switch (update_state) {
-    case UpdateState::ENCODERS:
-        if (tool_index == 0) {
-            const auto encoder_res = debug_get_encoders(false);
-            if (encoder_res.result == Result::OK) {
-                ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                  EncoderIndex::ExtruderOne);
-                ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                  EncoderIndex::ExtruderTwo);
-                ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                  EncoderIndex::ExtruderThree);
-                ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                EncoderIndex::SliderOne);
-                ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                EncoderIndex::SliderTwo);
-                ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
-                                                                EncoderIndex::SliderThree);
-                update_state = UpdateState::TEMPERATURE;
-            } else {
-                retry();
-            }
-        } else {
-            next_update_state(update_state);
-        }
-        break;
-
-    case UpdateState::TEMPERATURE: {
+    static auto update_temperature = [this](uint8_t tool_index) {
+        auto& state = ph_states[tool_index];
+        const Index index = static_cast<Index>(tool_index);
         const auto temp_res = get_temperature(index, false);
         if (temp_res.result == Result::OK) {
             // TODO: change back when get_temp is fixed on printhead
@@ -134,9 +110,55 @@ void Controller::update()
             next_update_state(update_state);
         } else
             retry();
-    } break;
+    };
 
-    case UpdateState::STATUS: {
+    if (millis() < next_update)
+        return;
+
+    switch (update_state) {
+    case UpdateState::ENCODERS: {
+        const auto encoder_res = debug_get_encoders(false);
+        if (encoder_res.result == Result::OK) {
+            ph_states[0].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderOne);
+            ph_states[1].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderTwo);
+            ph_states[2].extruder_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                              EncoderIndex::ExtruderThree);
+            ph_states[0].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderOne);
+            ph_states[1].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderTwo);
+            ph_states[2].slider_encoder = get_encoder_state(encoder_res.packet.payload,
+                                                            EncoderIndex::SliderThree);
+            update_state = next_update_state(update_state);
+        } else {
+            retry();
+        }
+
+        break;
+    }
+
+    case UpdateState::TEMPERATURE_0:
+        update_temperature(0);
+        break;
+    case UpdateState::TEMPERATURE_1:
+        update_temperature(1);
+        break;
+    case UpdateState::TEMPERATURE_2:
+        update_temperature(2);
+        break;
+
+    case UpdateState::STATUS_0:
+        [[fallthrough]];
+    case UpdateState::STATUS_1:
+        [[fallthrough]];
+    case UpdateState::STATUS_2:
+        [[fallthrough]];
+    case UpdateState::STATUS_3: {
+        static uint8_t tool_index = 0;
+        auto& state = ph_states[tool_index];
+        const Index index = static_cast<Index>(tool_index);
         const auto status_res = get_status(index, false);
         if (status_res.result == Result::OK) {
             if (DEBUGGING(LEVELING)) {
@@ -146,15 +168,17 @@ void Controller::update()
                     SERIAL_ECHO_MSG("slider valve move finished");
             }
             state.status = status_res.packet.payload;
-            next_update_state(update_state);
+            ++tool_index;
+            if (tool_index >= EXTRUDERS) {
+                tool_index = 0;
+                update_state = next_update_state(update_state);
+            }
         } else
             retry();
-        tool_index = ((tool_index + 1) % EXTRUDERS);
     } break;
 
     default:
         update_state = UpdateState::ENCODERS;
-        tool_index = 0;
         break;
     }
 
@@ -165,7 +189,7 @@ void Controller::update()
 void Controller::report_states()
 {
     {
-#define PRINT_FIELD(field) SERIAL_ECHOPGM(#field ": ", state.field, ", ");
+#    define PRINT_FIELD(field) SERIAL_ECHOPGM(#field ": ", state.field, ", ");
 
         SERIAL_ECHOLN("Printheads: [");
         for (const auto& state : ph_states) {
