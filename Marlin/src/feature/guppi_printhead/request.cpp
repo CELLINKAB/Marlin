@@ -55,7 +55,7 @@ enum class UpdateState {
     NUM_STATES
 };
 
-constexpr UpdateState next_update_state(UpdateState current_state)
+[[nodiscard]] constexpr UpdateState next_update_state(UpdateState current_state)
 {
     return static_cast<UpdateState>((static_cast<uint>(current_state) + 1)
                                     % static_cast<uint>(UpdateState::NUM_STATES));
