@@ -104,7 +104,7 @@ void UVCController::update(millis_t now)
 
 void UVCController::stop()
 {
-    WRITE(UVC_PWM_PIN, LOW);
+    analogWrite(UVC_PWM_PIN, TERN(UVC_PWM_INVERTING, 255, 0));
     write_uvc_switches(false);
     auto_off_time = 0;
     send_reports = false;
