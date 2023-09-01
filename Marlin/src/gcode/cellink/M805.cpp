@@ -53,50 +53,74 @@ constexpr CuringLed led_for_wavelength(uint16_t wavelength)
     }
 }
 
-static constexpr pin_t PC_STOP_PIN = PC_ENDSTOP_PIN;
-using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
-
-inline void move_degs(Stepper& stepper, float degs)
+struct Rainbow
 {
-    int32_t steps = -deg_to_steps(degs);
-    stepper.move_steps(steps, PC_VELOCITY);
-}
+    static constexpr pin_t PC_STOP_PIN = PC_ENDSTOP_PIN;
+    using Stepper = SimpleTMC<PC_ENABLE_PIN, PC_STOP_PIN, PC_STEP_PIN, PC_DIR_PIN>;
 
-void home_rainbow(Stepper& stepper)
-{
-    stepper.raw_move(-PC_VELOCITY);
-    millis_t timeout = millis() + 1000;
-    while (READ(PC_STOP_PIN) == LOW && millis() < timeout)
-        idle();
-    stepper.stop();
-}
+    Stepper& stepper;
+    uint32_t velocity;
 
-void move_rainbow(Stepper& stepper, CuringLed led)
-{
-    home_rainbow(stepper);
-    move_degs(stepper, led.deg);
-}
+    constexpr explicit Rainbow(Stepper& stepper_)
+        : stepper(stepper_)
+        , velocity(PC_VELOCITY)
+    {}
+
+    void move_degs(float degs)
+    {
+        int32_t steps = -deg_to_steps(degs);
+        stepper.move_steps(steps, velocity);
+    }
+
+    void home()
+    {
+        stepper.raw_move(-velocity);
+        millis_t timeout = millis() + 1000;
+        while (READ(PC_STOP_PIN) == LOW && millis() < timeout)
+            idle();
+        stepper.stop();
+    }
+
+    void move(CuringLed led)
+    {
+        home();
+        move_degs(led.deg);
+    }
+
+    void set_hold(bool hold)
+    {
+        stepper.set_hold(hold);
+        if (hold == false)
+            stepper.stop();
+    }
+};
 
 void GcodeSuite::M805()
 {
-    static auto stepper = [] {
+    static auto rainbow = [] {
         OUT_WRITE(PC_365_PIN, LOW);
         OUT_WRITE(PC_400_PIN, LOW);
         OUT_WRITE(PC_480_PIN, LOW);
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
 
-        auto st = Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
-                       PC_SERIAL_RX_PIN,
-                       PC_SERIAL_TX_PIN);
+        static auto st = Rainbow::Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
+                                          PC_SERIAL_RX_PIN,
+                                          PC_SERIAL_TX_PIN);
         auto driver = st.get_driver();
         driver.microsteps(PC_MICROSTEPS);
         driver.ihold(31); // hold current == run current for maximum torque
-        return st;
+        return Rainbow(st);
     }();
     const uint8_t intensity = parser.byteval('I');
     const uint16_t wavelength = parser.ushortval('W');
     const millis_t duration = (SEC_TO_MS(parser.ulongval('S')) + parser.ushortval('P'));
+
+    if (parser.seenval('F')) {
+        const feedRate_t feedrate_deg_s = parser.value_feedrate();
+        const uint32_t step_velocity = deg_to_steps(feedrate_deg_s);
+        rainbow.velocity = step_velocity;
+    }
 
     const CuringLed led = led_for_wavelength(wavelength);
 
@@ -106,18 +130,22 @@ void GcodeSuite::M805()
         return;
     }
 
-    stepper.set_hold(true);
+    planner.synchronize();
+    planner.quick_pause();
+
+    rainbow.set_hold(true);
     if (parser.seenval('D'))
-        move_rainbow(stepper, CuringLed{led.pin, parser.value_float()});
+        rainbow.move(CuringLed{led.pin, parser.value_float()});
     else
-        move_rainbow(stepper, led);
+        rainbow.move(led);
     WRITE(led.pin, HIGH);
     analogWrite(PC_PWM_PIN, intensity);
     safe_delay(duration);
     analogWrite(PC_PWM_PIN, 0);
     WRITE(led.pin, LOW);
-    stepper.set_hold(false);
-    stepper.stop();
+    rainbow.set_hold(false);
+
+    planner.quick_resume();
 }
 
 #endif // EXOCYTE_UV_CROSSLINKING
