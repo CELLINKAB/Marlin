@@ -23,7 +23,6 @@ REFERENCES
 #if ENABLED(CELLINK_REPORTING)
 
 #include "../gcode.h"
-#include "../../inc/_Version.h"
 #include "src/MarlinCore.h"
 
 void GcodeSuite::M1051()

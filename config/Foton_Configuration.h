@@ -62,6 +62,7 @@
 // Author info of this build printed to the host during boot and M115
 #define STRING_CONFIG_H_AUTHOR "(BigTreeTech, SKR-3)" // Who made the changes.
 #define CUSTOM_VERSION_FILE _Version.h // Path from the root directory (no quotes)
+#define CUSTOM_VERSION_STRICT_CHECK // errors if custom version file not present
 
 /**
  * *** VENDORS PLEASE READ ***

@@ -53,13 +53,6 @@ def generate_marlin(semver, majorminiopatch):
 #ifndef STRING_DISTRIBUTION_DATE
     #define STRING_DISTRIBUTION_DATE "0000-00-00"
 #endif
-#define MARLIN_HEX_VERSION 02010201
-#ifndef REQUIRED_CONFIGURATION_H_VERSION
-  #define REQUIRED_CONFIGURATION_H_VERSION MARLIN_HEX_VERSION
-#endif
-#ifndef REQUIRED_CONFIGURATION_ADV_H_VERSION
-  #define REQUIRED_CONFIGURATION_ADV_H_VERSION MARLIN_HEX_VERSION
-#endif
 /**
  * Define a generic printer name to be output to the LCD after booting Marlin.
  */
@@ -177,7 +170,7 @@ def generate_env():
 
 def make_versionfile():
 
-    source_dir = path.join('Marlin', 'src', 'inc',)
+    source_dir = 'Marlin'
     version_file = path.join(source_dir, '_Version.h')
     gv = process_gitversion()
 
