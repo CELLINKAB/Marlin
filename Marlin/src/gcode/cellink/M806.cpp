@@ -23,9 +23,10 @@ void GcodeSuite::M806()
     }
 
     uvc_controller.safety_override = parser.boolval('O');
-    uvc_controller.auto_off_time = SEC_TO_MS(
-        min(parser.ulongval('S', UVCController::DEFAULT_EXPOSURE_SECONDS),
-            UVCController::MAX_EXPOSURE_SECONDS));
+    const uint32_t exposure_seconds = min(parser.ulongval('S',
+                                                          UVCController::DEFAULT_EXPOSURE_SECONDS),
+                                          UVCController::MAX_EXPOSURE_SECONDS);
+    uvc_controller.auto_off_time = millis() + SEC_TO_MS(exposure_seconds);
     uvc_controller.send_reports = parser.boolval('V');
 
     const bool async = parser.boolval('A');

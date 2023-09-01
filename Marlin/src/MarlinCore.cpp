@@ -174,7 +174,7 @@
   #include "feature/guppi_printhead/chantarelle.h"
 #endif
 
-#if ENABLED(UVC_STERLIZATION)
+#if ENABLED(UVC_STERILIZATION)
   #include "feature/uvc_sterilization.h"
 #endif
 
@@ -562,7 +562,7 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
   }
   #endif
 
-  #if ENABLED(UVC_STERLIZATION)
+  #if ENABLED(UVC_STERILIZATION)
     uvc_controller.update(ms);
   #endif
 
@@ -1665,7 +1665,7 @@ void setup() {
     ph_controller.init();
   #endif
 
-  #if ENABLED(UVC_STERLIZATION)
+  #if ENABLED(UVC_STERILIZATION)
     uvc_controller.init();
   #endif
 
