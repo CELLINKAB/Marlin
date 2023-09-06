@@ -1,17 +1,23 @@
-/*
- * crc.h
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
  *
- *	Created on: 22 aug. 2016
- *	Author: Sterna
- *	The contents of this file is for internal use at CELLINK only.
- *	You are not allowed to distribute the contents of this file without prior written approval from CELLINK AB.
- *	If you have received this file in error, you are kindly asked to
- *	notify us of the reception and delete the file.
- *	Copyright (c) CELLINK AB
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
  */
 
-#ifndef CRC_H_
-#define CRC_H_
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -370,4 +376,3 @@ struct Packet<void> final : public EmptyPacket
 
 } // namespace printhead
 
-#endif /* CRC_H_ */
