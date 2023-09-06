@@ -148,7 +148,16 @@
 // Filament Runout Sensor
 //
 #define FIL_RUNOUT_PIN                      PC2   // E0DET
-#define FIL_RUNOUT2_PIN                     PA0   // E1DET
+// #define FIL_RUNOUT2_PIN                     PA0   // E1DET <- Is being used as UVC interlock switch sensing
+
+//
+// UVC & Door sensor
+//
+#define UVC_TFAULT_PIN                      PA0   // E1DET
+#define UVC_TFAULT_ACTIVE_STATE             HIGH
+
+#define DOOR_PIN                            UVC_TFAULT_PIN
+#define DOOR_SENSOR_INVERTING               false
 
 //
 // Power Supply Control
