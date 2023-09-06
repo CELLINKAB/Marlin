@@ -308,7 +308,9 @@ typedef struct SettingsDataStruct {
   // X_AXIS_TWIST_COMPENSATION
   //
   #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-    XATC xatc;                                          // M423 X Z
+    float xatc_spacing;                                 // M423 X Z
+    float xatc_start;
+    xatc_array_t xatc_z_offset;
   #endif
 
   //
@@ -431,7 +433,7 @@ typedef struct SettingsDataStruct {
   uint8_t lcd_brightness;                               // M256 B
 
   //
-  // LCD_BACKLIGHT_TIMEOUT
+  // Display Sleep
   //
   #if LCD_BACKLIGHT_TIMEOUT_MINS
     uint8_t backlight_timeout_minutes;                  // M255 S
@@ -588,7 +590,7 @@ typedef struct SettingsDataStruct {
   // MKS UI controller
   //
   #if ENABLED(DGUS_LCD_UI_MKS)
-    uint8_t mks_language_index;                         // Display Language
+    MKS_Language mks_language_index;                    // Display Language
     xy_int_t mks_corner_offsets[5];                     // Bed Tramming
     xyz_int_t mks_park_pos;                             // Custom Parking (without NOZZLE_PARK)
     celsius_t mks_min_extrusion_temp;                   // Min E Temp (shadow M302 value)
@@ -1050,7 +1052,7 @@ void MarlinSettings::postprocess() {
     // X Axis Twist Compensation
     //
     #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-      _FIELD_TEST(xatc);
+      _FIELD_TEST(xatc_spacing);
       EEPROM_WRITE(xatc.spacing);
       EEPROM_WRITE(xatc.start);
       EEPROM_WRITE(xatc.z_offset);
@@ -1264,7 +1266,7 @@ void MarlinSettings::postprocess() {
     }
 
     //
-    // LCD Backlight Timeout
+    // LCD Backlight / Sleep Timeout
     //
     #if LCD_BACKLIGHT_TIMEOUT_MINS
       EEPROM_WRITE(ui.backlight_timeout_minutes);
@@ -1280,7 +1282,7 @@ void MarlinSettings::postprocess() {
       #if ENABLED(USE_CONTROLLER_FAN)
         const controllerFan_settings_t &cfs = controllerFan.settings;
       #else
-        controllerFan_settings_t cfs = controllerFan_defaults;
+        constexpr controllerFan_settings_t cfs = controllerFan_defaults;
       #endif
       EEPROM_WRITE(cfs);
     }
@@ -1802,7 +1804,7 @@ void MarlinSettings::postprocess() {
         EEPROM_WRITE(stepper.get_shaping_damping_ratio(Y_AXIS));
       #endif
     #endif
-
+    
     //
     // Strain Gauge
     //
@@ -1831,7 +1833,6 @@ void MarlinSettings::postprocess() {
       EEPROM_WRITE(thermalManager.temp_bed.offset);
       EEPROM_WRITE(thermalManager.temp_bed.scale);
     #endif
-
 
     //
     // Report final CRC and Data Size
@@ -2138,9 +2139,6 @@ void MarlinSettings::postprocess() {
         #endif // AUTO_BED_LEVELING_BILINEAR
           {
             // Skip past disabled (or stale) Bilinear Grid data
-            xy_pos_t bgs, bs;
-            EEPROM_READ(bgs);
-            EEPROM_READ(bs);
             for (uint16_t q = grid_max_x * grid_max_y; q--;) EEPROM_READ(dummyf);
           }
       }
@@ -2149,7 +2147,7 @@ void MarlinSettings::postprocess() {
       // X Axis Twist Compensation
       //
       #if ENABLED(X_AXIS_TWIST_COMPENSATION)
-        _FIELD_TEST(xatc);
+        _FIELD_TEST(xatc_spacing);
         EEPROM_READ(xatc.spacing);
         EEPROM_READ(xatc.start);
         EEPROM_READ(xatc.z_offset);
@@ -2381,7 +2379,7 @@ void MarlinSettings::postprocess() {
       }
 
       //
-      // LCD Backlight Timeout
+      // LCD Backlight / Sleep Timeout
       //
       #if LCD_BACKLIGHT_TIMEOUT_MINS
         EEPROM_READ(ui.backlight_timeout_minutes);
@@ -2959,7 +2957,7 @@ void MarlinSettings::postprocess() {
         stepper.set_shaping_damping_ratio(Y_AXIS, _data[1]);
       }
       #endif
-
+      
       //
       // Strain Gauge
       //
@@ -3613,7 +3611,7 @@ void MarlinSettings::reset() {
   TERN_(HAS_LCD_BRIGHTNESS, ui.brightness = LCD_BRIGHTNESS_DEFAULT);
 
   //
-  // LCD Backlight Timeout
+  // LCD Backlight / Sleep Timeout
   //
   #if LCD_BACKLIGHT_TIMEOUT_MINS
     ui.backlight_timeout_minutes = LCD_BACKLIGHT_TIMEOUT_MINS;
@@ -3711,7 +3709,7 @@ void MarlinSettings::reset() {
   // Advanced Pause filament load & unload lengths
   //
   #if ENABLED(ADVANCED_PAUSE_FEATURE)
-    LOOP_L_N(e, EXTRUDERS) {
+    EXTRUDER_LOOP() {
       fc_settings[e].unload_length = FILAMENT_CHANGE_UNLOAD_LENGTH;
       fc_settings[e].load_length = FILAMENT_CHANGE_FAST_LOAD_LENGTH;
     }
@@ -3735,7 +3733,7 @@ void MarlinSettings::reset() {
   // MKS UI controller
   //
   TERN_(DGUS_LCD_UI_MKS, MKS_reset_settings());
-
+  
   //
   // Strain Gauge
   //
@@ -4123,7 +4121,7 @@ void MarlinSettings::reset() {
     #endif
 
     TERN_(HAS_MULTI_LANGUAGE, gcode.M414_report(forReplay));
-
+    
     TERN_(HX711_WSCALE,gcode.M7110_report(forReplay));
 
     TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.report_config(forReplay));
