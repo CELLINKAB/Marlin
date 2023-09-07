@@ -78,12 +78,9 @@ void HX_711::manage_hx_711() {
       _f_val = (float)_last_read;
     #endif
 
-    // HOMING Z-MIN ENDSTOP MANAGEMENT
-    if((_endstop_z_min)&&(_sg_output)&&(_homing_dir!=0)) {
-      if(_homing_dir > 0)
-        SERIAL_ECHOLNPGM("ERR_ZMIN_HOMING");
-      if(_homing_dir < 0)
-        SERIAL_ECHOLNPGM("ERR_ZMIN_CALIB");
+    // CALIBRATION Z-MIN ENDSTOP MANAGEMENT
+    if((_endstop_z_min) && (_sg_output) && (_homing_dir < 0)) {
+      SERIAL_ECHOLNPGM("ERR_ZMIN_CALIB");
       crash_kill_stop();
     }
 
