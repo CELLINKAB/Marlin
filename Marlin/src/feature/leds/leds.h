@@ -251,6 +251,10 @@ enum class LEDStrip {
     All,
 };
 
+/**
+ * @brief stateless fade interpolator to facilitate smooth efficient fades from one color to another
+ * 
+ */
 struct LedFade
 {
     millis_t start_time;
@@ -280,8 +284,8 @@ struct LedFade
         , strip{target_strip}
         , pixel{pixel_}
     {}
-    constexpr millis_t expiration() const { return start_time + duration; }
-    constexpr LEDColor next_state(millis_t current_time) const
+    [[nodiscard]] constexpr millis_t expiration() const { return start_time + duration; }
+    [[nodiscard]] constexpr LEDColor next_state(millis_t current_time) const
     {
         if (current_time >= expiration()) {
             return end_color;
@@ -300,15 +304,32 @@ struct LedFade
     }
 };
 
+/**
+ * @brief Manage LED state and background LED transitions
+ * 
+ */
 struct AnimationManager
 {
     LedFade active_fade;
     millis_t next_tick;
     size_t remaining_cycles;
     static constexpr millis_t MIN_FADE_TICK = 25;
+
+    /**
+     * @brief checks if a background LED animation is active
+     * 
+     * @return true 
+     * @return false 
+     */
     bool running() const;
+
+    /**
+     * @brief poll to progress background LED transitions
+     * 
+     */
     void update();
 };
+
 extern AnimationManager animation_manager;
 
 #    endif  // RGB_LED_FADE_COMMAND

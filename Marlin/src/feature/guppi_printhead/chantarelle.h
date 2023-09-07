@@ -22,5 +22,8 @@
 
 #include "request.h"
 
-
+/**
+ * @brief global printhead object for state storage and communication methods
+ * 
+ */
 extern printhead::Controller ph_controller;

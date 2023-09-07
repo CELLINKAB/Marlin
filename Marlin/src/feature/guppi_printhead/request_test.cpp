@@ -29,11 +29,19 @@ using namespace printhead;
 namespace test
 {
 
+/**
+ * @brief Trigger compiler error if Status size changes, which would invalidate conversions
+ * 
+ */
 void status_fixed_size()
 {
     static_assert_eq(sizeof(Status), 2);
 }
 
+/**
+ * @brief Trigger compiler error if conversion does not match assumptions
+ * 
+ */
 void status_raw_conversions()
 {
     static constexpr uint16_t raw = 0b0000'0000'1011'0100;

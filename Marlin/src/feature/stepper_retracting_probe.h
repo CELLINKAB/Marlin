@@ -26,11 +26,10 @@
 
 #include "simple_TMC_controller.h"
 
-// fully generic probe interface idea
-// crtp class with a stow/deploy impl and a read impl
-// read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
-// probe types inherit from Probe<StowDeploy, ProbeType>
-
+/**
+ * @brief Controller for a probe using a stepper motor to deploy and retract
+ * 
+ */
 struct StepperRetractingProbe
 {
     static constexpr int32_t SRP_DEPLOY_VELOCITY = -100'000;
@@ -40,6 +39,10 @@ struct StepperRetractingProbe
     static constexpr uint32_t SRP_RETRACT_TIME = 7000;
     static constexpr float SRP_STEPPER_RSENSE = 0.11f;
 
+    /**
+     * @brief POD configuration object
+     * 
+     */
     struct Config
     {
         int32_t deploy_velocity;

@@ -33,13 +33,18 @@ constexpr size_t NUM_BED_STATE_VARS = 2;
 
 using BedSensors = std::array<TMP117<SoftWire>, NUM_BED_TEMP_SENSORS>;
 
+/**
+ * @brief lazily initialize and get access to bed sensors
+ * 
+ * @return BedSensors& 
+ */
 BedSensors& bed_sensors();
 
 class BedKalmanFilter
 {
 public:
-    static const int indexST = 0;
-    static const int indexOT = 1;
+    static constexpr int indexST = 0;
+    static constexpr int indexOT = 1;
 
     BedKalmanFilter(double initialSurfaceTemp, double initialOffsetTemp);
     void predict();

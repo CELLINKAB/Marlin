@@ -20,6 +20,11 @@
 
 #include "../inc/MarlinConfig.h"
 
+/**
+ * @brief sticky pin reader to handle bouncy switches
+ * 
+ * @tparam PIN 
+ */
 template<pin_t PIN>
 struct Debounced
 {
@@ -28,6 +33,13 @@ struct Debounced
     millis_t debounce_until;
     bool state;
 
+    /**
+     * @brief Construct a new Debounced object
+     * 
+     * @param debounce_time 
+     * @param invert 
+     * @param pullup 
+     */
     explicit Debounced(millis_t debounce_time, bool invert = false, bool pullup = false)
         : period(debounce_time)
         , inverting(invert)
@@ -41,10 +53,27 @@ struct Debounced
         };
     }
 
+    /**
+     * @brief read current raw state accounting for inverting, but without debouncing
+     * 
+     * @return true 
+     * @return false 
+     */
     bool read_now() const { return static_cast<bool>(READ(PIN)) ^ inverting; }
 
+    /**
+     * @brief read debounced pin state
+     * 
+     * @return true 
+     * @return false 
+     */
     bool read() const { return state; }
 
+    /**
+     * @brief poll in background to update debouncing timers
+     * 
+     * @param now 
+     */
     void update(millis_t now = millis())
     {
         if (now <= debounce_until)
