@@ -115,21 +115,22 @@ void set_axis_sg_thresh(AxisEnum axis, uint16_t thresh)
     }
 }
 
-constexpr void set_homing_current(AxisEnum axis, uint16_t cur) {
+constexpr void set_homing_current(AxisEnum axis, uint16_t cur)
+{
     switch (axis) {
-        case AxisEnum::X_AXIS:
-            stepperX.homing_current = cur;
-            TERN_(HAS_DUAL_X_STEPPERS, stepperX2.homing_current = cur);
-            break;
-        case AxisEnum::Y_AXIS:
-            stepperY.homing_current = cur;
-            TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.homing_current = cur);
-            break;
-        case AxisEnum::Z_AXIS:
-            stepperZ.homing_current = cur;
-            break;
-        default:
-            break;
+    case AxisEnum::X_AXIS:
+        stepperX.homing_current = cur;
+        TERN_(HAS_DUAL_X_STEPPERS, stepperX2.homing_current = cur);
+        break;
+    case AxisEnum::Y_AXIS:
+        stepperY.homing_current = cur;
+        TERN_(HAS_DUAL_Y_STEPPERS, stepperY2.homing_current = cur);
+        break;
+    case AxisEnum::Z_AXIS:
+        stepperZ.homing_current = cur;
+        break;
+    default:
+        break;
     }
 }
 
@@ -149,6 +150,7 @@ void do_backoff(AxisEnum axis, float distance)
 enum class SanityTestResult {
     Ok,
     FalsePositive,
+    FalseNegative,
     NoTrigger,
 };
 
@@ -179,19 +181,20 @@ SanityTestResult test_hit(AxisEnum axis, feedRate_t feedrate)
     constexpr static float ERROR_MARGIN = 0.1f; // mm
     auto position_error = (planner.triggered_position_mm(axis) - start_pos) * -home_dir(axis);
     if (DEBUGGING(INFO))
-        SERIAL_ECHOLNPGM("axis test position error: ",
-                         planner.triggered_position_mm(axis) - start_pos);
+        SERIAL_ECHOLNPGM("axis test position error: ", position_error);
     if (position_error > ERROR_MARGIN) {
         current_position[axis] += position_error * home_dir(axis);
         do_blocking_move_to(current_position, feedrate);
         return SanityTestResult::FalsePositive;
+    } else if (position_error < (-ERROR_MARGIN * 10)) {
+        return SanityTestResult::FalseNegative;
     } else
         return SanityTestResult::Ok;
 }
 
 SummaryStats analyze_sweep(AxisEnum axis)
 {
-    static constexpr size_t MAX_SAMPLES = 40;
+    static constexpr size_t MAX_SAMPLES = 36;
     std::array<uint16_t, MAX_SAMPLES> sg_samples;
 
     uint32_t sum = 0;
@@ -201,7 +204,7 @@ SummaryStats analyze_sweep(AxisEnum axis)
         // spin until next result needed
         while (millis() <= next_poll)
             idle_no_sleep();
-        next_poll = millis() + 10;
+        next_poll = millis() + 8;
         sample = poll_sg_val(axis);
         sum += sample;
         if (DEBUGGING(LEVELING))
@@ -280,35 +283,36 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
     uint16_t optimal_current = cur;
     feedRate_t optimal_feedrate = feedrate;
 
-    static constexpr float CRITICAL_VALUE = -6.0f; // 1/100000 expected error rate
-    uint16_t cur_increment = 50;
-    while (cur < move_cur && cur > 100 && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+    static constexpr float CRITICAL_VALUE = -9.0f; // 1/10000000 expected error rate
+    uint16_t cur_increment = 20;
+    while (cur <= move_cur && cur > 100 && (best_sweep.z_statistic >= CRITICAL_VALUE || test_all)) {
         cur += cur_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_current = cur;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && cur_increment == 50
+        } else if ((new_sweep.z_statistic > (best_sweep.z_statistic + 2.5f) || cur >= move_cur) && cur_increment == 20
                    && (!test_all || cur >= move_cur)) {
             // getting worse, try the other way
-            cur_increment = -30;
-            while (cur >= move_cur)
+            cur_increment = -5;
+            while (cur > move_cur)
                 cur += cur_increment;
         }
     }
     cur = optimal_current;
+    best_sweep.z_statistic = max(best_sweep.z_statistic, CRITICAL_VALUE);
 
     static constexpr feedRate_t MAX_FEEDRATE = 36.0f;
-    static constexpr feedRate_t MIN_FEEDRATE = 3.0f;
+    static constexpr feedRate_t MIN_FEEDRATE = 6.0f;
     feedRate_t feedrate_increment = 5.0f;
     while (feedrate < MAX_FEEDRATE && feedrate > MIN_FEEDRATE
-           && (best_sweep.z_statistic > CRITICAL_VALUE || test_all)) {
+           && (best_sweep.z_statistic >= CRITICAL_VALUE || test_all)) {
         feedrate += feedrate_increment;
         auto new_sweep = test_sweep(axis, cur, feedrate);
         if (new_sweep.z_statistic < best_sweep.z_statistic) {
             best_sweep = new_sweep;
             optimal_feedrate = feedrate;
-        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 1.0f) && feedrate_increment == 5.0f
+        } else if (new_sweep.z_statistic > (best_sweep.z_statistic + 2.0f) && feedrate_increment == 5.0f
                    && (!test_all || feedrate >= MAX_FEEDRATE)) { // getting worse, change direction
             feedrate_increment = -2.0f;
             while (feedrate >= MAX_FEEDRATE)
@@ -321,31 +325,43 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
         return;
 
     size_t retries = 0;
-    while (retries++ < 5 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
+    size_t good_retries = 0;
+    while (retries++ < 10 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
         set_axis_sg_thresh(axis, best_sweep.sg_thresh);
         auto test_result = test_hit(axis, feedrate);
         switch (test_result) {
         case SanityTestResult::Ok:
-            SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
-                             optimal_current,
-                             "\nHOMING_FEEDRATE ",
-                             optimal_feedrate,
-                             "\nSTALLGUARD_THRESHOLD ",
-                             best_sweep.sg_thresh);
+            if (good_retries < 3) {
+                --retries;
+                ++good_retries;
+                break;
+            } else {
+                SERIAL_ECHOLNPGM("\nOptimal values:\nHOMING_CURRENT ",
+                                 optimal_current,
+                                 "\nHOMING_FEEDRATE ",
+                                 optimal_feedrate,
+                                 "\nSTALLGUARD_THRESHOLD ",
+                                 best_sweep.sg_thresh);
 
-            set_axis_current(axis, move_cur);
-            return;
+                set_axis_current(axis, move_cur);
+                homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
+                set_homing_current(axis, optimal_current);
+                static constexpr xyz_pos_t post_home_backoff = HOMING_BACKOFF_POST_MM;
+                current_position[axis] = post_home_backoff[axis];
+                do_blocking_move_to(current_position);
+                return;
+            }
         case SanityTestResult::FalsePositive:
             best_sweep.sg_thresh -= 5;
             break;
+        case SanityTestResult::FalseNegative:
+            [[fallthrough]];
         case SanityTestResult::NoTrigger:
             best_sweep.sg_thresh += 2;
             break;
         }
     }
 
-    homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
-    set_homing_current(axis, optimal_current);
     SERIAL_ECHOLN("No optimal stallguard settings found. :(");
 }
 
@@ -359,7 +375,7 @@ void GcodeSuite::G914()
     set_all_unhomed();
 
     SERIAL_ECHOLN("Manually move the printbed to the home position");
-    for (size_t seconds_until_start = 5; seconds_until_start > 0; --seconds_until_start) {
+    for (size_t seconds_until_start = 10; seconds_until_start > 0; --seconds_until_start) {
         SERIAL_ECHOLN(seconds_until_start);
         safe_delay(1000);
     }
