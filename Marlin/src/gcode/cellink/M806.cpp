@@ -47,7 +47,7 @@ void GcodeSuite::M806()
     uvc_controller.auto_off_time = millis() + SEC_TO_MS(exposure_seconds);
     uvc_controller.send_reports = parser.boolval('V');
 
-    const bool async = parser.boolval('A');
+    const bool async = parser.seenval('S') || parser.boolval('A');
 
     uvc_controller.start(intensity);
 
