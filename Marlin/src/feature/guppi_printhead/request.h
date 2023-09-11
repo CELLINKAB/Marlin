@@ -1,5 +1,21 @@
-// Copyright Cellink 2022 GPLv3
-
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 #pragma once
 
 #include "../../inc/MarlinConfig.h"
@@ -26,6 +42,10 @@ constexpr uint32_t PL_PER_FULL_STEP = static_cast<uint32_t>(UL_PER_MM * MM_PER_F
                                                             * 1'000'000.0);
 constexpr uint32_t PL_STEP_VOLUME = PL_PER_FULL_STEP;
 
+/**
+ * @brief Descriptive transmission error codes
+ * 
+ */
 enum class Result {
     OK,
     BAD_CRC,
@@ -63,6 +83,10 @@ constexpr const char* string_from_result_code(Result result)
     return "???";
 }
 
+/**
+ * @brief Error code used in protocol responses
+ * 
+ */
 enum class ErrorPayload : u_int8_t {
     OK,
     INVALID_CRC,
@@ -164,6 +188,10 @@ constexpr auto string_from_error_payload(ErrorPayload payload)
     return "???";
 }
 
+/**
+ * @brief Bitflag printhead status wrapper
+ * 
+ */
 struct Status
 {
     bool estop_top : 1;
@@ -218,6 +246,11 @@ private:
     };
 };
 
+/**
+ * @brief packet parsed from printhead response, and error code if packet could not be fully parsed
+ * 
+ * @tparam T contained packet payload
+ */
 template<typename T>
 struct Response
 {
@@ -226,6 +259,12 @@ struct Response
     Result result;
 };
 
+/**
+ * @brief Formatted print of a packet for debugging
+ * 
+ * @tparam T payload
+ * @param packet to print
+ */
 template<typename T>
 void print_packet(const Packet<T>& packet)
 {
@@ -249,11 +288,23 @@ void print_packet(const Packet<T>& packet)
     SERIAL_ECHOLN(" }");
 }
 
+/**
+ * @brief Clears any pending incoming bytes in case of bus noise or incomplete transmission
+ * 
+ * @param serial buffer to flush
+ */
 void flush_rx(HardwareSerial& serial);
 
 extern millis_t last_serial_activity;
 extern size_t printhead_rx_err_counter;
 
+/**
+ * @brief validates raw index before conversion
+ * 
+ * @param index raw from bus
+ * @return true 
+ * @return false 
+ */
 constexpr bool valid_index(uint16_t index)
 {
     switch (index) {
@@ -271,6 +322,13 @@ constexpr bool valid_index(uint16_t index)
     }
 }
 
+/**
+ * @brief Checks that command is known valid before conversion
+ * 
+ * @param command raw from bus
+ * @return true 
+ * @return false 
+ */
 constexpr bool valid_command(uint16_t command)
 {
     if (command >= static_cast<uint16_t>(Command::NOF_CMDS))
@@ -533,11 +591,26 @@ constexpr bool valid_command(uint16_t command)
     }
 }
 
+/**
+ * @brief validate packet size
+ * 
+ * @param size raw from bus
+ * @return true 
+ * @return false 
+ */
 constexpr bool valid_size(uint16_t size)
 {
     return (size <= 0x00ff);
 }
 
+/**
+ * @brief High level checked method to read a response packet from bus
+ * 
+ * @tparam T packet payload
+ * @param serial 
+ * @param enable_debug 
+ * @return Response<T> 
+ */
 template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
@@ -710,8 +783,26 @@ Result send(const Packet<T>& request,
     return Result::OK;
 }
 
+/**
+ * @brief send without type safety or bounds checks
+ * 
+ * @param data type erased pointer to buffer
+ * @param size bytes to read from buffer onto the bus
+ * @param serial 
+ * @return Result 
+ */
 Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
 
+/**
+ * @brief high level transaction command to send and recieve type checked packets with error reporting
+ * 
+ * @tparam OUT expected response payload
+ * @tparam IN provided request payload
+ * @param packet to send
+ * @param serial 
+ * @param enable_debug 
+ * @return Response<OUT> 
+ */
 template<typename OUT, typename IN = void>
 Response<OUT> send_and_receive(const Packet<IN>& packet,
                                HardwareSerial& serial,
@@ -760,11 +851,22 @@ enum class EncoderIndex {
     ExtruderThree
 };
 
+/**
+ * @brief Get the encoder state object
+ * 
+ * @param states 
+ * @param index 
+ * @return constexpr int32_t 
+ */
 constexpr int32_t get_encoder_state(const EncoderStates& states, EncoderIndex index)
 {
     return states[static_cast<size_t>(index)];
 }
 
+/**
+ * @brief local bundle of synchronized printhead state
+ * 
+ */
 struct PrintheadState
 {
     int32_t extruder_encoder;
@@ -788,6 +890,10 @@ struct State : AutoReporter<State>
 } // namespace reporters
 #endif
 
+/**
+ * @brief High level controller to handle protocol and state management
+ * 
+ */
 class Controller
 {
     HardwareSerial& bus;
@@ -799,19 +905,71 @@ public:
         : bus(ph_bus)
     {}
 
+    /**
+     * @brief setup required pins and bus configuration
+     * 
+     */
     void init();
 
+    /**
+     * @brief method to call on tool change to ensure printhead synchronization
+     * 
+     * @param tool_index 
+     */
     void tool_change(uint8_t tool_index);
 
+    /**
+     * @brief call in idle to handle background requests
+     * 
+     */
     void update();
 
+    /**
+     * @brief pretty print current states
+     * 
+     */
     void report_states();
 
+    /**
+     * @brief Get the latest extruder temp object
+     * 
+     * @param index 
+     * @return celsius_float_t 
+     */
     celsius_float_t get_latest_extruder_temp(Index index);
 
+    /**
+     * @brief poll internal state for ALL extruder moving status
+     * 
+     * @return true 
+     * @return false 
+     */
     bool extruder_busy();
+
+    /**
+     * @brief poll internal state for selected moving status
+     * 
+     * @param index 
+     * @return true 
+     * @return false 
+     */
     bool extruder_busy(Index index);
+    
+    /**
+     * @brief poll internal state for ALL moving status
+     * 
+     * @return true 
+     * @return false 
+     */
     bool slider_busy();
+
+    /**
+     * @brief poll internal state for selected moving status
+     * 
+     * @param index 
+     * @return true 
+     * @return false 
+     */
     bool slider_busy(Index index);
 
     // Metadata methods
@@ -820,6 +978,7 @@ public:
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
     Response<Status> get_status(Index index, bool debug = true);
+    
     // Temperature methods
     Response<uint16_t> set_temperature(Index index, celsius_float_t temperature);
     Response<uint16_t> get_temperature(Index index, bool debug = true);
@@ -829,6 +988,7 @@ public:
     Response<FanSpeeds> get_fan_speed(Index index);
     auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
     auto get_tem_debug(Index index) -> Response<TemTemps>;
+    
     // Extruder Stepper driver methods
     Result set_extrusion_speed(Index index, uint32_t feedrate);
     Response<uint32_t> get_extrusion_speed(Index index);
@@ -846,6 +1006,7 @@ public:
     Result add_raw_extruder_steps(Index index, int32_t steps);
     Result extruder_move(Index index, float uL);
     Result set_extruder_direction(Index index, bool direction);
+    
     // Slider Valve driver methods
     Result set_valve_speed(Index index, feedRate_t feedrate);
     Response<uint32_t> get_valve_speed(Index index);

@@ -1,4 +1,21 @@
-// Copyright Cellink 2022 - Licensed under GPLv3
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 
 #pragma once
 
@@ -9,11 +26,10 @@
 
 #include "simple_TMC_controller.h"
 
-// fully generic probe interface idea
-// crtp class with a stow/deploy impl and a read impl
-// read impl is either DigitalProbe<PIN> or AnalogProbe<Pin>
-// probe types inherit from Probe<StowDeploy, ProbeType>
-
+/**
+ * @brief Controller for a probe using a stepper motor to deploy and retract
+ * 
+ */
 struct StepperRetractingProbe
 {
     static constexpr int32_t SRP_DEPLOY_VELOCITY = -100'000;
@@ -23,6 +39,10 @@ struct StepperRetractingProbe
     static constexpr uint32_t SRP_RETRACT_TIME = 7000;
     static constexpr float SRP_STEPPER_RSENSE = 0.11f;
 
+    /**
+     * @brief POD configuration object
+     * 
+     */
     struct Config
     {
         int32_t deploy_velocity;

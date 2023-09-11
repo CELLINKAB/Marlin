@@ -16,18 +16,14 @@ Clearly describe the submitted changes with lots of details. Include images wher
 
 -->
 
-### Requirements
+### Affected Devices
 
-<!-- Does this PR require a specific board, LCD, etc.? -->
+<!-- List which Cellink devices targeted by change, and which devices will need tests with this change. Can also specify no device for e.g. (documentation change) -->
 
-### Benefits
+### Test Focus Areas
 
-<!-- What does this PR fix or improve? -->
-
-### Configurations
-
-<!-- Attach Configurations ZIP and any other files needed to test this PR. -->
+<!-- List systems which will need to be verified on each affected device. If possible include a test procedure (e.g. G codes to run with expected output)  -->
 
 ### Related Issues
 
-<!-- Does this PR fix a bug or fulfill a Feature Request? Link related Issues here. -->
+<!-- Jira ticket number to track PR in ticket automatically. Link is generated if ticket code is valid (e.g. EX-103) -->

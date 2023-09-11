@@ -1,4 +1,22 @@
 
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 #include "../MarlinCore.h"
 #include "../gcode/gcode.h"
 #include "../module/motion.h"
@@ -7,6 +25,10 @@
 #include <array>
 #include <numeric>
 
+/**
+ * @brief State and routine handler for optical nozzle autocalibration
+ * 
+ */
 struct OpticalAutocal
 {
     inline static constexpr xyz_pos_t END_POSITION_PRINTBED_DELTA{AUTOCAL_PRINTBED_CENTER_DELTA};
@@ -29,12 +51,27 @@ struct OpticalAutocal
 
     OpticalAutocal() = default;
 
+    /**
+     * @brief Run full blocking routine to find nozzle X,Y,Z offsets
+     * 
+     * @param start_pos 
+     * @param feedrate 
+     * @return ErrorCode 
+     */
     auto full_autocal_routine(const xyz_pos_t start_pos, const feedRate_t feedrate) -> ErrorCode;
+    
     [[nodiscard]] bool is_calibrated(const uint8_t tool) const;
     [[nodiscard]] const xyz_pos_t& offset(const uint8_t tool) const;
     void report_sensors() const;
     void reset(const uint8_t tool);
     void reset_all();
+
+    /**
+     * @brief Meta calibration routine to account for autocalibration module installation variance
+     * 
+     * @param start_pos 
+     * @param feedrate 
+     */
     void calibrate(xyz_pos_t start_pos, feedRate_t feedrate);
 
 private:

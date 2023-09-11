@@ -1,4 +1,21 @@
-//copyright cellink 2022 - GPLv3
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
 
 #pragma once
 
@@ -16,13 +33,18 @@ constexpr size_t NUM_BED_STATE_VARS = 2;
 
 using BedSensors = std::array<TMP117<SoftWire>, NUM_BED_TEMP_SENSORS>;
 
+/**
+ * @brief lazily initialize and get access to bed sensors
+ * 
+ * @return BedSensors& 
+ */
 BedSensors& bed_sensors();
 
 class BedKalmanFilter
 {
 public:
-    static const int indexST = 0;
-    static const int indexOT = 1;
+    static constexpr int indexST = 0;
+    static constexpr int indexOT = 1;
 
     BedKalmanFilter(double initialSurfaceTemp, double initialOffsetTemp);
     void predict();
