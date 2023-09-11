@@ -346,8 +346,9 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
                 set_axis_current(axis, move_cur);
                 homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
                 set_homing_current(axis, optimal_current);
+                planner.synchronize();
                 static constexpr xyz_pos_t post_home_backoff = HOMING_BACKOFF_POST_MM;
-                current_position[axis] = post_home_backoff[axis];
+                current_position[axis] += post_home_backoff[axis];
                 do_blocking_move_to(current_position);
                 return;
             }
