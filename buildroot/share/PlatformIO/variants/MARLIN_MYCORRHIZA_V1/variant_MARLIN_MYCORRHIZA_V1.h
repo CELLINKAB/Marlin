@@ -268,7 +268,7 @@
  * Changing this value from the default (1000) will affect the PWM output value of analogWrite (to a PWM pin)
  * Since the pin is toggled on capture, if you change the frequency of the timer you have to adapt the compare value (analogWrite thinks you did)
  */
-#define PWM_FREQUENCY           25000
+#define PWM_FREQUENCY           20000
 //The bottom values are the default and don't need to be redefined
 //#define PWM_RESOLUTION          8
 //#define PWM_MAX_DUTY_CYCLE      255
