@@ -47,8 +47,8 @@ void GcodeSuite::M806()
     uvc_controller.auto_off_time = millis() + SEC_TO_MS(exposure_seconds);
     uvc_controller.send_reports = parser.boolval('V');
 
-    // if no seconds are given user probably expects asynchronous behavior
-    const bool async = !parser.seenval('S') || parser.boolval('A');
+    // if no seconds or A are given, user probably expects async
+    const bool async = !parser.seen("SA") || parser.boolval('A');
 
     uvc_controller.start(intensity);
 
