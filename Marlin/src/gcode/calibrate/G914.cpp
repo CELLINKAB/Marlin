@@ -324,6 +324,8 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
     if (dry_run)
         return;
 
+    static constexpr int16_t SG_MIN = 5;
+    static constexpr int16_t SG_MAX = 250;
     size_t retries = 0;
     size_t good_retries = 0;
     while (retries++ < 10 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
@@ -353,11 +355,13 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
                 return;
             }
         case SanityTestResult::FalsePositive:
-            best_sweep.sg_thresh -= 5;
+            if (best_sweep.sg_thresh >= SG_MIN)
+                best_sweep.sg_thresh -= 5;
             break;
         case SanityTestResult::FalseNegative:
             [[fallthrough]];
         case SanityTestResult::NoTrigger:
+            if (best_sweep.sg_thresh <= SG_MAX)
             best_sweep.sg_thresh += 2;
             break;
         }
