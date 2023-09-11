@@ -324,6 +324,8 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
     if (dry_run)
         return;
 
+    static constexpr int16_t SG_MIN = 5;
+    static constexpr int16_t SG_MAX = 250;
     size_t retries = 0;
     size_t good_retries = 0;
     while (retries++ < 10 && WITHIN(best_sweep.sg_thresh, 0, 255)) {
@@ -346,18 +348,23 @@ void tune_axis(AxisEnum axis, uint16_t cur, feedRate_t feedrate, bool test_all, 
                 set_axis_current(axis, move_cur);
                 homing_feedrate_mm_m[axis] = MMS_TO_MMM(optimal_feedrate);
                 set_homing_current(axis, optimal_current);
+                planner.synchronize();
                 static constexpr xyz_pos_t post_home_backoff = HOMING_BACKOFF_POST_MM;
-                current_position[axis] = post_home_backoff[axis];
+                current_position[axis] += (post_home_backoff[axis] * -home_dir(axis));
                 do_blocking_move_to(current_position);
                 return;
             }
         case SanityTestResult::FalsePositive:
-            best_sweep.sg_thresh -= 5;
+            if (best_sweep.sg_thresh >= SG_MIN)
+                best_sweep.sg_thresh -= 5;
+            good_retries = 0;
             break;
         case SanityTestResult::FalseNegative:
             [[fallthrough]];
         case SanityTestResult::NoTrigger:
+            if (best_sweep.sg_thresh <= SG_MAX)
             best_sweep.sg_thresh += 2;
+            good_retries = 0;
             break;
         }
     }
