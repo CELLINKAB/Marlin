@@ -26,7 +26,7 @@
 #include "../../feature/guppi_printhead/chantarelle.h"
 
 void GcodeSuite::M2202() {
-    const bool stop_reports = !parser.boolval('E');
+    const bool stop_reports = parser.boolval('D');
     ph_controller.disable_background_updates = stop_reports;
 }
 
