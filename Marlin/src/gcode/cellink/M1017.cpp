@@ -32,6 +32,8 @@
 void GcodeSuite::M1017()
 {
     /*output unused in com-module, all status available in M503 report*/
+    // instead use this to enable/disable autoreporting
+    set_autoreport_paused(parser.boolval('D'));
 }
 
 #endif // CELLINK_REPORTING
