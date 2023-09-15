@@ -50,7 +50,7 @@ enum class Result {
     OK,
     BAD_CRC,
     BUSY,
-    PACKET_TOO_SHORT,
+    TIMEOUT,
     BAD_PAYLOAD_SIZE,
     ERROR_RESPONSE,
     WRITE_ERROR,
@@ -67,8 +67,8 @@ constexpr const char* string_from_result_code(Result result)
         return "BAD_PAYLOAD_SIZE";
     case Result::OK:
         return "OK";
-    case Result::PACKET_TOO_SHORT:
-        return "PACKET_TOO_SHORT";
+    case Result::TIMEOUT:
+        return "TIMEOUT";
     case Result::BUSY:
         return "BUSY";
     case Result::ERROR_RESPONSE:
