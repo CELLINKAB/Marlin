@@ -681,7 +681,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         SERIAL_ECHOLN("]");
     }
     if (bytes_received < EXPECTED_PACKET_SIZE)
-        return err(Result::PACKET_TOO_SHORT);
+        return err(Result::TIMEOUT);
 
     if (!valid)
         return err(Result::INVALID_HEADER);
@@ -897,7 +897,7 @@ struct State : AutoReporter<State>
 class Controller
 {
     HardwareSerial& bus;
-    std::array<PrintheadState, EXTRUDERS> ph_states{};
+    std::array<PrintheadState, EXTRUDERS> ph_states;
 
 public:
     bool disable_background_updates;
@@ -905,6 +905,8 @@ public:
     // initialization
     constexpr explicit Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
+        , ph_states{}
+        , disable_background_updates{false}
     {}
 
     /**
