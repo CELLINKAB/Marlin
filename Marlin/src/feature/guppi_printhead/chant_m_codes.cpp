@@ -820,16 +820,4 @@ void GcodeSuite::M2200()
     TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
 }
 
-size_t printhead::printhead_rx_err_counter = 0;
-size_t printhead::printhead_tx_err_counter = 0;
-
-// get printhead communication error counters
-void GcodeSuite::M2201()
-{
-    SERIAL_ECHOLNPGM("PRINTHEAD_TX_ERRORS:",
-                     printhead::printhead_tx_err_counter,
-                     ",PRINTHEAD_RX_ERRORS:",
-                     printhead::printhead_rx_err_counter);
-}
-
 #endif //  CHANTARELLE_SUPPORT
