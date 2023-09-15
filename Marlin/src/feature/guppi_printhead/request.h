@@ -24,7 +24,7 @@
 
 #include "packet.h"
 
-#define AUTO_REPORT_CHANTARELLE
+//#define AUTO_REPORT_CHANTARELLE
 #if ENABLED(AUTO_REPORT_CHANTARELLE)
 #    include "../../libs/autoreport.h"
 #endif
