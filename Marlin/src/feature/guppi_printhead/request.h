@@ -900,8 +900,10 @@ class Controller
     std::array<PrintheadState, EXTRUDERS> ph_states{};
 
 public:
+    bool disable_background_updates;
+
     // initialization
-    Controller(HardwareSerial& ph_bus)
+    constexpr explicit Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
     {}
 
@@ -922,7 +924,7 @@ public:
      * @brief call in idle to handle background requests
      * 
      */
-    void update();
+    void update(millis_t now = millis());
 
     /**
      * @brief pretty print current states
@@ -954,7 +956,7 @@ public:
      * @return false 
      */
     bool extruder_busy(Index index);
-    
+
     /**
      * @brief poll internal state for ALL moving status
      * 
@@ -978,7 +980,7 @@ public:
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
     Response<Status> get_status(Index index, bool debug = true);
-    
+
     // Temperature methods
     Response<uint16_t> set_temperature(Index index, celsius_float_t temperature);
     Response<uint16_t> get_temperature(Index index, bool debug = true);
@@ -988,7 +990,7 @@ public:
     Response<FanSpeeds> get_fan_speed(Index index);
     auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
     auto get_tem_debug(Index index) -> Response<TemTemps>;
-    
+
     // Extruder Stepper driver methods
     Result set_extrusion_speed(Index index, uint32_t feedrate);
     Response<uint32_t> get_extrusion_speed(Index index);
@@ -1006,7 +1008,7 @@ public:
     Result add_raw_extruder_steps(Index index, int32_t steps);
     Result extruder_move(Index index, float uL);
     Result set_extruder_direction(Index index, bool direction);
-    
+
     // Slider Valve driver methods
     Result set_valve_speed(Index index, feedRate_t feedrate);
     Response<uint32_t> get_valve_speed(Index index);

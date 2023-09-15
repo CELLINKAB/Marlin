@@ -1515,6 +1515,7 @@ private:
     static void M2111();
     static void M2200();
     static void M2201();
+    static void M2202(); // stop auto polling
   #endif
 
   // TODO: gate or change these
