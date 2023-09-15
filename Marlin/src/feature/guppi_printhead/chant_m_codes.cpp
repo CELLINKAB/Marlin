@@ -799,25 +799,6 @@ void GcodeSuite::M2100() {}
 void GcodeSuite::M2110() {}
 //ResetCoaxialCouple
 void GcodeSuite::M2111() {}
-//DebugGetEncoders
-void GcodeSuite::M2200()
-{
-    const auto res = ph_controller.debug_get_encoders();
-    SERIAL_ECHOLNPGM(",SLIDER_0_ENCODER:",
-                     res.packet.payload[0],
-                     ",EXTRUDER_0_ENCODER:",
-                     res.packet.payload[1],
-                     ",SLIDER_1_ENCODER:",
-                     res.packet.payload[2],
-                     ",EXTRUDER_1_ENCODER:",
-                     res.packet.payload[3],
-                     ",SLIDER_2_ENCODER:",
-                     res.packet.payload[4],
-                     ",EXTRUDER_2_ENCODER:",
-                     res.packet.payload[5]);
 
-    // FIXME: Put this in a better place and modularize
-    TERN_(AUTO_REPORT_CHANTARELLE, printhead_reporter.set_interval(parser.byteval('S')));
-}
 
 #endif //  CHANTARELLE_SUPPORT
