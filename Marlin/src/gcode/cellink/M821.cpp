@@ -24,6 +24,12 @@
 
   #include "../gcode.h"
   #include "../../module/motion.h"
+  #include "../../feature/cellink_reporter.h"
+
+  void cellink::Reporter::M821::report() {
+    cellink::serial_echoln_kv("HOME", all_axes_homed());
+  }
+
 
   /**
    * @brief report homing status in cellink protocol format
@@ -31,7 +37,8 @@
    */
   void GcodeSuite::M821()
   {
-    SERIAL_ECHOLNPGM("HOME:", all_axes_homed());
+    cellink::reporter.m821.report();
+    cellink::reporter.m821.set_interval(parser.byteval('S'));
   }
 
 #endif // CELLINK_REPORTING

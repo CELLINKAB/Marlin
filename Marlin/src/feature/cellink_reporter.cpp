@@ -33,7 +33,6 @@ void Reporter::M119::report()
 }
 void Reporter::M814::report() {}
 void Reporter::M816::report() {}
-void Reporter::M821::report() {}
 void Reporter::M825::report() {}
 void Reporter::M1015::report()
 {
