@@ -21,6 +21,8 @@
 
 #if ENABLED(CHANTARELLE_SUPPORT)
 
+#    include "../../module/motion.h"
+
 #    include "request.h"
 
 using namespace printhead;
@@ -99,12 +101,13 @@ constexpr auto update_state_to_str(UpdateState current_state)
         [[fallthrough]];
     case UpdateState::STATUS_3:
         return "STATUS";
-    case UpdateState::NUM_STATES: break;
+    case UpdateState::NUM_STATES:
+        break;
     }
     return "UNREACHABLE";
 }
 
-void Controller::update()
+void Controller::update(millis_t now)
 {
     static millis_t next_update = 0;
     static UpdateState update_state = UpdateState::ENCODERS;
@@ -133,7 +136,24 @@ void Controller::update()
             retry(state);
     };
 
-    if (millis() < next_update)
+    static auto update_status = [this](uint8_t tool_index) {
+        auto& state = ph_states[tool_index];
+        const Index index = static_cast<Index>(tool_index);
+        const auto status_res = get_status(index, false);
+        if (status_res.result == Result::OK) {
+            if (DEBUGGING(LEVELING)) {
+                if (state.status.is_homing && !status_res.packet.payload.is_homing)
+                    SERIAL_ECHO_MSG("extruder finished homing");
+                if (state.status.slider_is_stepping && !status_res.packet.payload.slider_is_stepping)
+                    SERIAL_ECHO_MSG("slider valve move finished");
+            }
+            state.status = status_res.packet.payload;
+            update_state = next_update_state(update_state);
+        } else
+            retry(state);
+    };
+
+    if (now < next_update || disable_background_updates)
         return;
 
     switch (update_state) {
@@ -176,27 +196,17 @@ void Controller::update()
     case UpdateState::STATUS_1:
         [[fallthrough]];
     case UpdateState::STATUS_2:
-        [[fallthrough]];
+        update_status(active_extruder);
+        break;
     case UpdateState::STATUS_3: {
         static uint8_t tool_index = 0;
-        auto& state = ph_states[tool_index];
-        const Index index = static_cast<Index>(tool_index);
-        const auto status_res = get_status(index, false);
-        if (status_res.result == Result::OK) {
-            if (DEBUGGING(LEVELING)) {
-                if (state.status.is_homing && !status_res.packet.payload.is_homing)
-                    SERIAL_ECHO_MSG("extruder finished homing");
-                if (state.status.slider_is_stepping && !status_res.packet.payload.slider_is_stepping)
-                    SERIAL_ECHO_MSG("slider valve move finished");
-            }
-            state.status = status_res.packet.payload;
-            ++tool_index;
-            if (tool_index >= EXTRUDERS) {
-                tool_index = 0;
-                update_state = next_update_state(update_state);
-            }
-        } else
-            retry(state);
+        update_status(tool_index);
+        ++tool_index;
+        if (tool_index >= EXTRUDERS) {
+            tool_index = 0;
+        } else {
+            update_state = UpdateState::STATUS_3;
+        }
     } break;
 
     default:
@@ -205,7 +215,7 @@ void Controller::update()
     }
 
     static constexpr millis_t UPDATE_INTERVAL = SEC_TO_MS(1) / 8; // 125ms
-    next_update = millis() + UPDATE_INTERVAL;
+    next_update = now + UPDATE_INTERVAL;
 }
 
 void Controller::report_states()

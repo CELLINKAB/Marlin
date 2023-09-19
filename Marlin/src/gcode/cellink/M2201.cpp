@@ -17,23 +17,24 @@
  *
  */
 
-
 #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(CELLINK_REPORTING)
+#if ENABLED(CHANTARELLE_SUPPORT)
 
 #    include "../../feature/cellink_reporter.h"
+#    include "../../feature/guppi_printhead/chantarelle.h"
 #    include "../gcode.h"
 
-/**
-   * @brief report tool offesets
-   * 
-   */
-void GcodeSuite::M1017()
+size_t printhead::printhead_rx_err_counter = 0;
+size_t printhead::printhead_tx_err_counter = 0;
+
+// get printhead communication error counters
+void GcodeSuite::M2201()
 {
-    /*output unused in com-module, all status available in M503 report*/
-    // instead use this to enable/disable autoreporting
-    set_autoreport_paused(parser.boolval('D'));
+    cellink::serial_echoln_kv("PRINTHEAD_TX_ERRORS",
+                              printhead::printhead_tx_err_counter,
+                              "PRINTHEAD_RX_ERRORS",
+                              printhead::printhead_rx_err_counter);
 }
 
-#endif // CELLINK_REPORTING
+#endif

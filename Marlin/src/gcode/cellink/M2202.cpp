@@ -20,20 +20,14 @@
 
 #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(CELLINK_REPORTING)
+#if ENABLED(CHANTARELLE_SUPPORT)
 
-#    include "../../feature/cellink_reporter.h"
-#    include "../gcode.h"
+#include "../gcode.h"
+#include "../../feature/guppi_printhead/chantarelle.h"
 
-/**
-   * @brief report tool offesets
-   * 
-   */
-void GcodeSuite::M1017()
-{
-    /*output unused in com-module, all status available in M503 report*/
-    // instead use this to enable/disable autoreporting
-    set_autoreport_paused(parser.boolval('D'));
+void GcodeSuite::M2202() {
+    const bool stop_reports = parser.boolval('D');
+    ph_controller.disable_background_updates = stop_reports;
 }
 
-#endif // CELLINK_REPORTING
+#endif

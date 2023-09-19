@@ -17,23 +17,31 @@
  *
  */
 
-
 #include "../../inc/MarlinConfig.h"
 
-#if ENABLED(CELLINK_REPORTING)
+#if ENABLED(CHANTARELLE_SUPPORT)
 
 #    include "../../feature/cellink_reporter.h"
+#    include "../../feature/guppi_printhead/chantarelle.h"
 #    include "../gcode.h"
 
-/**
-   * @brief report tool offesets
-   * 
-   */
-void GcodeSuite::M1017()
+//DebugGetEncoders
+void GcodeSuite::M2200()
 {
-    /*output unused in com-module, all status available in M503 report*/
-    // instead use this to enable/disable autoreporting
-    set_autoreport_paused(parser.boolval('D'));
+    const auto res = ph_controller.debug_get_encoders();
+    cellink::serial_echoln_kv("SLIDER_0_ENCODER",
+                              res.packet.payload[0],
+                              "EXTRUDER_0_ENCODER",
+                              res.packet.payload[1],
+                              "SLIDER_1_ENCODER",
+                              res.packet.payload[2],
+                              "EXTRUDER_1_ENCODER",
+                              res.packet.payload[3],
+                              "SLIDER_2_ENCODER",
+                              res.packet.payload[4],
+                              "EXTRUDER_2_ENCODER",
+                              res.packet.payload[5]);
+
 }
 
-#endif // CELLINK_REPORTING
+#endif // CHANTARELLE_SUPPORT

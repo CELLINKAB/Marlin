@@ -24,8 +24,8 @@
 
 struct UVCController
 {
-    static constexpr millis_t DEFAULT_EXPOSURE_SECONDS = 300;
-    static constexpr millis_t MAX_EXPOSURE_SECONDS = 1'200;
+    static constexpr millis_t DEFAULT_EXPOSURE_SECONDS = 600;
+    static constexpr millis_t MAX_EXPOSURE_SECONDS = 3'600;
 
     millis_t auto_off_time;
     bool safety_override;

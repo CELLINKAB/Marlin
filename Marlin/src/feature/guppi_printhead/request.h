@@ -24,7 +24,7 @@
 
 #include "packet.h"
 
-#define AUTO_REPORT_CHANTARELLE
+//#define AUTO_REPORT_CHANTARELLE
 #if ENABLED(AUTO_REPORT_CHANTARELLE)
 #    include "../../libs/autoreport.h"
 #endif
@@ -50,7 +50,7 @@ enum class Result {
     OK,
     BAD_CRC,
     BUSY,
-    PACKET_TOO_SHORT,
+    TIMEOUT,
     BAD_PAYLOAD_SIZE,
     ERROR_RESPONSE,
     WRITE_ERROR,
@@ -67,8 +67,8 @@ constexpr const char* string_from_result_code(Result result)
         return "BAD_PAYLOAD_SIZE";
     case Result::OK:
         return "OK";
-    case Result::PACKET_TOO_SHORT:
-        return "PACKET_TOO_SHORT";
+    case Result::TIMEOUT:
+        return "TIMEOUT";
     case Result::BUSY:
         return "BUSY";
     case Result::ERROR_RESPONSE:
@@ -681,7 +681,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         SERIAL_ECHOLN("]");
     }
     if (bytes_received < EXPECTED_PACKET_SIZE)
-        return err(Result::PACKET_TOO_SHORT);
+        return err(Result::TIMEOUT);
 
     if (!valid)
         return err(Result::INVALID_HEADER);
@@ -897,12 +897,16 @@ struct State : AutoReporter<State>
 class Controller
 {
     HardwareSerial& bus;
-    std::array<PrintheadState, EXTRUDERS> ph_states{};
+    std::array<PrintheadState, EXTRUDERS> ph_states;
 
 public:
+    bool disable_background_updates;
+
     // initialization
-    Controller(HardwareSerial& ph_bus)
+    constexpr explicit Controller(HardwareSerial& ph_bus)
         : bus(ph_bus)
+        , ph_states{}
+        , disable_background_updates{false}
     {}
 
     /**
@@ -922,7 +926,7 @@ public:
      * @brief call in idle to handle background requests
      * 
      */
-    void update();
+    void update(millis_t now = millis());
 
     /**
      * @brief pretty print current states
@@ -954,7 +958,7 @@ public:
      * @return false 
      */
     bool extruder_busy(Index index);
-    
+
     /**
      * @brief poll internal state for ALL moving status
      * 
@@ -978,7 +982,7 @@ public:
     Response<void> get_all(Index index);
     Response<std::array<uint8_t, 12>> get_uuid(Index index);
     Response<Status> get_status(Index index, bool debug = true);
-    
+
     // Temperature methods
     Response<uint16_t> set_temperature(Index index, celsius_float_t temperature);
     Response<uint16_t> get_temperature(Index index, bool debug = true);
@@ -988,7 +992,7 @@ public:
     Response<FanSpeeds> get_fan_speed(Index index);
     auto set_tem_debug(Index index, TemTemps tem_pwms) -> Result;
     auto get_tem_debug(Index index) -> Response<TemTemps>;
-    
+
     // Extruder Stepper driver methods
     Result set_extrusion_speed(Index index, uint32_t feedrate);
     Response<uint32_t> get_extrusion_speed(Index index);
@@ -1006,7 +1010,7 @@ public:
     Result add_raw_extruder_steps(Index index, int32_t steps);
     Result extruder_move(Index index, float uL);
     Result set_extruder_direction(Index index, bool direction);
-    
+
     // Slider Valve driver methods
     Result set_valve_speed(Index index, feedRate_t feedrate);
     Response<uint32_t> get_valve_speed(Index index);
