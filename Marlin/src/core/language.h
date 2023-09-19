@@ -324,30 +324,30 @@
 //
 // Endstop Names used by Endstops::report_states
 //
-#define STR_X_MIN                           "x_min"
-#define STR_X_MAX                           "x_max"
-#define STR_X2_MIN                          "x2_min"
-#define STR_X2_MAX                          "x2_max"
+#define STR_X_MIN                           "ESXMIN"
+#define STR_X_MAX                           "ESXMAX"
+#define STR_X2_MIN                          "ESX2MIN"
+#define STR_X2_MAX                          "ESX2MAX"
 
 #if HAS_Y_AXIS
-  #define STR_Y_MIN                         "y_min"
-  #define STR_Y_MAX                         "y_max"
-  #define STR_Y2_MIN                        "y2_min"
-  #define STR_Y2_MAX                        "y2_max"
+  #define STR_Y_MIN                         "ESYMIN"
+  #define STR_Y_MAX                         "ESYMAX"
+  #define STR_Y2_MIN                        "ESY2MIN"
+  #define STR_Y2_MAX                        "ESY2MAX"
 #endif
 
 #if HAS_Z_AXIS
-  #define STR_Z_MIN                         "z_min"
-  #define STR_Z_MAX                         "z_max"
-  #define STR_Z2_MIN                        "z2_min"
-  #define STR_Z2_MAX                        "z2_max"
-  #define STR_Z3_MIN                        "z3_min"
-  #define STR_Z3_MAX                        "z3_max"
-  #define STR_Z4_MIN                        "z4_min"
-  #define STR_Z4_MAX                        "z4_max"
+  #define STR_Z_MIN                         "ESZMIN"
+  #define STR_Z_MAX                         "ESZMAX"
+  #define STR_Z2_MIN                        "ESZ2MIN"
+  #define STR_Z2_MAX                        "ESZ2MAX"
+  #define STR_Z3_MIN                        "ESZ3MIN"
+  #define STR_Z3_MAX                        "ESZ3MAX"
+  #define STR_Z4_MIN                        "ESZ4MIN"
+  #define STR_Z4_MAX                        "ESZ4MAX"
 #endif
 
-#define STR_Z_PROBE                         "z_probe"
+#define STR_Z_PROBE                         "EBSP"
 #define STR_PROBE_EN                        "probe_en"
 #define STR_FILAMENT                        "filament"
 
