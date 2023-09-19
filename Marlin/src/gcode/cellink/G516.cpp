@@ -38,15 +38,14 @@ void GcodeSuite::G516()
     TemporaryBedLevelingState scope_leveling(false);
 
     xyz_pos_t eject_pos(EJECT_POS + hotend_offset[active_extruder]);
-    xyz_pos_t clipped_eject_pos(eject_pos);
 
     if (parser.boolval('R')) {
-            do_blocking_move_to(clipped_eject_pos, EJECT_FEEDRATE);
+            do_blocking_move_to(eject_pos, EJECT_FEEDRATE);
             if (!all_axes_trusted())
                 process_subcommands_now(F("G28XY"));
     } else {
-        apply_motion_limits(clipped_eject_pos);
-        do_blocking_move_to(clipped_eject_pos, EJECT_FEEDRATE);
+        LOOP_NUM_AXES(i) {set_axis_trusted(static_cast<AxisEnum>(i));}
+        do_blocking_move_to(eject_pos, EJECT_FEEDRATE);
         soft_endstop._enabled = false;
         do_blocking_move_to(eject_pos, EJECT_FEEDRATE);
         soft_endstop._enabled = true;
