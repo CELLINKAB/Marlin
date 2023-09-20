@@ -233,14 +233,13 @@ void GcodeSuite::M1069()
     }
 
     const uint32_t latency_us = micros() - sent_us;
-    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes");
+    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes in ", latency_us, "us");
     SERIAL_ECHO("Response: [ ");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
         SERIAL_CHAR(' ');
     }
     SERIAL_ECHOLN("]");
-    SERIAL_ECHOLNPGM("Request latency: ", latency_us, "us");
 }
 
 //StartActuatingPrinthead
