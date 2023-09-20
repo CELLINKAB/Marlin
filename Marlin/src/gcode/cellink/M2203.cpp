@@ -29,7 +29,7 @@ void GcodeSuite::M2203()
     SERIAL_ECHOLNPGM("Min latency: ", printhead::min_latency_us, "us");
     SERIAL_ECHOLNPGM("Avg latency: ", printhead::avg_latency_us, "us");
     SERIAL_ECHOLNPGM("Max latency: ", printhead::max_latency_us, "us");
-    if (parser.boolval('d') && parser.seenval('S')) {
+    if (parser.boolval('D') && parser.seenval('S')) {
         const millis_t timeout = parser.value_millis();
         ph_controller.set_timeout(timeout);
     }
