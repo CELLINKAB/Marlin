@@ -645,7 +645,6 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
         return Response<T>{incoming, code};
     };
-    serial.setTimeout(25);
     size_t bytes_received = serial.readBytes(packet_buffer, EXPECTED_PACKET_SIZE);
 
     // validation
@@ -993,6 +992,12 @@ public:
      * @return false 
      */
     bool slider_busy(Index index);
+
+    /**
+     * @brief Set the recieve timeout for the bus
+     * 
+     */
+    void set_timeout(millis_t);
 
     // Metadata methods
     Response<void> get_info(Index index);

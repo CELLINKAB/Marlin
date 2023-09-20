@@ -1516,6 +1516,7 @@ private:
     static void M2200();
     static void M2201();
     static void M2202(); // stop auto polling
+    static void M2203(); // get latency stats
   #endif
 
   // TODO: gate or change these

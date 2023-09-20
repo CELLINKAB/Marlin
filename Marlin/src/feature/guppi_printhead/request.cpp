@@ -267,6 +267,11 @@ bool Controller::slider_busy(Index index)
     return state.status.slider_is_stepping;
 }
 
+void Controller::set_timeout(millis_t timeout)
+{
+    bus.setTimeout(timeout);
+}
+
 Response<uint16_t> Controller::set_temperature(Index index, celsius_float_t temperature)
 {
     uint16_t chant_temp = static_cast<uint16_t>((temperature * 100.0f) + 30'000);
