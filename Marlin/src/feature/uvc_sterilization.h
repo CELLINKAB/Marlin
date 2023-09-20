@@ -52,6 +52,15 @@ struct UVCController
     bool ot_prewarn();
 
     /**
+     * @brief Returns whether the UVC is currently active based on input time
+     * 
+     * @param now current system time in millis, defaults to grabbing current millis()
+     * @return true UVC active
+     * @return false UVC inactive
+     */
+    inline bool running(millis_t now = millis()) { return now < auto_off_time; }
+
+    /**
      * @brief Start a sterilization cycle
      * 
      * @param intensity PWM value
