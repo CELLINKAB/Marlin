@@ -603,6 +603,11 @@ constexpr bool valid_size(uint16_t size)
     return (size <= 0x00ff);
 }
 
+extern uint32_t avg_latency_us;
+extern uint32_t min_latency_us;
+extern uint32_t max_latency_us;
+extern uint32_t request_start_us;
+
 /**
  * @brief High level checked method to read a response packet from bus
  * 
@@ -669,6 +674,12 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     }
 
     last_serial_activity = millis();
+    
+    const millis_t request_latency = request_start_us - micros();
+    avg_latency_us = static_cast<uint32_t>(static_cast<float>(avg_latency_us) * 0.95f
+                                           + static_cast<float>(request_latency) * 0.05f);
+    min_latency_us = min(min_latency_us, request_latency);
+    max_latency_us = max(max_latency_us, request_latency);
 
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
@@ -771,7 +782,10 @@ Result send(const Packet<T>& request,
     }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
+
     last_serial_activity = millis();
+    request_start_us = micros();
+
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())
