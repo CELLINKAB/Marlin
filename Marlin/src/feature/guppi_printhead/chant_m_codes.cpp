@@ -417,11 +417,6 @@ void GcodeSuite::M814() {}
 void GcodeSuite::M816() {}
 //MovePHsVertically
 void GcodeSuite::M817() {}
-//ReadDoorStatus
-void GcodeSuite::M818()
-{
-    SERIAL_ECHOLNPGM("DO:", door.read(), ",INTERLOCK_24V:", (READ(FREEZE_PIN) == FREEZE_STATE));
-}
 //SetBedCoolingFans
 void GcodeSuite::M819()
 {
