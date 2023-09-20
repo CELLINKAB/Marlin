@@ -1316,6 +1316,8 @@ private:
     static void M801(); // set printbed temp
     static void M802(); // get printbed temp
 
+    static void M818(); // get door state
+
     static void M821(); // get homing status
 
     static void M824(); // get active tool
@@ -1395,7 +1397,6 @@ private:
     static void M814();
     static void M816();
     static void M817();
-    static void M818();
     static void M819();
     static void M822();
     static void M823();
