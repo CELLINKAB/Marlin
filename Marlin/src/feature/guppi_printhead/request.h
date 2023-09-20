@@ -607,6 +607,10 @@ extern uint32_t avg_latency_us;
 extern uint32_t min_latency_us;
 extern uint32_t max_latency_us;
 extern uint32_t request_start_us;
+constexpr size_t LATENCY_AVG_WINDOW = 20;
+constexpr float AVG_LATENCY_WEIGHT = static_cast<float>(LATENCY_AVG_WINDOW - 1)
+                                     / static_cast<float>(LATENCY_AVG_WINDOW);
+constexpr float NEW_LATENCY_WEIGHT = 1.0f / static_cast<float>(LATENCY_AVG_WINDOW);
 
 /**
  * @brief High level checked method to read a response packet from bus
@@ -674,10 +678,10 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
     }
 
     last_serial_activity = millis();
-    
-    const millis_t request_latency = request_start_us - micros();
-    avg_latency_us = static_cast<uint32_t>(static_cast<float>(avg_latency_us) * 0.95f
-                                           + static_cast<float>(request_latency) * 0.05f);
+
+    const auto request_latency = request_start_us - micros();
+    avg_latency_us = static_cast<uint32_t>(static_cast<float>(avg_latency_us) * AVG_LATENCY_WEIGHT
+                                           + static_cast<float>(request_latency) * NEW_LATENCY_WEIGHT);
     min_latency_us = min(min_latency_us, request_latency);
     max_latency_us = max(max_latency_us, request_latency);
 
