@@ -28,7 +28,7 @@
 /**
  * @brief UVC sterilization all-in-one command.
  * @brief params: I(intensity) S(seconds)
- * @brief options:  O(override flag) A(async flag) V(verbosity flag)
+ * @brief options:  O(override flag) A(async flag) V(verbosity flag) W(wait flag)
  * 
  */
 void GcodeSuite::M806()
@@ -38,6 +38,12 @@ void GcodeSuite::M806()
     if (intensity == 0) {
         uvc_controller.stop();
         return;
+    }
+
+    if (parser.boolval('W'))
+    {
+        while (uvc_controller.running())
+            idle();
     }
 
     uvc_controller.safety_override = parser.boolval('O');
@@ -55,7 +61,7 @@ void GcodeSuite::M806()
     if (async)
         return;
 
-    while (millis() <= uvc_controller.auto_off_time)
+    while (uvc_controller.running())
         idle();
 }
 
