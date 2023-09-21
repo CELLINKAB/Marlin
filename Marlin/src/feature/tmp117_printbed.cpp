@@ -35,13 +35,13 @@ BedSensors& bed_sensors()
         pb_i2c.setRxBuffer(rx_buf, 4);
         pb_i2c.setClock(20'000);
         pb_i2c.begin();
-        TMP117<SoftWire> sensor_1(TMPAddr::GND, pb_i2c);
+        TMP117<SoftWire> sensor_1(TMPAddr::SCL, pb_i2c);
         sensor_1.init(nullptr);
-        TMP117<SoftWire> sensor_2(TMPAddr::SCL, pb_i2c);
+        TMP117<SoftWire> sensor_2(TMPAddr::SDA, pb_i2c);
         sensor_2.init(nullptr);
-        TMP117<SoftWire> sensor_3(TMPAddr::SDA, pb_i2c);
+        TMP117<SoftWire> sensor_3(TMPAddr::VCC, pb_i2c);
         sensor_3.init(nullptr);
-        TMP117<SoftWire> sensor_4(TMPAddr::VCC, pb_i2c);
+        TMP117<SoftWire> sensor_4(TMPAddr::GND, pb_i2c);
         sensor_4.init(nullptr);
         return std::array{sensor_1, sensor_2, sensor_3, sensor_4};
     }()};
