@@ -52,11 +52,11 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     size_t failed_reads = 0;
-    static float last_temp = bed_sensors()[0].getTemperature();
+    static float last_temp = NAN;
     constexpr static float TEMP_TOLERANCE = 5.0f;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        if (!isnan(temperature) && WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE))
+        if (!isnan(temperature) && !isnan(last_temp) && WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE))
             total_temps += (temperature);
         else
             ++failed_reads;
