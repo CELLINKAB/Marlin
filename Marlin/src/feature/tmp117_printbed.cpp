@@ -56,7 +56,8 @@ double get_tmp117_bed_temp()
     constexpr static float TEMP_TOLERANCE = 5.0f;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        if (!isnan(temperature) && !isnan(last_temp) && WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE))
+        const auto is_temp_within_range = !isnan(last_temp) ? WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE) : true;
+        if (!isnan(temperature) && is_temp_within_range)
             total_temps += (temperature);
         else
             ++failed_reads;
