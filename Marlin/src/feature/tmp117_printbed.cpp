@@ -22,6 +22,7 @@
 #if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
 
 #include "tmp117_printbed.h"
+#include "../module/temperature.h"
 
 BedKalmanFilter bed_kalman_filter(25, 0);
 
@@ -52,9 +53,11 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     size_t failed_reads = 0;
+    const float last_temp = Temperature::degBed();
+    constexpr static float TEMP_TOLERANCE = 5.0f;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        if (!isnan(temperature))
+        if (!isnan(temperature) && WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE))
             total_temps += (temperature);
         else
             ++failed_reads;
