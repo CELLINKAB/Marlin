@@ -21,13 +21,13 @@
 
 #if ENABLED(CHANTARELLE_SUPPORT)
 
-#include "../../gcode/gcode.h"
-#include "../../gcode/parser.h"
-#include "../../module/planner.h"
-#include "../../module/temperature.h"
-#include "../../feature/door_sensor.h"
+#    include "../../feature/door_sensor.h"
+#    include "../../gcode/gcode.h"
+#    include "../../gcode/parser.h"
+#    include "../../module/planner.h"
+#    include "../../module/temperature.h"
 
-#include "chantarelle.h"
+#    include "chantarelle.h"
 
 printhead::Controller ph_controller(CHANT_SERIAL);
 
@@ -157,7 +157,8 @@ void GcodeSuite::G513()
 // debug arbitrary command, super unsafe
 void GcodeSuite::M1069()
 {
-    static uint8_t cmd_buf[128]{};
+    constexpr static size_t MAX_BUF_SIZE = 128;
+    uint8_t cmd_buf[MAX_BUF_SIZE]{};
     const uint16_t index = (get_target_extruder_from_command());
     const uint16_t command = (parser.ushortval('C'));
     memcpy(cmd_buf, &index, 2);
@@ -209,18 +210,34 @@ void GcodeSuite::M1069()
     SERIAL_PRINT(cmd_buf[6 + cmd_size], PrintBase::Hex);
     SERIAL_PRINT(cmd_buf[6 + cmd_size + 1], PrintBase::Hex);
     SERIAL_ECHOLN(" }");
+
     printhead::flush_rx(CHANT_SERIAL);
+
     WRITE(CHANT_RTS_PIN, HIGH);
     auto written = CHANT_SERIAL.write(cmd_buf, cmd_size + 8);
     CHANT_SERIAL.flush();
     WRITE(CHANT_RTS_PIN, LOW);
+    const uint32_t sent_us = micros();
+
     SERIAL_ECHOLNPGM("Sent ", written, " bytes");
     if (written != cmd_size + 8U) {
         SERIAL_ECHOLNPGM("Serial error, code: ", CHANT_SERIAL.getWriteError());
     }
-    CHANT_SERIAL.setTimeout(500);
-    size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 128);
-    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes");
+
+    size_t read_bytes = CHANT_SERIAL.readBytes(cmd_buf, 6);
+    if (read_bytes == 6) {
+        uint16_t payload_size;
+        memcpy(&payload_size, &cmd_buf[4], sizeof(payload_size));
+        const size_t remaining_bytes = min(payload_size + 2U, MAX_BUF_SIZE - read_bytes);
+        read_bytes += CHANT_SERIAL.readBytes(&cmd_buf[read_bytes], remaining_bytes);
+    }
+
+    const uint32_t latency_us = micros() - sent_us;
+    SERIAL_ECHOLNPGM("Received ",
+                     read_bytes,
+                     " bytes in ",
+                     latency_us,
+                     "us");
     SERIAL_ECHO("Response: [ ");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
@@ -404,14 +421,6 @@ void GcodeSuite::M814() {}
 void GcodeSuite::M816() {}
 //MovePHsVertically
 void GcodeSuite::M817() {}
-//ReadDoorStatus
-void GcodeSuite::M818()
-{
-    SERIAL_ECHOLNPGM("DO:",
-                     door.read(),
-                     ",INTERLOCK_24V:",
-                     (READ(FREEZE_PIN) == FREEZE_STATE));
-}
 //SetBedCoolingFans
 void GcodeSuite::M819()
 {
@@ -799,6 +808,5 @@ void GcodeSuite::M2100() {}
 void GcodeSuite::M2110() {}
 //ResetCoaxialCouple
 void GcodeSuite::M2111() {}
-
 
 #endif //  CHANTARELLE_SUPPORT

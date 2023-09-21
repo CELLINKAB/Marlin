@@ -29,6 +29,11 @@ using namespace printhead;
 
 millis_t printhead::last_serial_activity = 0;
 
+uint32_t printhead::avg_latency_us = 0;
+uint32_t printhead::min_latency_us = std::numeric_limits<uint32_t>::max();
+uint32_t printhead::max_latency_us = 0;
+uint32_t printhead::request_start_us = 0;
+
 Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
 {
     OUT_WRITE(CHANT_RTS_PIN, HIGH);
@@ -265,6 +270,11 @@ bool Controller::slider_busy(Index index)
 {
     const auto state = ph_states[static_cast<uint8_t>(index)];
     return state.status.slider_is_stepping;
+}
+
+void Controller::set_timeout(millis_t timeout)
+{
+    bus.setTimeout(timeout);
 }
 
 Response<uint16_t> Controller::set_temperature(Index index, celsius_float_t temperature)

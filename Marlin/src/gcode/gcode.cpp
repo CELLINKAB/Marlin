@@ -1180,6 +1180,8 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 801: M801(); break; // set bed temperature
         case 802: M802(); break; // get bed temperature
 
+        case 818: M818(); break; // get door state
+
         case 821: M821(); break; // get home status
 
         case 824: M824(); break; // get active tool
@@ -1247,7 +1249,6 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 814: M814(); break;
         case 816: M816(); break;
         case 817: M817(); break;
-        case 818: M818(); break;
         case 819: M819(); break;
         // case 821: M821(); break;
         case 822: M822(); break;
@@ -1374,6 +1375,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 2200: M2200(); break;
         case 2201: M2201(); break;
         case 2202: M2202(); break;
+        case 2203: M2203(); break;
       #endif
 
       default: parser.unknown_command_warning(); break;

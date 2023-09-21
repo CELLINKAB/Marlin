@@ -298,310 +298,14 @@ void flush_rx(HardwareSerial& serial);
 extern millis_t last_serial_activity;
 extern size_t printhead_rx_err_counter;
 
-/**
- * @brief validates raw index before conversion
- * 
- * @param index raw from bus
- * @return true 
- * @return false 
- */
-constexpr bool valid_index(uint16_t index)
-{
-    switch (index) {
-    case 0:
-        [[fallthrough]];
-    case 1:
-        [[fallthrough]];
-    case 2:
-        [[fallthrough]];
-    case 0xFFFF:
-        return true;
-
-    default:
-        return false;
-    }
-}
-
-/**
- * @brief Checks that command is known valid before conversion
- * 
- * @param command raw from bus
- * @return true 
- * @return false 
- */
-constexpr bool valid_command(uint16_t command)
-{
-    if (command >= static_cast<uint16_t>(Command::NOF_CMDS))
-        return false;
-    switch (command) {
-    case 1:
-        [[fallthrough]];
-    case 2:
-        [[fallthrough]];
-    case 3:
-        [[fallthrough]];
-    case 4:
-        [[fallthrough]];
-    case 5:
-        [[fallthrough]];
-    case 6:
-        [[fallthrough]];
-    case 7:
-        [[fallthrough]];
-    case 8:
-        [[fallthrough]];
-    case 9:
-        [[fallthrough]];
-    case 10:
-        [[fallthrough]];
-    case 11:
-        [[fallthrough]];
-    case 12:
-        [[fallthrough]];
-    case 13:
-        [[fallthrough]];
-    case 14:
-        [[fallthrough]];
-    case 15:
-        [[fallthrough]];
-    case 16:
-        [[fallthrough]];
-    case 17:
-        [[fallthrough]];
-    case 18:
-        [[fallthrough]];
-    case 19:
-        [[fallthrough]];
-    case 20:
-        [[fallthrough]];
-    case 21:
-        [[fallthrough]];
-    case 22:
-        [[fallthrough]];
-    case 23:
-        [[fallthrough]];
-    case 24:
-        [[fallthrough]];
-    case 25:
-        [[fallthrough]];
-    case 26:
-        [[fallthrough]];
-    case 27:
-        [[fallthrough]];
-    case 28:
-        [[fallthrough]];
-    case 29:
-        [[fallthrough]];
-    case 30:
-        [[fallthrough]];
-    case 31:
-        [[fallthrough]];
-    case 32:
-        [[fallthrough]];
-    case 33:
-        [[fallthrough]];
-    case 34:
-        [[fallthrough]];
-    case 35:
-        [[fallthrough]];
-    case 36:
-        [[fallthrough]];
-    case 37:
-        [[fallthrough]];
-    case 38:
-        [[fallthrough]];
-    case 39:
-        [[fallthrough]];
-    case 40:
-        [[fallthrough]];
-    case 41:
-        [[fallthrough]];
-    case 42:
-        [[fallthrough]];
-    case 43:
-        [[fallthrough]];
-    case 44:
-        [[fallthrough]];
-    case 45:
-        [[fallthrough]];
-    case 46:
-        [[fallthrough]];
-    case 47:
-        [[fallthrough]];
-    case 48:
-        [[fallthrough]];
-    case 49:
-        [[fallthrough]];
-    case 50:
-        [[fallthrough]];
-    case 51:
-        [[fallthrough]];
-    case 52:
-        [[fallthrough]];
-    case 53:
-        [[fallthrough]];
-    case 54:
-        [[fallthrough]];
-    case 55:
-        [[fallthrough]];
-    case 56:
-        [[fallthrough]];
-    case 57:
-        [[fallthrough]];
-    case 58:
-        [[fallthrough]];
-    case 59:
-        [[fallthrough]];
-    case 60:
-        [[fallthrough]];
-    case 61:
-        [[fallthrough]];
-    case 62:
-        [[fallthrough]];
-    case 63:
-        [[fallthrough]];
-    case 64:
-        [[fallthrough]];
-    case 65:
-        [[fallthrough]];
-    case 66:
-        [[fallthrough]];
-    case 67:
-        [[fallthrough]];
-    case 68:
-        [[fallthrough]];
-    case 69:
-        [[fallthrough]];
-    case 70:
-        [[fallthrough]];
-    case 71:
-        [[fallthrough]];
-    case 72:
-        [[fallthrough]];
-    case 73:
-        [[fallthrough]];
-    case 74:
-        [[fallthrough]];
-    case 75:
-        [[fallthrough]];
-    case 76:
-        [[fallthrough]];
-    case 77:
-        [[fallthrough]];
-    case 78:
-        [[fallthrough]];
-    case 84:
-        [[fallthrough]];
-    case 99:
-        [[fallthrough]];
-    case 201:
-        [[fallthrough]];
-    case 202:
-        [[fallthrough]];
-    case 203:
-        [[fallthrough]];
-    case 204:
-        [[fallthrough]];
-    case 205:
-        [[fallthrough]];
-    case 206:
-        [[fallthrough]];
-    case 301:
-        [[fallthrough]];
-    case 302:
-        [[fallthrough]];
-    case 401:
-        [[fallthrough]];
-    case 402:
-        [[fallthrough]];
-    case 403:
-        [[fallthrough]];
-    case 404:
-        [[fallthrough]];
-    case 405:
-        [[fallthrough]];
-    case 406:
-        [[fallthrough]];
-    case 407:
-        [[fallthrough]];
-    case 408:
-        [[fallthrough]];
-    case 601:
-        [[fallthrough]];
-    case 602:
-        [[fallthrough]];
-    case 603:
-        [[fallthrough]];
-    case 604:
-        [[fallthrough]];
-    case 605:
-        [[fallthrough]];
-    case 606:
-        [[fallthrough]];
-    case 607:
-        [[fallthrough]];
-    case 608:
-        [[fallthrough]];
-    case 609:
-        [[fallthrough]];
-    case 610:
-        [[fallthrough]];
-    case 611:
-        [[fallthrough]];
-    case 612:
-        [[fallthrough]];
-    case 613:
-        [[fallthrough]];
-    case 801:
-        [[fallthrough]];
-    case 802:
-        [[fallthrough]];
-    case 803:
-        [[fallthrough]];
-    case 804:
-        [[fallthrough]];
-    case 805:
-        [[fallthrough]];
-    case 806:
-        [[fallthrough]];
-    case 807:
-        [[fallthrough]];
-    case 808:
-        [[fallthrough]];
-    case 809:
-        [[fallthrough]];
-    case 1001:
-        [[fallthrough]];
-    case 1006:
-        [[fallthrough]];
-    case 1007:
-        [[fallthrough]];
-    case 1008:
-        [[fallthrough]];
-    case 1009:
-        [[fallthrough]];
-    case 1010:
-        [[fallthrough]];
-    case 1011:
-        [[fallthrough]];
-    case 1016:
-        return true;
-    default:
-        return false;
-    }
-}
-
-/**
- * @brief validate packet size
- * 
- * @param size raw from bus
- * @return true 
- * @return false 
- */
-constexpr bool valid_size(uint16_t size)
-{
-    return (size <= 0x00ff);
-}
+extern uint32_t avg_latency_us;
+extern uint32_t min_latency_us;
+extern uint32_t max_latency_us;
+extern uint32_t request_start_us;
+constexpr size_t LATENCY_AVG_WINDOW = 20;
+constexpr float AVG_LATENCY_WEIGHT = static_cast<float>(LATENCY_AVG_WINDOW - 1)
+                                     / static_cast<float>(LATENCY_AVG_WINDOW);
+constexpr float NEW_LATENCY_WEIGHT = 1.0f / static_cast<float>(LATENCY_AVG_WINDOW);
 
 /**
  * @brief High level checked method to read a response packet from bus
@@ -615,7 +319,7 @@ template<typename T>
 Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 {
     // header + crc
-    static constexpr size_t EMPTY_PACKET_SIZE = sizeof(EmptyPacket) + sizeof(uint16_t);
+    static constexpr size_t EMPTY_PACKET_SIZE = sizeof(PacketHeader) + sizeof(uint16_t);
 
     static constexpr size_t EXPECTED_PACKET_SIZE = []() {
         if constexpr (std::is_same_v<T, void>) {
@@ -636,7 +340,6 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
         return Response<T>{incoming, code};
     };
-    serial.setTimeout(25);
     size_t bytes_received = serial.readBytes(packet_buffer, EXPECTED_PACKET_SIZE);
 
     // validation
@@ -670,6 +373,12 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
 
     last_serial_activity = millis();
 
+    const auto request_latency = micros() - request_start_us;
+    avg_latency_us = static_cast<uint32_t>(static_cast<float>(avg_latency_us) * AVG_LATENCY_WEIGHT
+                                           + static_cast<float>(request_latency) * NEW_LATENCY_WEIGHT);
+    min_latency_us = min(min_latency_us, request_latency);
+    max_latency_us = max(max_latency_us, request_latency);
+
     if (DEBUGGING(INFO) && enable_debug) {
         SERIAL_ECHO("Bytes received: [ ");
         for (size_t i = 0; i < bytes_received; ++i) {
@@ -679,6 +388,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
             SERIAL_CHAR(' ');
         }
         SERIAL_ECHOLN("]");
+        SERIAL_ECHOLNPGM("Request latency: ", request_latency, "us");
     }
     if (bytes_received < EXPECTED_PACKET_SIZE)
         return err(Result::TIMEOUT);
@@ -771,7 +481,10 @@ Result send(const Packet<T>& request,
     }
     serial.flush();
     WRITE(CHANT_RTS_PIN, LOW);
+
     last_serial_activity = millis();
+    request_start_us = micros();
+
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHOLN("]");
     if (serial.getWriteError())
@@ -975,6 +688,12 @@ public:
      * @return false 
      */
     bool slider_busy(Index index);
+
+    /**
+     * @brief Set the recieve timeout for the bus
+     * 
+     */
+    void set_timeout(millis_t);
 
     // Metadata methods
     Response<void> get_info(Index index);
