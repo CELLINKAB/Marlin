@@ -228,12 +228,16 @@ void GcodeSuite::M1069()
     if (read_bytes == 6) {
         uint16_t payload_size;
         memcpy(&payload_size, &cmd_buf[4], sizeof(payload_size));
-        payload_size = min(payload_size + 2U, MAX_BUF_SIZE - read_bytes);
-        read_bytes += CHANT_SERIAL.readBytes(&cmd_buf[read_bytes], payload_size + 2);
+        const size_t remaining_bytes = min(payload_size + 2U, MAX_BUF_SIZE - read_bytes);
+        read_bytes += CHANT_SERIAL.readBytes(&cmd_buf[read_bytes], remaining_bytes);
     }
 
     const uint32_t latency_us = micros() - sent_us;
-    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes in ", latency_us, "us");
+    SERIAL_ECHOLNPGM("Received ",
+                     read_bytes,
+                     " bytes in ",
+                     latency_us,
+                     "us");
     SERIAL_ECHO("Response: [ ");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);
