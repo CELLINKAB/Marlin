@@ -21,7 +21,7 @@
 
 #if ENABLED(TEMP_SENSOR_BED_IS_TMP117)
 
-#include "tmp117_printbed.h"
+#    include "tmp117_printbed.h"
 
 BedKalmanFilter bed_kalman_filter(25, 0);
 
@@ -52,11 +52,14 @@ double get_tmp117_bed_temp()
 {
     double total_temps = 0.0;
     size_t failed_reads = 0;
-    static float last_temp = NAN;
+    static double last_temp = NAN;
     constexpr static float TEMP_TOLERANCE = 5.0f;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        const auto is_temp_within_range = !isnan(last_temp) ? WITHIN(temperature, last_temp - TEMP_TOLERANCE, last_temp + TEMP_TOLERANCE) : true;
+        const bool is_temp_within_range = isnan(last_temp)
+                                          || WITHIN(temperature,
+                                                    last_temp - TEMP_TOLERANCE,
+                                                    last_temp + TEMP_TOLERANCE);
         if (!isnan(temperature) && is_temp_within_range)
             total_temps += (temperature);
         else
