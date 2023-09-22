@@ -33,7 +33,7 @@ BedSensors& bed_sensors()
         static uint8_t rx_buf[4]{};
         pb_i2c.setTxBuffer(tx_buf, 4);
         pb_i2c.setRxBuffer(rx_buf, 4);
-        pb_i2c.setClock(13'669);
+        pb_i2c.setClock(17'977); // prime number to avoid resonance
         pb_i2c.begin();
         TMP117<SoftWire> sensor_1(TMPAddr::SCL, pb_i2c);
         sensor_1.init(nullptr);
@@ -77,11 +77,9 @@ double get_tmp117_bed_temp()
     }();
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        const bool is_temp_within_range = isnan(last_avg_temp)
-                                          || WITHIN(temperature,
-                                                    last_avg_temp - TEMP_TOLERANCE,
-                                                    last_avg_temp + TEMP_TOLERANCE);
-        if (!isnan(temperature) && is_temp_within_range) {
+        const bool is_temp_within_range = !isnan(temperature)
+                                          && (std::abs(temperature - last_avg_temp) > TEMP_TOLERANCE);
+        if (is_temp_within_range) {
             total_temps += (temperature);
         } else
             ++failed_reads;
