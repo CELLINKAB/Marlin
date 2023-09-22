@@ -65,12 +65,13 @@ double get_tmp117_bed_temp()
                                                     last_avg_temp + TEMP_TOLERANCE);
         if (!isnan(temperature) && is_temp_within_range) {
             total_temps += (temperature);
-            if (isnan(last_avg_temp)) // if the first average hasnt calculated
+            if (isnan(last_avg_temp)) {// if the first average hasnt been calculated
                 individual_temps[temp_index] = temperature;
+                ++temp_index;
+            }
         }
         else
             ++failed_reads;
-        ++temp_index;
     }
     bed_kalman_filter.predict();
     static unsigned retry_count = 0;
