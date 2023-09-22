@@ -51,37 +51,26 @@ BedSensors& bed_sensors()
 double get_tmp117_bed_temp()
 {
     size_t failed_reads = 0;
+    size_t temp_index = 0;
     double total_temps = 0.0;
+    static double last_avg_temp = NAN;
+    std::array<double, 4> individual_temps = {NAN, NAN, NAN, NAN};
     constexpr static float TEMP_TOLERANCE = 3.0f;
-    static double last_avg_temp = []() {
-        std::array<double, 4> individual_temps = {NAN, NAN, NAN, NAN};
-        auto sensors = bed_sensors();
-        double first_avg{};
-        for (size_t i = 0; i < individual_temps.size(); ++i) {
-            double temp = NAN;
-            while (isnan(temp)) {
-                temp = sensors[i].getTemperature();
-            }
-            individual_temps[i] = temp;
-            first_avg += temp / 4.0;
-        }
-        double final_avg{};
-        for (size_t i = 0; i < individual_temps.size(); ++i) {
-            const double individual_temp = individual_temps[i];
-            while (std::abs(individual_temp - first_avg) > TEMP_TOLERANCE) {
-                individual_temps[i] = sensors[i].getTemperature();
-            }
-            final_avg += individual_temps[i] / 4.0;
-        }
-        return final_avg;
-    }();
+    auto is_average_acknowledged = true;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        const bool is_temp_within_range = !isnan(temperature)
-                                          && (std::abs(temperature - last_avg_temp) > TEMP_TOLERANCE);
-        if (is_temp_within_range) {
+        const bool is_temp_within_range = isnan(last_avg_temp)
+                                          || WITHIN(temperature,
+                                                    last_avg_temp - TEMP_TOLERANCE,
+                                                    last_avg_temp + TEMP_TOLERANCE);
+        if (!isnan(temperature) && is_temp_within_range) {
             total_temps += (temperature);
-        } else
+            if (isnan(last_avg_temp)) {// if the first average hasnt been calculated
+                individual_temps[temp_index] = temperature;
+                ++temp_index;
+            }
+        }
+        else
             ++failed_reads;
     }
     bed_kalman_filter.predict();
@@ -94,6 +83,14 @@ double get_tmp117_bed_temp()
     } else {
         retry_count = 0;
         const double avg = total_temps / (bed_sensors().size() - failed_reads);
+        if (isnan(last_avg_temp)) {
+            for (auto& individual_temp : individual_temps) {
+                if (!isnan(individual_temp) && (std::abs(individual_temp - avg) > TEMP_TOLERANCE))
+                    is_average_acknowledged = false;
+            }
+        }
+        if (is_average_acknowledged)
+            last_avg_temp = avg;
         bed_kalman_filter.update(avg, 0.01);
     }
     return bed_kalman_filter.surface_temp();
