@@ -50,20 +50,27 @@ BedSensors& bed_sensors()
 
 double get_tmp117_bed_temp()
 {
-    double total_temps = 0.0;
     size_t failed_reads = 0;
-    static double last_temp = NAN;
-    constexpr static float TEMP_TOLERANCE = 5.0f;
+    size_t temp_index = 0;
+    double total_temps = 0.0;
+    static double last_avg_temp = NAN;
+    std::array<double, 4> individual_temps = {NAN, NAN, NAN, NAN};
+    constexpr static float TEMP_TOLERANCE = 3.0f;
+    auto is_average_acknowledged = true;
     for (auto& sensor : bed_sensors()) {
         const auto temperature = sensor.getTemperature();
-        const bool is_temp_within_range = isnan(last_temp)
+        const bool is_temp_within_range = isnan(last_avg_temp)
                                           || WITHIN(temperature,
-                                                    last_temp - TEMP_TOLERANCE,
-                                                    last_temp + TEMP_TOLERANCE);
-        if (!isnan(temperature) && is_temp_within_range)
+                                                    last_avg_temp - TEMP_TOLERANCE,
+                                                    last_avg_temp + TEMP_TOLERANCE);
+        if (!isnan(temperature) && is_temp_within_range) {
             total_temps += (temperature);
+            if (isnan(last_avg_temp)) // if the first average hasnt calculated
+                individual_temps[temp_index] = temperature;
+        }
         else
             ++failed_reads;
+        ++temp_index;
     }
     bed_kalman_filter.predict();
     static unsigned retry_count = 0;
@@ -75,7 +82,14 @@ double get_tmp117_bed_temp()
     } else {
         retry_count = 0;
         const double avg = total_temps / (bed_sensors().size() - failed_reads);
-        last_temp = avg;
+        if (isnan(last_avg_temp)) {
+            for (auto& individual_temp : individual_temps) {
+                if (!isnan(individual_temp) && (std::abs(individual_temp - avg) > TEMP_TOLERANCE))
+                    is_average_acknowledged = false;
+            }
+        }
+        if (is_average_acknowledged)
+            last_avg_temp = avg;
         bed_kalman_filter.update(avg, 0.01);
     }
     return bed_kalman_filter.surface_temp();
