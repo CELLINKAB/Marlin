@@ -60,8 +60,10 @@ void Controller::tool_change(uint8_t tool_index)
 
 void Controller::init()
 {
-    constexpr static unsigned CHANT_BAUDRATE = 115200;
-    bus.begin(CHANT_BAUDRATE);
+    constexpr static unsigned CHANT_DEFAULT_BAUDRATE = 115200;
+    constexpr static unsigned CHANT_DEFAULT_TIMEOUT = 200;
+    bus.begin(CHANT_DEFAULT_BAUDRATE);
+    bus.setTimeout(CHANT_DEFAULT_TIMEOUT);
     tool_change(0);
 }
 
