@@ -16,10 +16,6 @@ Additional documentation can be found at the [Marlin Home Page](https://marlinfw
 Please test this firmware and let us know if it misbehaves in any way.
 
 
-## Example Configurations
-
-
-
 ## Building Instructions
 
 Unless you will be making changes to the configuration, or otherwise doing development in the repo, builds should be obtained from the [jenkins](https://jenkins.cellink.dev/view/BioCellX%20Current%20List/job/Common/job/Marlin%20Internal%20Build/).
