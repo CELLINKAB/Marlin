@@ -125,21 +125,14 @@ void set_gripper_valves(GripperState state)
 
 void report_sensors()
 {
-    cellink::serial_echoln_kv("REG",
+    cellink::serial_echoln_kv("RP",
                               regulator_feedback.read_avg(),
-                              "TANK",
+                              "TP",
                               tank_pressure.read_avg(),
-                              "GRIP",
+                              "GRIP_PRESSURE",
                               gripper_vacuum.read_avg());
 }
 
-#    if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
-void Reporter::report()
-{
-    report_sensors();
-}
-Reporter reporter;
-#    endif
 
 } // namespace pneumatics
 

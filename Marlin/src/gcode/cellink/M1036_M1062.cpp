@@ -44,15 +44,6 @@ void GcodeSuite::M1036_report(bool for_replay)
     SERIAL_ECHOLNPGM("M1036 K", regulator.set_point());
 }
 
-// get pressure sensors
-void GcodeSuite::M1062()
-{
-    pneumatics::report_sensors();
-#    if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
-    pneumatics::reporter.set_interval(parser.byteval('S'));
-#    endif
-}
-
 template<typename SENSOR>
 void set_sensor_params(SENSOR& sensor)
 {

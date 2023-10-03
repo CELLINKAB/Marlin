@@ -1158,9 +1158,9 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
           case 1030: M1030(); break;
       #endif
 
-      #if ENABLED(FESTO_PNEUMATICS)
+      #if ALL(FESTO_PNEUMATICS, CELLINK_REPORTING)
+        case 816:  M816();  break; // get pressure sensors
         case 1036: M1036(); break; // set pressure regulator
-        case 1062: M1062(); break; // get pressure sensors
         case 1100: M1100(); break; // set pressure sensor offset/gain
         case 1101: M1101(); break; // debug set pump
       #endif
@@ -1189,7 +1189,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1015: M1015(); break; // get current position
         case 1016: M1016(); break; // get current machine position
 
-        case 1017:M1017(); break; // multi-line status report
+        case 1017: M1017(); break; // multi-line status report - unused
 
         case 1051: M1051(); break; // version report
       #endif
@@ -1247,7 +1247,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 810: M810(); break;
         case 811: M811(); break;
         case 814: M814(); break;
-        case 816: M816(); break;
+        //case 816: M816(); break;
         case 817: M817(); break;
         case 819: M819(); break;
         // case 821: M821(); break;
@@ -1297,7 +1297,7 @@ void GcodeSuite::process_parsed_command(const bool no_ok/*=false*/) {
         case 1047: M1047(); break;
         case 1048: M1048(); break;
         case 1050: M1050(); break;
-  
+        case 1062: M1062(); break;
         case 1063: M1063(); break;
         case 1064: M1064(); break;
         case 1065: M1065(); break;
