@@ -1,6 +1,6 @@
 <p align="center"><img src="buildroot/share/pixmaps/logo/marlin-outrun-nf-500.png" height="250" alt="MarlinFirmware's logo" /></p>
 
-<h1 align="center">Marlin 3D Printer Firmware</h1>
+<h1 align="center">Marlin-Cell 3D Bio Printer Firmware</h1>
 
 <p align="center">
     <a href="/LICENSE"><img alt="GPL-V3.0 License" src="https://img.shields.io/github/license/marlinfirmware/marlin.svg"></a>
@@ -13,79 +13,41 @@
 </p>
 
 Additional documentation can be found at the [Marlin Home Page](https://marlinfw.org/).
-Please test this firmware and let us know if it misbehaves in any way. Volunteers are standing by!
+Please test this firmware and let us know if it misbehaves in any way.
 
-## Marlin 2.1
-
-Marlin 2.1 continues to support both 32-bit ARM and 8-bit AVR boards while adding support for up to 9 coordinated axes and to up to 8 extruders.
-
-This branch is for patches to the latest 2.0.x release version. Periodically this branch will form the basis for the next minor 2.0.x release.
-
-Download earlier versions of Marlin on the [Releases page](https://github.com/MarlinFirmware/Marlin/releases).
 
 ## Example Configurations
 
-Before you can build Marlin for your machine you'll need a configuration for your specific hardware. Upon request, your vendor will be happy to provide you with the complete source code and configurations for your machine, but you'll need to get updated configuration files if you want to install a newer version of Marlin. Fortunately, Marlin users have contributed dozens of tested configurations to get you started. Visit the [MarlinFirmware/Configurations](https://github.com/MarlinFirmware/Configurations) repository to find the right configuration for your hardware.
 
-## Building Marlin 2.1
 
-To build and upload Marlin you will use one of these tools:
+## Building Instructions
 
-- The free [Visual Studio Code](https://code.visualstudio.com/download) using the [Auto Build Marlin](https://marlinfw.org/docs/basics/auto_build_marlin.html) extension.
-- The free [Arduino IDE](https://www.arduino.cc/en/main/software) : See [Building Marlin with Arduino](https://marlinfw.org/docs/basics/install_arduino.html)
-- You can also use VSCode with devcontainer : See [Installing Marlin (VSCode devcontainer)](http://marlinfw.org/docs/basics/install_devcontainer_vscode.html).
+Unless you will be making changes to the configuration, or otherwise doing development in the repo, builds should be obtained from the [jenkins](https://jenkins.cellink.dev/view/BioCellX%20Current%20List/job/Common/job/Marlin%20Internal%20Build/).
 
-Marlin is optimized to build with the **PlatformIO IDE** extension for **Visual Studio Code**. You can still build Marlin with **Arduino IDE**, and we hope to improve the Arduino build experience, but at this time PlatformIO is the better choice.
+To build and upload Cell-Marlin, use [Visual Studio Code](https://code.visualstudio.com/download) with the [PlatformIO](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) extension. You will also need a recent (>3.9) version of [Python](https://python.org).
 
-## Hardware Abstraction Layer (HAL)
+Device configuration is selected with an included script `scripts/setup-config.py`, run the script without arguments to see current valid configurations. After picking a configuration, pick your target board from the evironment selector on the bottom bar.
 
-Marlin includes an abstraction layer to provide a common API for all the platforms it targets. This allows Marlin code to address the details of motion and user interface tasks at the lowest and highest levels with no system overhead, tying all events directly to the hardware clock.
+#### Current Supported Configurations
 
-Every new HAL opens up a world of hardware. At this time we need HALs for RP2040 and the Duet3D family of boards. A HAL that wraps an RTOS is an interesting concept that could be explored. Did you know that Marlin includes a Simulator that can run on Windows, macOS, and Linux? Join the Discord to help move these sub-projects forward!
+<table>
+<tr><td>Configuration</td><td>Board</td>
+<tr><td>Exocyte</td><td>MYCORRHIZA_V1_1</td>
+<tr><td>Foton</td><td>STM32H723Vx_btt</td>
+<tr><td>Foton</td><td>STM32H743Vx_btt</td>
+<tr><td>Generic</td><td>mega2560</td>
+</table>
 
-## 8-Bit AVR Boards
+## Submitting Changes
 
-A core tenet of this project is to keep supporting 8-bit AVR boards while also maintaining a single codebase that applies equally to all machines. We want casual hobbyists to benefit from the community's innovations as much as possible just as much as those with fancier machines. Plus, those old AVR-based machines are often the best for your testing and feedback!
+All changes should be submitted as a Pull Request to the [dev](https://github.com/CELLINKAB/Marlin-Internal/tree/dev) branch. Changes which need to be applied to a release should still be submitted to dev first, and the PR should be tagged with "add to release". Changes should always be on the most recent commit, updated via rebase if needed. Please follow the [Upstream Coding Standards](https://marlinfw.org/docs/development/coding_standards.html) to ease maintenance. 
 
-Marlin 2.0 introduces a layer of abstraction so that all the existing high-level code can be built for 32-bit platforms while still retaining full 8-bit AVR compatibility. Retaining AVR compatibility and a single code-base is important to us, because we want to make sure that features and patches get as much testing and attention as possible, and that all platforms always benefit from the latest improvements.
+Changes need to be reviewed by at least one person to be merged. Depending on which devices are affected by a change, more reviewers representing each affected device should be requested - or request to the github group for that project.
 
-  Platform|MCU|Example Boards
-  --------|---|-------
-  [Arduino AVR](https://www.arduino.cc/)|ATmega|RAMPS, Melzi, RAMBo
-  [Teensy++ 2.0](https://www.microchip.com/en-us/product/AT90USB1286)|AT90USB1286|Printrboard
-  [Arduino Due](https://www.arduino.cc/en/Guide/ArduinoDue)|SAM3X8E|RAMPS-FD, RADDS, RAMPS4DUE
-  [ESP32](https://github.com/espressif/arduino-esp32)|ESP32|FYSETC E4, E4d@BOX, MRR
-  [LPC1768](https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc1700-cortex-m3/512-kb-flash-64-kb-sram-ethernet-usb-lqfp100-package:LPC1768FBD100)|ARM® Cortex-M3|MKS SBASE, Re-ARM, Selena Compact
-  [LPC1769](https://www.nxp.com/products/processors-and-microcontrollers/arm-microcontrollers/general-purpose-mcus/lpc1700-cortex-m3/512-kb-flash-64-kb-sram-ethernet-usb-lqfp100-package:LPC1769FBD100)|ARM® Cortex-M3|Smoothieboard, Azteeg X5 mini, TH3D EZBoard
-  [STM32F103](https://www.st.com/en/microcontrollers-microprocessors/stm32f103.html)|ARM® Cortex-M3|Malyan M200, GTM32 Pro, MKS Robin, BTT SKR Mini
-  [STM32F401](https://www.st.com/en/microcontrollers-microprocessors/stm32f401.html)|ARM® Cortex-M4|ARMED, Rumba32, SKR Pro, Lerdge, FYSETC S6, Artillery Ruby
-  [STM32F7x6](https://www.st.com/en/microcontrollers-microprocessors/stm32f7x6.html)|ARM® Cortex-M7|The Borg, RemRam V1
-  [STM32G0B1RET6](https://www.st.com/en/microcontrollers-microprocessors/stm32g0x1.html)|ARM® Cortex-M0+|BigTreeTech SKR mini E3 V3.0
-  [STM32H743xIT6](https://www.st.com/en/microcontrollers-microprocessors/stm32h743-753.html)|ARM® Cortex-M7|BigTreeTech SKR V3.0, SKR EZ V3.0, SKR SE BX V2.0/V3.0
-  [SAMD51P20A](https://www.adafruit.com/product/4064)|ARM® Cortex-M4|Adafruit Grand Central M4
-  [Teensy 3.5](https://www.pjrc.com/store/teensy35.html)|ARM® Cortex-M4|
-  [Teensy 3.6](https://www.pjrc.com/store/teensy36.html)|ARM® Cortex-M4|
-  [Teensy 4.0](https://www.pjrc.com/store/teensy40.html)|ARM® Cortex-M7|
-  [Teensy 4.1](https://www.pjrc.com/store/teensy41.html)|ARM® Cortex-M7|
-  Linux Native|x86/ARM/etc.|Raspberry Pi
+#### Release Patch Process
+Changes merged with the "add to release" tag should have all of their changes cherry-picked to a patch branch. The patch branch should come from the release branch. Only these branches should be merged to active release branches, and all commits in a patch should be tested in dev first. Patch branches must be squashed before merging. Release patch merges should have multiple approvals from either the firmware github group, or the matching device github group.
 
-## Submitting Patches
-
-Proposed patches should be submitted as a Pull Request against the ([bugfix-2.1.x](https://github.com/MarlinFirmware/Marlin/tree/bugfix-2.1.x)) branch.
-
-- Follow the [Coding Standards](https://marlinfw.org/docs/development/coding_standards.html) to gain points with the maintainers.
-- Please submit Feature Requests and Bug Reports to the [Issue Queue](https://github.com/MarlinFirmware/Marlin/issues/new/choose). Support resources are also listed there.
-- Whenever you add new features, be sure to add tests to `buildroot/tests` and then run your tests locally, if possible.
-  - It's optional: Running all the tests on Windows might take a long time, and they will run anyway on GitHub.
-  - If you're running the tests on Linux (or on WSL with the code on a Linux volume) the speed is much faster.
-  - You can use `make tests-all-local` or `make tests-single-local TEST_TARGET=...`.
-  - If you prefer Docker you can use `make tests-all-local-docker` or `make tests-all-local-docker TEST_TARGET=...`.
-
-  #### DUE
-
-  boards|processor|speed|flash|sram|logic|fpu
-  ----|---------|-----|-----|----|-----|---
-  [Arduino Due](https://www.arduino.cc/en/Guide/ArduinoDue), [RAMPS-FD](https://www.reprap.org/wiki/RAMPS-FD), etc.|[SAM3X8E ARM-Cortex M3](https://www.microchip.com/wwwproducts/en/ATsam3x8e)|84MHz|512k|64+32k|3.3V|no
+# Marlin Resources
 
 - [Marlin Documentation](https://marlinfw.org) - Official Marlin documentation
 - [Marlin Discord](https://discord.gg/n5NJ59y) - Discuss issues with Marlin users and developers
@@ -94,26 +56,12 @@ Proposed patches should be submitted as a Pull Request against the ([bugfix-2.1.
 - Facebook Group ["Marlin Firmware for 3D Printers"](https://www.facebook.com/groups/3Dtechtalk/)
 - [Marlin Configuration](https://www.youtube.com/results?search_query=marlin+configuration) on YouTube
 
-  board|processor|speed|flash|sram|logic|fpu
-  ----|---------|-----|-----|----|-----|---
-  [ESP32](https://www.espressif.com/en/products/hardware/esp32/overview)|Tensilica Xtensa LX6|160-240MHz variants|---|---|3.3V|---
 
-  #### LPC1768 / LPC1769
-
-  boards|processor|speed|flash|sram|logic|fpu
-  ----|---------|-----|-----|----|-----|---
-  [Re-ARM](https://www.kickstarter.com/projects/1245051645/re-arm-for-ramps-simple-32-bit-upgrade)|[LPC1768 ARM-Cortex M3](https://www.nxp.com/products/microcontrollers-and-processors/arm-based-processors-and-mcus/lpc-cortex-m-mcus/lpc1700-cortex-m3/512kb-flash-64kb-sram-ethernet-usb-lqfp100-package:LPC1768FBD100)|100MHz|512k|32+16+16k|3.3-5V|no
-  [MKS SBASE](https://reprap.org/forum/read.php?13,499322)|LPC1768 ARM-Cortex M3|100MHz|512k|32+16+16k|3.3-5V|no
-  [Selena Compact](https://github.com/Ales2-k/Selena)|LPC1768 ARM-Cortex M3|100MHz|512k|32+16+16k|3.3-5V|no
-  [Azteeg X5 GT](https://www.panucatt.com/azteeg_X5_GT_reprap_3d_printer_controller_p/ax5gt.htm)|LPC1769 ARM-Cortex M3|120MHz|512k|32+16+16k|3.3-5V|no
-  [Smoothieboard](https://reprap.org/wiki/Smoothieboard)|LPC1769 ARM-Cortex M3|120MHz|512k|64k|3.3-5V|no
-
-  #### SAMD51
+## Upstream Maintaners
 
 <table align="center">
-<tr><td>Project Maintainer</td></tr>
+<tr><td>Upstream Maintainer</td></tr>
 <tr><td>
-
  🇺🇸  **Scott Lahteine**
        [@thinkyhead](https://github.com/thinkyhead)
        [<kbd>  Donate 💸  </kbd>](https://www.thinkyhead.com/donate-to-marlin)
