@@ -22,6 +22,7 @@ REFERENCES
 
 #include "../../gcode.h"
 #include "../../../feature/hx_711.h"
+#include "../../../feature/cellink_reporter.h"
 #include "src/MarlinCore.h"
 
 /**
@@ -107,12 +108,12 @@ void GcodeSuite::M7111()
 void GcodeSuite::M7112()
 {
     // Optimized print to serial.
-    SERIAL_ECHOLNPGM("HX711:Raw val: ", wScale.getCurrentVal());
+    cellink::serial_echoln_kv("SG_RAW_VALUE", wScale.getCurrentVal());
     //debug only
-    SERIAL_ECHOLNPGM("HX711:Offset: ", wScale.getOffset());
-    SERIAL_ECHOLNPGM("HX711:Scale: ", wScale.getScale());
-    SERIAL_ECHOLNPGM("HX711:Threshold: ", wScale.getThreshold());
-    SERIAL_ECHOLNPGM("HX711:Channel: ", wScale.getChannel());
+    cellink::serial_echoln_kv("SG_OFFSET", wScale.getOffset());
+    cellink::serial_echoln_kv("SG_SCALE", wScale.getScale());
+    cellink::serial_echoln_kv("SG_THRESHOLD", wScale.getThreshold());
+    cellink::serial_echoln_kv("SG_CHANNEL", wScale.getChannel());
 }
 
 void GcodeSuite::M7110_report(const bool forReplay/*=true*/) {
