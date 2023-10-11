@@ -741,7 +741,9 @@
 #elif MB(MYCORRHIZA_V1)
   #include "stm32f7/pins_MYCORRHIZA_V1.h"       // STM32F7                                env:MYCORRHIZA_V1
 #elif MB(MYCORRHIZA_V1_1)
-  #include "stm32f7/pins_MYCORRHIZA_V1_1.h"       // STM32F7                              env:MYCORRHIZA_V1_1
+  #include "stm32f7/pins_MYCORRHIZA_V1_1.h"     // STM32F7                                env:MYCORRHIZA_V1_1
+#elif MB(MYCORRHIZA_V2_0)
+  #include "stm32f7/pins_MYCORRHIZA_V2_0.h"     // STM32F7                                env:MYCORRHIZA_V2_0
 #elif MB(BTT_SKR_SE_BX_V2)
   #include "stm32h7/pins_BTT_SKR_SE_BX_V2.h"    // STM32H7                                env:BTT_SKR_SE_BX
 #elif MB(BTT_SKR_SE_BX_V3)

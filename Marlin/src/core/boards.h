@@ -460,6 +460,7 @@
 #define BOARD_BTT_SKR_V3_0_EZ         6007  // BigTreeTech SKR V3.0 EZ (STM32H743VG)
 #define BOARD_BTT_OCTOPUS_MAX_EZ_V1_0 6008  // BigTreeTech Octopus Max EZ V1.0 (STM32H723VE / STM32H723ZE)
 #define BOARD_MYCORRHIZA_V1_1         6100  // Cellink Mycorrhiza control board
+#define BOARD_MYCORRHIZA_V2_0         6101  // Cellink MPCBA for Bio Cell X
 
 //
 // Espressif ESP32 WiFi
