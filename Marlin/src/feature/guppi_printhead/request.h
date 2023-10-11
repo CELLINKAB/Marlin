@@ -471,7 +471,11 @@ Result send(const Packet<T>& request,
     flush_rx(serial);
     if (DEBUGGING(INFO) && enable_debug)
         SERIAL_ECHO("bytes sent: [ ");
-    TERN_(CHANT_RTS_PIN, OUT_WRITE(CHANT_RTS_PIN, HIGH));
+
+#if PIN_EXISTS(CHANT_RTS)
+    OUT_WRITE(CHANT_RTS_PIN, HIGH);
+#endif
+
     for (const auto byte : packet_bytes) {
         if (DEBUGGING(INFO) && enable_debug) {
             SERIAL_PRINT(byte, PrintBase::Hex);
@@ -480,7 +484,9 @@ Result send(const Packet<T>& request,
         serial.write(byte);
     }
     serial.flush();
-    TERN_(CHANT_RTS_PIN, WRITE(CHANT_RTS_PIN, LOW));
+#if PIN_EXISTS(CHANT_RTS)
+    WRITE(CHANT_RTS_PIN, LOW);
+#endif
 
     last_serial_activity = millis();
     request_start_us = micros();
