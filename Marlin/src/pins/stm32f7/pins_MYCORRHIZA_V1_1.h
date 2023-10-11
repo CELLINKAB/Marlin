@@ -142,6 +142,9 @@
 #define FAN1_PIN PC7 // CC
 #define FAN_MIN_PWM 255
 
+#define FAST_PWM_FAN    // Increase the fan PWM frequency. Removes the PWM noise but increases heating in the FET/Arduino
+#define FAST_PWM_FAN_FREQUENCY 25000  // Define here to override the defaults below
+
 
 #define E0_FAN_TACHO_PIN PE12 // PB
 #define E1_FAN_TACHO_PIN PA8 // CC 1

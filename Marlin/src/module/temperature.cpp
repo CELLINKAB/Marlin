@@ -2627,10 +2627,13 @@ void Temperature::init() {
   #endif
 
   #if HAS_HEATED_BED
-    #ifdef BOARD_OPENDRAIN_MOSFETS
+    #ifdef(BOARD_OPENDRAIN_MOSFETS)
       OUT_WRITE_OD(HEATER_BED_PIN, HEATER_BED_INVERTING);
     #else
       OUT_WRITE(HEATER_BED_PIN, HEATER_BED_INVERTING);
+    #endif
+    #ifdef HEATER_BED_FREQUENCY
+      hal.set_pwm_frequency(HEATER_BED_PIN, HEATER_BED_FREQUENCY);
     #endif
   #endif
 
