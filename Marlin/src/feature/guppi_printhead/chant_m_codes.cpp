@@ -286,9 +286,9 @@ void GcodeSuite::M771()
 //GetAllPrintheadsTemps
 // M772 - MOVED
 //SetPrintheadPressure
-void GcodeSuite::M773() {}
+//void GcodeSuite::M773() {} - MOVED
 //GetPrintheadPressure
-void GcodeSuite::M774() {}
+//void GcodeSuite::M774() {} - MOVED
 //SetPrintHdHeaterPIDparams
 void GcodeSuite::M777()
 {

@@ -1,0 +1,40 @@
+/**
+ * Marlin 3D Printer Firmware
+ * Copyright (c) 2023 Cellink [https://github.com/CELLINKAB/Marlin]
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ *
+ */
+
+
+#include "../../inc/MarlinConfig.h"
+
+#if ENABLED(FESTO_PNEUMATICS)
+
+#    include "../../feature/air_system/pneumatics.h"
+#    include "../../feature/cellink_reporter.h"
+#    include "../gcode.h"
+
+// set pressure regulator
+void GcodeSuite::M773()
+{
+    if (parser.seen('P'))
+        pneumatics::regulator.set_point(parser.value_float());
+}
+
+void GcodeSuite::M774() {
+    cellink::serial_echoln_kv("PREG_SET", pneumatics::regulator.set_point());
+}
+
+#endif // FESTO_PNEUMATICS
