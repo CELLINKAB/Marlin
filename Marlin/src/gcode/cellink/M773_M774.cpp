@@ -33,6 +33,7 @@ void GcodeSuite::M773()
         pneumatics::regulator.set_point(parser.value_float());
 }
 
+// get pressure regulator set point
 void GcodeSuite::M774() {
     cellink::serial_echoln_kv("PREG_SET", pneumatics::regulator.set_point());
 }
