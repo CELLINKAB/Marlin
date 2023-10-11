@@ -122,6 +122,8 @@ void GcodeSuite::M805()
         OUT_WRITE(PC_480_PIN, LOW);
         OUT_WRITE(PC_520_PIN, LOW);
         pinMode(PC_PWM_PIN, PWM);
+        constexpr auto PC_FREQ = TERN(PC_PWM_FREQUENCY, PC_PWM_FREQUENCY, 20'000);
+        hal.set_pwm_frequency(PC_PWM_PIN, PC_FREQ);
 
         static auto st = Rainbow::Stepper(SimpleTMCConfig(PC_SLAVE_ADDRESS, 50, PC_RMS_CURRENT, 0.15f),
                                           PC_SERIAL_RX_PIN,
