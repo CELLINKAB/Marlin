@@ -213,10 +213,10 @@ void GcodeSuite::M1069()
 
     printhead::flush_rx(CHANT_SERIAL);
 
-    WRITE(CHANT_RTS_PIN, HIGH);
+    TERN_(CHANT_RTS_PIN, WRITE(CHANT_RTS_PIN, HIGH));
     auto written = CHANT_SERIAL.write(cmd_buf, cmd_size + 8);
     CHANT_SERIAL.flush();
-    WRITE(CHANT_RTS_PIN, LOW);
+    TERN_(CHANT_RTS_PIN, WRITE(CHANT_RTS_PIN, LOW));
     const uint32_t sent_us = micros();
 
     SERIAL_ECHOLNPGM("Sent ", written, " bytes");

@@ -131,6 +131,8 @@
 #define HEATER_BED_PIN PE9 // TEM B
 #define HEATER_BED_2_PIN PE11 // TEM A
 
+#define HEATER_BED_FREQUENCY 25000
+
 #define HEATER_BED_CS_PIN PF10
 
 #define HEATER_BED_INVERTING true
@@ -142,8 +144,8 @@
 #define FAN1_PIN PC7 // CC
 #define FAN_MIN_PWM 255
 
-#define FAST_PWM_FAN    // Increase the fan PWM frequency. Removes the PWM noise but increases heating in the FET/Arduino
-#define FAST_PWM_FAN_FREQUENCY 25000  // Define here to override the defaults below
+#define FAST_PWM_FAN 
+#define FAST_PWM_FAN_FREQUENCY HEATER_BED_FREQUENCY  // this board shares a timer, and bed heater timing is more critical
 
 
 #define E0_FAN_TACHO_PIN PE12 // PB

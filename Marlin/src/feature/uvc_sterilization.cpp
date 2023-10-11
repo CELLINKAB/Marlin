@@ -65,6 +65,8 @@ void UVCController::write_uvc_switches(bool state)
 {
 #    if PIN_EXISTS(UVC_RELAY)
     WRITE(UVC_RELAY_PIN, state);
+#    else
+    std::ignore = state;
 #    endif
 #    if PINS_EXIST(UVC_SH_CS_1, UVC_SH_CS_2, UVC_SH_CS_3, UVC_SH_CS_4, UVC_SH_CS_5)
     WRITE(UVC_SWITCH_1_PIN, state);
