@@ -30,7 +30,7 @@
 void GcodeSuite::M1036()
 {
     using namespace pneumatics;
-    if (parser.seen('K'))
+    if (parser.seen('S'))
         regulator.set_point(parser.value_float());
     else {
         cellink::serial_echoln_kv("PREG_SET", regulator.set_point());
