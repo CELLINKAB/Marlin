@@ -213,10 +213,14 @@ void GcodeSuite::M1069()
 
     printhead::flush_rx(CHANT_SERIAL);
 
+#    if PIN_EXISTS(CHANT_RTS)
     WRITE(CHANT_RTS_PIN, HIGH);
+#    endif
     auto written = CHANT_SERIAL.write(cmd_buf, cmd_size + 8);
     CHANT_SERIAL.flush();
+#    if PIN_EXISTS(CHANT_RTS)
     WRITE(CHANT_RTS_PIN, LOW);
+#    endif
     const uint32_t sent_us = micros();
 
     SERIAL_ECHOLNPGM("Sent ", written, " bytes");
@@ -233,11 +237,7 @@ void GcodeSuite::M1069()
     }
 
     const uint32_t latency_us = micros() - sent_us;
-    SERIAL_ECHOLNPGM("Received ",
-                     read_bytes,
-                     " bytes in ",
-                     latency_us,
-                     "us");
+    SERIAL_ECHOLNPGM("Received ", read_bytes, " bytes in ", latency_us, "us");
     SERIAL_ECHO("Response: [ ");
     for (size_t i = 0; i < read_bytes; ++i) {
         SERIAL_PRINT(cmd_buf[i], PrintBase::Hex);

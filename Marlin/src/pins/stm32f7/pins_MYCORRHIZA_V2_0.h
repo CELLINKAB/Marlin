@@ -24,8 +24,8 @@
 #error "Oops! Select an STM32F746 environment"
 #endif
 
-#define BOARD_INFO_NAME "CELLINK_MYCORRHIZA_V1.1"
-#define DEFAULT_MACHINE_NAME "Exocyte"
+#define BOARD_INFO_NAME "CELLINK_MYCORRHIZA_V2"
+#define DEFAULT_MACHINE_NAME "BIO CELL X"
 
 #if NO_EEPROM_SELECTED
 #define FLASH_EEPROM_EMULATION // Use Flash-based EEPROM emulation
@@ -140,18 +140,24 @@
 #define MYCO_HEATER
 #define BED_TEMP_IS_BIDIRECTIONAL true
 
-#define FAN_PIN PE13 // PB
-#define FAN1_PIN PC7 // CC
+#define FAN_PIN PE6 // PB
 #define FAN_MIN_PWM 255
+#define FAN1_PIN PC7 // CC
+#define FAN2_PIN PB4 // CC 2
+#define FAN3_PIN PB5 // CC 3
 
-#define FAST_PWM_FAN 
-#define FAST_PWM_FAN_FREQUENCY HEATER_BED_FREQUENCY  // this board shares a timer, and bed heater timing is more critical
-
+#define FAST_PWM_FAN    // Increase the fan PWM frequency. Removes the PWM noise but increases heating in the FET/Arduino
+#define FAST_PWM_FAN_FREQUENCY 5000  // Define here to override the defaults below
 
 #define E0_FAN_TACHO_PIN PE12 // PB
 #define E1_FAN_TACHO_PIN PA8 // CC 1
 #define E2_FAN_TACHO_PIN PC9 // CC 2
 #define E3_FAN_TACHO_PIN PC8 // CC 3
+
+// TODO: I don't know what these mean
+#define CC_FAN_2_TACH PC1
+#define CC_FAN_3_TACH PC12
+
 
 //
 // pneumatics
@@ -205,7 +211,8 @@
 
 #define CHANT_SERIAL MSerial2
 #define USING_HW_SERIAL2 1
-#define CHANT_RTS_PIN PA1
+#define CHANT_DE_PIN PA1
+#define CHANT_RE_PIN PA6
 
 #define CHANT_IRQ1_PIN -1 //PC13
 #define CHANT_IRQ2_PIN -1 //PC14
@@ -228,19 +235,8 @@
 
 #define UVC_INTERLOCK_PIN PF8
 
-#define UVC_SWITCH_1_PIN PD4
-#define UVC_SWITCH_2_PIN PD5
-#define UVC_SWITCH_3_PIN PD6
-#define UVC_SWITCH_4_PIN PD7
-#define UVC_SWITCH_5_PIN PG9
-
 #define UVC_SH_CS_1_PIN PA4
 #define UVC_SH_CS_2_PIN PA0
-#define UVC_SH_CS_3_PIN PA6
-#define UVC_SH_CS_4_PIN PA7
-#define UVC_SH_CS_5_PIN PC4
-
-#define UVC_RELAY_PIN PC12
 
 #define UVC_STERILIZATION
 
@@ -260,8 +256,7 @@
 #define LED_RED PE3
 #define LED_GREEN PE2
 
-#define MYCO_ID_PIN PC0 
-#define BAMBOO_ID_PIN PC1
+#define BOARD_ID_PIN PC0 
 
 #define CALIBRATION_PIN PD0
 #define CALIBRATION_GROUND_PIN PD1

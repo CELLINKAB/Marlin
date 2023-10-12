@@ -2632,6 +2632,10 @@ void Temperature::init() {
     #else
       OUT_WRITE(HEATER_BED_PIN, HEATER_BED_INVERTING);
     #endif
+    #ifdef HEATER_BED_FREQUENCY
+      hal.set_pwm_frequency(HEATER_BED_PIN, HEATER_BED_FREQUENCY);
+      TERN_(HEATER_BED_2_PIN, hal.set_pwm_frequency(HEATER_BED_2_PIN, HEATER_BED_FREQUENCY));
+    #endif
   #endif
 
   #if HAS_HEATED_CHAMBER

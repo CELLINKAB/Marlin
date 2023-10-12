@@ -47,7 +47,7 @@ pipeline {
                     }
                     axis {
                         name 'BOARD'
-                        values 'MYCORRHIZA_V1_1', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
+                        values 'MYCORRHIZA_V1_1', 'MYCORRHIZA_V2_0', 'STM32H743Vx_btt', 'STM32H723Vx_btt'
                     }
                 }
                 excludes {
@@ -68,7 +68,7 @@ pipeline {
                         }
                         axis {
                             name 'BOARD'
-                            values 'MYCORRHIZA_V1_1'
+                            values 'MYCORRHIZA_V1_1', 'MYCORRHIZA_V2_0'
                         }
                     }
                     

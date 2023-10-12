@@ -35,6 +35,9 @@ void UVCController::init()
 
     OUT_WRITE(UVC_PWM_PIN, LOW);
 
+    constexpr auto UVC_FREQ = TERN(UVC_PWM_FREQUENCY, UVC_PWM_FREQUENCY, 1000);
+    hal.set_pwm_frequency(UVC_PWM_PIN, UVC_FREQ);
+
 #    if PINS_EXIST(UVC_SWITCH_1, UVC_SWITCH_2, UVC_SWITCH_3, UVC_SWITCH_4, UVC_SWITCH_5)
     OUT_WRITE(UVC_SWITCH_1_PIN, LOW);
     OUT_WRITE(UVC_SWITCH_2_PIN, LOW);
@@ -62,6 +65,8 @@ void UVCController::write_uvc_switches(bool state)
 {
 #    if PIN_EXISTS(UVC_RELAY)
     WRITE(UVC_RELAY_PIN, state);
+#    else
+    std::ignore = state;
 #    endif
 #    if PINS_EXIST(UVC_SH_CS_1, UVC_SH_CS_2, UVC_SH_CS_3, UVC_SH_CS_4, UVC_SH_CS_5)
     WRITE(UVC_SWITCH_1_PIN, state);

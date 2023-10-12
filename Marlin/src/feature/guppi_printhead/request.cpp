@@ -34,16 +34,6 @@ uint32_t printhead::min_latency_us = std::numeric_limits<uint32_t>::max();
 uint32_t printhead::max_latency_us = 0;
 uint32_t printhead::request_start_us = 0;
 
-Result printhead::unsafe_send(const void* data, const size_t size, HardwareSerial& serial)
-{
-    OUT_WRITE(CHANT_RTS_PIN, HIGH);
-    size_t sent = serial.write(static_cast<const uint8_t*>(data), size);
-    serial.flush();
-    WRITE(CHANT_RTS_PIN, LOW);
-    if (sent != size)
-        return Result::BUSY;
-    return Result::OK;
-}
 
 void printhead::flush_rx(HardwareSerial& serial)
 {
