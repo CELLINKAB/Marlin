@@ -30,7 +30,7 @@
 void GcodeSuite::M1036()
 {
     using namespace pneumatics;
-    if (parser.seen('K'))
+    if (parser.seen('S'))
         regulator.set_point(parser.value_float());
     else {
         cellink::serial_echoln_kv("PREG_SET", regulator.set_point());
@@ -42,15 +42,6 @@ void GcodeSuite::M1036_report(bool for_replay)
     using namespace pneumatics;
     report_heading_etc(for_replay, F("Air Pressure Regulator"));
     SERIAL_ECHOLNPGM("M1036 K", regulator.set_point());
-}
-
-// get pressure sensors
-void GcodeSuite::M1062()
-{
-    pneumatics::report_sensors();
-#    if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
-    pneumatics::reporter.set_interval(parser.byteval('S'));
-#    endif
 }
 
 template<typename SENSOR>

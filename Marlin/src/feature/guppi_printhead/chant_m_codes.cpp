@@ -286,9 +286,9 @@ void GcodeSuite::M771()
 //GetAllPrintheadsTemps
 // M772 - MOVED
 //SetPrintheadPressure
-void GcodeSuite::M773() {}
+//void GcodeSuite::M773() {} - MOVED
 //GetPrintheadPressure
-void GcodeSuite::M774() {}
+//void GcodeSuite::M774() {} - MOVED
 //SetPrintHdHeaterPIDparams
 void GcodeSuite::M777()
 {
@@ -418,7 +418,7 @@ void GcodeSuite::M811() {}
 //GetZ3EndstopStatus
 void GcodeSuite::M814() {}
 //GetTankNRegulatorPressure
-void GcodeSuite::M816() {}
+//void GcodeSuite::M816() {}
 //MovePHsVertically
 void GcodeSuite::M817() {}
 //SetBedCoolingFans
@@ -569,7 +569,7 @@ void GcodeSuite::M1048() {}
 //ChangeSerialBaudrate
 void GcodeSuite::M1050() {}
 //GetPressureAndExtrusionData
-//void GcodeSuite::M1062() {} - MOVED
+void GcodeSuite::M1062() {}
 //MovePrintheadsUpDownDBG
 void GcodeSuite::M1063() {}
 //IgnoreCurrentPrinthead

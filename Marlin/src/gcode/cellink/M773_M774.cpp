@@ -18,36 +18,24 @@
  */
 
 
-#pragma once
+#include "../../inc/MarlinConfig.h"
 
-#include "../../inc/MarlinConfigPre.h"
+#if ENABLED(FESTO_PNEUMATICS)
 
-#define AUTO_REPORT_PNEUMATIC_SENSORS 1
-#if ENABLED(AUTO_REPORT_PNEUMATIC_SENSORS)
-#    include "../../libs/autoreport.h"
-#endif
+#    include "../../feature/air_system/pneumatics.h"
+#    include "../../feature/cellink_reporter.h"
+#    include "../gcode.h"
 
-#include "analog_sensor.h"
-#include "pump.h"
-#include "regulator.h"
+// set pressure regulator
+void GcodeSuite::M773()
+{
+    if (parser.seen('P'))
+        pneumatics::regulator.set_point(parser.value_float());
+}
 
-namespace pneumatics {
+// get pressure regulator set point
+void GcodeSuite::M774() {
+    cellink::serial_echoln_kv("PREG_SET", pneumatics::regulator.set_point());
+}
 
-void init();
-
-void update();
-
-enum class GripperState {
-    Close,
-    Release,
-    Grip,
-};
-
-void set_gripper_valves(GripperState state);
-
-void apply_mixing_pressure(uint8_t tool);
-void release_mixing_pressure(uint8_t tool);
-
-void report_sensors();
-
-} // namespace pneumatics
+#endif // FESTO_PNEUMATICS
