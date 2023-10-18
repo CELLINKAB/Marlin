@@ -3344,9 +3344,6 @@
 
 #endif
 
-// inverts the parameters for RGB control, in case you're using an inverting level-shift
-#define INVERTED_RGB_CONTROL
-
 // enable LED fade command for smooth transitions
 #define RGB_LED_FADE_COMMAND
 
