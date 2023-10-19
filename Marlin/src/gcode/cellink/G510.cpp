@@ -29,6 +29,10 @@
 #    include <cmath>
 #    include <stdio.h>
 
+#    if ENABLED(CELLINK_REPORTING)
+#        include "../../feature/cellink_reporter.h"
+#    endif
+
 xyz_pos_t OpticalAutocal::nozzle_calibration_extra_offset{};
 
 void update_offset(const xyz_pos_t& offset)
@@ -97,6 +101,7 @@ void GcodeSuite::G510()
         [[fallthrough]];
     case OpticalAutocal::ErrorCode::OK: {
         update_offset(optical_autocal.offset(active_extruder));
+        TERN_(CELLINK_REPORTING, cellink::reporter.m798.report());
         break;
     }
     case OpticalAutocal::ErrorCode::CALIBRATION_FAILED:
