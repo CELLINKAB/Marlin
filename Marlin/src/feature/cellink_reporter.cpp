@@ -21,7 +21,6 @@
 #if ENABLED(CELLINK_REPORTING)
 
 #    include "../module/endstops.h"
-#    include "../module/planner.h"
 
 #    include "cellink_reporter.h"
 
@@ -33,16 +32,6 @@ void Reporter::M119::report()
 }
 void Reporter::M814::report() {}
 void Reporter::M825::report() {}
-void Reporter::M1015::report()
-{
-    const auto pos = current_position.asLogical();
-    serial_echoln_kv("XPOS", pos.x, "YPOS", pos.y, "ZPOS", pos.z);
-}
-void Reporter::M1016::report()
-{
-    const auto pos = planner.get_axis_positions_mm();
-    serial_echoln_kv("XMPOS", pos.x, "YMPOS", pos.y, "ZMPOS", pos.z);
-}
 
 void Reporter::tick_all()
 {
