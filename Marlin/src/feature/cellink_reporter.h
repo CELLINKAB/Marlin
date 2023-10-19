@@ -76,46 +76,67 @@ void serial_echoln_kv(Args... args)
  */
 struct Reporter
 {
+    // endstop state
     struct M119 : AutoReporter<M119>
     {
         static void report();
     } m119;
+
+    // printhead temperature
     struct M772 : AutoReporter<M772>
     {
         static void report();
     } m772;
+
+    // autocal state
     struct M798 : AutoReporter<M798>
     {
         static void report();
     } m798;
+
+    // autocal offsets
     struct M799 : AutoReporter<M799>
     {
         static void report();
     } m799;
+
+    // printbed temperature
     struct M802 : AutoReporter<M802>
     {
         static void report();
     } m802;
+
+    // TODO: unimplemented
     struct M814 : AutoReporter<M814>
     {
         static void report();
     } m814;
+
+    // pressure sensors
     struct M816 : AutoReporter<M816>
     {
         static void report();
     } m816;
+
+    // homing state
     struct M821 : AutoReporter<M821>
     {
         static void report();
     } m821;
+
+    // TODO: unimplemented
     struct M825 : AutoReporter<M825>
     {
         static void report();
     } m825;
+
+    // current position
     struct M1015 : AutoReporter<M1015>
     {
         static void report();
     } m1015;
+
+    // current mechanical position
     struct M1016 : AutoReporter<M1016>
     {
         static void report();
