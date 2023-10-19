@@ -256,6 +256,7 @@ void GcodeSuite::G28()
     if (!axes_should_home() && parser.seen_test('O')) {
         if (DEBUGGING(LEVELING))
             DEBUG_ECHOLNPGM("> homing not needed, skip");
+            TERN_(CELLINK_REPORTING, cellink::reporter.m821.report());
         return;
     }
 
