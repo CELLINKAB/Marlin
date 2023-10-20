@@ -180,6 +180,9 @@
 #define NEOPIXEL_PIN PF0 // UI LED bar
 #define NEOPIXEL2_PIN PF1 // Chamber LED bar
 
+// inverts the parameters for RGB control, in case you're using an inverting level-shift
+#define INVERTED_RGB_CONTROL
+
 //
 // Photocuring LEDs
 //
