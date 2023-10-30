@@ -17,14 +17,25 @@
  *
  */
 
-
 #include "../../inc/MarlinConfig.h"
 
 #if ENABLED(CELLINK_REPORTING)
 
-#include "../../feature/cellink_reporter.h"
+#    include "../../feature/cellink_reporter.h"
+#    include "../../module/planner.h"
 #    include "../gcode.h"
 
+void cellink::Reporter::M1015::report()
+{
+    const auto pos = current_position.asLogical();
+    serial_echoln_kv("XPOS", pos.x, "YPOS", pos.y, "ZPOS", pos.z);
+}
+
+void cellink::Reporter::M1016::report()
+{
+    const auto pos = planner.get_axis_positions_mm();
+    serial_echoln_kv("XMPOS", pos.x, "YMPOS", pos.y, "ZMPOS", pos.z);
+}
 
 /**
    * @brief Get current position in cellink protocol format
