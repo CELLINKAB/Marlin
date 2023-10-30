@@ -69,17 +69,12 @@
 #define X_ENABLE_PIN PB15
 #define X_STOP_PIN PD9
 
-#define INVERT_X_DIR true
-
 #define X_SLAVE_ADDRESS  0
 
 #define Y_STEP_PIN PD13
 #define Y_DIR_PIN PD12
 #define Y_ENABLE_PIN PD11
 #define Y_STOP_PIN PD14
-
-#define INVERT_Y_DIR false
-
 #define Y_SLAVE_ADDRESS  2
 
 #define Y2_STEP_PIN PD15
@@ -95,8 +90,6 @@
 #define Z_STOP_PIN PG7
 
 #define Z_SLAVE_ADDRESS  3
-
-#define INVERT_Z_DIR false
 
 #define PROBE_EN_PIN PE0
 #define PROBE_INDEX_PIN PE1

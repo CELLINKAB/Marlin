@@ -69,8 +69,6 @@
 #define X_ENABLE_PIN PB15
 #define X_STOP_PIN PD9
 
-#define INVERT_X_DIR false
-
 #define X_SLAVE_ADDRESS  0
 
 #define Y_STEP_PIN PD13
@@ -78,9 +76,6 @@
 #define Y_ENABLE_PIN PD11
 #define Y_STOP_PIN PD14
 #define Y_SLAVE_ADDRESS  2
-
-#define INVERT_Y_DIR true
-
 
 #define Y2_STEP_PIN PD15
 #define Y2_DIR_PIN PG3
@@ -94,10 +89,7 @@
 #define Z_ENABLE_PIN PG5
 #define Z_STOP_PIN PG7
 
-#define INVERT_Z_DIR true
-
 #define Z_SLAVE_ADDRESS  3
-
 
 #define PROBE_EN_PIN PE0
 #define PROBE_INDEX_PIN PE1
@@ -149,7 +141,7 @@
 #define BED_TEMP_IS_BIDIRECTIONAL true
 
 #define FAN_PIN PE6 // PB
-//#define FAN_MIN_PWM 255
+#define FAN_MIN_PWM 255
 #define FAN1_PIN PC7 // CC
 #define FAN2_PIN PB4 // CC 2
 #define FAN3_PIN PB5 // CC 3
@@ -258,7 +250,7 @@
 #define PSU_FAULT_PIN PG10
 
 #define DOOR_PIN UVC_INTERLOCK_PIN
-#define DOOR_SENSOR_INVERTING false
+#define DOOR_SENSOR_INVERTING true
 #define FREEZE_PIN PA10
 
 #define LED_RED PE3
