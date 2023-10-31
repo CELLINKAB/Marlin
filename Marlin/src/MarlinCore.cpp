@@ -1366,6 +1366,27 @@ void setup() {
   if (mcu & RST_WATCHDOG)  SERIAL_ECHOLNPGM(STR_WATCHDOG_RESET);
   if (mcu & RST_SOFTWARE)  SERIAL_ECHOLNPGM(STR_SOFTWARE_RESET);
 
+  // Debug display restart reason with morse code on LED
+  #if ENABLED(DEBUG_LED_RESTART_REASON)
+    OUT_WRITE(LED_RED, LOW);
+    for (size_t i = 0; i < 8; ++i) {
+      if (mcu & (1 << i)) {
+        WRITE(LED_RED, HIGH);
+        delay((i & 1) ? 350 : 150);
+        WRITE(LED_RED, LOW);
+        delay(150);
+        WRITE(LED_RED, HIGH);
+        delay((i & 2) ? 350 : 150);
+        WRITE(LED_RED, LOW);
+        delay(150);
+        WRITE(LED_RED, HIGH);
+        delay((i & 4) ? 350 : 150);
+        WRITE(LED_RED, LOW);
+        break;
+      }
+    }
+  #endif
+
   // Identify myself as Marlin x.x.x
   SERIAL_ECHOLNPGM("Marlin " SHORT_BUILD_VERSION);
   #if defined(STRING_DISTRIBUTION_DATE) && defined(STRING_CONFIG_H_AUTHOR)
