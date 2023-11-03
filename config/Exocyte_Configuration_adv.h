@@ -4309,6 +4309,14 @@
 
 // @section develop
 
+// Debug display restart reason with morse code on LED
+// ... -> powerup
+// -.. -> external
+// .-. -> brown-out
+// --. -> watchdog
+// -.- -> software
+#define DEBUG_LED_RESTART_REASON
+
 //
 // M100 Free Memory Watcher to debug memory usage
 //
