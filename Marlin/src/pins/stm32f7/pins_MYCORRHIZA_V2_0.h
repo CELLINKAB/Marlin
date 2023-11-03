@@ -141,7 +141,6 @@
 #define BED_TEMP_IS_BIDIRECTIONAL true
 
 #define FAN_PIN PE6 // PB
-#define FAN_MIN_PWM 255
 #define FAN1_PIN PC7 // CC
 #define FAN2_PIN PB4 // CC 2
 #define FAN3_PIN PB5 // CC 3
@@ -250,7 +249,7 @@
 #define PSU_FAULT_PIN PG10
 
 #define DOOR_PIN UVC_INTERLOCK_PIN
-#define DOOR_SENSOR_INVERTING true
+#define DOOR_SENSOR_INVERTING false
 #define FREEZE_PIN PA10
 
 #define LED_RED PE3

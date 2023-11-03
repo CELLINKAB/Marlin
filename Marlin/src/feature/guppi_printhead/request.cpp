@@ -52,6 +52,10 @@ void Controller::init()
 {
     constexpr static unsigned CHANT_DEFAULT_BAUDRATE = 115200;
     constexpr static unsigned CHANT_DEFAULT_TIMEOUT = 200;
+    #if PINS_EXIST(CHANT_DE, CHANT_RE)
+      OUT_WRITE(CHANT_DE_PIN, HIGH);
+      OUT_WRITE(CHANT_RE_PIN, HIGH);
+    #endif
     bus.begin(CHANT_DEFAULT_BAUDRATE);
     bus.setTimeout(CHANT_DEFAULT_TIMEOUT);
     tool_change(0);
