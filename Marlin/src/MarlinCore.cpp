@@ -1371,13 +1371,17 @@ void setup() {
     OUT_WRITE(LED_RED, LOW);
     for (size_t i = 0; i < 8; ++i) {
       if (mcu & (1 << i)) {
-        while (i > 0) {
-          WRITE(LED_RED, HIGH);
-          safe_delay((i & 1) ? 350 : 150);
-          WRITE(LED_RED, LOW);
-          safe_delay(150); 
-          i >>= 1;
-        }
+        WRITE(LED_RED, HIGH);
+        delay((i & 1) ? 350 : 150);
+        WRITE(LED_RED, LOW);
+        delay(150);
+        WRITE(LED_RED, HIGH);
+        delay((i & 2) ? 350 : 150);
+        WRITE(LED_RED, LOW);
+        delay(150);
+        WRITE(LED_RED, HIGH);
+        delay((i & 4) ? 350 : 150);
+        WRITE(LED_RED, LOW);
         break;
       }
     }
