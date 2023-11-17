@@ -176,11 +176,12 @@ struct SimpleTMC
     */
     void gentle_stop() {
         auto velocity = driver.VACTUAL();
-        const auto increment = velocity / -10;
-        for (size_t i = 0; i < 9; ++i) {
+        const int sign = (velocity > 0) ? 1 : ((velocity < 0) ? -1 : 0);
+        const int increment = -sign * 8192;
+        while (abs(velocity) > abs(increment)) {
             velocity += increment;
             raw_move(velocity);
-            safe_delay(10);
+            safe_delay(5);
         }
         stop();
     }
