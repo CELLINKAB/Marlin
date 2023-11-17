@@ -45,33 +45,20 @@ struct StepperRetractingProbe
      */
     struct Config
     {
-        int32_t deploy_velocity;
-        int32_t stow_velocity;
-        int16_t stall_threshold;
-        uint16_t stepper_current;
-        uint32_t minimum_retract_time;
-
-        constexpr Config()
-            : deploy_velocity(SRP_DEPLOY_VELOCITY)
-            , stow_velocity(SRP_STOW_VELOCITY)
-            , stall_threshold(SRP_STALL_THRESHOLD)
-            , stepper_current(SRP_STEPPER_CURRENT)
-            , minimum_retract_time(SRP_RETRACT_TIME)
-        {}
+        int32_t deploy_velocity{SRP_DEPLOY_VELOCITY};
+        int32_t stow_velocity{SRP_STOW_VELOCITY};
+        int16_t stall_threshold{SRP_STALL_THRESHOLD};
+        uint16_t stepper_current{SRP_STEPPER_CURRENT};
+        uint32_t minimum_retract_time{SRP_RETRACT_TIME};
     };
-
-    constexpr StepperRetractingProbe()
-        : state{ProbeState::Unknown}
-        , _stepper{}
-    {}
 
     void deploy();
 
     void stow();
 
-    constexpr const Config& get_config() const { return config; }
+    constexpr const Config& get_config() const noexcept { return config; }
 
-    inline void set_config(const Config& conf)
+    inline void set_config(Config conf)
     {
         config = conf;
         // reset stepper to force reinitialization next use
@@ -87,15 +74,17 @@ struct StepperRetractingProbe
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
 
-    Config config;
+    Config config{};
 
     enum class ProbeState {
         Unknown,
         Stowed,
         Deployed
-    } state;
+    };
 
-    std::optional<STMC> _stepper;
+    ProbeState state{ProbeState::Unknown};
+
+    std::optional<STMC> _stepper{};
 
     void stepper_init();
 
