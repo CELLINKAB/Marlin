@@ -108,7 +108,7 @@ void StepperRetractingProbe::report_config(bool for_replay) const
                            config.stow_velocity,
                            " D",
                            config.deploy_velocity,
-                           " M",
+                           " B",
                            config.minimum_retract_time);
     } else {
         SERIAL_ECHOLNPGM_P("Stall threshold: ",
@@ -119,7 +119,7 @@ void StepperRetractingProbe::report_config(bool for_replay) const
                            config.stow_velocity,
                            "\nDeploy velocity: ",
                            config.deploy_velocity,
-                           "\nBackoff time: ",
+                           "\nRetract time: ",
                            config.minimum_retract_time);
     }
 }
