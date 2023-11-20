@@ -338,6 +338,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         ++printhead_rx_err_counter;
         if (DEBUGGING(ERRORS) && enable_debug)
             SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
+        safe_delay(0); // refresh watchdog
         return Response<T>{incoming, code};
     };
     size_t bytes_received = serial.readBytes(packet_buffer, EXPECTED_PACKET_SIZE);
@@ -453,13 +454,15 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    constexpr static millis_t MIN_CHANT_SEND_DELAY = 10;
+    constexpr static millis_t MIN_CHANT_SEND_DELAY = 1;
     if (millis() <= last_serial_activity + MIN_CHANT_SEND_DELAY)
-        delay(MIN_CHANT_SEND_DELAY);
+        safe_delay(MIN_CHANT_SEND_DELAY);
 
     static auto err = [](Result code) {
         ++printhead_tx_err_counter;
         last_serial_activity = millis();
+        safe_delay(0); // refresh watchdog
+
         return code;
     };
 
@@ -503,16 +506,6 @@ Result send(const Packet<T>& request,
 }
 
 /**
- * @brief send without type safety or bounds checks
- * 
- * @param data type erased pointer to buffer
- * @param size bytes to read from buffer onto the bus
- * @param serial 
- * @return Result 
- */
-Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
-
-/**
  * @brief high level transaction command to send and recieve type checked packets with error reporting
  * 
  * @tparam OUT expected response payload
@@ -531,6 +524,8 @@ Response<OUT> send_and_receive(const Packet<IN>& packet,
     response.result = send<IN>(packet, serial, false, enable_debug);
     if (response.result != Result::OK)
         return response;
+    safe_delay(0); // run temp task to refresh watchdog
+
     return receive<OUT>(serial, enable_debug);
 }
 

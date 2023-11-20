@@ -1370,17 +1370,23 @@ void setup() {
   #if ENABLED(DEBUG_LED_RESTART_REASON)
     OUT_WRITE(LED_RED, LOW);
     for (size_t i = 0; i < 8; ++i) {
+      constexpr static millis_t PULSE_OFF = 150;
+      constexpr static auto bit_pulse_length = [](bool bit){
+        constexpr static millis_t PULSE_SHORT = 120;
+        constexpr static millis_t PULSE_LONG = 350;
+        return bit ? PULSE_LONG : PULSE_SHORT;
+      };
       if (mcu & (1 << i)) {
         WRITE(LED_RED, HIGH);
-        delay((i & 1) ? 350 : 150);
+        delay(bit_pulse_length(i & 1));
         WRITE(LED_RED, LOW);
-        delay(150);
+        delay(PULSE_OFF);
         WRITE(LED_RED, HIGH);
-        delay((i & 2) ? 350 : 150);
+        delay(bit_pulse_length(i & 2));
         WRITE(LED_RED, LOW);
-        delay(150);
+        delay(PULSE_OFF);
         WRITE(LED_RED, HIGH);
-        delay((i & 4) ? 350 : 150);
+        delay(bit_pulse_length(i & 4));
         WRITE(LED_RED, LOW);
         break;
       }
@@ -1791,6 +1797,10 @@ void setup() {
   marlin_state = MF_RUNNING;
 
   SETUP_LOG("setup() completed.");
+
+  #if ENABLED(DEBUG_LED_RESTART_REASON)
+    OUT_WRITE(LED_GREEN, HIGH);
+  #endif
 
   TERN_(MARLIN_TEST_BUILD, runStartupTests());
 }

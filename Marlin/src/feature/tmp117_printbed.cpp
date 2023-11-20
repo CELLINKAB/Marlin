@@ -58,6 +58,9 @@ double get_tmp117_bed_temp()
     constexpr static float TEMP_TOLERANCE = 3.0f;
     auto is_average_acknowledged = true;
     for (auto& sensor : bed_sensors()) {
+        // make sure watchdog doesn't timeout while fetching temps
+        hal.watchdog_refresh();
+
         const auto temperature = sensor.getTemperature();
         const bool is_temp_within_range = isnan(last_avg_temp)
                                           || WITHIN(temperature,
