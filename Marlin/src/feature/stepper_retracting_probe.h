@@ -52,6 +52,10 @@ struct StepperRetractingProbe
         uint32_t minimum_retract_time{SRP_RETRACT_TIME};
     };
 
+    void init();
+
+    void update(millis_t ms = millis());
+
     void deploy();
 
     void stow();
@@ -66,11 +70,11 @@ struct StepperRetractingProbe
 
     void report_config(bool for_replay) const;
 
-    constexpr inline void reset_position() noexcept { state = ProbeState::Unknown; }
+    constexpr inline void reset_position() noexcept { state = State::Unknown; }
 
     [[nodiscard]] constexpr inline bool is_deployed() const noexcept
     {
-        return state == ProbeState::Deployed;
+        return state == State::Deployed;
     }
 
     inline void reinit_driver() noexcept
@@ -83,15 +87,17 @@ private:
 
     Config config{};
 
-    enum class ProbeState {
+    enum class State {
         Unknown,
         Stowed,
         Deployed
     };
 
-    ProbeState state{ProbeState::Unknown};
+    State state{State::Unknown};
 
     std::optional<STMC> _stepper{};
+
+    millis_t init_done_time{};
 
     void stepper_init();
 
@@ -103,6 +109,14 @@ private:
     }
 
     void unstick(int32_t velocity);
+
+    inline void start_move(int32_t velocity)
+    {
+        unstick(velocity);
+        stepper().ramped_move(velocity);
+    }
+
+    void backoff();
 };
 
 extern StepperRetractingProbe stepper_probe;

@@ -17,7 +17,6 @@
  *
  */
 
-
 #include "../inc/MarlinConfig.h"
 
 #if ENABLED(STEPPER_RETRACTING_PROBE)
@@ -28,36 +27,39 @@
 
 #    include "stepper_retracting_probe.h"
 
-void StepperRetractingProbe::unstick(int32_t velocity){
+void StepperRetractingProbe::unstick(int32_t velocity)
+{
     int32_t unstick_velocity = (velocity >= 0) ? 8000 : -8000;
-    auto unstick_move = [=](millis_t move_time){
-        stepper().raw_move(unstick_velocity);
-        delay(move_time);
-        stepper().stop();
-        safe_delay(1);
+    auto unstick_move = [this, unstick_velocity](int32_t velocity, millis_t move_time) {
+        stepper().ramped_move(velocity);
+        safe_delay(move_time);
+        stepper().gentle_stop();
     };
-    for (size_t i = 0; i < 5; ++i) {
-        unstick_move(10);
+    for (size_t i = 0; i < 3; ++i) {
+        unstick_move(unstick_velocity, 10);
     }
-    unstick_move(50);
+}
+
+void StepperRetractingProbe::backoff()
+{
+    start_move(config.stow_velocity);
+    safe_delay(200);
+    stepper().gentle_stop();
+    safe_delay(10);
 }
 
 void StepperRetractingProbe::deploy()
 {
     switch (state) {
-    case ProbeState::Deployed:
+    case State::Deployed:
         break;
-    case ProbeState::Unknown:
-        stepper().raw_move(config.stow_velocity);
-        safe_delay(200);
-        stepper().stop();
-        delay(10);
+    case State::Unknown:
+        backoff();
         [[fallthrough]];
-    case ProbeState::Stowed:
+    case State::Stowed:
         // FIXME: re-enable stallguard move
         // stepper().blocking_move_until_stall(config.deploy_velocity, config.minimum_retract_time * 2);
-        unstick(config.deploy_velocity); 
-        stepper().raw_move(config.deploy_velocity);
+        start_move(config.deploy_velocity);
         const millis_t minimum_deploy_time = static_cast<millis_t>(
             static_cast<float>(config.minimum_retract_time)
                 * ABS(static_cast<float>(config.stow_velocity)
@@ -71,7 +73,7 @@ void StepperRetractingProbe::deploy()
             idle();
         }
         stepper().stop();
-        state = ProbeState::Deployed;
+        state = State::Deployed;
         if (probe_hit) {
             stow();
         }
@@ -83,16 +85,15 @@ void StepperRetractingProbe::deploy()
 void StepperRetractingProbe::stow()
 {
     switch (state) {
-    case ProbeState::Stowed:
+    case State::Stowed:
         break;
-    case ProbeState::Unknown:
+    case State::Unknown:
         [[fallthrough]];
-    case ProbeState::Deployed:
-        unstick(config.stow_velocity);
-        stepper().raw_move(config.stow_velocity);
+    case State::Deployed:
+        start_move(config.stow_velocity);
         safe_delay(config.minimum_retract_time);
         stepper().stop();
-        state = ProbeState::Stowed;
+        state = State::Stowed;
         break;
     }
 }
@@ -142,6 +143,24 @@ void StepperRetractingProbe::stepper_init()
 #    else
 #        error "need to define SP_SERIAL_TX/RX_PIN or SP_HARDWARE_SERIAL for stepper retracting probe"
 #    endif
+}
+
+void StepperRetractingProbe::init()
+{
+    state = State::Unknown;
+    init_done_time = millis() + config.minimum_retract_time;
+    start_move(config.stow_velocity);
+}
+
+void StepperRetractingProbe::update(millis_t ms)
+{
+    if (state != State::Unknown || init_done_time == 0 || ms < init_done_time)
+        return;
+
+    // state is unknown, there's an init_done_time, and we're past it, so finish init
+    stepper().stop();
+    state = State::Stowed;
+    init_done_time = 0;
 }
 
 StepperRetractingProbe stepper_probe;

@@ -103,7 +103,7 @@ struct SimpleTMC
         const int sign = (velocity > 0) ? 1 : ((velocity < 0) ? -1 : 0);
         const int32_t increment = 1024 * sign;
         int32_t temp_velocity = increment;
-        while (abs(temp_velocity) < abs(velocity)) {
+        while (ABS(temp_velocity) < ABS(velocity)) {
             raw_move(temp_velocity);
             temp_velocity += increment;
             safe_delay(5);
@@ -124,12 +124,19 @@ struct SimpleTMC
         stallguard_delay();
         gentle_stop();
 
+        move_until_stall(velocity, callback);
+    }
+
+    void move_until_stall(const int32_t velocity,
+                          callback_function_t callback = callback_function_t{})
+    {
         auto done = [this, callback]() {
             detachInterrupt(STOP);
             stop();
             if DEBUGGING (INFO)
                 SERIAL_ECHOLNPGM("Stepper stalled, SG:", driver.SG_RESULT());
-            if (callback) callback();
+            if (callback)
+                callback();
         };
 
         ramped_move(velocity);
@@ -174,11 +181,12 @@ struct SimpleTMC
     /**
      * @brief stop with deceleration
     */
-    void gentle_stop() {
-        auto velocity = driver.VACTUAL();
+    void gentle_stop()
+    {
+        int32_t velocity = driver.VACTUAL();
         const int sign = (velocity > 0) ? 1 : ((velocity < 0) ? -1 : 0);
         const int increment = -sign * 8192;
-        while (abs(velocity) > abs(increment)) {
+        while (ABS(velocity) > ABS(increment)) {
             velocity += increment;
             raw_move(velocity);
             safe_delay(5);
@@ -229,7 +237,7 @@ struct SimpleTMC
 
         millis_t next_idle = millis() + 100;
         uint32_t low_microseconds = 1'000'000 / velocity;
-        steps = abs(steps);
+        steps = ABS(steps);
         while (!stop_condition() && (steps-- > 0)) {
             single_step();
             if (millis() > next_idle) {
@@ -301,5 +309,8 @@ private:
             SERIAL_ERROR_MSG("driver bad status");
     }
 
-    inline void stallguard_delay() const {safe_delay(TERN0(SENSORLESS_STALLGUARD_DELAY, SENSORLESS_STALLGUARD_DELAY));}
+    inline void stallguard_delay() const
+    {
+        safe_delay(TERN0(SENSORLESS_STALLGUARD_DELAY, SENSORLESS_STALLGUARD_DELAY));
+    }
 };

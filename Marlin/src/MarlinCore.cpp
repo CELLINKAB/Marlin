@@ -966,6 +966,9 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   // Update chantarelle status
   TERN_(CHANTARELLE_SUPPORT, ph_controller.update());
 
+  // Update stepper probe tasks
+  TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.update());
+
   // Update UVC
 
   IDLE_DONE:
@@ -1790,7 +1793,7 @@ void setup() {
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
-    SETUP_RUN(stepper_probe.stow());
+    SETUP_RUN(stepper_probe.init());
   #endif
 
 
