@@ -545,7 +545,12 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
         SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
         #endif
         stepper.frozen = new_freeze;
-        TERN_(FREEZE_RESTORE, if (!stepper.frozen) restore_stepper_drivers());
+        #if ENABLED(FREEZE_RESTORE)
+         if (!stepper.frozen) { 
+          restore_stepper_drivers(); 
+          TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.reinit_driver());
+        }
+        #endif
         }
     } 
   #endif
