@@ -522,6 +522,7 @@ Response<OUT> send_and_receive(const Packet<IN>& packet,
 {
     Response<OUT> response;
     response.result = send<IN>(packet, serial, false, enable_debug);
+    safe_delay(0); // run temp task to refresh watchdog
     if (response.result != Result::OK)
         return response;
     return receive<OUT>(serial, enable_debug);
