@@ -94,21 +94,54 @@ struct SimpleTMC
     }
 
     /**
+     * @brief smoothly accelerate to target velocity before returning
+     * 
+     * @param velocity 
+     */
+    void ramped_move(const int32_t velocity)
+    {
+        const int sign = (velocity > 0) ? 1 : ((velocity < 0) ? -1 : 0);
+        const int32_t increment = 1024 * sign;
+        int32_t temp_velocity = increment;
+        while (ABS(temp_velocity) < ABS(velocity)) {
+            raw_move(temp_velocity);
+            temp_velocity += increment;
+            safe_delay(5);
+        }
+        raw_move(velocity);
+    }
+
+    /**
      * @brief begin moving and return asynchronously until stallguard is triggered
      *
      * @param velocity signed step rate to move stepper at, negative values reverse direction
      * @param callback (optional) function to call when stall condition is met
      */
-    void move_until_stall(
-        const int32_t velocity, callback_function_t callback = [] {})
+    void stallguard_home(const int32_t velocity, callback_function_t callback = callback_function_t{})
     {
-        auto done = [this, callback] {
+        // backoff
+        ramped_move(-velocity);
+        stallguard_delay();
+        gentle_stop();
+
+        move_until_stall(velocity, callback);
+    }
+
+    void move_until_stall(const int32_t velocity,
+                          callback_function_t callback = callback_function_t{})
+    {
+        auto done = [this, callback]() {
             detachInterrupt(STOP);
             stop();
             if DEBUGGING (INFO)
                 SERIAL_ECHOLNPGM("Stepper stalled, SG:", driver.SG_RESULT());
-            callback();
+            if (callback)
+                callback();
         };
+
+        ramped_move(velocity);
+        stallguard_delay();
+
         attachInterrupt(STOP, done, RISING);
         raw_move(velocity);
     }
@@ -143,6 +176,22 @@ struct SimpleTMC
         driver.VACTUAL(0);
         if (!hold)
             WRITE(EN, HIGH);
+    }
+
+    /**
+     * @brief stop with deceleration
+    */
+    void gentle_stop()
+    {
+        int32_t velocity = driver.VACTUAL();
+        const int sign = (velocity > 0) ? 1 : ((velocity < 0) ? -1 : 0);
+        const int increment = -sign * 8192;
+        while (ABS(velocity) > ABS(increment)) {
+            velocity += increment;
+            raw_move(velocity);
+            safe_delay(5);
+        }
+        stop();
     }
 
     /**
@@ -188,7 +237,7 @@ struct SimpleTMC
 
         millis_t next_idle = millis() + 100;
         uint32_t low_microseconds = 1'000'000 / velocity;
-        steps = abs(steps);
+        steps = ABS(steps);
         while (!stop_condition() && (steps-- > 0)) {
             single_step();
             if (millis() > next_idle) {
@@ -232,7 +281,7 @@ private:
         gconf.i_scale_analog = false;  // will be set digitally
         gconf.en_spreadcycle = false;  // use stealthcop
         if constexpr (INDEX != 0)
-            gconf.index_step = true;   // index will output generated step pulses
+            gconf.index_step = true; // index will output generated step pulses
         driver.GCONF(gconf.sr);
         driver.stored.stealthChop_enabled = true;
 
@@ -258,5 +307,10 @@ private:
         uint32_t status = driver.DRV_STATUS();
         if (status == 0xFFFF'FFFF)
             SERIAL_ERROR_MSG("driver bad status");
+    }
+
+    inline void stallguard_delay() const
+    {
+        safe_delay(TERN0(SENSORLESS_STALLGUARD_DELAY, SENSORLESS_STALLGUARD_DELAY));
     }
 };

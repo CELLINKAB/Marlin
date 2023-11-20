@@ -45,57 +45,59 @@ struct StepperRetractingProbe
      */
     struct Config
     {
-        int32_t deploy_velocity;
-        int32_t stow_velocity;
-        int16_t stall_threshold;
-        uint16_t stepper_current;
-        uint32_t minimum_retract_time;
-
-        constexpr Config()
-            : deploy_velocity(SRP_DEPLOY_VELOCITY)
-            , stow_velocity(SRP_STOW_VELOCITY)
-            , stall_threshold(SRP_STALL_THRESHOLD)
-            , stepper_current(SRP_STEPPER_CURRENT)
-            , minimum_retract_time(SRP_RETRACT_TIME)
-        {}
+        int32_t deploy_velocity{SRP_DEPLOY_VELOCITY};
+        int32_t stow_velocity{SRP_STOW_VELOCITY};
+        int16_t stall_threshold{SRP_STALL_THRESHOLD};
+        uint16_t stepper_current{SRP_STEPPER_CURRENT};
+        uint32_t minimum_retract_time{SRP_RETRACT_TIME};
     };
 
-    constexpr StepperRetractingProbe()
-        : state{ProbeState::Unknown}
-        , _stepper{}
-    {}
+    void init();
+
+    void update(millis_t ms = millis());
 
     void deploy();
 
     void stow();
 
-    constexpr const Config& get_config() const { return config; }
+    constexpr const Config& get_config() const noexcept { return config; }
 
-    inline void set_config(const Config& conf)
+    inline void set_config(Config conf)
     {
         config = conf;
-        // reset stepper to force reinitialization next use
-        _stepper.reset();
+        reinit_driver();
     }
 
     void report_config(bool for_replay) const;
 
-    constexpr inline void reset_position() noexcept { state = ProbeState::Unknown; }
+    constexpr inline void reset_position() noexcept { state = State::Unknown; }
 
-    constexpr inline bool is_deployed() const noexcept { return state == ProbeState::Deployed; }
+    [[nodiscard]] constexpr inline bool is_deployed() const noexcept
+    {
+        return state == State::Deployed;
+    }
+
+    inline void reinit_driver() noexcept
+    { // reset stepper to force reinitialization next use
+        _stepper.reset();
+    }
 
 private:
     using STMC = SimpleTMC<PROBE_EN_PIN, PROBE_STOP_PIN>;
 
-    Config config;
+    Config config{};
 
-    enum class ProbeState {
+    enum class State {
         Unknown,
         Stowed,
         Deployed
-    } state;
+    };
 
-    std::optional<STMC> _stepper;
+    State state{State::Unknown};
+
+    std::optional<STMC> _stepper{};
+
+    millis_t init_done_time{};
 
     void stepper_init();
 
@@ -107,6 +109,14 @@ private:
     }
 
     void unstick(int32_t velocity);
+
+    inline void start_move(int32_t velocity)
+    {
+        unstick(velocity);
+        stepper().ramped_move(velocity);
+    }
+
+    void backoff();
 };
 
 extern StepperRetractingProbe stepper_probe;

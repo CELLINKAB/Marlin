@@ -545,7 +545,12 @@ inline void manage_inactivity(const bool no_stepper_sleep=false) {
         SERIAL_ECHOLNPGM(FREEZE_MSG, new_freeze);
         #endif
         stepper.frozen = new_freeze;
-        TERN_(FREEZE_RESTORE, if (!stepper.frozen) restore_stepper_drivers());
+        #if ENABLED(FREEZE_RESTORE)
+         if (!stepper.frozen) { 
+          restore_stepper_drivers(); 
+          TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.reinit_driver());
+        }
+        #endif
         }
     } 
   #endif
@@ -965,6 +970,9 @@ void idle(const bool no_stepper_sleep/*=false*/) {
 
   // Update chantarelle status
   TERN_(CHANTARELLE_SUPPORT, ph_controller.update());
+
+  // Update stepper probe tasks
+  TERN_(STEPPER_RETRACTING_PROBE, stepper_probe.update());
 
   // Update UVC
 
@@ -1790,7 +1798,7 @@ void setup() {
   #endif
 
   #if ENABLED(STEPPER_RETRACTING_PROBE)
-    SETUP_RUN(stepper_probe.stow());
+    SETUP_RUN(stepper_probe.init());
   #endif
 
 
