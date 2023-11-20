@@ -506,16 +506,6 @@ Result send(const Packet<T>& request,
 }
 
 /**
- * @brief send without type safety or bounds checks
- * 
- * @param data type erased pointer to buffer
- * @param size bytes to read from buffer onto the bus
- * @param serial 
- * @return Result 
- */
-Result unsafe_send(const void* data, const size_t size, HardwareSerial& serial);
-
-/**
  * @brief high level transaction command to send and recieve type checked packets with error reporting
  * 
  * @tparam OUT expected response payload
