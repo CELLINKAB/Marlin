@@ -338,6 +338,7 @@ Response<T> receive(HardwareSerial& serial, bool enable_debug = true)
         ++printhead_rx_err_counter;
         if (DEBUGGING(ERRORS) && enable_debug)
             SERIAL_ECHOLNPGM("CHANT_RX_ERR:", string_from_result_code(code));
+        safe_delay(0); // refresh watchdog
         return Response<T>{incoming, code};
     };
     size_t bytes_received = serial.readBytes(packet_buffer, EXPECTED_PACKET_SIZE);
@@ -453,13 +454,15 @@ Result send(const Packet<T>& request,
             bool enable_debug = true)
 {
     // make sure at least a millisecond has passed between sends
-    constexpr static millis_t MIN_CHANT_SEND_DELAY = 10;
+    constexpr static millis_t MIN_CHANT_SEND_DELAY = 1;
     if (millis() <= last_serial_activity + MIN_CHANT_SEND_DELAY)
-        delay(MIN_CHANT_SEND_DELAY);
+        safe_delay(MIN_CHANT_SEND_DELAY);
 
     static auto err = [](Result code) {
         ++printhead_tx_err_counter;
         last_serial_activity = millis();
+        safe_delay(0); // refresh watchdog
+
         return code;
     };
 
