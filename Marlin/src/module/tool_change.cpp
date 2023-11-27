@@ -1167,10 +1167,6 @@ void tool_change(const uint8_t new_tool, bool no_move/*=false*/) {
     #if ENABLED(AUTO_BED_LEVELING_UBL)
       // Workaround for UBL mesh boundary, possibly?
       TEMPORARY_BED_LEVELING_STATE(false);
-    #elif ANY(MESH_BED_LEVELING, AUTO_BED_LEVELING_3POINT, AUTO_BED_LEVELING_LINEAR, AUTO_BED_LEVELING_BILINEAR)
-      const bool level_state = Planner::leveling_active;
-      set_bed_leveling_enabled(false);
-      Defer restore_leveling_state([level_state](){set_bed_leveling_enabled(level_state);});
     #endif
 
     // First tool priming. To prime again, reboot the machine. -- Should only occur for first T0 after powerup!
