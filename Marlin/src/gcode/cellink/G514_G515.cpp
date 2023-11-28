@@ -29,12 +29,6 @@
 #    include "../gcode.h"
 #    include "../parser.h"
 
-void clipped_move(xyz_pos_t pos)
-{
-    apply_motion_limits(pos);
-    do_blocking_move_to(pos);
-}
-
 /**
  * @brief mixing extrude / pneumatic move
  * 
@@ -67,19 +61,20 @@ void GcodeSuite::G515()
 
     xyz_pos_t gripper_pos(GRIPPER_ABSOLUTE_XY + hotend_offset[active_extruder]);
     gripper_pos.z = Z_MAX_POS;
-    clipped_move(gripper_pos);
+    apply_motion_limits(gripper_pos);
+    do_blocking_move_to(gripper_pos);
 
     bool is_releasing = parser.seen('R');
 
     if (is_releasing) {
         {
             gripper_pos.z = GRIP_Z_HEIGHT;
-            clipped_move(gripper_pos);
+            do_blocking_move_to(gripper_pos);
             auto _using_pressure = pneumatics::pump.use_pressure();
             set_gripper_valves(GripperState::Release);
             const millis_t timeout = millis() + 8000;
             gripper_pos.z = RELEASE_Z_HEIGHT;
-            clipped_move(gripper_pos);
+            do_blocking_move_to(gripper_pos);
             while (millis() < timeout && gripper_vacuum.read() < 0)
                 idle();
         }
@@ -101,7 +96,7 @@ void GcodeSuite::G515()
         }
         set_gripper_valves(GripperState::Grip);
         gripper_pos.z = GRIP_Z_HEIGHT;
-        clipped_move(gripper_pos);
+        do_blocking_move_to(gripper_pos);
         {
             auto _ = pneumatics::pump.use_suction();
             const millis_t timeout = millis() + SEC_TO_MS(10);
@@ -111,7 +106,7 @@ void GcodeSuite::G515()
         }
         set_gripper_valves(GripperState::Close);
         gripper_pos.z = RELEASE_Z_HEIGHT;
-        clipped_move(gripper_pos);
+        do_blocking_move_to(gripper_pos);
 
         if (float reading = gripper_vacuum.read(); reading > GRIP_THRESHOLD + THRESHOLD_HYSTERESIS) {
             SERIAL_ECHOLN("GRIP_FAILED");
@@ -120,7 +115,7 @@ void GcodeSuite::G515()
         }
     }
     gripper_pos.z = Z_MAX_POS;
-    clipped_move(gripper_pos);
+    do_blocking_move_to(gripper_pos);
 }
 
 #endif // FESTO_PNEUMATICS
