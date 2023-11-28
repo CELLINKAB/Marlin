@@ -1217,19 +1217,6 @@ void tool_change(const uint8_t new_tool, bool no_move/*=false*/) {
 
       REMEMBER(fr, feedrate_mm_s, XY_PROBE_FEEDRATE_MM_S);
 
-      #if HAS_SOFTWARE_ENDSTOPS
-        #if HAS_HOTEND_OFFSET
-          #define _EXT_ARGS , old_tool, new_tool
-        #else
-          #define _EXT_ARGS
-        #endif
-        update_software_endstops(X_AXIS _EXT_ARGS);
-        #if DISABLED(DUAL_X_CARRIAGE)
-          update_software_endstops(Y_AXIS _EXT_ARGS);
-          update_software_endstops(Z_AXIS _EXT_ARGS);
-        #endif
-      #endif
-
       #if DISABLED(TOOLCHANGE_ZRAISE_BEFORE_RETRACT) && DISABLED(SWITCHING_NOZZLE)
         if (can_move_away && TERN1(TOOLCHANGE_PARK, toolchange_settings.enable_park)) {
           // Do a small lift to avoid the workpiece in the move back (below)
@@ -1306,6 +1293,19 @@ void tool_change(const uint8_t new_tool, bool no_move/*=false*/) {
 
       // Tell the planner the new "current position"
       sync_plan_position();
+
+      #if HAS_SOFTWARE_ENDSTOPS
+        #if HAS_HOTEND_OFFSET
+          #define _EXT_ARGS , old_tool, new_tool
+        #else
+          #define _EXT_ARGS
+        #endif
+        update_software_endstops(X_AXIS _EXT_ARGS);
+        #if DISABLED(DUAL_X_CARRIAGE)
+          update_software_endstops(Y_AXIS _EXT_ARGS);
+          update_software_endstops(Z_AXIS _EXT_ARGS);
+        #endif
+      #endif
 
       #if ENABLED(DELTA)
         //LOOP_NUM_AXES(i) update_software_endstops(i); // or modify the constrain function
