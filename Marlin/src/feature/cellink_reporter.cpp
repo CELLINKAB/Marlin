@@ -40,6 +40,7 @@ void Reporter::tick_all()
     m798.tick();
     m799.tick();
     m802.tick();
+    TERN_(FESTO_PNEUMATICS, m816.tick());
     m821.tick();
     m825.tick();
     m1015.tick();
