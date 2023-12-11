@@ -1340,6 +1340,8 @@ private:
   #endif
 
   #if ENABLED(FESTO_PNEUMATICS)
+    static void M773();
+    static void M774();
     static void M1036(); // set pressure regulator
     static void M1036_report(bool for_replay);
     static void M1062(); // get pressure sensors
@@ -1367,8 +1369,6 @@ private:
     static void M753();
     static void M770();
     static void M771();
-    static void M773();
-    static void M774();
     static void M777();
     static void M778();
     static void M779();
