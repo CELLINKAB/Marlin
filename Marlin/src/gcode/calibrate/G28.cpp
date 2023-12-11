@@ -697,7 +697,7 @@ void GcodeSuite::G28()
 #    if HAS_CURRENT_HOME(Y2)
     stepperY2.rms_current(tmc_save_current_Y2);
 #    endif
-#    if HAS_CURRENT_HOME(Z) && ENABLED(DELTA)
+#    if HAS_CURRENT_HOME(Z)
     stepperZ.rms_current(tmc_save_current_Z);
 #    endif
 #    if HAS_CURRENT_HOME(I)
