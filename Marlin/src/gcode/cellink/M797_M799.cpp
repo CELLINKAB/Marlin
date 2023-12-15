@@ -17,31 +17,34 @@
  *
  */
 
-
 #include "../../inc/MarlinConfig.h"
 
 #if ALL(CELLINK_REPORTING, OPTICAL_AUTOCAL)
 
 #    include "../../feature/cellink_reporter.h"
 #    include "../../feature/optical_autocal.h"
+#    include "../../module/tool_change.h"
 #    include "../gcode.h"
 
 void cellink::Reporter::M798::report()
 {
-    cellink::serial_echoln_kv("AT", active_extruder, "AUTOCAL", optical_autocal.is_calibrated(active_extruder));
+    cellink::serial_echoln_kv("AT",
+                              active_extruder,
+                              "AUTOCAL",
+                              optical_autocal.is_calibrated(active_extruder));
 }
 
 void cellink::Reporter::M799::report()
 {
     const auto& offset = optical_autocal.offset(active_extruder);
     cellink::serial_echoln_kv("AT",
-                     active_extruder,
-                     "AUTOCAL_XOFF",
-                     offset.x,
-                     "AUTOCAL_YOFF",
-                     offset.y,
-                     "AUTOCAL_ZOFF",
-                     offset.z);
+                              active_extruder,
+                              "AUTOCAL_XOFF",
+                              offset.x,
+                              "AUTOCAL_YOFF",
+                              offset.y,
+                              "AUTOCAL_ZOFF",
+                              offset.z);
 }
 
 /**
@@ -50,8 +53,18 @@ void cellink::Reporter::M799::report()
    */
 void GcodeSuite::M797()
 {
-    optical_autocal.reset_all();
+    if (!parser.seenval('T'))
+        optical_autocal.reset_all();
+    const auto current_tool = active_extruder;
+    const auto target_tool = get_target_extruder_from_command();
+    planner.synchronize(); // moving while changing calibration is unsafe
+    if (current_tool != target_tool) {
+        tool_change(target_tool, true);
+    }
     process_subcommands_now(F("G510 R"));
+    if (current_tool != target_tool) {
+        tool_change(current_tool, true);
+    }
 }
 
 /**

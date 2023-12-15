@@ -2723,7 +2723,7 @@
  */
 #if HAS_TRINAMIC_CONFIG || HAS_TMC26X
 
-  #define HOLD_MULTIPLIER    1.0  // Scales down the holding current from run current
+  #define HOLD_MULTIPLIER    0.25  // Scales down the holding current from run current
 
   /**
    * Interpolate microsteps to 256
